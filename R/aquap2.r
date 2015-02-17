@@ -1,8 +1,11 @@
 #'@title Aquaphotomics NIRS Analysis
-#'@description Methods and tools to analyse NIRS data from an Aquaphotomics perspective
-#'@details After launching the package, the first call has to be to 
-#'\code{\link{updateSettings}} to read-in global settings and parameter from the 
-#' \code{\link{settings_file}}. 
+#'@description Methods and tools to analyse NIRS data from an Aquaphotomics 
+#'perspective. The package can support you in preparing (randomizing) your 
+#'experiment, and it will assist you in splitting up your data and analyzing 
+#'it using standard multivariate analysis methods and, especially, the Aquagram.
+#'XXX
+#'@details The first step is to generate the required folder structure for an 
+#'experiment via \code{\link{genFolderStr}}. Then XXX
 #'@author Bernhard Pollner, Zoltan Kovacs
 #'@section Maintainer: Bernhard Pollner <bernhard.pollner@@mac.com>
 #'@section Important Functions: List functions here

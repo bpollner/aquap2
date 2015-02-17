@@ -44,7 +44,4 @@ Once you have specified a folder under the variable \code{AQUAP2SH} in
  of the settings.r file and then copy a new setings.r file from the package,
  your changes will be lost.
 }
-\seealso{
-Other res: \code{\link{updateSettings}}
-}
 

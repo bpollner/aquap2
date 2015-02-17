@@ -4,23 +4,27 @@
 \alias{updateSettings}
 \title{Update aquap2 settings.}
 \usage{
-updateSettings(packageName = "aquap2")
+updateSettings(packageName = "aquap2", silent = FALSE)
 }
 \arguments{
 \item{packageName}{Character, the name of the package where settings
 should be updated. Defaults to "aquap2".}
+
+\item{silent}{Logical. If a confirmation should be printed or not. Defaults
+to 'FALSE'}
 }
 \value{
-An (invisible) list with the settings \code{stn}
+An (invisible) list with the settings  resp. a list called 'stn' in
+the environment '.ap2'.
 }
 \description{
-Read in the settings-file in the aquap2-settings home directory
-as specified in the .Renviron file
+Manually read in the settings-file in the aquap2-settings
+home directory as specified in the .Renviron file.
 }
 \details{
-Must be run first after loading the package, and after every change
-in the settings.r file to initialize /reload the settings into the
-list called 'stn' in the environment '.ap2'.
+If you leave 'autoUpdateSettings' in settings.r to 'TRUE', the
+settings will be checked resp. updated automatically every time you call any
+function from package 'aquap2'.
 }
 \section{Note}{
  You have to set the path to where you want the settings.r file
@@ -38,6 +42,6 @@ ls(.ap2)
 \seealso{
 \code{\link{settings_file}}
 
-Other res: \code{\link{settings_file}}
+Other Helper Functions: \code{\link{genFolderStr}}
 }
 

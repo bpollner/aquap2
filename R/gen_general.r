@@ -77,7 +77,7 @@ checkSettings <- function() {
 				a <- readLines(n=1)
 				if (a != "y" & a != "Y") {
 					message("Please be aware that the package will not work properly if your settings.r file is not up to date.")
-					return(TRUE)
+					return(FALSE)
 				} else {
 					copySettingsFile(pspath, pathSH)
 					return(TRUE)
@@ -89,20 +89,22 @@ checkSettings <- function() {
 	} # end else nchar == 0
 } # EOF
 
-
 #' @title Update aquap2 settings.
-#' @description Read in the settings-file in the aquap2-settings home directory 
-#' as specified in the .Renviron file
-#' @details Must be run first after loading the package, and after every change 
-#' in the settings.r file to initialize /reload the settings into the 
-#' list called 'stn' in the environment '.ap2'.
+#' @description Manually read in the settings-file in the aquap2-settings 
+#' home directory as specified in the .Renviron file.
+#' @details If you leave 'autoUpdateSettings' in settings.r to 'TRUE', the 
+#' settings will be checked resp. updated automatically every time you call any 
+#' function from package 'aquap2'.
 #' @section Note: You have to set the path to where you want the settings.r file 
 #' to be stored once in your .Renviron file by defining 
 #' \code{AQUAP2SH = path/to/any/folder/XX} , with XX being any folder where then the 
 #' settings.r file will reside in.
 #' @param packageName Character, the name of the package where settings 
 #' should be updated. Defaults to "aquap2".
-#' @return An (invisible) list with the settings \code{stn} 
+#' @param silent Logical. If a confirmation should be printed or not. Defaults 
+#' to 'FALSE'
+#' @return An (invisible) list with the settings  resp. a list called 'stn' in 
+#' the environment '.ap2'.
 #' @family Helper Functions
 #' @seealso \code{\link{settings_file}} 
 #' @examples
@@ -112,7 +114,7 @@ checkSettings <- function() {
 #' ls(.ap2)
 #'}
 #' @export
-updateSettings <- function(packageName="aquap2") { 
+updateSettings <- function(packageName="aquap2", silent=FALSE) { 
 	ok <- checkSettings() # makes sure that we have the latest version of the settings.r file in the settings-home directory defined in .Renviron
 	if (ok) {
 		pathSettings <- paste(Sys.getenv("AQUAP2SH"), "/settings.r", sep="")
@@ -121,7 +123,66 @@ updateSettings <- function(packageName="aquap2") {
 	#		detach(.ap2)
 	#	}
 	#	attach(.ap2)
-		cat(paste(packageName, "settings updated\n"))
+		if (!silent) {
+			cat(paste(packageName, "settings updated\n"))
+		}
 		invisible(.ap2$stn)
+	} else { # so if the settings check was not ok
+	return(NULL)
 	}
+} # EOF
+
+autoUpS <- function() { # stops if somethings goes wrong
+	if (exists(".ap2$stn")) {
+		autoUpS <- .ap2$autoUpdateSettings
+	} else {
+		autoUpS <- TRUE
+	}
+	if (autoUpS) {
+		res <- updateSettings(packageName="aquap2", silent=TRUE)
+	}
+	if (is.null(res)) {
+	stop(call.=FALSE)
+	}
+} # EOF
+
+#' @title Generate Folder Structure
+#' @description Generate the required folder structure in the current working 
+#' directory.
+#' @details \code{genFolderStr} will generate all the required folders in the 
+#' current working directory that 'aquap2' needs to work properly. Templates 
+#' for metadata and analysis procedure will be copied into the metadata-folder.
+#' You can change the defaults for the folder names in the settings file.
+#' @return Folders get created in the current working directory.
+#' @family Helper Functions
+#' @seealso \code{\link{settings_file}} 
+#' @export
+genFolderStr <- function() {
+	autoUpS()
+	fn_analysisData <- .ap2$fn_analysisData 
+	fn_exports <- .ap2$stn$fn_exports
+	fn_rcode <- .ap2$stn$fn_rcode 
+	fn_rawdata <- .ap2$stn$fn_rawdata
+	fn_rdata <- .ap2$stn$fn_rdata 
+	fn_metadata <- .ap2$stn$fn_metadata
+	fn_results <- .ap2$stn$fn_results 
+	fn_sampleLists <- .ap2$stn$fn_sampleLists
+	fn_mDataDefFile <- .ap2$stn$fn_mDataDefFile
+	fn_anProcDefFile <- .ap2$stn$fn_anProcDefFile
+	pp <- c(fn_analysisData, fn_exports, fn_rcode, fn_rawdata, fn_rdata, fn_metadata, fn_results, fn_sampleLists)
+	dirOk <- NULL
+	for (p in pp) {
+		dirOk <- c(dirOk, dir.create(p))
+	}
+	dirOk <- c(dirOk, dir.create(paste(fn_sampleLists, "/sl_in", sep="")))
+	dirOk <- c(dirOk, dir.create(paste(fn_sampleLists, "/sl_out", sep="")))
+	a <- path.package("aquap2")
+	pathFrom <- paste(a, "/templates/", sep="")
+	pathFromMeta <- paste(pathFrom, fn_mDataDefFile, sep="")
+	pathFromAnP <- paste(pathFrom, fn_anProcDefFile, sep="")
+	file.copy(pathFromMeta, fn_metadata)
+	file.copy(pathFromAnP, fn_metadata)
+	if (any(dirOk)) {
+		if (!.ap2$stn$allSilent) {	cat("Folder structure created.\n")}
+	} 
 } # EOF

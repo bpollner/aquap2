@@ -15,11 +15,13 @@ stn <- list(
 	fn_metadata = "metadata", 				## the folder where you put the metadata and the analysis procedure r-files
 	fn_results = "results",					## the folder where all the result-pdfs get saved
 	fn_sampleLists = "sampleLists", 		## the folder for the sample lists used in randomizing the samples and for importing the raw-data
+	fn_mDataDefFile = "metadata.r", 		## the default filename for the metadata file
+	fn_anProcDefFile = "anProc.r", 			## the default filename for the analysis procedure file
 
-
-	## General behaviour
+	## General behaviour & settings
 	allSilent = FALSE,						## if false, "status" messages will be displayed
-
+	autoUpdateSettings = TRUE, 				## if the settings should be automatically updated when calling a function from package 'aquap2'
+	numberOfCPUs = 7, 						## the number of CPUs used for parallel computing
 
 	### smoothing ###
 	## settings for the Sav. Golay filter at the smoothing process
