@@ -10,11 +10,11 @@ updateSettings(packageName = "aquap2", silent = FALSE)
 \item{packageName}{Character, the name of the package where settings
 should be updated. Defaults to "aquap2".}
 
-\item{silent}{Logical. If a confirmation should be printed or not. Defaults
+\item{silent}{Logical. If a confirmation should be printed. Defaults
 to 'FALSE'}
 }
 \value{
-An (invisible) list with the settings  resp. a list called 'stn' in
+An (invisible) list with the settings resp. a list called 'stn' in
 the environment '.ap2'.
 }
 \description{

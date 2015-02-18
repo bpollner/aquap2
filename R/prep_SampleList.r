@@ -189,7 +189,7 @@ esl_checkDefaults <- function(form) {
 	if (form == "def") {
 		form <- .ap2$stn$p_sampleListExportFormat
 	} else {
-		if (form != "txt" | form != "xls") {
+		if (form != "txt" & form != "xls") {
 			stop("Please provide either 'txt' or 'xls' to the 'form' argument to export either a tab-delimited text file or an Excel-file.", call.=FALSE)
 		}
 	}
@@ -251,7 +251,7 @@ exportSampleList <- function(md=getmd(), form="def", showFirstRows=TRUE, timeEst
 	if (toTab) {
 		write.table(b, filename, sep="\t", row.names=FALSE)	
 	} else {
-		print("Now please the excel")
+		xlsx::write.xlsx2(b, filename, row.names=FALSE)
 	}
  	cat(paste("A sample list in ", msg, " format with ", nrow(b), " rows has been saved to \"", fn_sl, "/", fn_sl_out, "\".\n", sep="") )
 	if (!timeEstimate) {

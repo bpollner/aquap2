@@ -156,6 +156,8 @@ getmd <- function(fn="def") {
 
 
 getap <- function(fn="def") {
+	autoUpS()
+	
 	
 } #EOF
 
