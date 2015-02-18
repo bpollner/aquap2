@@ -15,6 +15,11 @@ showPathToAquap2 <- function() {
 
 
 copySettingsFile <- function(fromPath, toPath) {
+	a <- paste(toPath, "settings.r", sep="/")
+	b <- paste(toPath, "settings_OLD.r", sep="/")
+	if (file.exists(a)) {
+		file.rename(a, b)
+	}
 	ok <- file.copy(fromPath, toPath, overwrite=TRUE)
 	if (ok) { cat("A fresh version of the settings.r file has been copied from the package.\n")}			
 } # EOF
@@ -73,7 +78,7 @@ checkSettings <- function() {
 						message(msgDel); 	message(paste(del, collapse=", "))
 					}
 				}
-				message(paste("Do you want to copy it now into \n\"", pathSH, "\" ? \n( y / n )", sep=""))
+				message(paste("Do you want to copy it now into \n\"", pathSH, "\" ? \nThe existing file will remain in place but will be renamed to 'settings_OLD.r' \n( y / n )", sep=""))
 				a <- readLines(n=1)
 				if (a != "y" & a != "Y") {
 					message("Please be aware that the package will not work properly if your settings.r file is not up to date.")
@@ -101,9 +106,9 @@ checkSettings <- function() {
 #' settings.r file will reside in.
 #' @param packageName Character, the name of the package where settings 
 #' should be updated. Defaults to "aquap2".
-#' @param silent Logical. If a confirmation should be printed or not. Defaults 
+#' @param silent Logical. If a confirmation should be printed. Defaults 
 #' to 'FALSE'
-#' @return An (invisible) list with the settings  resp. a list called 'stn' in 
+#' @return An (invisible) list with the settings resp. a list called 'stn' in 
 #' the environment '.ap2'.
 #' @family Helper Functions
 #' @seealso \code{\link{settings_file}} 
@@ -133,13 +138,16 @@ updateSettings <- function(packageName="aquap2", silent=FALSE) {
 } # EOF
 
 autoUpS <- function() { # stops if somethings goes wrong
+	res <- 1
 	if (exists(".ap2$stn")) {
-		autoUpS <- .ap2$autoUpdateSettings
+		autoUpS <- .ap2$stn$autoUpdateSettings
 	} else {
 		autoUpS <- TRUE
 	}
 	if (autoUpS) {
-		res <- updateSettings(packageName="aquap2", silent=TRUE)
+		if (is.null(.ap2$.devMode)) { 			## to be able to run it locally without loading the package
+			res <- updateSettings(packageName="aquap2", silent=TRUE)
+		}
 	}
 	if (is.null(res)) {
 	stop(call.=FALSE)
@@ -167,6 +175,9 @@ genFolderStr <- function() {
 	fn_metadata <- .ap2$stn$fn_metadata
 	fn_results <- .ap2$stn$fn_results 
 	fn_sampleLists <- .ap2$stn$fn_sampleLists
+	fn_sampleListOut <- .ap2$stn$fn_sampleListOut
+	f_sampleListIn <- .ap2$stn$f_sampleListIn
+	
 	fn_mDataDefFile <- .ap2$stn$fn_mDataDefFile
 	fn_anProcDefFile <- .ap2$stn$fn_anProcDefFile
 	pp <- c(fn_analysisData, fn_exports, fn_rcode, fn_rawdata, fn_rdata, fn_metadata, fn_results, fn_sampleLists)
@@ -174,8 +185,10 @@ genFolderStr <- function() {
 	for (p in pp) {
 		dirOk <- c(dirOk, dir.create(p))
 	}
-	dirOk <- c(dirOk, dir.create(paste(fn_sampleLists, "/sl_in", sep="")))
-	dirOk <- c(dirOk, dir.create(paste(fn_sampleLists, "/sl_out", sep="")))
+	slin <- paste(fn_sampleLists, f_sampleListIn, sep="/")
+	slout <- paste(fn_sampleLists, fn_sampleListOut, sep="/")
+	dirOk <- c(dirOk, dir.create(slin))
+	dirOk <- c(dirOk, dir.create(slout))
 	a <- path.package("aquap2")
 	pathFrom <- paste(a, "/templates/", sep="")
 	pathFromMeta <- paste(pathFrom, fn_mDataDefFile, sep="")

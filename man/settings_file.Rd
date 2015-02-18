@@ -23,6 +23,8 @@ procedure r-files}
 
 \item{fn_sampleLists}{The folder for the sample lists used in randomizing the
 samples and for importing the raw-data}
+
+\item{XXX}{complete this}
 }
 \description{
 The settings file is used to store parameters and constants used
@@ -43,5 +45,8 @@ Once you have specified a folder under the variable \code{AQUAP2SH} in
  the settings.r file available within the  package. If you changed some values
  of the settings.r file and then copy a new setings.r file from the package,
  your changes will be lost.
+}
+\seealso{
+Other fileDocs: \code{\link{metadata_file}}
 }
 

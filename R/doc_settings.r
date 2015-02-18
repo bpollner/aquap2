@@ -23,6 +23,7 @@
 #'	@param fn_results The folder where all the result-pdfs get saved
 #'	@param fn_sampleLists The folder for the sample lists used in randomizing the 
 #'  samples and for importing the raw-data
+#'  @param XXX complete this 
 #'  @family fileDocs
 #'  @name settings_file
 NULL
