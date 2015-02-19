@@ -25,12 +25,7 @@
 	columnNamesL2 <- c("Y_Conc", "C_DELETE")	## "DELETE" is the default character for those columns that, after the generation of the sample list, should be omitted
 
 	L1 <- list(list("RangeA", "RangeB", "RangeC"), list("Serial", "Direct")) 	## XXX explain this L1 and L2 thing
-		A <- as.character(seq(0.1,1, by=0.1))
-		B <- as.character(seq(0.01, 0.1, by=0.01))
-		C <- as.character(seq(0.001, 0.01, by=0.001))
-		ser <- "Ser"
-		Dir <- "Dir"
-	L2 <- list(list(A,B,C), list(ser, Dir)) 
+	L2 <- list(list(as.character(seq(0.1,1, by=0.1)), as.character(seq(0.01, 0.1, by=0.01)), as.character(seq(0.001, 0.01, by=0.001))), list("Ser", "Dir")) 
 
 	###
 

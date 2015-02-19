@@ -145,7 +145,7 @@ getmd <- function(fn="def") {
  	postProc <- list(spacing=e$spacing, ECRMLabel=ECRMlabel, noSplitLabel=noSplitLabel, nrConScans=e$nrConScans)
  	meta <- list(expName=e$experimentName, coluNames=coluNames)
 	expMetaData <- list(expClasses = expClasses, postProc = postProc, meta = meta)
-	return(expMetaData)	
+	return(new("aquap_md", expMetaData))
 } # EOF
 
 ##################################################

@@ -3,7 +3,7 @@
 ##############################################################
 
 .initializeAQ2Classes <- function() {
-	
+	setClass("aquap_md", contains="list")
 		
 } # EOF
 

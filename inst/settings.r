@@ -40,13 +40,27 @@ stn <- list(
 	p_groupCol = "Group", 					## the name of the column containing the groups (like e.g. experiment and control)
 	p_deleteCol = "DELETE", 				## the character indicating that this column should be omitted at the time of creating the sample list, usually needed for L2-columns that are identical to their L1-columns
 	p_noTimePointsLabel = "NT", 			## the value assigned to every observation when there is no splitting into time points
-	p_sampleListExportFormat = "xls", 		## the format for the generated sample list, possible values are "txt" for a tab-delimited text file and "xls" for an Excel-file.
+	p_sampleListExportFormat = "csv", 		## the format for the generated sample list, possible values are "txt" for a tab-delimited text file and "xls" for an Excel-file.
 
 
 	## General behaviour & settings
 	allSilent = FALSE,						## if false, "status" messages will be displayed
 	autoUpdateSettings = TRUE, 				## if the settings should be automatically updated when calling a function from package 'aquap2'
 	numberOfCPUs = 7, 						## the number of CPUs used for parallel computing
+
+
+	## Import Data
+	imp_specFileType = "vision_NSAS.da",	## the filetype of the spectral data. Refer to the help for 'getFullData'  for possible values
+	imp_startDate = "2014-06-01 00:00:00",	## the start-date used to calculate the absolute number of minutes since then
+	imp_sampleListType = "csv", 			## the filetype of the sample list in the sampleLists/sl_in folder. Please refer to the help for "getFullData" for possible values.
+	imp_multiplyRows = TRUE,				## if all the rows in the sample list should be multiplied by the number of consecutive scans.
+	imp_autoCopyYvarsAsClass = TRUE, 		## if all available Y-Variables should be automatically copied as a class variable at the time of importing the data. Recommended value is TRUE.
+	imp_TClassesDiv = 5,					## the number by which the temperature values get divided, then rounded, then multiplied
+	imp_RHClassesDiv = 3,					## the number by which the rel. humidity values get divided, then rounded, then multiplied
+	imp_TRounding = 1,  					## digits precision for rounding when re-factoring the temperature
+	imp_RHRounding = 0, 					## digits precision for rounding when re-factoring the rel. humidity
+
+
 
 
 	### smoothing ###
