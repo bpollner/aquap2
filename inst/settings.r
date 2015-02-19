@@ -40,7 +40,7 @@ stn <- list(
 	p_groupCol = "Group", 					## the name of the column containing the groups (like e.g. experiment and control)
 	p_deleteCol = "DELETE", 				## the character indicating that this column should be omitted at the time of creating the sample list, usually needed for L2-columns that are identical to their L1-columns
 	p_noTimePointsLabel = "NT", 			## the value assigned to every observation when there is no splitting into time points
-	p_sampleListExportFormat = "txt", 		## the format for the generated sample list, possible values are "txt" for a tab-delimited text file and "xls" for an excel-file.
+	p_sampleListExportFormat = "xls", 		## the format for the generated sample list, possible values are "txt" for a tab-delimited text file and "xls" for an Excel-file.
 
 
 	## General behaviour & settings

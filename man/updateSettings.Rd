@@ -30,7 +30,8 @@ function from package 'aquap2'.
  You have to set the path to where you want the settings.r file
 to be stored once in your .Renviron file by defining
 \code{AQUAP2SH = path/to/any/folder/XX} , with XX being any folder where then the
-settings.r file will reside in.
+settings.r file will reside in. If you do not have a '.Renviron' file in your
+home directory (user/home) you have to create one.
 }
 \examples{
 \dontrun{

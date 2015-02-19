@@ -28,7 +28,7 @@ checkSettings <- function() {
 	pspath <- paste(path.package("aquap2"), "/settings.r", sep="")
 	pathSH <- Sys.getenv("AQUAP2SH")
 	if (nchar(pathSH) == 0) { 			## so the variable is *not* defined in .Renviron
-		msg <- ("It appears you did not yet define the path to your aquap2 settings.r home directory in the .Renviron file. \nPlease do this by going to the .Renviron file (in your home directory) and there define the variable 'AQUAP2SH' as the path to a folder of your liking. \nRestart R for the changes to become effective. \nSee the help for '?updateSettings' for additional information")
+		msg <- ("It appears you did not yet define the path to your aquap2 settings.r home directory in the '.Renviron' file. \nPlease do this by going to the .Renviron file (in your home directory 'user/home') and there define the variable 'AQUAP2SH' as the path to a folder of your liking. \nIf you do not have a '.Renviron' file you have to create one. \nRestart R for the changes to become effective. \nSee the help for '?updateSettings' for additional information")
 		message(msg)
 		return(FALSE)
 	} else { ## so we have something defined under AQUAP2SH
@@ -103,7 +103,8 @@ checkSettings <- function() {
 #' @section Note: You have to set the path to where you want the settings.r file 
 #' to be stored once in your .Renviron file by defining 
 #' \code{AQUAP2SH = path/to/any/folder/XX} , with XX being any folder where then the 
-#' settings.r file will reside in.
+#' settings.r file will reside in. If you do not have a '.Renviron' file in your 
+#' home directory (user/home) you have to create one.
 #' @param packageName Character, the name of the package where settings 
 #' should be updated. Defaults to "aquap2".
 #' @param silent Logical. If a confirmation should be printed. Defaults 

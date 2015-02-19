@@ -211,6 +211,9 @@ esl_checkDefaults <- function(form) {
 #' @param showFirstRows Logical. If the first rows of the sample list should be 
 #' displayed.
 #' @param timeEstimate Logical. If time estimates should be displayed.
+#' @section Note: You can provide your own values for how many seconds you 
+#' need for a single scan etc. at the bottom of the settings.r file to make the 
+#' time estimate valid for you.
 #' @return An (invisible) data frame with a randomized sample list resp. this 
 #' list saved to  a file.
 #' @family Import-Export
@@ -219,6 +222,11 @@ esl_checkDefaults <- function(form) {
 #' metadata <- getmd()
 #' sl <- exportSampleList(metadata)
 #' sl <- esl() 	# is the same as above
+#' sl <- esl(md=getmd("myMetadataFile.r"), form="txt", showFirstRows=FALSE)
+#' # this would load the metadata from the file "myMetadataFile.r" and generate 
+#' # a sample list based on these metadata. This would be a rare case, as usually 
+#' # in an experiment home-folder you will have probably only one metadata file 
+#' # but several analysis procedure files.
 #' }
 #' @export exportSampleList
 exportSampleList <- function(md=getmd(), form="def", showFirstRows=TRUE, timeEstimate=FALSE) {
@@ -234,6 +242,7 @@ exportSampleList <- function(md=getmd(), form="def", showFirstRows=TRUE, timeEst
 		scanSeconds <- 	(nrConScans+1) * durationSingleScan 	## +1 because of the reference scan !
 		totalTime <- scanSeconds + handlingTime
 	##
+	if(!.ap2$stn$allSilent) {cat("Creating sample list...\n")}
 	a <- makeTimeLabelSampleList(md)
 	b <- insertEnumeration(a)
 	##
@@ -248,10 +257,17 @@ exportSampleList <- function(md=getmd(), form="def", showFirstRows=TRUE, timeEst
 		toTab <- FALSE
 	}
 	filename <- paste(fn_sl, "/",fn_sl_out , "/", expName, ending, sep="")
+	if(!.ap2$stn$allSilent) {cat("Writing sample list to file...\n")}
 	if (toTab) {
 		write.table(b, filename, sep="\t", row.names=FALSE)	
 	} else {
-		xlsx::write.xlsx2(b, filename, row.names=FALSE)
+		ok <- TRUE
+#		ok <- require(xlsx, quietly=TRUE)
+		if (ok) {		## the error only comes up when using "write.xlsx2", while "write.xlsx" does work fine, although it is slower.
+			xlsx::write.xlsx(b, filename, row.names=FALSE, sheetName=expName)
+		} else {
+			stop("Package 'xlsx' does not seem to be available. The sample list could not be exported to Excel. Sorry.", call.=FALSE)
+		}
 	}
  	cat(paste("A sample list in ", msg, " format with ", nrow(b), " rows has been saved to \"", fn_sl, "/", fn_sl_out, "\".\n", sep="") )
 	if (!timeEstimate) {

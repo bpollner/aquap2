@@ -17,7 +17,7 @@
 #'@import methods
 #'@import foreach
 #'@import doParallel
-#'@import xlsx
+### @import xlsx
 #'
 #'@docType package
 #'@name aquap2

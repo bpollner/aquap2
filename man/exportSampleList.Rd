@@ -35,11 +35,21 @@ Creates and exports the randomized sample list to file.
 Possible formats to export are XXX. For the time estimates,
 	you can fill in your own values at the bottom of the settings.r file.
 }
+\section{Note}{
+ You can provide your own values for how many seconds you
+need for a single scan etc. at the bottom of the settings.r file to make the
+time estimate valid for you.
+}
 \examples{
 \dontrun{
 metadata <- getmd()
 sl <- exportSampleList(metadata)
 sl <- esl() 	# is the same as above
+sl <- esl(md=getmd("myMetadataFile.r"), form="txt", showFirstRows=FALSE)
+# this would load the metadata from the file "myMetadataFile.r" and generate
+# a sample list based on these metadata. This would be a rare case, as usually
+# in an experiment home-folder you will have probably only one metadata file
+# but several analysis procedure files.
 }
 }
 
