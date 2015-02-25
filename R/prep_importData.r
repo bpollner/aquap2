@@ -346,21 +346,24 @@ getFullData <- function(md=getmd(), filetype="def", naString="NA", slType="def",
 	headerFusion <- headerFusion[, -(which(colnames(headerFusion) == "DELETE"))] 
 	check_conScanColumn(headerFusion, headerFilePath, spectraFilePath, slType) 
 	# ? check for existence of sample number column as well ?
-	gfd_checkForDoubleColumns(headerFusion, spectraFilePath, headerFilePath, slType)
-
-
-#	return(headerFusion)
-	
-	info <- si$info			# 	info <- list(nCharPrevWl=nCharPrevWl)
-	
+	gfd_checkForDoubleColumns(headerFusion, spectraFilePath, headerFilePath, slType)	
 	if (.ap2$stn$imp_autoCopyYvarsAsClass) {  # if TRUE, copy all columns containing a Y-variable as class variable
 		headerFusion <- copyYColsAsClass(headerFusion)
 	}
 	headerFusion <- remakeTRHClasses_sys(headerFusion)
 	colRep <- extractClassesForColRep(headerFusion)		## the color representation of the factors
 	NIR <- si$NIR
-	fullData <- data.frame(headerFusion, I(colRep), I(NIR))
+	header <- headerFusion
+#	fd <- data.frame(I(header), I(colRep), I(NIR))
+	fullData <- new("aquap_data")
+	fullData@header <- header
+	fullData@colRep <- colRep
+	fullData@NIR <- NIR
+	fullData@ncpwl <- si$info$nCharPrevWl
 	return(fullData) 
+	
+	## next: check rownames !!!!!; repair row-multiplication when only one column !!
+	
 } # EOF
 
 # refine header -------------------------------------------------------------
@@ -453,6 +456,7 @@ convertYColsToNumeric <- function(sampleList) {
 ### x-fold every line (Nr. Cons. Measurements), and add a numbering for each of the consecutive scans
 multiplySampleListRows <- function(sampleList, nrScans) {
 	multiList <- NULL
+#	sampleList <- as.data.frame(sampleList)
 	for (i in 1:nrScans) {
 		multiList <- rbind(multiList, sampleList)
 	} # end i loop
@@ -597,8 +601,9 @@ readHeader <- function(md=getmd(), slType="def", multiplyRows="def") {
 # XXX
 
 
-## next: check rownames;
 	## to do: write the documentation in the make custom doc file
+## import TRH from a / any logfile	
+	
 
 ## note: make @numRep in Aquacalc to take numerics OR character, because if we have more than 8 elements...  :-)
 
