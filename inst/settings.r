@@ -26,7 +26,7 @@ stn <- list(
 	p_ClassVarPref = "C_",					## the prefix for class-variables
 	p_timeCol = "Time", 					## the name of the column containing the time-points (if any)
 	p_sampleNrCol = "SampleNr", 			## the name of the column containing the number of the sample in the list, automatically generated
-	p_conSNrCol= "ConSNr",					## the name of the second column containing the number of the consecutive scan, automatically generated
+	p_conSNrCol= "conSNr",					## the name of the second column containing the number of the consecutive scan, automatically generated
 	p_ECRMCol = "ECRM", 					## the name of the column holding the class for indicating either environmental control or real measurement
 	p_tempCol = "Temp",						## the name of the column holding the room temperature at which the measurements were taken
 	p_RHCol ="RelHum",						## the name of the column holding the relative humidity at which the measurements were taken 
@@ -59,6 +59,13 @@ stn <- list(
 	imp_RHClassesDiv = 3,					## the number by which the rel. humidity values get divided, then rounded, then multiplied
 	imp_TRounding = 1,  					## digits precision for rounding when re-factoring the temperature
 	imp_RHRounding = 0, 					## digits precision for rounding when re-factoring the rel. humidity
+	imp_makeExpNameColumn = FALSE, 			## if a column containing the name of the experiment in every row should be added to the dataset. This is useful if you plan to fuse datasets from several experiments.
+	imp_makeNoSplitColumn = TRUE, 			## if a column containing the same value in every row should be added to the dataset. This can be useful to have in the operations for data splitting.
+
+
+
+	## Colors
+	col_RampForTRH = c("blue", "red", "yellow2"), 	## used for color-coding any column that contains the characters defined as names for the temperature and rel. humidity column. Provide at least two colors.
 
 
 

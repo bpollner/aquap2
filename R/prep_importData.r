@@ -178,7 +178,7 @@ gfd_check_imports <- function(specImp) {
 	}
 } # EOF
 
-gfd_makeColumnNames <- function(specImp) {
+gfd_makeNiceColumns <- function(specImp) {
 	yPref <- .ap2$stn$p_yVarPref
 	cPref <- .ap2$stn$p_ClassVarPref
 	sampleNrColn <- .ap2$stn$p_sampleNrCol
@@ -192,29 +192,45 @@ gfd_makeColumnNames <- function(specImp) {
 	nr <- nrow(specImp$NIR)
 	##
 	if (!is.null(specImp$sampleNr)) {
-		colnames(specImp$sampleNr) <- paste(cPref, sampleNrColn, sep="")
+		colnames(specImp$sampleNr) <- paste(yPref, sampleNrColn, sep="")
+	} else {
+		specImp$sampleNr <- data.frame(DELETE = rep(NA, nr))
 	}
 	if (!is.null(specImp$conSNr)) {
 		colnames(specImp$conSNr) <- paste(yPref, conSNrColn, sep="")
-	}
+	} else {
+		specImp$conSNr <- data.frame(DELETE = rep(NA, nr))
+	}	
 	if (!is.null(specImp$timePoints)) {
 		colnames(specImp$timePoints) <- paste(cPref, timePointsColn, sep="")
-	}
+	}  else {
+		specImp$timePoints <- data.frame(DELETE = rep(NA, nr))
+	}	
 	if (!is.null(specImp$ecrm)) {
 		colnames(specImp$ecrm) <- paste(cPref, ecrmColn, sep="")
-	}
+	}  else {
+		specImp$ecrm <- data.frame(DELETE = rep(NA, nr))
+	}	
 	if (!is.null( specImp$repl)) {
 		colnames(specImp$repl) <- paste(cPref, replColn, sep="")
-	}
+	}  else {
+		specImp$repl <- data.frame(DELETE = rep(NA, nr))
+	}	
 	if (!is.null(specImp$group)) {
 		colnames(specImp$group) <- paste(cPref, groupColn, sep="")
-	}
+	} else {
+		specImp$group <- data.frame(DELETE = rep(NA, nr))
+	}	
 	if (!is.null(specImp$temp)) {
 		colnames(specImp$temp) <- paste(yPref, tempColn, sep="")
-	}
-	if (!is.null(a)) {
+	} else {
+		specImp$temp <- data.frame(DELETE = rep(NA, nr))
+	}	
+	if (!is.null(specImp$relHum)) {
 		colnames(specImp$relHum) <- paste(yPref, relHumColn, sep="")
-	}
+	} else {
+		specImp$relHum <- data.frame(DELETE = rep(NA, nr))
+	}	
 	if (!is.null(specImp$C_cols)) {
 		lePref <- nchar(cPref)
 		a <- colnames(specImp$C_cols)
@@ -222,6 +238,8 @@ gfd_makeColumnNames <- function(specImp) {
 		if (length(noPrefInd) > 0) {
 			colnames(specImp$C_cols)[noPrefInd] <- paste(cPref, a[noPrefInd], sep="")
 		}
+	} else {
+		specImp$C_cols <- data.frame(DELETE = rep(NA, nr))
 	}
 	if (!is.null(specImp$Y_cols)) {
 		lePref <- nchar(yPref)
@@ -230,19 +248,71 @@ gfd_makeColumnNames <- function(specImp) {
 		if (length(noPrefInd) > 0) {
 			colnames(specImp$Y_cols)[noPrefInd] <- paste(yPref, a[noPrefInd], sep="")
 		}
+		specImp$Y_cols <- convertYColsToNumeric(specImp$Y_cols)
+	} else {
+		specImp$Y_cols <- data.frame(DELETE = rep(NA, nr))
 	}
 	if (!is.null(specImp$timestamp)) {
 		colnames(specImp$timestamp) <- "Timestamp"
+	} else {
+		specImp$timestamp <- data.frame(DELETE = rep(NA, nr))
 	}
 	return(specImp)
 } # EOF
 
-
-gfd_checkNrOfRows <- function(header, headerFilePath, nrowsNIR, spectraFilePath) {
+gfd_checkNrOfRows <- function(header, headerFilePath, nrowsNIR, spectraFilePath, multiplyRows, nrConScans) {
 	if (!is.null(header)) {
 		if (nrow(header) != nrowsNIR) {
-			stop(paste("The header that was constructed from the file \n\"", headerFilePath, "\"\n consists of ", nrow(header), " rows, while the imported spectra from file \n\"", spectraFilePath, "\"\n consist of ", nrowsNIR, " rows. \nPlease make sure that all data to be imported have the same number of rows.", sep=""), call.=FALSE)
+			if (multiplyRows) {
+				to <- paste("after the multiplication of every row by ", nrConScans, " consecutive scans", sep="")
+			} else {
+				to <- "(multiplication of rows was *not* performed)"
+			}
+			stop(paste("The header that was constructed from the file \n\"", headerFilePath, "\"\n consists of ", nrow(header), " rows ", to, ", while the imported spectra from file \n\"", spectraFilePath, "\"\n consist of ", nrowsNIR, " rows. \nPlease make sure that all data to be imported have the same number of rows.", sep=""), call.=FALSE)
 		}
+	}
+} # EOF
+
+gfd_getExpNameNoSplit <- function(metadata, nRows) {
+	cPref <- .ap2$stn$p_ClassVarPref
+	makeExpNameColumn <- .ap2$stn$imp_makeExpNameColumn
+	makeNoSplitColumn <- .ap2$stn$imp_makeNoSplitColumn
+	##
+	if (makeExpNameColumn) {
+		expName <- data.frame(rep(metadata$meta$expName, nRows))
+		colnames(expName) <- paste(cPref, .ap2$stn$p_expNameCol, sep="")
+	} else {
+		expName <- data.frame(DELETE = rep(NA, nRows))
+	}
+	assign("expName", expName, pos=parent.frame(n=1))
+	##
+	if (makeNoSplitColumn) {
+		noSplit <- data.frame(rep(.ap2$stn$p_commonNoSplit, nRows))
+		colnames(noSplit) <- paste(cPref, .ap2$stn$p_commonNoSplitCol, sep="")
+	} else {
+		noSplit <- data.frame(DELETE = rep(NA, nRows))	
+	}
+	assign("noSplit", noSplit, pos=parent.frame(n=1))
+} # EOF
+
+gfd_checkForDoubleColumns <- function(header, spectraFilePath, headerFilePath, slType) {
+	collect <- NULL
+	a <- colnames(header)
+	for (i in 1: length(a)) {
+		inds <- grep(a[i], a)
+		if (length(inds) > 1) {
+			collect <- c(collect, i)
+		}
+	} # end for i
+	if (!is.null(collect)) {
+		if (is.null(slType)) {
+			files <- paste("\"", spectraFilePath, "\"", sep="")		
+		} else {
+ 			files <- paste("\"", headerFilePath, "\" and ", "\"", spectraFilePath, sep="")
+		}
+		cols <- paste(a[collect], collapse=", ")
+		msg <- paste("Some columns seem to appear twice: \n", cols,"\nPlease check the files used for importing data, that is \n", files, sep="")
+		stop(msg, call.=FALSE)
 	}
 } # EOF
 
@@ -252,74 +322,45 @@ gfd <- function(md=getmd(), filetype="def", naString="NA", slType="def", multipl
 	return(getFullData(md, filetype, naString, slType, multiplyRows, stf))
 } # EOF
 
-
 # get full data ---------------------------------------------------------------
 #' @rdname getFullData
 #' @export
 getFullData <- function(md=getmd(), filetype="def", naString="NA", slType="def", multiplyRows="def",  stf=TRUE) {
 	autoUpS()
-	cPref <- .ap2$stn$p_ClassVarPref
 #	outList <- list(sampleNr=sampleNr, conSNr=conSNr, timePoints=timePoints, ecrm=ecrm, repl=repl, group=group, temp=temp, relHum=relHum, C_cols=C_cols, Y_cols=Y_cols, timestamp=timestamp, info=info, NIR=NIR)
 	headerFilePath <- NULL # gets assigned in readHeader()
-	header <- readHeader(md, slType, multiplyRows) # re-assigns 'slType' also here -- in parent 2 level frame ## if slType is NULL, header will be returned as NULL as well
+	header <- readHeader(md, slType, multiplyRows) ## re-assigns 'slType' and 'multiplyRows' also here -- in parent 2 level frame 
+													## if slType is NULL, header will be returned as NULL as well
 	spectraFilePath <- NULL # gets assigned in readSpectra()
-	specImp <-  readSpectra(md, filetype, naString) ### !!!!!!!!! here the import !!!!!!!!!
-	gfd_check_imports(specImp) # makes sure eveything is NULL or data.frame / matrix (NIR)
-	specImp <- gfd_makeColumnNames(specImp) # makes all column names
-	gfd_checkNrOfRows(header, headerFilePath, nrow(specImp$NIR), spectraFilePath) 
+	si <-  readSpectra(md, filetype, naString) ### !!!!!!!!! here the import !!!!!!!!!
+	gfd_check_imports(si) # makes sure eveything is NULL or data.frame / matrix (NIR)
+	si <- gfd_makeNiceColumns(si) # makes all column names, transforms Y-variables to numeric
+	nr <- nrow(si$NIR)
+	gfd_checkNrOfRows(header, headerFilePath, nr, spectraFilePath, multiplyRows, nrConScans=md$postProc$nrConScans) 
 	if (is.null(header)) {
-		header <- data.frame(rep(NA, nrow(specImp$NIR)))
+		header <- data.frame(DELETE=rep(NA, nr))
 	}
-#	return(specImp)
+	expName <- noSplit <- NULL # gets assigned below in gfd_getExpNameNoSplit()
+	gfd_getExpNameNoSplit(metadata=md, nRows=nr)
+	headerFusion <- cbind(expName, noSplit, header, si$sampleNr, si$conSNr, si$timePoints, si$ecrm, si$repl, si$group, si$C_cols, si$Y_cols,  si$temp, si$relHum, si$timestamp)
+	headerFusion <- headerFusion[, -(which(colnames(headerFusion) == "DELETE"))] 
+	check_conScanColumn(headerFusion, headerFilePath, spectraFilePath, slType) 
+	# ? check for existence of sample number column as well ?
+	gfd_checkForDoubleColumns(headerFusion, spectraFilePath, headerFilePath, slType)
+
+
+#	return(headerFusion)
 	
-		sampleNr <- specImp$sampleNr
-		conSNr <- specImp$conSNr
-		timePoints <- specImp$timePoints
-		ecrm <- specImp$ecrm
-		repl <- specImp$repl
-		group <- specImp$group
-		temp <- specImp$temp
-		relHum <- specImp$relHum
-		C_cols <- specImp$C_cols
-		Y_cols <- specImp$Y_cols
-		timestamp <- specImp$timestamp
-		info <- specImp$info			# 	info <- list(nCharPrevWl=nCharPrevWl)
-		NIR <- specImp$NIR
-	nr <- nrow(NIR)
-	expName <- data.frame(rep(md$meta$expName, nr))
-	colnames(expName) <- paste(cPref, .ap2$stn$p_expNameCol)
-	noSplit <- data.frame(rep(.ap2$stn$p_commonNoSplit, nr))
-	colnames(noSplit) <- paste(cPref, .ap2$stn$p_commonNoSplitCol)
-#	headerFusion <- cbind(expName, noSplit, sampleNr, conSNr, timePoints, ecrm, repl, group, C_cols, Y_cols,  temp, relHum, timestamp)
-	headerFusion <- cbind(expName, noSplit, sampleNr, timePoints, ecrm, repl, group, C_cols, Y_cols,  temp, relHum)
+	info <- si$info			# 	info <- list(nCharPrevWl=nCharPrevWl)
 	
-	return(headerFusion)
-	
-	
-	cns <- colnames(addCols)
-	##
-	indT <- which(cns == "Timestamp")
-	if (length(ind) != 0) {
-		timestamp <- addCols[ind]
-	} else {
-		timestamp <- data.frame(Timestamp = rep(NA, nrow(NIR)))
-	}
-	##
-	if (ncol(addCols) > 1) {
-		addColsRest <- as.data.frame(addCols[, -indT])
-	} else {
-		addColsRest <- NULL
-	}
-	headerFusion <- cbind(header, addColsRest, timestamp)
 	if (.ap2$stn$imp_autoCopyYvarsAsClass) {  # if TRUE, copy all columns containing a Y-variable as class variable
-		header <- copyYColsAsClass(headerFusion)
+		headerFusion <- copyYColsAsClass(headerFusion)
 	}
 	headerFusion <- remakeTRHClasses_sys(headerFusion)
-	numRep <- extractClassesForNumRep(headerFusion)		## the numerical representation of the factors
-	chrons <- NULL
-	fullData <- data.frame(headerFusion, timeStamp, chrons, I(numRep), I(NIR))		### FUSION HERE 
-	return(fullData)
-	## to do: correct the globals in the color-functions, add possibility to replace temp and relhum by columns in the spectral data?, test the placement of the additional columns, write the documentation in the make custom doc file
+	colRep <- extractClassesForColRep(headerFusion)		## the color representation of the factors
+	NIR <- si$NIR
+	fullData <- data.frame(headerFusion, I(colRep), I(NIR))
+	return(fullData) 
 } # EOF
 
 # refine header -------------------------------------------------------------
@@ -331,15 +372,15 @@ transformNrsIntoColorCharacters <- function(numbers) {
 } # EOF
 
 generateHeatMapColorCoding <- function(numbers) {
-	whatColors <- get("stngs")$colorRampForTRH
+	whatColors <- .ap2$stn$col_RampForTRH
 	colRamp <- colorRampPalette(whatColors)
 	colorChar <- colRamp(length(unique(numbers)))
 	out <- as.character(colorChar[numbers])
 } # EOF
 
-extractClassesForNumRep <- function(header) { ## does not need "NIR" present in the data frame
-	tempCol <- get("stngs")$tempCol ## depends on "grepl" or not
-	RHCol <- get("stngs")$RHCol
+extractClassesForColRep <- function(header) { ## does not need "NIR" present in the data frame
+	tempCol <- .ap2$stn$p_tempCol ## depends on "grepl" or not
+	RHCol <- .ap2$stn$p_RHCol
 	out <- data.frame(matrix(NA, nrow=nrow(header)))
 	for (i in 1: ncol(header)) {
 		if (is.factor(header[,i])) {
@@ -377,8 +418,7 @@ copyYColsAsClass <- function(sampleList) {
 		add <- data.frame(add, newDF )
 	}
 	add <- add[-1]
-	out <- data.frame(sampleList, add)
-	return(out)
+	return(data.frame(sampleList, add))
 } # EOF
 
 remakeTRHClasses_sys <- function(headerOnly, TDiv=.ap2$stn$imp_TClassesDiv, TRound=.ap2$stn$imp_TRounding, RHDiv=.ap2$stn$imp_RHClassesDiv, RHRound= .ap2$stn$imp_RHRounding) {
@@ -459,6 +499,7 @@ readHeader_checkDefaults <- function(slType, possibleValues, md, multiplyRows) {
 		}
 	}
 	assign("multiplyRows", multiplyRows, pos=parent.frame(n=1))
+	assign("multiplyRows", multiplyRows, pos=parent.frame(n=2))  # that is needed to always have the correct value for multiplyRows in the getFullData function
 } # EOF
 
 check_sl_existence <- function(filename, ext) {
@@ -468,10 +509,26 @@ check_sl_existence <- function(filename, ext) {
 	if (!file.exists(a)) {
 		stop(paste("The file \"", fn, "\" does not seem to exist in \"", slInFolder, "\".", sep=""), call.=FALSE)
 	}	
-	
 } # EOF
 
-check_conScanColumn <- function(header, filename, ext) {
+check_conScanColumn <- function(header, headerFilePath, spectraFilePath, slType) {
+	a <- paste(.ap2$stn$p_yVarPref, .ap2$stn$p_conSNrCol, sep="")
+	if (!any(a %in% colnames(header))) {
+		if (is.null(slType)) {
+			from <- paste(" in the file \n\"", spectraFilePath, "\" containing the spectral data.", sep="")
+			where <- paste(" to the file containing the spectral data and modify the custom import function accordingly.\n")
+			maybe <- ""
+		} else {
+			from <- paste(", neither in your sample-list file \n\"", headerFilePath, "\", nor in file \n\"", spectraFilePath, "\" containing the spectral data.", sep="")
+			where <- paste(" either to the sample list or to the file containing the spectral data. In the latter case please modify the custom import function accordingly.\n")
+ 			maybe <- "(You probably encounter this error because you did choose to *not* multiply the rows of the sample list by the nr. of consecutive scans.)\n"
+		}
+		msg <- paste("You do not have a column for the nr of the consecutive scan", from, " \nPlease, add a column called \"", a, "\"", where, maybe, "\nSee the help for 'custom_import' for further information.", sep="")
+		stop(msg, call.=FALSE)
+	}	
+} # EOF
+
+check_conScanColumn_2 <- function(header, filename, ext) {
 	a <- paste(.ap2$stn$p_yVarPref, .ap2$stn$p_conSNrCol, sep="")
 	if (!any(a %in% colnames(header))) {
 		stop(paste("You do not have a column for the nr of the consecutive scan in your sample list called \"", filename, ext, "\". \nPlease, add a column called \"", a, "\" to the file as the second column and provide the right values in this column. \n(You probably encounter this error because you did choose to *not* multiply the rows of the sample list by the nr. of consecutive scans.)\nPlease refer to the help for 'getFullData' for further information.", sep=""), call.=FALSE)
@@ -530,7 +587,7 @@ readHeader <- function(md=getmd(), slType="def", multiplyRows="def") {
 		header <- multiplySampleListRows(rawHead, nrScans)
 	} else {
 		header <- rawHead
-		check_conScanColumn(header, filename, ext)
+		# check_conScanColumn_2(header, filename, ext)
 	}
 	return(header)
 } # EOF
@@ -540,6 +597,8 @@ readHeader <- function(md=getmd(), slType="def", multiplyRows="def") {
 # XXX
 
 
-## next: add experiment name to the dataset, make import of spectra clean; add the common-value column; add expeirment name column; check rownames; check for existence of consSNr (is a must have)
+## next: check rownames;
+	## to do: write the documentation in the make custom doc file
+
 ## note: make @numRep in Aquacalc to take numerics OR character, because if we have more than 8 elements...  :-)
 
