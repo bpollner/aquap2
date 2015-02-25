@@ -31,8 +31,8 @@ stn <- list(
 	p_tempCol = "Temp",						## the name of the column holding the room temperature at which the measurements were taken
 	p_RHCol ="RelHum",						## the name of the column holding the relative humidity at which the measurements were taken 
 	p_expNameCol = "ExpName",				## the name of the column holding the experiment name 
-	p_commonNoSplitCol = "noSplit", 		## the name of the column containing the common "no-split" value
-	p_commonNoSplit = "noSplit", 			## a common value for all the rows in the dataset in the "noSplit" column
+	p_commonNoSplitCol = "all", 			## the name of the column containing the common "no-split" value
+	p_commonNoSplit = "all", 				## a common value for all the rows in the dataset in the "noSplit" column
 	p_envControlLabel = "MQ", 				## the default label for the environmental control
 	p_realMeasurementLabel = "RM", 			## the default label for the "real measurement", for all the samples of your experiment
 	p_replicatePrefix = "R", 				## the prefix for the value indicating the number of the replicate of a measurement, so e.g. with the default 'R' you will have your replicates named "R1", "R2", "R3", ...
@@ -59,7 +59,6 @@ stn <- list(
 	imp_RHClassesDiv = 3,					## the number by which the rel. humidity values get divided, then rounded, then multiplied
 	imp_TRounding = 1,  					## digits precision for rounding when re-factoring the temperature
 	imp_RHRounding = 0, 					## digits precision for rounding when re-factoring the rel. humidity
-
 
 
 

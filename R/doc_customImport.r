@@ -17,11 +17,18 @@
 #'    to be the data file. Provide any necessary defaults in the 
 #'    function definition.
 #' }
-#' @return The returned values of the function have to be structured as follows:
+#' @return The returned value of the function has to be a list with the following 
+#' elements:
+#' \itemize{
+#'  \item NIR a data frame with the NIR spectra
+#'  \item 
+#' 
+#' }
 #' addCols if time then column name "Timestamp", if Temp and RH then XXX
 #' NIR the NIR spectra
 #' nchar Prev wl in info
 #' if time called Timestamp format POSIXct
+#' @aliases gfd
 #' @examples
 #' \dontrun{
 #' # this could be the content of the .r file for defining a custom function 
@@ -35,3 +42,6 @@
 #' @family Development
 #' @name custom_import
 NULL
+
+
+# outList <- list(sampleNr=sampleNr, timePoints=timePoints, ecrm=ecrm, repl=repl, group=group, temp=temp, relHum=relHum, C_cols=C_cols, Y_cols=Y_cols, timestamp=timestamp, info=info, NIR=NIR)

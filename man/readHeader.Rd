@@ -15,6 +15,16 @@ sl_in folder. Possible values are:
 \itemize{
    \item "def" Gets the default value from the settings.r file.
          (variable 'imp_sampleListType')
+   \item NULL By providing 'NULL' to the argument 'slType' you indicate that
+         no sample-list should be imported to create the header. This would
+         be the case if you use a custom-function to import your spectral
+         data and all the necessary class- and numerical variables are already
+         defined in the same file that holds the spectral data. Please refer to
+         \code{\link{custom_import}} for furhter information on the requirements
+         for this custom import function.
+         You can use a custom function to import spectral data and at the same
+         time import additional variables from a sample-list file by providing
+         one of the characters listed below.
    \item "csv" a comma separated text file ending in '.csv'
    \item "txt" a tab delimited text file ending in '.txt'
    \item "xls" an Excel file ending in '.xlsx'
@@ -47,7 +57,7 @@ by a "-in" and then the file extension.
 \seealso{
 \code{\link{getFullData}}
 
-Other Development: \code{\link{custom_import}};
-  \code{\link{readSpectra}}
+Other Development: \code{\link{custom_import}},
+  \code{\link{gfd}}; \code{\link{readSpectra}}
 }
 

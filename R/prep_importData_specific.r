@@ -60,15 +60,27 @@ getNIRData_Vision_da <- function(dataFile) {
 	dfOut <- cbind(sampleNr, sampleName, dfTime, NIR)
 	colnames(dfOut) <- c("sampleNr", "sampleName", "Timestamp", wlsChar)
 	rownames(dfOut) <- make.unique(sampleName)
-	out <- dfOut[, -(1:2)]
+#	out <- dfOut[, -(1:2)]
 #	out <- dfOut
 	NIR <- dfOut[, -(1:3)]
 	nCharPrevWl <- 1
-	addCols <- dfOut[3]
+	timestamp <-  dfOut[3]
+	sampleNr <- NULL
+	conSNr <- NULL
+	timePoints <- NULL
+	ecrm <- NULL
+	C_cols <- NULL
+	Y_cols <- NULL
+	repl <- NULL
+	group <- NULL
+	temp <- NULL
+	relHum <- NULL
 	info <- list(nCharPrevWl=nCharPrevWl)
-	outList <- list(addCols=addCols, NIR=NIR, info=info)
+	outList <- list(sampleNr=sampleNr, conSNr=conSNr, timePoints=timePoints, ecrm=ecrm, repl=repl, group=group, temp=temp, relHum=relHum, C_cols=C_cols, Y_cols=Y_cols, timestamp=timestamp, info=info, NIR=NIR)
 	return(outList)
 } # EOF 
+
+
 
 
 # Spectra from tab delim .txt file ---------------------------------------

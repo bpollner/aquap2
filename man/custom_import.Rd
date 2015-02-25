@@ -2,9 +2,16 @@
 % Please edit documentation in R/doc_customImport.r
 \name{custom_import}
 \alias{custom_import}
+\alias{gfd}
 \title{Customising Spectral Import}
 \value{
-The returned values of the function have to be structured as follows:
+The returned value of the function has to be a list with the following
+elements:
+\itemize{
+ \item NIR a data frame with the NIR spectra
+ \item
+
+}
 addCols if time then column name "Timestamp", if Temp and RH then XXX
 NIR the NIR spectra
 nchar Prev wl in info
