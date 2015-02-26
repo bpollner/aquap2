@@ -42,7 +42,6 @@ written rawdata import functions. (see \code{\link{custom_import}})
 \seealso{
 \code{\link{getFullData}}
 
-Other Development: \code{\link{custom_import}},
-  \code{\link{gfd}}; \code{\link{readHeader}}
+Other Development Functions: \code{\link{readHeader}}
 }
 

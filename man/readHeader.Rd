@@ -35,8 +35,8 @@ should be multiplied by the number of consecutive scans as specified in the
 metadata of the experiment. If 'FALSE' (what would be the case if you, during
 your measurements, had to divert from the planned number of consecutive scans
 or had to make other changes so that the number of consecutive scans is not
-the same for every sample) you have manually insert the column (default name
-would be 'C_ConSNr' and provide the values for every row.}
+the same for every sample) you have to manually insert the column (default name
+would be 'C_conSNr' and provide the values for every row.}
 }
 \description{
 This functions reads in the sample-list file and prepares the
@@ -57,7 +57,6 @@ by a "-in" and then the file extension.
 \seealso{
 \code{\link{getFullData}}
 
-Other Development: \code{\link{custom_import}},
-  \code{\link{gfd}}; \code{\link{readSpectra}}
+Other Development Functions: \code{\link{readSpectra}}
 }
 

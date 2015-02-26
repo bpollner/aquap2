@@ -61,7 +61,7 @@ stn <- list(
 	imp_RHRounding = 0, 					## digits precision for rounding when re-factoring the rel. humidity
 	imp_makeExpNameColumn = FALSE, 			## if a column containing the name of the experiment in every row should be added to the dataset. This is useful if you plan to fuse datasets from several experiments.
 	imp_makeNoSplitColumn = TRUE, 			## if a column containing the same value in every row should be added to the dataset. This can be useful to have in the operations for data splitting.
-
+	imp_makeTimeDistanceColumn = TRUE, 		## if, should a timestamp be available, a column with the time-distance from a user-defined point in time and an other with the chronological order (1:nrow enumeration) should be generated
 
 
 	## Colors

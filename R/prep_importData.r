@@ -50,7 +50,7 @@ readSpec_checkDefaults <- function(possibleFiletypes, md, filetype, naString) {
 #' @return The spectral data in the format as described in 'Value' in 
 #' \code{\link{custom_import}}
 #' @seealso \code{\link{getFullData}}
-#' @family Development
+#' @family Development Functions
 #' @export
 readSpectra <- function(md=getmd(), filetype="def", naString="NA") {
 	autoUpS()
@@ -253,7 +253,18 @@ gfd_makeNiceColumns <- function(specImp) {
 		specImp$Y_cols <- data.frame(DELETE = rep(NA, nr))
 	}
 	if (!is.null(specImp$timestamp)) {
-		colnames(specImp$timestamp) <- "Timestamp"
+		if (.ap2$stn$imp_makeTimeDistanceColumn) {
+			startDate <- as.POSIXct(.ap2$stn$imp_startDate)
+			startDateNr <- as.double(startDate)
+			a <- unclass(specImp$timestamp[,1])
+			MinuteTimStamp <- as.numeric(round((a - startDateNr)/60, 2))
+			chrons <- data.frame(absTime=MinuteTimStamp, chron=1:length(MinuteTimStamp))
+			timestamp <- specImp$timestamp
+			specImp$timestamp <- cbind(specImp$timestamp, chrons)
+			colnames(specImp$timestamp) <- c("Timestamp", "absTime", "chron")
+		} else {
+			colnames(specImp$timestamp) <- "Timestamp"		
+		}
 	} else {
 		specImp$timestamp <- data.frame(DELETE = rep(NA, nr))
 	}
@@ -296,19 +307,20 @@ gfd_getExpNameNoSplit <- function(metadata, nRows) {
 } # EOF
 
 gfd_checkForDoubleColumns <- function(header, spectraFilePath, headerFilePath, slType) {
-	collect <- NULL
+	collect  <-  NULL
+	patterns <- c(".1", ".2", ".3", ".4", ".5", ".6", ".7", ".8", ".9", ".10", ".11", ".12")
 	a <- colnames(header)
-	for (i in 1: length(a)) {
-		inds <- grep(a[i], a)
-		if (length(inds) > 1) {
-			collect <- c(collect, i)
+	for (k in 1: length(patterns)) {	
+		inds <- grep(patterns[k], a)
+		if (length(inds) > 0) {
+			collect <- c(collect, inds)
 		}
-	} # end for i
+	}  # end for k
 	if (!is.null(collect)) {
 		if (is.null(slType)) {
 			files <- paste("\"", spectraFilePath, "\"", sep="")		
 		} else {
- 			files <- paste("\"", headerFilePath, "\" and ", "\"", spectraFilePath, sep="")
+ 			files <- paste("\"", headerFilePath, "\" and ", "\"", spectraFilePath, "\".", sep="")
 		}
 		cols <- paste(a[collect], collapse=", ")
 		msg <- paste("Some columns seem to appear twice: \n", cols,"\nPlease check the files used for importing data, that is \n", files, sep="")
@@ -316,18 +328,40 @@ gfd_checkForDoubleColumns <- function(header, spectraFilePath, headerFilePath, s
 	}
 } # EOF
 
-#' @rdname getFullData
-#' @export
-gfd <- function(md=getmd(), filetype="def", naString="NA", slType="def", multiplyRows="def",  stf=TRUE) {
-	return(getFullData(md, filetype, naString, slType, multiplyRows, stf))
+gfd_importData <- function() {
+
+
+} # EOF
+
+gfd_checkLoadSaveLogic <- function(ttl, stf) {
+	if (!is.logical(ttl) | !is.logical(stf)) {
+		stop("Please provide 'TRUE' or 'FALSE' to the arguments 'ttl' / 'stf' ", call.=FALSE)
+	}
+} # EOF
+
+gfd_checkMetadata <- function(md) {
+	if (class(md) != "aquap_md") {
+		stop("Please provide a valid metadata object of class 'aquap_md' to the argument 'md'", call.=FALSE)
+	}
 } # EOF
 
 # get full data ---------------------------------------------------------------
 #' @rdname getFullData
 #' @export
-getFullData <- function(md=getmd(), filetype="def", naString="NA", slType="def", multiplyRows="def",  stf=TRUE) {
+getFullData <- function(md=getmd(), filetype="def", naString="NA", slType="def", multiplyRows="def", ttl=TRUE, stf=TRUE) {
 	autoUpS()
-#	outList <- list(sampleNr=sampleNr, conSNr=conSNr, timePoints=timePoints, ecrm=ecrm, repl=repl, group=group, temp=temp, relHum=relHum, C_cols=C_cols, Y_cols=Y_cols, timestamp=timestamp, info=info, NIR=NIR)
+	gfd_checkLoadSaveLogic(ttl, stf)
+	gfd_checkMetadata(md)
+	dataset <- NULL
+	if (ttl) {
+		dataset <- loadAQdata(md, verbose=FALSE)
+	}
+	if(!is.null(dataset)) { # so the path existed and it could be loaded
+		if(!.ap2$stn$allSilent) {cat(paste("Dataset \"", md$meta$expName, "\" was loaded.\n", sep="")) }
+		return(invisible(dataset)) # returns the dataset and we exit here
+	}
+	################ here the import starts #######################
+	if(!.ap2$stn$allSilent) {cat("Importing data...\n")}	
 	headerFilePath <- NULL # gets assigned in readHeader()
 	header <- readHeader(md, slType, multiplyRows) ## re-assigns 'slType' and 'multiplyRows' also here -- in parent 2 level frame 
 													## if slType is NULL, header will be returned as NULL as well
@@ -336,7 +370,7 @@ getFullData <- function(md=getmd(), filetype="def", naString="NA", slType="def",
 	gfd_check_imports(si) # makes sure eveything is NULL or data.frame / matrix (NIR)
 	si <- gfd_makeNiceColumns(si) # makes all column names, transforms Y-variables to numeric
 	nr <- nrow(si$NIR)
-	gfd_checkNrOfRows(header, headerFilePath, nr, spectraFilePath, multiplyRows, nrConScans=md$postProc$nrConScans) 
+	gfd_checkNrOfRows(header, headerFilePath, nr, spectraFilePath, multiplyRows, nrConScans=md$postProc$nrConScans)  # makes sure spectra and sample list have same number of rows
 	if (is.null(header)) {
 		header <- data.frame(DELETE=rep(NA, nr))
 	}
@@ -353,17 +387,82 @@ getFullData <- function(md=getmd(), filetype="def", naString="NA", slType="def",
 	headerFusion <- remakeTRHClasses_sys(headerFusion)
 	colRep <- extractClassesForColRep(headerFusion)		## the color representation of the factors
 	NIR <- si$NIR
-	header <- headerFusion
+	rownames(NIR) <- make.unique(rownames(NIR)) # just to be sure
+	rownames(headerFusion) <- rownames(colRep) <- rownames(NIR)
 #	fd <- data.frame(I(header), I(colRep), I(NIR))
 	fullData <- new("aquap_data")
-	fullData@header <- header
+	fullData@header <- headerFusion
 	fullData@colRep <- colRep
 	fullData@NIR <- NIR
 	fullData@ncpwl <- si$info$nCharPrevWl
-	return(fullData) 
-	
-	## next: check rownames !!!!!; repair row-multiplication when only one column !!
-	
+	if (stf) {
+		saveAQdata(fullData, md, verbose=TRUE)
+	} else {
+		if(!.ap2$stn$allSilent) {cat("Done. (not saved) \n")}	
+	}
+	return(invisible(fullData))
+} # EOF
+
+#' @rdname getFullData
+#' @export
+gfd <- function(md=getmd(), filetype="def", naString="NA", slType="def", multiplyRows="def", ttl=TRUE, stf=TRUE) {
+	return(getFullData(md, filetype, naString, slType, multiplyRows, ttl, stf))
+} # EOF
+
+
+#' @title Save and load aquap2 datasets
+#' @description Save and load the standard aquap2 dataset (class "aquap_data") 
+#' to / from the 'R-data' folder.
+#' @details  From the provided metadata the experiment name is extracted.
+#' \itemize{
+#'  \item saveAQdata The dataset is saved under the same name as the experiment name.
+#'  \item laodAQdata The file having the same name as the experiment name is being 
+#'  loaded.
+#' } 
+#' @aliases saveAQdata loadAQdata
+#' @inheritParams getFullData
+#' @param dataset An object of class 'aquap_data'
+#' @param verbose Logical, if messages should be displayed.
+#' @return loadData 
+#' @family Helper Functions
+#' @seealso \code{\link{getFullData}}
+#' @examples
+#' \dontrun{
+#' saveAQdata(dataset)
+#' loadAQdata()
+#' }
+#' @export
+saveAQdata <- function(dataset, md=getmd(), verbose=TRUE) {
+	autoUpS()
+  	if (class(dataset) != "aquap_data") {
+    	stop("Please provide an object of class 'aquap_data' to the argument 'dataset'", call.=FALSE)
+  	}
+  	expName <- md$meta$expName
+	path <- paste(.ap2$stn$fn_rdata, expName, sep="/")
+	save(dataset, file=path)
+	if (verbose & !.ap2$stn$allSilent) {
+		cat(paste("Dataset saved under \"", path, "\".\n", sep=""))
+	}
+} # EOF
+
+#' @rdname saveAQdata
+#' @export
+loadAQdata <- function(md=getmd(), verbose=TRUE) {
+	autoUpS()
+  	expName <- md$meta$expName
+	path <- paste(.ap2$stn$fn_rdata, expName, sep="/")
+	if (file.exists(path)){
+		a <- load(path)
+		if (verbose & !.ap2$stn$allSilent) {
+			cat(paste("Dataset \"", path, "\" loaded.", sep=""))
+		}
+		invisible(get("dataset"))	
+	} else {
+		if (verbose) {
+			message(paste("Dataset \"", path, "\" does not seem to exist, sorry.", sep=""))
+		}
+		return(NULL)
+	}	
 } # EOF
 
 # refine header -------------------------------------------------------------
@@ -463,9 +562,14 @@ multiplySampleListRows <- function(sampleList, nrScans) {
 	second <- matrix(rep(1:nrScans, each=nrow(sampleList) ))
 	first <- matrix(rep(1:nrow(sampleList), nrScans) )
 	a <- data.frame(multiList, second=second, first=first)
-	a <- a[order(first, second), ][,1:(ncol(a)-2)] # order, then cut away the last two columns
+	a <- as.data.frame(a[order(first, second), ][,1:(ncol(a)-2)]) # order, then cut away the last two columns
+
 	ConSNr <- rep(1:(nrScans),nrow(sampleList)) # generate a vector numbering all the consecutive scans
-	a <- data.frame(a[1], ConSNr=ConSNr, a[-1]) # insert into data frame
+	if (ncol(a) > 1) {
+		a <- data.frame(a[1], ConSNr=ConSNr, a[-1]) # insert into data frame
+	} else {
+		a <- data.frame(a[1], ConSNr=ConSNr) # insert into data frame		
+	}
 	ColNames <- colnames(a)
 	ColNames[2] <- paste(.ap2$stn$p_yVarPref, .ap2$stn$p_conSNrCol, sep="")
 	colnames(a) <- ColNames
@@ -557,7 +661,7 @@ check_conScanColumn_2 <- function(header, filename, ext) {
 #' \dontrun{
 #'  header <- readHeader()
 #' }
-#' @family Development
+#' @family Development Functions
 #' @export
 readHeader <- function(md=getmd(), slType="def", multiplyRows="def") {
 	autoUpS()
@@ -600,10 +704,8 @@ readHeader <- function(md=getmd(), slType="def", multiplyRows="def") {
 ## maybe add here the user-function for re-making the T and RH classes
 # XXX
 
-
-	## to do: write the documentation in the make custom doc file
-## import TRH from a / any logfile	
-	
+## import & align TRH from a / any logfile	
+# make tutorial; make data-package
 
 ## note: make @numRep in Aquacalc to take numerics OR character, because if we have more than 8 elements...  :-)
 

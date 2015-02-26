@@ -62,7 +62,7 @@ getNIRData_Vision_da <- function(dataFile) {
 	rownames(dfOut) <- make.unique(sampleName)
 #	out <- dfOut[, -(1:2)]
 #	out <- dfOut
-	NIR <- dfOut[, -(1:3)]
+	NIR <- as.matrix(dfOut[, -(1:3)])
 	rownames(NIR) <- make.unique(sampleName)	
 	nCharPrevWl <- 1
 	timestamp <-  dfOut[3]

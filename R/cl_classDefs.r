@@ -9,15 +9,10 @@
 } # EOF
 
 
-show_aquap_data <- function(object) {
-	print(object@header)
-		
-} # EOF
-
-
 .initializeAQM2ethods <- function() {
 	setMethod("show", signature(object = "aquap_data"), definition = show_aquap_data )
 
 	
 	
 } # EOF
+str

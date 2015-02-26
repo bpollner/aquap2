@@ -34,7 +34,7 @@ they have to have the same length as the L1 column names.}
 
 \item{L1}{A list, containing a list for each L1-variable.}
 
-\item{L2}{A list, containing a lsit for each L2-variable.}
+\item{L2}{A list, containing a list for each L2-variable.}
 
 \item{Repls}{Numeric. How many replicates of each sample to measure. The values
 in the dataset wil be prefixed with the default character for the replicates,

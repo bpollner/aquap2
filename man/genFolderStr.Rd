@@ -22,6 +22,8 @@ You can change the defaults for the folder names in the settings file.
 \seealso{
 \code{\link{settings_file}}
 
-Other Helper Functions: \code{\link{updateSettings}}
+Other Helper Functions: \code{\link{loadAQdata}},
+  \code{\link{loadAQdata}}, \code{\link{saveAQdata}};
+  \code{\link{updateSettings}}
 }
 

@@ -43,6 +43,8 @@ ls(.ap2)
 \seealso{
 \code{\link{settings_file}}
 
-Other Helper Functions: \code{\link{genFolderStr}}
+Other Helper Functions: \code{\link{genFolderStr}};
+  \code{\link{loadAQdata}}, \code{\link{loadAQdata}},
+  \code{\link{saveAQdata}}
 }
 

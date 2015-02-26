@@ -26,7 +26,7 @@
 #'  @param columnNamesL2 Character vector. The column names for the L2-variables, 
 #'  they have to have the same length as the L1 column names.
 #'  @param L1 A list, containing a list for each L1-variable.
-#'  @param L2 A list, containing a lsit for each L2-variable.
+#'  @param L2 A list, containing a list for each L2-variable.
 #'  @param Repls Numeric. How many replicates of each sample to measure. The values 
 #'  in the dataset wil be prefixed with the default character for the replicates, 
 #'  which can be set in the settings (default is "R"). So, with e.g. three 

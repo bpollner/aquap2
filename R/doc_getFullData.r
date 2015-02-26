@@ -1,15 +1,26 @@
 #' @title Get / Import Spectral Data
-#' @description Loads an R-object containing previously imported spectral data, 
-#'  or imports spectral data from a file in the rawdata-folder and fuses 
-#' these data together with the class-header provided in the sampleLists/sl_in 
-#' folder.
+#' @description If everyting is left at the defaults, the function first tries 
+#' to load an R-object containing previously imported spectral data. If this was 
+#' not found, it tries to import spectral data from a file in the rawdata-folder, 
+#' fuses these data together with the class-header provided in the 
+#' sampleLists/sl_in folder and saves the resulting dataset.
+#' It is also possible to use a user-defined custom function to import data from 
+#' a file in any format, containing the NIR-spectra as well as all the class- 
+#' and numerical  variables. In the latter case it is still possible to fuse 
+#' additional variables provided in a file in sampleLists/sl_in with the imported 
+#' data.
 #' @details From the metadata, provided in the first argument, the experiment 
-#' name is extracted, and the spectral file having the same name as the experiment 
-#' name (plus its specific ending) is imported from the rawdata-folder. 
-#' The sample list (what is used to create the header) must be in the 
-#' sampleLists/sl_in folder and must be named with the experiment name, followed 
-#' by a "-in" and then the file extension.
-#' @section Note: This strict regime with the filenames seems maybe at first at 
+#' name is extracted, and (if 'ttl' is TRUE) first the dataset-file having this 
+#' name is looked for in the 'R-data' folder and, if there, is being loaded.
+#' If the file could not be found (or if 'ttl' is FALSE) the spectral file having 
+#' the same name as the experiment name (plus its specific ending) is imported 
+#' from the rawdata-folder. The sample list (what is used to create the header) 
+#' must be in the sampleLists/sl_in folder and must be named with the experiment 
+#' name, followed by a "-in" and then the file extension. 
+#' If you use a custom function and provide all the class- and numerical variables 
+#' together with the spectral data, set argument 'slType' to NULL.
+#' @aliases gfd
+#' @section Note: The strict regime with the filenames seems maybe at first at 
 #' bit complicated, but it proved to be good practise to ensure and enforce a 
 #' strict and conscious handling of the files.
 #' @param md List. The object with the metadat of the experiment. 
@@ -54,21 +65,42 @@
 #' metadata of the experiment. If 'FALSE' (what would be the case if you, during 
 #' your measurements, had to divert from the planned number of consecutive scans
 #' or had to make other changes so that the number of consecutive scans is not 
-#' the same for every sample) you have manually insert the column (default name 
-#' would be 'C_ConSNr' and provide the values for every row.
-#' 
+#' the same for every sample) you have to manually insert the column (default name 
+#' would be 'C_conSNr' and provide the values for every row.
+#' @param ttl Logical, 'try to load'. If a possibly existing r-data file should be 
+#' loaded. From the provided metadata (argument 'md') the experiment name is 
+#' extracted, and if a file having the same name as the experiment name is found 
+#' in folder 'R-data' it is loaded. If there is no such file, the spectra and class 
+#' variables are imported from raw-data, and the whole dataset is safed if 
+#' argument 'stf' is TRUE.
+#' In other words, providing 'FALSE' to argument 'ttl' always imports the spectra 
+#' from the raw-data.
 #' @param stf Logical, 'save to file'. If the final dataset should be saved to 
-#' the 'R-data' folder. Defaults to 'TRUE'.
+#' the 'R-data' folder after import from the raw-data file. Defaults to 'TRUE'.
 #' @seealso \code{\link{readSpectra}}, \code{\link{readHeader}}
-#' @return XXX
+#' @return An object of class 'aquap_data' containing four slots:
+#' \itemize{
+#'  \item header A data frame with all the class- and numerical variables, and 
+#'  possibly with the timestamp and time-distance.
+#'  \item colRep A data frame with the color-representation of every class variable 
+#'  present in the header.
+#'  \item NIR A matrix with the NIR data.
+#'  \item ncpwl Numeric length one, the number of characters before the wavelength 
+#'  in the column names of the NIR spectra.
+#' }
 #' @examples
 #' \dontrun{
 #'  md <- getmd()
 #'  fd <- getFullData(md)
 #'  fd <- getFullData() # the same as above
+#'  fd <- gfd(md=getmd("foo.r")) # loads metadata from file 'foo.r'
 #'  fd <- getFullData(filetype="custom@@myFunc.r", slType="xls")
 #'  # This would use a custom function to read in the raw spectra, and read in 
-#'  # the header file from an Excel file.
+#'  # the class- and numerical variables from an Excel file.
+#'  ## 
+#'  md <- getmd()
+#'  md$meta$expName <- "bar"
+#'  fd <- getFullData(md) # load a rawdata-file called "bar"
 #' }
 #' @name getFullData
 NULL
