@@ -12,6 +12,7 @@ Depends:
     R (>= 2.8.0)
 Imports:
     methods,
+    devtools,
     foreach,
     doParallel,
     xlsx

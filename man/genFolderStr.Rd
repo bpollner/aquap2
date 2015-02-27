@@ -24,6 +24,7 @@ You can change the defaults for the folder names in the settings file.
 
 Other Helper Functions: \code{\link{loadAQdata}},
   \code{\link{loadAQdata}}, \code{\link{saveAQdata}};
+  \code{\link{loadAquapData}}; \code{\link{updateAquap}};
   \code{\link{updateSettings}}
 }
 

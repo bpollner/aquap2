@@ -200,3 +200,42 @@ genFolderStr <- function() {
 		if (!.ap2$stn$allSilent) {	cat("Folder structure created.\n")}
 	} 
 } # EOF
+
+
+#'  @title Update the aquap2-package.
+#'  @description Download and install the latest version of package 'aquap2' 
+#'  from its github repository
+#'  @details Always downloads and installs the latest available version, also 
+#'  if the same up-to-date version is already installed.
+#'  @param branch Character, the name of the branch to downlaod. Defaults to 
+#'  "master".
+#'  @family Helper Functions
+#'  @examples
+#'  \dontrun{
+#'  updateAquap()
+#'  }
+#'  @export
+updateAquap <- function(branch="master") {
+	github_pat <- "7fc5ade6d6b5bfe07de528b17b959d37b4d1b01d"
+	devtools::install_github(repo="bpollner/aquap2", ref=branch, auth_token=github_pat)
+} # EOF
+
+
+#'  @title Load the aquap2 data package.
+#'  @description Download and install the latest version of package 'aquapData' 
+#'  from its github repository. 
+#' 	Package 'aquapData' contains the data and examples used in package 'aquap2'.
+#'  @details Always downloads and installs the latest available version, also 
+#'  if the same up-to-date version is already installed.
+#'  @param branch Character, the name of the branch to downlaod. Defaults to 
+#'  "master".
+#'  @family Helper Functions
+#'  @examples
+#'  \dontrun{
+#'  loadAquapData()
+#'  }
+#'  @export
+loadAquapData <- function(branch="master") {
+	github_pat <- "26728e1a8199df859170a83fc4025f8a34deb25b"
+	devtools::install_github(repo="bpollner/aquapData", ref=branch, auth_token=github_pat)
+} # EOF
