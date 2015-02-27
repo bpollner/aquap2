@@ -704,7 +704,7 @@ readHeader <- function(md=getmd(), slType="def", multiplyRows="def") {
 # XXX
 
 ## import & align TRH from a / any logfile	
-# make tutorial; make data-package
+# make tutorial;
 
 ## note: make @numRep in Aquacalc to take numerics OR character, because if we have more than 8 elements...  :-)
 

@@ -5,15 +5,17 @@ Version: 0.0.1
 Date: 2015-02-17
 Author: Bernhard Pollner, Zoltan Kovacs
 Maintainer: Bernhard Pollner <bernhard.pollner@mac.com>
-Description:  Methods and tools to analyse NIRS data from an Aquaphotomics perspective
+Description: Methods and tools to analyse NIRS data from an Aquaphotomics perspective
 License: GPL (>=2)
 LazyLoad: yes
-Depends:
+Depends: 
     R (>= 2.8.0)
-Imports:
+Imports: 
     methods,
     devtools,
     foreach,
     doParallel,
     xlsx
 Suggests:
+    knitr
+VignetteBuilder: knitr

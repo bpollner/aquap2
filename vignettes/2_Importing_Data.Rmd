@@ -1,0 +1,28 @@
+---
+title: "2 Importing Data"
+author: ""
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{2 Importing Data}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}  
+---
+
+```{r, echo = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+
+## Importing Spectral Data
+
+There are two ways to import spectral data:
+
+  1. by using one of the built-in functions to import from a supported file format
+  2. by writing your own custom-function to import data from any file format 
+  
+  
+  
+## Importing Class- and Numerical Variables
+
+Class-variables and numerical variables can be 

@@ -1,0 +1,26 @@
+---
+title: "1 Introduction and Setup"
+author: ""
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{1 Introduction and Setup}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}  
+---
+
+```{r, echo = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+## Introduction
+
+What for, purpose.
+Working procedure
+
+
+
+## Setup
+
+The .Renviron variable
+
