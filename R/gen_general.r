@@ -232,10 +232,10 @@ updateAquap <- function(branch="master") {
 #'  @family Helper Functions
 #'  @examples
 #'  \dontrun{
-#'  loadAquapData()
+#'  loadAquapDatapackage()
 #'  }
 #'  @export
-loadAquapData <- function(branch="master") {
+loadAquapDatapackage <- function(branch="master") {
 	github_pat <- "26728e1a8199df859170a83fc4025f8a34deb25b"
 	devtools::install_github(repo="bpollner/aquapData", ref=branch, auth_token=github_pat)
 } # EOF
