@@ -360,8 +360,8 @@ getFullData <- function(md=getmd(), filetype="def", naString="NA", slType="def",
 		if(!.ap2$stn$allSilent) {cat(paste("Dataset \"", md$meta$expName, "\" was loaded.\n", sep="")) }
 		return(invisible(dataset)) # returns the dataset and we exit here
 	}
-	################ here the import starts #######################
-	if(!.ap2$stn$allSilent) {cat("Importing data...\n")}	
+  # import starts 
+  if(!.ap2$stn$allSilent) {cat("Importing data...\n")}	
 	headerFilePath <- NULL # gets assigned in readHeader()
 	header <- readHeader(md, slType, multiplyRows) ## re-assigns 'slType' and 'multiplyRows' also here -- in parent 2 level frame 
 													## if slType is NULL, header will be returned as NULL as well

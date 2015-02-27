@@ -221,7 +221,7 @@ updateAquap <- function(branch="master") {
 } # EOF
 
 
-#'  @title Load the aquap2 data package.
+#'  @title Load the aquap2 data and examples package.
 #'  @description Download and install the latest version of package 'aquapData' 
 #'  from its github repository. 
 #' 	Package 'aquapData' contains the data and examples used in package 'aquap2'.

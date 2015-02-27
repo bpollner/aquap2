@@ -2,7 +2,7 @@
 % Please edit documentation in R/gen_general.r
 \name{loadAquapDatapackage}
 \alias{loadAquapDatapackage}
-\title{Load the aquap2 data package.}
+\title{Load the aquap2 data and examples package.}
 \usage{
 loadAquapDatapackage(branch = "master")
 }
@@ -25,10 +25,5 @@ Always downloads and installs the latest available version, also
 \dontrun{
  loadAquapDatapackage()
  }
-}
-\seealso{
-Other Helper Functions: \code{\link{genFolderStr}};
-  \code{\link{loadAQdata}}, \code{\link{saveAQdata}};
-  \code{\link{updateAquap}}; \code{\link{updateSettings}}
 }
 

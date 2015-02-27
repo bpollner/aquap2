@@ -42,7 +42,6 @@ loadAQdata()
 \code{\link{getFullData}}
 
 Other Helper Functions: \code{\link{genFolderStr}};
-  \code{\link{loadAquapDatapackage}};
   \code{\link{updateAquap}}; \code{\link{updateSettings}}
 }
 
