@@ -229,7 +229,6 @@ updateAquap <- function(branch="master") {
 #'  if the same up-to-date version is already installed.
 #'  @param branch Character, the name of the branch to downlaod. Defaults to 
 #'  "master".
-#'  @family Helper Functions
 #'  @examples
 #'  \dontrun{
 #'  loadAquapDatapackage()

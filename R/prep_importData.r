@@ -419,7 +419,6 @@ gfd <- function(md=getmd(), filetype="def", naString="NA", slType="def", multipl
 #'  \item laodAQdata The file having the same name as the experiment name is being 
 #'  loaded.
 #' } 
-#' @aliases saveAQdata loadAQdata
 #' @inheritParams getFullData
 #' @param dataset An object of class 'aquap_data'
 #' @param verbose Logical, if messages should be displayed.
