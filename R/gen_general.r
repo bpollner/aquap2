@@ -238,3 +238,36 @@ loadAquapDatapackage <- function(branch="master") {
 	github_pat <- "26728e1a8199df859170a83fc4025f8a34deb25b"
 	devtools::install_github(repo="bpollner/aquapData", ref=branch, auth_token=github_pat)
 } # EOF
+
+getStdColnames <- function() {
+	yPref <- .ap2$stn$p_yVarPref
+	cPref <- .ap2$stn$p_ClassVarPref
+	sampleNrColn <- .ap2$stn$p_sampleNrCol
+	conSNrColn <- .ap2$stn$p_conSNrCol
+	timePointsColn <- .ap2$stn$p_timeCol
+	ecrmColn <- .ap2$stn$p_ECRMCol
+	replColn <- .ap2$stn$p_replicateCol
+	groupColn <- .ap2$stn$p_groupCol
+	tempColn <- .ap2$stn$p_tempCol
+	relHumColn <- .ap2$stn$p_RHCol
+	stdColsY <- c(paste(yPref, sampleNrColn, sep=""), paste(yPref, conSNrColn, sep=""), paste(yPref, tempColn, sep=""), paste(yPref, relHumColn, sep=""))
+	stdColsC <- c( paste(cPref, timePointsColn, sep=""), paste(cPref, ecrmColn, sep=""), paste(cPref, replColn, sep=""), paste(cPref, groupColn, sep=""))
+	return(list(stdColsY=stdColsY, stdColsC=stdColsC))
+} # EOF
+
+#' @title Print standard column names
+#' @description Prints the standard column names as defined in the local 
+#' settings.r file to stdout.
+#' @family Helper Functions
+#' @export
+printStdColnames <- function() {
+	autoUpS()
+	cns <- getStdColnames()
+	stdColsC <- cns$stdColsC
+	stdColsY <- cns$stdColsY
+	cat("The standard column names as defined in your settings.r file are: \n\n")
+	cat("Class variables:\n")
+	cat(paste(stdColsC, collapse=", ")); cat("\n\n")
+	cat("Numeric variables:\n")
+	cat(paste(stdColsY, collapse=", ")); cat("\n")
+} # EOF

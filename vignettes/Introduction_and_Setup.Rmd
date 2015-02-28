@@ -1,10 +1,10 @@
 ---
-title: "1 Introduction and Setup"
+title: "Introduction and Setup"
 author: ""
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{1 Introduction and Setup}
+  %\VignetteIndexEntry{Introduction and Setup}
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}  
 ---

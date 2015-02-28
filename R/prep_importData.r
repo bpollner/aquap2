@@ -54,7 +54,7 @@ readSpec_checkDefaults <- function(possibleFiletypes, md, filetype, naString) {
 #' @export
 readSpectra <- function(md=getmd(), filetype="def", naString="NA") {
 	autoUpS()
-	possibleFiletypes <- c("vision_NSAS.da", "tabDelim.txt") # they get handed down to the checking function !  # XXVARXX
+	possibleFiletypes <- c("vision_NSAS.da", "tabDelim.txt", "Pirouette.pir") # they get handed down to the checking function !  # XXVARXX
 	filename <- NULL # will be changed in the checking
 	readSpec_checkDefaults(possibleFiletypes, md, filetype, naString)
 	rawFolder <- .ap2$stn$fn_rawdata
@@ -69,6 +69,10 @@ readSpectra <- function(md=getmd(), filetype="def", naString="NA") {
 		a <- paste(folderFile, ".txt", sep="")
  		return(getNirData_plainText(a, naString))
 	}
+	if (filetype == "Pirouette.pir") {
+		a <- paste(folderFile, ".pir", sep="")
+ 		return(getNIRData_Pirouette(a))
+	} 
 	## if nothing of the above happend, then we must have (checked!) the path to a valid custom .r file in "filetype" 
 	custName <- strsplit(filetype, "custom@")[[1]][2]
 	pathSH <- Sys.getenv("AQUAP2SH")

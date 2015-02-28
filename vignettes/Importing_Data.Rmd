@@ -1,10 +1,10 @@
 ---
-title: "2 Importing Data"
+title: "Importing Data"
 author: ""
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{2 Importing Data}
+  %\VignetteIndexEntry{Importing Data}
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}  
 ---
