@@ -19,6 +19,10 @@ Possile values are:
 from a Foss-XDS spectroscope.
 \item "tabDelim.txt": Import any tab delimited text file that contains only
 the NIR spectra and *no* additional columns like e.g. time, temperature etc.
+\item "Pirouette.pir": Import spectra *and* any class- or numerical variable
+directly from a .pir file. Those column-names in the .pir  file that match the
+standard-column names (\code{\link{printStdColnames}}) as defined in the
+settings.r file will be assigned to those columns automatically.
 \item "custom@yourFile.r": You can provide your own import-function for
 importing spectra, with "yourFile.r" being the .r-file located in the path
 specified in the .Renviron file. Please refer to \code{\link{custom_import}}
@@ -42,6 +46,8 @@ written rawdata import functions. (see \code{\link{custom_import}})
 \seealso{
 \code{\link{getFullData}}
 
-Other Development Functions: \code{\link{readHeader}}
+Other Development Functions: \code{\link{custom_import}};
+  \code{\link{imp_searchAskColumns}};
+  \code{\link{readHeader}}
 }
 

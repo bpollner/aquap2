@@ -85,6 +85,6 @@
 #'    #
 #'  } # EOF
 #' }
-#' @family Development
+#' @family Development Functions
 #' @name custom_import
 NULL

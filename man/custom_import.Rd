@@ -97,4 +97,8 @@ spectralImport <- function(dataFile) {
  } # EOF
 }
 }
+\seealso{
+Other Development Functions: \code{\link{imp_searchAskColumns}};
+  \code{\link{readHeader}}; \code{\link{readSpectra}}
+}
 

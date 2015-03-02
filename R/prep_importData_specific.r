@@ -88,7 +88,6 @@ getNirData_plainText <- function(dataFile, naStrings="NA") {
 } # EOF
 
 
-
 # Spectra from pirouette .pir file ---------------------------------------
 
 PirInfo <- function(dataFile) {
@@ -187,13 +186,16 @@ createPirMatrix <- function(PirTable, colNames, rowNames, nColSpect, nColClass, 
   }
   if (nColClass > 0){
     classCol <- (nColSpect+1):(nColSpect+nColClass)
-    ClassVar = PirTable[,classCol]
+    ClassVar = as.data.frame(PirTable[,classCol])
+    colnames(ClassVar) <- colnames(PirTable)[classCol]
   } else {
     ClassVar = NA
   }
   if (noColDepen > 0){
-    depenCol <- c((ncol(PirTable) - noColDepen) : ncol(PirTable))
-    DepenVar = PirTable[,depenCol]
+#   depenCol <- c((ncol(PirTable) - noColDepen) : ncol(PirTable))
+    depenCol <- c((ncol(PirTable) - noColDepen + 1) : ncol(PirTable)) ## B.P. added the +1 here
+    DepenVar = as.data.frame(PirTable[,depenCol])
+    colnames(DepenVar) <- colnames(PirTable)[depenCol]
   } else {
     DepenVar = NA
   }
@@ -209,112 +211,6 @@ pir_importPirFile <- function(dataFile) {
   	return(createPirMatrix(PirTable=PirData, colNames=headAll, rowNames=rowNames, nColSpect=Info$NoColSpect, nColClass=Info$NoColClass, noColDepen=Info$NoColDepen))
 } # EOF
 
-pir_searchAskColumns <- function(allC_var, allY_var) {
-	yPref <- .ap2$stn$p_yVarPref
-	cPref <- .ap2$stn$p_ClassVarPref
-	sampleNrColn <- .ap2$stn$p_sampleNrCol
-	conSNrColn <- .ap2$stn$p_conSNrCol
-	timePointsColn <- .ap2$stn$p_timeCol
-	ecrmColn <- .ap2$stn$p_ECRMCol
-	replColn <- .ap2$stn$p_replicateCol
-	groupColn <- .ap2$stn$p_groupCol
-	tempColn <- .ap2$stn$p_tempCol
-	relHumColn <- .ap2$stn$p_RHCol
-	## XXXVARXXX
-	listElementNames_C <- c("timePoints", "ecrm", "repl", "group")
-	stdColumnNames_C <- c(paste(cPref, timePointsColn, sep=""), paste(cPref, ecrmColn, sep=""), paste(cPref, replColn, sep=""), paste(cPref, groupColn, sep=""))
-	listElementNames_Y <- c("sampleNr", "conSNr", "temp", "relHum")
-	stdColumnNames_Y <- c(paste(yPref, sampleNrColn, sep=""), paste(yPref, conSNrColn, sep=""), paste(yPref, tempColn, sep=""), paste(yPref, relHumColn, sep=""))
-	##
-	stopMsg <- "Import aborted."
-	stopDoubleMsg1 <- "The standard column name \""
-	stopDoubleMsg2 <- " appears more than once in the Pirouette file. Please check your input. \n"
-	msg1 <- "\n\nThe standard column name \""
-	msg2 <-  "\" could not be found in the .pir file. \nWhich of the following columns does represent "
-	msg3 <- "?\nPlease enter the appropriate number; type 0 for not represented; type any non-numeric to stop.\n"
-	notRep <- " 0 -- not represented \n "
-	##
-	checkNumber <- function(nr, nCols, tol = .Machine$double.eps^0.5) {
-   		if (is.na(nr)) { stop(stopMsg, call.=FALSE) }
-	    isInteger <- (abs(nr - round(nr)) < tol)
-  		if (nr > nCols | nr < 0 | !isInteger) { 
-  			message("Please enter a positive integer in the range shown above.\n")
-  			return(FALSE)
-  		} else {
-  			return(TRUE)
-  		}
-	} # EOIF
-	#### the C-variables ####
-	for (i in 1: length(listElementNames_C)) {
-		print(ht(allC_var))
-		cn <- stdColumnNames_C[i]
-		ind <- which(colnames(allC_var) == cn )
-		cle <- length(colnames(allC_var))
-		if (length(ind) == 0) {
-	 		cat(paste(msg1, cn, msg2, cn, msg3, sep=""))
- 			cat(notRep)
- 			cat(paste(1:cle, " -- ", colnames(allC_var), "\n", sep=""))
- 			nrOk <- FALSE
-	 		while(!nrOk) {
- 				a <- readLines(n=1)
- 			 	options(warn=-1); a <- as.numeric(a); options(warn=0)
- 		 		nrOk <- checkNumber(a, cle)
-	 		} # end while
- 			if (a == 0) {
- 				assign(listElementNames_C[i], NULL, pos=parent.frame(n=1))
- 			#	assign(listElementNames_C[i], NULL, pos=parent.frame(n=2))
-	 		} else { # so we have a valid input giving a representation
-				assign(listElementNames_C[i], as.data.frame(allC_var[, a]), pos=parent.frame(n=1))
- 			#	assign(listElementNames_C[i], as.data.frame(allC_var[, a]), pos=parent.frame(n=2))
-				allC_var <- as.data.frame(allC_var[,-a])
-	 		}
-		} else { # so we did find something
-			if (length(ind) > 1 ) { # more than one
-				stop(paste(stopDoubleMsg1, cn, stopDoubleMsg2, sep=""), call.=FALSE)
-			} # if still here the index == 1
-				assign(listElementNames_C[i], as.data.frame(allC_var[, ind]), pos=parent.frame(n=1))
- 			#	assign(listElementNames_C[i], as.data.frame(allC_var[, ind]), pos=parent.frame(n=2))
-				allC_var <- as.data.frame(allC_var[,-ind])
-		} # end else 
-	} # end for i
-	### the Y-variables
-	for (i in 1: length(listElementNames_Y)) {
-		print(ht(allY_var))
-		cn <- stdColumnNames_Y[i]
-		ind <- which(colnames(allY_var) == cn )
-		cle <- length(colnames(allY_var))
-		if (length(ind) == 0) {
-	 		cat(paste(msg1, cn, msg2, cn, msg3, sep=""))
- 			cat(notRep)
- 			cat(paste(1:cle, " -- ", colnames(allY_var), "\n", sep=""))
- 			nrOk <- FALSE
-	 		while(!nrOk) {
- 				a <- readLines(n=1)
- 			 	options(warn=-1); a <- as.numeric(a); options(warn=0)
- 		 		nrOk <- checkNumber(a, cle)
-	 		} # end while
- 			if (a == 0) {
- 				assign(listElementNames_Y[i], NULL, pos=parent.frame(n=1))
- 			#	assign(listElementNames_Y[i], NULL, pos=parent.frame(n=2))
-	 		} else { # so we have a valid input giving a representation
-				assign(listElementNames_Y[i], as.data.frame(allY_var[, a]), pos=parent.frame(n=1))
- 			#	assign(listElementNames_Y[i], as.data.frame(allY_var[, a]), pos=parent.frame(n=2))
-				allY_var <- as.data.frame(allY_var[,-a])
-	 		}
-		} else { # so we did find something
-			if (length(ind) > 1 ) { # more than one
-				stop(paste(stopDoubleMsg1, cn, stopDoubleMsg2, sep=""), call.=FALSE)
-			} # if still here the index == 1
-				assign(listElementNames_Y[i], as.data.frame(allY_var[, ind]), pos=parent.frame(n=1))
- 			#	assign(listElementNames_Y[i], as.data.frame(allY_var[, ind]), pos=parent.frame(n=2))
-				allY_var <- as.data.frame(allY_var[,-ind])
-		} # end else 		
-	} # end for i
-	# handle colnames; error when only one left in selection
-	# handle rest of the columns - hand over to C_cols and Y_cols
-} # EOF
-
-
 # Master
 getNIRData_Pirouette <- function(dataFile) {
 	a <- getStdColnames()
@@ -326,27 +222,15 @@ getNIRData_Pirouette <- function(dataFile) {
 	nCharPrevWl <- 1
 	info <- list(nCharPrevWl=nCharPrevWl)
 	NIR <- pir$IndepenVar
+	timestamp <- NULL
 	allC_var <- pir$ClassVar
 	allY_var <- pir$DepenVar
-	
-	pir_searchAskColumns(allC_var, allY_var) # assigns all the necessary list elements in this frame !
-	
-	
-	timestamp <-  NULL
-#	sampleNr <- NULL
-#	conSNr <- NULL
-#	timePoints <- NULL
-#	ecrm <- NULL
-	C_cols <- NULL
-	Y_cols <- NULL
-#	repl <- NULL
-#	group <- NULL
-#	temp <- NULL
-#	relHum <- NULL
+#	print(allC_var); print(allY_var); wait()
+	sampleNr <- conSNr <- timePoints <- ecrm <- repl <- group <- temp <- temp <- relHum <- C_cols <- Y_cols <- NULL
+	imp_searchAskColumns(allC_var, allY_var) # assigns all the necessary list elements except NIR, info and timestamp in this frame !!!
 	outList <- list(sampleNr=sampleNr, conSNr=conSNr, timePoints=timePoints, ecrm=ecrm, repl=repl, group=group, temp=temp, relHum=relHum, C_cols=C_cols, Y_cols=Y_cols, timestamp=timestamp, info=info, NIR=NIR)
 	return(outList)	
 } # EOF
-
 
 
 ##########################################################################

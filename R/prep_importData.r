@@ -62,15 +62,18 @@ readSpectra <- function(md=getmd(), filetype="def", naString="NA") {
 	##
 	if (filetype == "vision_NSAS.da") {
 		a <- paste(folderFile, ".da", sep="")
+		assign("spectraFilePath", a, pos=parent.frame(n=1))
 		return(getNIRData_Vision_da(a))
 	}
 	##
 	if (filetype == "tabDelim.txt") {
 		a <- paste(folderFile, ".txt", sep="")
+		assign("spectraFilePath", a, pos=parent.frame(n=1))
  		return(getNirData_plainText(a, naString))
 	}
 	if (filetype == "Pirouette.pir") {
 		a <- paste(folderFile, ".pir", sep="")
+		assign("spectraFilePath", a, pos=parent.frame(n=1))
  		return(getNIRData_Pirouette(a))
 	} 
 	## if nothing of the above happend, then we must have (checked!) the path to a valid custom .r file in "filetype" 
@@ -206,21 +209,33 @@ gfd_makeNiceColumns <- function(specImp) {
 		specImp$conSNr <- data.frame(DELETE = rep(NA, nr))
 	}	
 	if (!is.null(specImp$timePoints)) {
+		if (!is.factor(specImp$timePoints[,1])) {
+			specImp$timePoints[,1] <- as.factor(specImp$timePoints[,1])
+		}
 		colnames(specImp$timePoints) <- paste(cPref, timePointsColn, sep="")
 	}  else {
 		specImp$timePoints <- data.frame(DELETE = rep(NA, nr))
 	}	
 	if (!is.null(specImp$ecrm)) {
+		if (!is.factor(specImp$ecrm[,1])) {
+			specImp$ecrm[,1] <- as.factor(specImp$ecrm[,1])
+		}	
 		colnames(specImp$ecrm) <- paste(cPref, ecrmColn, sep="")
 	}  else {
 		specImp$ecrm <- data.frame(DELETE = rep(NA, nr))
 	}	
 	if (!is.null( specImp$repl)) {
+		if (!is.factor(specImp$repl[,1])) {
+			specImp$repl[,1] <- as.factor(specImp$repl[,1])
+		}		
 		colnames(specImp$repl) <- paste(cPref, replColn, sep="")
 	}  else {
 		specImp$repl <- data.frame(DELETE = rep(NA, nr))
 	}	
 	if (!is.null(specImp$group)) {
+		if (!is.factor(specImp$group[,1])) {
+			specImp$group[,1] <- as.factor(specImp$group[,1])
+		}
 		colnames(specImp$group) <- paste(cPref, groupColn, sep="")
 	} else {
 		specImp$group <- data.frame(DELETE = rep(NA, nr))
@@ -242,6 +257,11 @@ gfd_makeNiceColumns <- function(specImp) {
 		if (length(noPrefInd) > 0) {
 			colnames(specImp$C_cols)[noPrefInd] <- paste(cPref, a[noPrefInd], sep="")
 		}
+		specImp$C_cols <- as.data.frame(apply(specImp$C_cols, 2, function(x) {
+				co <- as.factor(x)
+				names(co) <- NULL
+				return(co)
+			} ))
 	} else {
 		specImp$C_cols <- data.frame(DELETE = rep(NA, nr))
 	}
@@ -312,7 +332,7 @@ gfd_getExpNameNoSplit <- function(metadata, nRows) {
 
 gfd_checkForDoubleColumns <- function(header, spectraFilePath, headerFilePath, slType) {
 	collect  <-  NULL
-	patterns <- c(".1", ".2", ".3", ".4", ".5", ".6", ".7", ".8", ".9", ".10", ".11", ".12")
+	patterns <- paste(".", 1:12, sep="")
 	a <- colnames(header)
 	for (k in 1: length(patterns)) {	
 		inds <- grep(patterns[k], a)
@@ -364,8 +384,8 @@ getFullData <- function(md=getmd(), filetype="def", naString="NA", slType="def",
 		if(!.ap2$stn$allSilent) {cat(paste("Dataset \"", md$meta$expName, "\" was loaded.\n", sep="")) }
 		return(invisible(dataset)) # returns the dataset and we exit here
 	}
-  # import starts 
-  if(!.ap2$stn$allSilent) {cat("Importing data...\n")}	
+  	# import starts 
+  	if(!.ap2$stn$allSilent) {cat("Importing data...\n")}	
 	headerFilePath <- NULL # gets assigned in readHeader()
 	header <- readHeader(md, slType, multiplyRows) ## re-assigns 'slType' and 'multiplyRows' also here -- in parent 2 level frame 
 													## if slType is NULL, header will be returned as NULL as well
@@ -382,7 +402,7 @@ getFullData <- function(md=getmd(), filetype="def", naString="NA", slType="def",
 	gfd_getExpNameNoSplit(metadata=md, nRows=nr)
 	headerFusion <- cbind(expName, noSplit, header, si$sampleNr, si$conSNr, si$timePoints, si$ecrm, si$repl, si$group, si$C_cols, si$Y_cols,  si$temp, si$relHum, si$timestamp)
 	headerFusion <- headerFusion[, -(which(colnames(headerFusion) == "DELETE"))] 
-	check_conScanColumn(headerFusion, headerFilePath, spectraFilePath, slType) 
+	check_conScanColumn(headerFusion, headerFilePath, spectraFilePath, slType, filetype) 
 	# ? check for existence of sample number column as well ?
 	gfd_checkForDoubleColumns(headerFusion, spectraFilePath, headerFilePath, slType)	
 	if (.ap2$stn$imp_autoCopyYvarsAsClass) {  # if TRUE, copy all columns containing a Y-variable as class variable
@@ -529,16 +549,29 @@ copyYColsAsClass <- function(sampleList) {
 remakeTRHClasses_sys <- function(headerOnly, TDiv=.ap2$stn$imp_TClassesDiv, TRound=.ap2$stn$imp_TRounding, RHDiv=.ap2$stn$imp_RHClassesDiv, RHRound= .ap2$stn$imp_RHRounding) {
 	options(warn=-1)
 	cPref <- .ap2$stn$p_ClassVarPref
+	yPref <- .ap2$stn$p_yVarPref
+	YTemp <- paste(yPref, .ap2$stn$p_tempCol, sep="")
+	YRH <- paste(yPref, .ap2$stn$p_RHCol, sep="")
 	Tpat <- paste(cPref, .ap2$stn$p_tempCol, sep="") 						# read in the prefix for class and temperature from settings
 	RHpat <- paste(cPref, .ap2$stn$p_RHCol, sep="")							# read in the prefix for class and rel. humidity from settings
-	TInd <- grep(.ap2$stn$p_tempCol, colnames(headerOnly), fixed=TRUE)		# find column-index that has the temperatur - the source
-	TClInd  <- grep(Tpat, colnames(headerOnly), fixed=TRUE)					# find column-index that the temperatur already as class - the target
-	RHInd <- grep(.ap2$stn$p_RHCol, colnames(headerOnly), fixed=TRUE)		# find column-index that has the rel. hum.
-	RHClInd  <- grep(RHpat, colnames(headerOnly), fixed=TRUE)				# find column-index that the re.hum. already as class - the target
-	numsTemp <- headerOnly[, TInd[1] ]										# extract the numbers
-	numsRH <- headerOnly[, RHInd[1] ]										# extract the numbers
-	headerOnly[TClInd] <- factor(round((numsTemp/TDiv),TRound)*TDiv)		# insert the new classes
-	headerOnly[RHClInd] <- factor(round((numsRH/RHDiv),RHRound)*RHDiv)		# insert the new classes
+	
+#	TInd <- grep(.ap2$stn$p_tempCol, colnames(headerOnly), fixed=TRUE)		# find column-index that has the temperatur - the source
+	TInd <- which(colnames(headerOnly) == YTemp)			 				# find column-index that has the temperatur - the source
+	if (length(TInd) > 0) {
+#		TClInd  <- grep(Tpat, colnames(headerOnly), fixed=TRUE)					# find column-index that the temperatur already as class - the target
+		TClInd  <- which(colnames(headerOnly) == Tpat) 						# find column-index that the temperatur already as class - the target
+		numsTemp <- headerOnly[, TInd[1] ]										# extract the numbers
+		headerOnly[TClInd] <- factor(round((numsTemp/TDiv),TRound)*TDiv)		# insert the new classes
+	}
+	##
+#	RHInd <- grep(.ap2$stn$p_RHCol, colnames(headerOnly), fixed=TRUE)		# find column-index that has the rel. hum.
+	RHInd <- which(colnames(headerOnly) == YRH)
+	if (length(RHInd) > 0 ) {
+#		RHClInd  <- grep(RHpat, colnames(headerOnly), fixed=TRUE)				# find column-index that the re.hum. already as class - the target
+		RHClInd  <- which(colnames(headerOnly) == RHpat)
+		numsRH <- headerOnly[, RHInd[1] ]										# extract the numbers
+		headerOnly[RHClInd] <- factor(round((numsRH/RHDiv),RHRound)*RHDiv)		# insert the new classes
+	}
 	options(warn=0)
 	return(headerOnly)
 } # EOF
@@ -548,9 +581,11 @@ convertYColsToNumeric <- function(sampleList) {
 	options(warn=-1)
 	pref <- .ap2$stn$p_yVarPref
 	ind  <- grep(pref, colnames(sampleList))
-	for (i in 1: length(ind)) {
-		sampleList[ind[i]] <- as.numeric( as.character(sampleList[, ind[i]]) )
-	}
+	if (length(ind) > 0) {
+		for (i in 1: length(ind)) {
+			sampleList[ind[i]] <- as.numeric( as.character(sampleList[, ind[i]]) )
+		}
+	}	
 	options(warn=0)
 	return(sampleList)
 } # EOF
@@ -622,19 +657,27 @@ check_sl_existence <- function(filename, ext) {
 	}	
 } # EOF
 
-check_conScanColumn <- function(header, headerFilePath, spectraFilePath, slType) {
+check_conScanColumn <- function(header, headerFilePath, spectraFilePath, slType, filetype) {
+	custImp <- grepl("custom@", filetype)
 	a <- paste(.ap2$stn$p_yVarPref, .ap2$stn$p_conSNrCol, sep="")
 	if (!any(a %in% colnames(header))) {
 		if (is.null(slType)) {
 			from <- paste(" in the file \n\"", spectraFilePath, "\" containing the spectral data.", sep="")
-			where <- paste(" to the file containing the spectral data and modify the custom import function accordingly.\n")
+			if (custImp) {
+				whereCust <-  " and modify the custom import function accordingly.\n"
+				lookHelp <- "\nSee the help for 'custom_import' for further information."
+			} else {
+				whereCust <- "."
+				lookHelp <- ""
+			}
+			where <- paste(" to the file containing the spectral data", whereCust, sep="")
 			maybe <- ""
 		} else {
 			from <- paste(", neither in your sample-list file \n\"", headerFilePath, "\", nor in file \n\"", spectraFilePath, "\" containing the spectral data.", sep="")
 			where <- paste(" either to the sample list or to the file containing the spectral data. In the latter case please modify the custom import function accordingly.\n")
- 			maybe <- "(You probably encounter this error because you did choose to *not* multiply the rows of the sample list by the nr. of consecutive scans.)\n"
+ 			maybe <- "(You maybe encounter this error because you did choose to *not* multiply the rows of the sample list by the nr. of consecutive scans, in which case a column for the nr. of cons. scan gets inserted automatically.)\n"
 		}
-		msg <- paste("You do not have a column for the nr of the consecutive scan", from, " \nPlease, add a column called \"", a, "\"", where, maybe, "\nSee the help for 'custom_import' for further information.", sep="")
+		msg <- paste("You do not have a column for the nr of the consecutive scan", from, " \nPlease, add a column called \"", a, "\"", where, maybe, lookHelp, sep="")
 		stop(msg, call.=FALSE)
 	}	
 } # EOF
@@ -703,6 +746,140 @@ readHeader <- function(md=getmd(), slType="def", multiplyRows="def") {
 	return(header)
 } # EOF
 
+
+#  assigns all the necessary list elements except NIR, info and timestamp and in the frame where it is called
+#' @title Aks for column representation
+#' @description This function can be used in a custom import function. All 
+#' required list elements except 'timestamp', 'info' and 'NIR' will be assigned in 
+#' the environment from where this function was called.
+#' @details This function checks if any of the in the settings.r file defined 
+#' standard column names are present in the provided class-variables and numerical 
+#' variables. If no exact match is found, the function asks which one of the 
+#' provided columns is representing each of the standard columns. Those columns 
+#' that do not get assigned to one of the standard columns will be imported under 
+#' their respective name with the corresponding prefix for class- or numerical 
+#' variables.
+#' @param allC_var A data frame containing only class variables.
+#' @param allY_var A data frame containing only numerical variables.
+#' @return All the list elements needed in the \code{\link{custom_import}} function 
+#' except 'timestamp', 'info' and 'NIR get assigned in the environment from where 
+#' this function was called.
+#' @family Development Functions
+#' @examples
+#' \dontrun{
+#' # this could be the content of the .r file for defining a custom function, 
+#' # in this example for an import from an Excel-file.
+#' fileExtension <- ".xlsx"
+#' ##
+#' spectralImport <- function(dataFile) {
+#'    require(xlsx)
+#'    import <- read.xlsx(dataFile, sheetIndex=1)
+#'    #
+#'    allY_var <- import[,c(1,2,10,11,6)]
+#'    allC_var <- import[, c(3,4,8,9,5,7)] 
+#'    info <- list(nCharPrevWl = 2)
+#'    NIR <- as.matrix(import[, 12:18])
+#'    rownames(NIR) <- paste("S", 1:nrow(NIR), sep="")
+#'    timestamp <- NULL
+#'    imp_searchAskColumns(allC_var, allY_var) 
+#'    # assigns all list elements except timestamp, info and NIR
+#'    #
+#'    return(list(sampleNr=sampleNr, conSNr=conSNr, timePoints=timePoints, 
+#'    ecrm=ecrm, repl=repl, group=group, temp=temp, relHum=relHum, C_cols=C_cols, 
+#'    Y_cols=Y_cols, timestamp=timestamp, info=info, NIR=NIR))
+#'    #
+#'  } # EOF
+#' }
+#' @export
+imp_searchAskColumns <- function(allC_var, allY_var) {
+	yPref <- .ap2$stn$p_yVarPref
+	cPref <- .ap2$stn$p_ClassVarPref
+	sampleNrColn <- .ap2$stn$p_sampleNrCol
+	conSNrColn <- .ap2$stn$p_conSNrCol
+	timePointsColn <- .ap2$stn$p_timeCol
+	ecrmColn <- .ap2$stn$p_ECRMCol
+	replColn <- .ap2$stn$p_replicateCol
+	groupColn <- .ap2$stn$p_groupCol
+	tempColn <- .ap2$stn$p_tempCol
+	relHumColn <- .ap2$stn$p_RHCol
+	## XXXVARXXX
+	listElementNames_C <- c("timePoints", "ecrm", "repl", "group")
+	stdColumnNames_C <- c(paste(cPref, timePointsColn, sep=""), paste(cPref, ecrmColn, sep=""), paste(cPref, replColn, sep=""), paste(cPref, groupColn, sep=""))
+	listElementNames_Y <- c("sampleNr", "conSNr", "temp", "relHum")
+	stdColumnNames_Y <- c(paste(yPref, sampleNrColn, sep=""), paste(yPref, conSNrColn, sep=""), paste(yPref, tempColn, sep=""), paste(yPref, relHumColn, sep=""))
+	listElementNames <- list(listElementNames_C, listElementNames_Y)
+	stdColumnNames <- list(stdColumnNames_C, stdColumnNames_Y)
+	allVars <- list(allC_var, allY_var)
+	listElementNamesRestCols <- list("C_cols", "Y_cols")
+	##
+	stopMsg <- "Import aborted."
+	stopDoubleMsg1 <- "The standard column name \""
+	stopDoubleMsg2 <- "\" appears more than once in the input file. Please check the column names. \n"
+	msg1 <- "\n\nThe standard column name \""
+	msg2 <-  "\" could not be found in the .pir file. \nWhich of the following columns does represent "
+	msg3 <- "?\nPlease enter the appropriate number; type 0 for not represented; type any non-numeric to stop.\n"
+	msg2_zero <- "\" could not be found in the .pir file. \nPlease confirm by typing '0' that "
+	msg3_zero <- " is not represented in this data set; type any non-numeric to stop.\n"
+	notRep <- " 0 -- not represented \n "
+	##
+	checkNumber <- function(nr, nCols, tol = .Machine$double.eps^0.5) {
+   		if (is.na(nr)) { stop(stopMsg, call.=FALSE) }
+	    isInteger <- (abs(nr - round(nr)) < tol)
+  		if (nr > nCols | nr < 0 | !isInteger) { 
+  			message("Please enter a positive integer in the range shown above.\n")
+  			return(FALSE)
+  		} else {
+  			return(TRUE)
+  		}
+	} # EOIF
+	##
+	for (k in 1: length(listElementNames)) { # to go first through the C-variables, then through the Y-variables
+		for (i in 1: length(listElementNames[[k]])) { # go through the single element name
+	#		print(ht(allVars[[k]])); cat("\n--------------------------------------------------------------------\n")
+			cn <- stdColumnNames[[k]][i]
+			ind <- which(colnames(allVars[[k]]) == cn )
+			cle <- length(colnames(allVars[[k]]))
+			if (length(ind) == 0) {
+				if (cle > 0) {
+					cat(paste(msg1, cn, msg2, cn, msg3, sep=""))
+				} else {
+					cat(paste(msg1, cn, msg2_zero, cn, msg3_zero, sep=""))				
+				}
+				cat(notRep)
+				if (cle > 0) {
+					cat(paste(1:cle, " -- ", colnames(allVars[[k]]), "\n", sep=""))
+				}
+				nrOk <- FALSE
+				while(!nrOk) {
+					a <- readLines(n=1)
+					options(warn=-1); a <- as.numeric(a); options(warn=0)
+					nrOk <- checkNumber(a, cle)
+				} # end while
+				if (a == 0) { # user chooses to set to NULL
+					assign(listElementNames[[k]][i], NULL, pos=parent.frame(n=1))
+				} else { # so we have (checked) a valid input giving a representation
+					assign(listElementNames[[k]][i], as.data.frame(allVars[[k]][, a]), pos=parent.frame(n=1))
+					cnsPrev <- colnames(allVars[[k]])
+					allVars[[k]] <- as.data.frame(allVars[[k]][,-a])
+					colnames(allVars[[k]]) <-cnsPrev[-a]
+				}
+			} else { # so we did find something
+				if (length(ind) > 1 ) { # more than one
+					stop(paste(stopDoubleMsg1, cn, stopDoubleMsg2, sep=""), call.=FALSE)
+				} # if still here the index == 1, that means we found exactly one match in the column names
+				assign(listElementNames[[k]][i], as.data.frame(allVars[[k]][, ind]), pos=parent.frame(n=1))
+				cnsPrev <- colnames(allVars[[k]])
+				allVars[[k]] <- as.data.frame(allVars[[k]][,-ind])
+				colnames(allVars[[k]]) <-cnsPrev[-ind]
+			} # end else 
+		} # end for i
+		if (ncol(allVars[[k]]) == 0) {
+			assign(listElementNamesRestCols[[k]], NULL, pos=parent.frame(n=1))
+		} else {
+			assign(listElementNamesRestCols[[k]], as.data.frame(allVars[[k]]), pos=parent.frame(n=1))			
+		}
+	} # end for k
+} # EOF
 
 ## maybe add here the user-function for re-making the T and RH classes
 # XXX

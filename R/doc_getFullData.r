@@ -2,8 +2,8 @@
 #' @description If everyting is left at the defaults, the function first tries 
 #' to load an R-object containing previously imported spectral data. If this was 
 #' not found, it tries to import spectral data from a file in the rawdata-folder, 
-#' fuses these data together with the class-header provided in the 
-#' sampleLists/sl_in folder and saves the resulting dataset.
+#' fuses (if slType is not NULL) these data together with the class-header 
+#' provided in the sampleLists/sl_in folder and saves the resulting dataset.
 #' It is also possible to use a user-defined custom function to import data from 
 #' a file in any format, containing the NIR-spectra as well as all the class- 
 #' and numerical  variables. In the latter case it is still possible to fuse 
@@ -16,9 +16,13 @@
 #' the same name as the experiment name (plus its specific ending) is imported 
 #' from the rawdata-folder. The sample list (what is used to create the header) 
 #' must be in the sampleLists/sl_in folder and must be named with the experiment 
-#' name, followed by a "-in" and then the file extension. 
+#' name, followed by a "-in" and then the file extension. To be recognized as 
+#' such, the standard columns have to be named with the standard column names 
+#' as defined in the settings.r file. (see \code{\link{printStdColnames}})
 #' If you use a custom function and provide all the class- and numerical variables 
 #' together with the spectral data, set argument 'slType' to NULL.
+#' If you import from a .pir file and have all the class- and numerical variables 
+#' inside the .pir file, set argument 'slType'to NULL
 #' @aliases gfd
 #' @section Note: The strict regime with the filenames seems maybe at first at 
 #' bit complicated, but it proved to be good practise to ensure and enforce a 
@@ -34,6 +38,10 @@
 #' from a Foss-XDS spectroscope.
 #' \item "tabDelim.txt": Import any tab delimited text file that contains only 
 #' the NIR spectra and *no* additional columns like e.g. time, temperature etc.
+#' \item "Pirouette.pir": Import spectra *and* any class- or numerical variable 
+#' directly from a .pir file. Those column-names in the .pir  file that match the 
+#' standard-column names (\code{\link{printStdColnames}}) as defined in the 
+#' settings.r file will be assigned to those columns automatically.
 #' \item "custom@@yourFile.r": You can provide your own import-function for 
 #' importing spectra, with "yourFile.r" being the .r-file located in the path 
 #' specified in the .Renviron file. Please refer to \code{\link{custom_import}} 
