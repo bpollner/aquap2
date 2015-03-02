@@ -84,7 +84,10 @@ getNIRData_Vision_da <- function(dataFile) {
 
 # Spectra from tab delim .txt file ---------------------------------------
 getNirData_plainText <- function(dataFile, naStrings="NA") {
-	return(read.table(dataFile, na.strings=naStrings))
+	sampleNr <- conSNr <- timePoints <- ecrm <- repl <- group <- temp  <- relHum <- C_cols <- Y_cols <- timestamp <- NULL
+	info <- list(nCharPrevWl=1)
+	NIR <- read.table(dataFile, na.strings=naStrings)
+	return(list(sampleNr=sampleNr, conSNr=conSNr, timePoints=timePoints, ecrm=ecrm, repl=repl, group=group, temp=temp, relHum=relHum, C_cols=C_cols, Y_cols=Y_cols, timestamp=timestamp, info=info, NIR=NIR))
 } # EOF
 
 
@@ -231,7 +234,6 @@ getNIRData_Pirouette <- function(dataFile) {
 	outList <- list(sampleNr=sampleNr, conSNr=conSNr, timePoints=timePoints, ecrm=ecrm, repl=repl, group=group, temp=temp, relHum=relHum, C_cols=C_cols, Y_cols=Y_cols, timestamp=timestamp, info=info, NIR=NIR)
 	return(outList)	
 } # EOF
-
 
 ##########################################################################
 

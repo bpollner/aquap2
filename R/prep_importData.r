@@ -369,10 +369,174 @@ gfd_checkMetadata <- function(md) {
 	}
 } # EOF
 
+gfd_TRH_checkCustomImport <- function(trhImp) {
+	possVals <- c("Time", "Temp", "RelHum")
+	if (class(trhImp) != "data.frame") {
+		stop("The returned value of your custom-import function for importing temp. and rel.hum. has to be a data frame.", call.=FALSE)
+	}
+	if (ncol(trhImp) != 3) {
+		stop("The returned data frame of your custom-import function for importing temp. and rel.hum. has to have three columns", call=FALSE)
+	}
+	if (!any(grepl("POSIX", class(trhImp[1,1]))) ) {
+		stop("The first column has to contain timestamps in 'POSIX' format.", call.=FALSE)
+	}
+	if (!is.numeric(trhImp$Temp) | !is.numeric(trhImp$RelHum)) {
+		stop("The temperature and rel.humidity columns have to contain numerical values.", call=FALSE)
+	}
+	if (!all(possVals %in% colnames(trhImp))) {
+		stop("The column names of the imported dataframe have to be 'Time', 'Temp' and 'RelHum'", call.=FALSE)		
+	}
+} # EOF
+
+readTRHlogfile <- function(trhLog) {
+	rawFolder <- .ap2$stn$fn_rawdata
+	logfileName <- .ap2$stn$imp_TRH_logfile_name
+	if (trhLog == "ESPEC") {
+		ext <- ".txt"
+		path <- paste(rawFolder, "/", logfileName, ext, sep="")
+		TRHimp <- importTRH_ESPEC(path)
+	}	
+	if (grepl("custom@", trhLog)) {
+		custName <- strsplit(trhLog, "custom@")[[1]][2]
+		pathSH <- Sys.getenv("AQUAP2SH")
+		pathToCustom <- paste(pathSH, custName, sep="/")
+		e <- new.env()
+		sys.source(pathToCustom, envir=e)
+		a <- paste(rawFolder, "/", logfileName, e$fileExtension, sep="")
+		TRHimp <- e$trhImport(a)
+		gfd_TRH_checkCustomImport(TRHimp)
+	}
+	return(TRHimp)	
+} # EOF
+
+alignTempRelHum <- function(timeDataset, TRHlog) {
+	narrowMinutes <-.ap2$stn$imp_narrowMinutes
+	secsNarrowPrecision <-.ap2$stn$imp_secsNarrowPrecision
+	mtp <-.ap2$stn$imp_minutesTotalPrecision
+	diffT <- abs(difftime(TRHlog$Time[1], TRHlog$Time[2], units="secs"))
+	TIndUpRange <- round((narrowMinutes*60)/as.double(diffT), 0) ## for a narrowed-down area of narrowMinutes
+	rowNr <- rep(NA, length(timeDataset))
+	if (min(abs(difftime(TRHlog$Time, timeDataset[1], units="secs"))) > mtp*60) {
+		stop(paste("The first spectra aquisition time seems to be more than", mtp, "minutes separated from any data in the time-log. The import of the  data-file has been aborted. Sorry."), call.= FALSE)
+	} # end if difftime 
+	firstIndex <- which( (TRHlog$Time-timeDataset[1]) == min( abs(TRHlog$Time-timeDataset[1])) )
+	if (length(firstIndex) < 1 ) {
+		firstIndex <- which( -1*(TRHlog$Time-timeDataset[1]) == min(abs(TRHlog$Time-timeDataset[1])) )
+	} # end if
+	fromIndex <- firstIndex
+	for ( i in 1: length(timeDataset)) {
+		toIndex <- fromIndex + TIndUpRange
+		if (toIndex > nrow(TRHlog)) {
+			toIndex <- nrow(TRHlog)
+		}
+	## first check in the narrowed down area
+		index <- which( (TRHlog$Time[fromIndex:toIndex] - timeDataset[i]) == min( abs(TRHlog$Time[fromIndex:toIndex] - timeDataset[i])) )
+		if (length(index) < 1 ) {
+			index <- which( -1*(TRHlog$Time[fromIndex:toIndex] - timeDataset[i]) == min(abs(TRHlog$Time[fromIndex:toIndex] - timeDataset[i])) )
+		} # end if
+		index <- fromIndex + index - 1
+		if (min(abs(difftime(TRHlog$Time[index], timeDataset[i], units="secs"))) > secsNarrowPrecision) {
+			index <- NULL
+		}
+	## if nothing, look in the whole vector
+		if (length(index) < 1) { ## so if we still did not find a matching Time in the given narrowed down range, then go look through the whole set
+			index <- which( (TRHlog$Time - timeDataset[i]) == min( abs(TRHlog$Time - timeDataset[i])) )
+		}
+		if (length(index) < 1) {
+			index <- which( -1*(TRHlog$Time - timeDataset[i]) == min(abs(TRHlog$Time - timeDataset[i])) )
+		}
+		fromIndex <- index
+		rowNr[i] <- index
+		if (min(abs(difftime(TRHlog$Time[index], timeDataset[i], units="secs"))) > mtp*60) {
+			stop(paste("I am sorry, but I could not find log-data for", timeDataset[i], "less than", mtp, "minutes away. The import of the data-file has been aborted."), call.= FALSE)
+		}
+	} # end for i
+	out <- TRHlog[rowNr ,]
+} # EOF
+
+gfd_importMakeTRH_alignment <- function(header, trhLog) {
+	a <- which(colnames(header) == "Timestamp")
+	if (length(a) == 0 & trhLog != FALSE) {
+		stop(paste("There is no 'Timestamp' column in your dataset to which data from a logger could be aligned."), call.=FALSE)
+	}
+	if (length(a) !=0 ) {	 # so only do all this if we actually have a timestamp in the columns
+		tempCol <- paste(.ap2$stn$p_yVarPref, .ap2$stn$p_tempCol, sep="")
+		rhCol <- paste(.ap2$stn$p_yVarPref, .ap2$stn$p_RHCol, sep="")
+		if (trhLog == FALSE) {
+			return(header)
+		}
+		tInd <- which(colnames(header) == tempCol) # check if we do have a temp column
+		if (length(tInd) == 0) { # it not, add one
+			cns <- colnames(header)
+			header <- cbind(header, data.frame(rep(NA, nrow(header))))
+			colnames(header) <- c(cns, tempCol)
+			tInd <- which(colnames(header) == tempCol)
+		}
+		rhInd <- which(colnames(header) == rhCol)
+		if (length(rhInd) == 0) {
+			cns <- colnames(header)
+			header <- cbind(header, data.frame(rep(NA, nrow(header))))
+			colnames(header) <- c(cns, rhCol)
+			rhInd <- which(colnames(header) == rhCol)
+		}
+		TRHimp <- readTRHlogfile(trhLog)
+		if (!.ap2$stn$allSilent) {cat("   Aligning temp. and rel.hum. values to timestamp...\n") }
+		TRH_alig <- alignTempRelHum(header$Timestamp, TRHimp)
+		if (!.ap2$stn$allSilent) {cat("   Done.\n") }
+#			tempF <- data.frame(SpectTime= header$Timestamp, LogTime = TRH_alig$Time, Temp=TRH_alig$Temp, Hum=TRH_alig$RelHum)
+#			print(tempF[1:20,]); wait()
+		header[tInd] <- TRH_alig$Temp
+		header[rhInd] <- TRH_alig$RelHum 
+	} # end checking if we have a timestamp column
+	return(header)
+} # EOF
+
+gfd_check_trhLog_defaults <- function(trhLog) {
+	# can be: FALSE, 'def' "ESPEC", "custom@name.r"
+	filename <- .ap2$stn$imp_TRH_logfile_name
+	rawFolder <- .ap2$stn$fn_rawdata
+	possibleValues <- c("ESPEC") ## XXXVARXXX
+	stopMsg <- "Please refer to the help for 'getFullData' to find out about the possible values for the argument 'trhLog'"
+	if (trhLog == TRUE) {
+		stop(stopMsg, call.=FALSE)
+	}
+	if (!is.logical(trhLog)) {
+		if (all(trhLog == "def")) {
+			trhLog <- .ap2$stn$imp_use_TRH_logfile
+		}
+	}
+	afix <- any(possibleValues %in% trhLog)
+	bcust <- grepl("custom@", trhLog)
+	if (!is.logical(trhLog) & !afix & !bcust ) {
+		stop(stopMsg, call.=FALSE)
+	}
+	if (afix) {
+		if (trhLog == "ESPEC") {
+			ext <- ".txt"
+			if (!file.exists(paste(rawFolder, "/", filename, ext, sep=""))) {
+				stop(paste("The file \"", filename, ext, "\" does not seem to exist in the ", rawFolder, " folder, sorry.", sep=""), call.=FALSE)
+			}
+		}
+	}
+	if (bcust) {
+		shPath <- Sys.getenv("AQUAP2SH")
+		customFilename <- strsplit(trhLog, "custom@")[[1]][2]
+		if (!file.exists(paste(shPath, "/", customFilename, sep=""))) {
+			stop(paste("The file \"", customFilename, "\" does not seem to exist in ", shPath, ", sorry.", sep=""), call.=FALSE)
+		}
+		a <- list.files(rawFolder)
+		isThere <- any(grepl(filename, a))
+		if(!isThere) {
+			stop(paste("The file \"", filename, "\" does not seem to exist in ", rawFolder, ", sorry.", sep=""), call.=FALSE)
+		}
+	}	
+	assign("trhLog", trhLog, pos=parent.frame(n=1))
+} # EOF
+
 # get full data ---------------------------------------------------------------
 #' @rdname getFullData
 #' @export
-getFullData <- function(md=getmd(), filetype="def", naString="NA", slType="def", multiplyRows="def", ttl=TRUE, stf=TRUE) {
+getFullData <- function(md=getmd(), filetype="def", naString="NA", slType="def", trhLog="def", multiplyRows="def", ttl=TRUE, stf=TRUE) {
 	autoUpS()
 	gfd_checkLoadSaveLogic(ttl, stf)
 	gfd_checkMetadata(md)
@@ -386,6 +550,7 @@ getFullData <- function(md=getmd(), filetype="def", naString="NA", slType="def",
 	}
   	# import starts 
   	if(!.ap2$stn$allSilent) {cat("Importing data...\n")}	
+	gfd_check_trhLog_defaults(trhLog)
 	headerFilePath <- NULL # gets assigned in readHeader()
 	header <- readHeader(md, slType, multiplyRows) ## re-assigns 'slType' and 'multiplyRows' also here -- in parent 2 level frame 
 													## if slType is NULL, header will be returned as NULL as well
@@ -404,7 +569,8 @@ getFullData <- function(md=getmd(), filetype="def", naString="NA", slType="def",
 	headerFusion <- headerFusion[, -(which(colnames(headerFusion) == "DELETE"))] 
 	check_conScanColumn(headerFusion, headerFilePath, spectraFilePath, slType, filetype) 
 	# ? check for existence of sample number column as well ?
-	gfd_checkForDoubleColumns(headerFusion, spectraFilePath, headerFilePath, slType)	
+	gfd_checkForDoubleColumns(headerFusion, spectraFilePath, headerFilePath, slType)
+	headerFusion <- gfd_importMakeTRH_alignment(headerFusion, trhLog)
 	if (.ap2$stn$imp_autoCopyYvarsAsClass) {  # if TRUE, copy all columns containing a Y-variable as class variable
 		headerFusion <- copyYColsAsClass(headerFusion)
 	}
@@ -429,8 +595,8 @@ getFullData <- function(md=getmd(), filetype="def", naString="NA", slType="def",
 
 #' @rdname getFullData
 #' @export
-gfd <- function(md=getmd(), filetype="def", naString="NA", slType="def", multiplyRows="def", ttl=TRUE, stf=TRUE) {
-	return(getFullData(md, filetype, naString, slType, multiplyRows, ttl, stf))
+gfd <- function(md=getmd(), filetype="def", naString="NA", slType="def", trhLog="def", multiplyRows="def", ttl=TRUE, stf=TRUE) {
+	return(getFullData(md, filetype, naString, slType, trhLog, multiplyRows, ttl, stf))
 } # EOF
 
 
@@ -884,7 +1050,6 @@ imp_searchAskColumns <- function(allC_var, allY_var) {
 ## maybe add here the user-function for re-making the T and RH classes
 # XXX
 
-## import & align TRH from a / any logfile	
 # make tutorial;
 
 ## note: make @numRep in Aquacalc to take numerics OR character, because if we have more than 8 elements...  :-)

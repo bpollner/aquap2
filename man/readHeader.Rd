@@ -57,7 +57,8 @@ by a "-in" and then the file extension.
 \seealso{
 \code{\link{getFullData}}
 
-Other Development Functions: \code{\link{custom_import}};
+Other Development Functions: \code{\link{custom_TRH}};
+  \code{\link{custom_import}};
   \code{\link{imp_searchAskColumns}};
   \code{\link{readSpectra}}
 }
