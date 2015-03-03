@@ -44,6 +44,7 @@ ls(.ap2)
 \code{\link{settings_file}}
 
 Other Helper Functions: \code{\link{genFolderStr}};
+  \code{\link{instAquap2Examples}};
   \code{\link{loadAQdata}}, \code{\link{saveAQdata}};
   \code{\link{printStdColnames}}; \code{\link{updateAquap}}
 }

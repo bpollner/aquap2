@@ -1,0 +1,118 @@
+---
+title: "Introduction to 'aquap2'"
+author: ""
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to 'aquap2'}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}  
+---
+
+```{r, echo = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+library(aquap2)
+```
+
+Package `aquap2` provides tools and methods to analyse NIR data from an **Aquaphotomics** (XXX ref.) point of view. 
+It can assist you in the following areas:
+
+- Experiment design and randomization of samples
+- Data Import
+- Data Analysis
+    - Grouping / splitting / splicing of data with encapsulated, i.e. stable color-coding of samples / groups.
+    - various data pre-treatments
+    - implemented analysis methods are e.g. PCA, PLSR, SIMCA; and the Aquagram
+
+**Advantages**
+
+- recyclable analysis procedure file
+- scriptable analysis routine
+- new tools like the Aquagram
+
+Advantage of analysis procedure file; scriptable analysis routines; repeat an experiment -- just copy and paste the analysis script.
+Purpose - what for? Why Aquagram? some citations?
+XXX write nice text here !!
+
+
+## Typical Workflow
+
+After the initial setup (only has to be done once, see [Setup](setup.html)), the first step is to generate the **folder structure** needed for an experiment. You then can **design** the experiment using the entries in the `metadata` of the experiment and after that have the package generate a **randomized sample list** which you can use during your measurements.
+
+After the data aquisition you can **import data** either from one of the supported data formats, or you can easily plug in your own data import function to read your very specific data format. (It is possible to automatically allign data from a provided temperature and relative humidity log file to the timestamp in your dataset, should you have one.)
+
+Once your data are imported into the standard dataset of `aquap2`, you can use the analysis procedure `anProc.r` to split up and group the data (**"splice datasets"**), and then use the implemented methods and tools to **analyse** your data.
+
+
+### Generate Folder Structure
+First set your working directory to an empty folder. This folder will be the root-folder of a single experiment.
+```
+setwd(dir = "/Users/bernhard/Documents/.../.../home_KCl-Dilutions"
+```
+In this example the folder called `home_KCl-Dilutions` is the root-, the "home-folder" of the KCl-Dilutions experiment.
+
+
+Now we call
+```
+genFolderStr()
+#> Folder structure created.
+```
+what creates all the necessary folders and installs a template of the `metadata.r` and of the analysis procedure, the `anProc.r` file in the 'metadata' folder.
+
+If you use RStudio, create a new project right in 'home_KCl-Dilutions'.
+
+In a typical experiment home-folder, you will probably have only a single metadata file but several analysis procedure files.
+
+
+### Design your Experiment
+The primary purpose of the experiment-design functionality is to have a truly randomized sample list. The data provided in the `metadata.r` file can be used to generate this sample list, what then can be used during data aquisition as a kind of "fixed schedule" what sample to measure next. The same sample-list can then be merged with the spectral data, providing an easy, fast and secure way to import all the class- and numerical variables.
+
+Most of the arguments in the metadata.r (see `?metadata_file`) file are easy to understand and straightforward, only the `L1` and `L2` arguments require a bit of extra explanation:
+
+XXX explain this !!
+
+'L1' stands for 'Level 1', 'L2' for 'Level 2' -- think of level 2 as a sub-group, a further segmentation of the coresponding level 1.
+
+You can have as many level 1 variables (with each of them having their level 2 variable) as you want.
+
+Have a look at some [examples](examples_design.html) on how to design experiments.
+
+
+### Export Randomized Sample List
+If your metadata.r file is complete, simply call
+```
+exportSampleList()
+```
+or its short-form, 
+```
+esl()
+```
+to export a randomized sample list into the folder `sampleLists/sl_out`.
+
+
+### Importing Data
+The work-horse for importing data into aquap2 is the function `getFullData()` and its short-form, `gfd()`.
+
+After your data aquisition, the file with the spectral data goes into the `rawdata` folder, renamed with the name of the experiment as specified in the metadata file.
+If you used the sample list, rename it so that it ends in "-in" instead of "-out" and put it into `sampleLists/sl_in`, including any possible modification of the sample order.
+
+If you have a temperature and humidity log-file and a timestamp in your spectral data and you want to automatically align the temperature and humidity values to the spectral data, rename the logfile as specified in your settings.r (default is "TRHlog"), put it in the rawdata folder as well and set the `trhLog` argument accordingly.
+
+```
+fullData <- gfd()
+```
+will then import the spectral data, import the class- and numerical variables from your sample list file, possibly align data from a logger and save the resulting dataset in the folder `R-data`.
+
+See the help for `?gfd` and [here](importing_data.html) for more information and some examples on data import.
+
+
+### Splicing the Dataset
+The analysis procedure.
+
+
+
+
+### Data Analysis
+Yes Yes  Very much so.
+what is implemented, and the Aquagram
+

@@ -1,7 +1,8 @@
 #  @title Show Path to Package Aquap2
 #  @description Displays a character string with the path to the packae 
 #    'Aquap2'
-#  @details This is where you will find the \code{\link{settings_file}}.
+#  @details This is where you can find the source of the 
+#' \code{\link{settings_file}}.
 #  @return A character string with the path.
 #  @family Helper Functions
 #  @export
@@ -271,3 +272,36 @@ printStdColnames <- function() {
 	cat("Numeric variables:\n")
 	cat(paste(stdColsY, collapse=", ")); cat("\n")
 } # EOF
+
+
+#' @title Install Examples
+#' @description Install a single experiment-home folder containing various 
+#' examples.
+#' @details The example folder will be installed in the directory as specified 
+#' in the .Renviron file. (see \code{\link{updateSettings}})
+#' @family Helper Functions
+#' @export
+instAquap2Examples <- function() {
+	eh <- "home_examples"
+	pathSH <- Sys.getenv("AQUAP2SH")
+	pathFolder <- paste(pathSH, "/", eh, sep="")
+	a <- system.file(package="aquap2")
+	pathFrom <- paste(a, "/", eh, sep="")
+	ok <- FALSE
+	if (!file.exists(pathFolder)) {
+		ok <- file.copy(pathFrom, pathSH, recursive=TRUE)
+		
+	}
+	if (ok) {cat("Example folder copied\n")}
+} # EOF
+
+
+
+
+
+
+
+
+
+
+

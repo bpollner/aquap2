@@ -1,0 +1,36 @@
+---
+title: "Examples for Experiment-Design"
+author: ""
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Examples for Experiment-Design}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}  
+---
+
+```{r, echo = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+[(back to introduction)](introduction.html)
+
+## Some Examples for Experiment Designs
+A look at some examples will best ilustrated the usage of the L1 and L2 arguments in the metadata.r file.
+
+If you haven´t done already, copy the examples-folder from the package into the folder specified in the .Renviron file and set the working directory to `home_examples`
+```{}
+instAquap2Examples()
+oldwd <- getwd()
+setwd(paste(Sys.getenv("AQUAP2SH"), "home_examples", sep="/"))
+```
+
+
+The first argument to `esl` are the metadata. If left at the default, the default metadata file is loaded; if a valid filename is provided this file gets loaded.
+
+Let us first have a look at the sample-list that file `meta1.r` is generating:
+```{}
+esl(md=getmd("meta1.r"))
+```
+
+

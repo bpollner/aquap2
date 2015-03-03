@@ -77,9 +77,9 @@ stn <- list(
 
 	### smoothing ###
 	## settings for the Sav. Golay filter at the smoothing process
-	savGolayOrder_p = 2, 					## default is 3
-	savGolayLength_n = 25,					## default is 5
-	savGolayDeriv_m = 0, 					## default is 0
+	savGolayOrder_p = 2, 					## 
+	savGolayLength_n = 25,					## 
+	savGolayDeriv_m = 0, 					## 
 
 
 

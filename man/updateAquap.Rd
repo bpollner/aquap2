@@ -27,6 +27,7 @@ Always downloads and installs the latest available version, also
 }
 \seealso{
 Other Helper Functions: \code{\link{genFolderStr}};
+  \code{\link{instAquap2Examples}};
   \code{\link{loadAQdata}}, \code{\link{saveAQdata}};
   \code{\link{printStdColnames}};
   \code{\link{updateSettings}}

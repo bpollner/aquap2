@@ -13,16 +13,50 @@ vignette: >
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 ```
 
+[(back to introduction)](introduction.html)
+
+## General Workflow
+After your data aquisition, the file with the spectral data goes into the `rawdata` folder, renamed with the name of the experiment as specified in the metadata file.
+If you used the sample list, rename it so that it ends in "-in" instead of "-out" and put it into `sampleLists/sl_in`, including any possible modification of the sample order.
+
+If you have a temperature and humidity log-file and a timestamp in your spectral data and you want to automatically align the temperature and humidity values to the spectral data, rename the logfile as specified in your settings.r (default is "TRHlog"), put it in the rawdata folder as well and set the `trhLog` argument accordingly.
+
+The work-horse for importing data into aquap2 is the function
+```
+getFullData()
+```
+and its short-form, 
+```
+gfd()
+```
+
 
 ## Importing Spectral Data
 
 There are two ways to import spectral data:
 
-  1. by using one of the built-in functions to import from a supported file format
-  2. by writing your own custom-function to import data from any file format 
-  
+  1. by using one of the built-in functions to import from a supported file format. (See `?gfd`)
+  2. by writing your own custom-function to import data from any file format. (See `?custom_import`for further information.)
   
   
 ## Importing Class- and Numerical Variables
 
-Class-variables and numerical variables can be 
+Class-variables and numerical variables can be:
+
+- either completely separated from the spectral data file (in which case you provide them in the `sampleLists/sl_in` folder),
+- or only provided within the same file containing the spectral data as well,
+- or can be imported from both the spectral data file **and** a sample-list file.
+
+All of the above mentioned situations will be handled by the function `gfd`.
+
+
+
+If you haven´t done already, copy the examples-folder from the package into the folder specified in the .Renviron file and set the working directory to `home_examples`
+```{}
+instAquap2Examples()
+oldwd <- getwd()
+setwd(paste(Sys.getenv("AQUAP2SH"), "home_examples", sep="/"))
+```
+
+
+XXX bring some nice examples !!

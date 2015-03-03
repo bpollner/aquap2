@@ -12,6 +12,7 @@ settings.r file to stdout.
 }
 \seealso{
 Other Helper Functions: \code{\link{genFolderStr}};
+  \code{\link{instAquap2Examples}};
   \code{\link{loadAQdata}}, \code{\link{saveAQdata}};
   \code{\link{updateAquap}}; \code{\link{updateSettings}}
 }

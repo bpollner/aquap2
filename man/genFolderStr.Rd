@@ -22,8 +22,9 @@ You can change the defaults for the folder names in the settings file.
 \seealso{
 \code{\link{settings_file}}
 
-Other Helper Functions: \code{\link{loadAQdata}},
-  \code{\link{saveAQdata}}; \code{\link{printStdColnames}};
+Other Helper Functions: \code{\link{instAquap2Examples}};
+  \code{\link{loadAQdata}}, \code{\link{saveAQdata}};
+  \code{\link{printStdColnames}};
   \code{\link{updateAquap}}; \code{\link{updateSettings}}
 }
 
