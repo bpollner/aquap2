@@ -53,6 +53,8 @@
 #'  \item NIR A matrix containing the NIR-spectra, with the wavelenghts as column 
 #'  names and the sample-names as the rownames.
 #' }
+#' You can use the function \code{\link{imp_searchAskColumns}} to automatize column 
+#' asignment.
 #' @section Note: Every list element except 'NIR' and 'info' can be set to NULL.
 #' @examples
 #' \dontrun{

@@ -60,3 +60,9 @@ setwd(paste(Sys.getenv("AQUAP2SH"), "home_examples", sep="/"))
 
 
 XXX bring some nice examples !!
+
+show:
+
+- custom immport from the exccel file
+- examples for all three cases of importing class- und numerical
+- trhLog file; also custom (?)

@@ -916,7 +916,7 @@ readHeader <- function(md=getmd(), slType="def", multiplyRows="def") {
 
 
 #  assigns all the necessary list elements except NIR, info and timestamp and in the frame where it is called
-#' @title Aks for column representation
+#' @title Search and Ask for Column Representation
 #' @description This function can be used in a custom import function. All 
 #' required list elements except 'timestamp', 'info' and 'NIR' will be assigned in 
 #' the environment from where this function was called.

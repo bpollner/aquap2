@@ -40,6 +40,8 @@ it has to be set to 'NULL'.
  \item NIR A matrix containing the NIR-spectra, with the wavelenghts as column
  names and the sample-names as the rownames.
 }
+You can use the function \code{\link{imp_searchAskColumns}} to automatize column
+asignment.
 }
 \description{
 Cou can provide your own import function for importing spectral

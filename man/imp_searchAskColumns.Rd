@@ -2,7 +2,7 @@
 % Please edit documentation in R/prep_importData.r
 \name{imp_searchAskColumns}
 \alias{imp_searchAskColumns}
-\title{Aks for column representation}
+\title{Search and Ask for Column Representation}
 \usage{
 imp_searchAskColumns(allC_var, allY_var, slType = .ap2$.slType)
 }
