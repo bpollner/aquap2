@@ -42,7 +42,8 @@ There need to be two and only to objects in this file, having the names
  fileExtension <- ".txt"
  trhImport <- function(dataFile) {
    ##
-   TRH <- read.table(dataFile, header=F, skip=4)[,-c(1,2,3)]
+   TRH <- read.table(dataFile, header=F, skip=4)[,c(1,2,3)]
+   # assuming time, temp and rel. hum are in column 1, 2, and 3
    colnames(TRH) <- c("Time", "Temp", "RelHum")
    TRH$Time <- strptime(TRH$Time, format = "\%Y/\%m/\%d \%H:\%M'\%S")
    return(TRH)

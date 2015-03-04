@@ -230,7 +230,8 @@ getNIRData_Pirouette <- function(dataFile) {
 	allY_var <- pir$DepenVar
 #	print(allC_var); print(allY_var); wait()
 	sampleNr <- conSNr <- timePoints <- ecrm <- repl <- group <- temp <- temp <- relHum <- C_cols <- Y_cols <- NULL
-	imp_searchAskColumns(allC_var, allY_var) # assigns all the necessary list elements except NIR, info and timestamp in this frame !!!
+	slType <- .ap2$.slType ## .slType gets assigned in readHeader_checkDefaults
+	imp_searchAskColumns(allC_var, allY_var, slType) # assigns all the necessary list elements except NIR, info and timestamp in this frame !!!
 	outList <- list(sampleNr=sampleNr, conSNr=conSNr, timePoints=timePoints, ecrm=ecrm, repl=repl, group=group, temp=temp, relHum=relHum, C_cols=C_cols, Y_cols=Y_cols, timestamp=timestamp, info=info, NIR=NIR)
 	return(outList)	
 } # EOF

@@ -457,7 +457,8 @@ alignTempRelHum <- function(timeDataset, TRHlog) {
 gfd_importMakeTRH_alignment <- function(header, trhLog) {
 	a <- which(colnames(header) == "Timestamp")
 	if (length(a) == 0 & trhLog != FALSE) {
-		stop(paste("There is no 'Timestamp' column in your dataset to which data from a logger could be aligned."), call.=FALSE)
+		message(paste("There is no 'Timestamp' column in your dataset to which data from a logger could be aligned. \n(Alignment is controlled by argument 'trhLog'.) "))
+		message("Importing continues without the alignment of log data.")
 	}
 	if (length(a) !=0 ) {	 # so only do all this if we actually have a timestamp in the columns
 		tempCol <- paste(.ap2$stn$p_yVarPref, .ap2$stn$p_tempCol, sep="")
@@ -795,6 +796,7 @@ readHeader_checkDefaults <- function(slType, possibleValues, md, multiplyRows) {
 	}
 	assign("slType", slType, pos=parent.frame(n=1))
 	assign("slType", slType, pos=parent.frame(n=2)) # that is needed to always have the correct value for slType in the getFullData function
+	assign(".slType", slType, envir=.ap2)
 	###
 	if (class(md) == "aquap_md") {
 		filename <- md$meta$expName
@@ -927,6 +929,10 @@ readHeader <- function(md=getmd(), slType="def", multiplyRows="def") {
 #' variables.
 #' @param allC_var A data frame containing only class variables.
 #' @param allY_var A data frame containing only numerical variables.
+#' @param slType What type of sample list is used during the import. If no 
+#' additional sample list is used (slType = 'NULL'), the function stops if no 
+#' column for the nr. of consec. scan is present or gets assigned. You can get 
+#' the current slType with '.ap2$.slType' - see example.
 #' @return All the list elements needed in the \code{\link{custom_import}} function 
 #' except 'timestamp', 'info' and 'NIR get assigned in the environment from where 
 #' this function was called.
@@ -947,7 +953,7 @@ readHeader <- function(md=getmd(), slType="def", multiplyRows="def") {
 #'    NIR <- as.matrix(import[, 12:18])
 #'    rownames(NIR) <- paste("S", 1:nrow(NIR), sep="")
 #'    timestamp <- NULL
-#'    imp_searchAskColumns(allC_var, allY_var) 
+#'    imp_searchAskColumns(allC_var, allY_var, .ap2$.slType) 
 #'    # assigns all list elements except timestamp, info and NIR
 #'    #
 #'    return(list(sampleNr=sampleNr, conSNr=conSNr, timePoints=timePoints, 
@@ -957,7 +963,7 @@ readHeader <- function(md=getmd(), slType="def", multiplyRows="def") {
 #'  } # EOF
 #' }
 #' @export
-imp_searchAskColumns <- function(allC_var, allY_var) {
+imp_searchAskColumns <- function(allC_var, allY_var, slType=.ap2$.slType) {
 	yPref <- .ap2$stn$p_yVarPref
 	cPref <- .ap2$stn$p_ClassVarPref
 	sampleNrColn <- .ap2$stn$p_sampleNrCol
@@ -982,9 +988,9 @@ imp_searchAskColumns <- function(allC_var, allY_var) {
 	stopDoubleMsg1 <- "The standard column name \""
 	stopDoubleMsg2 <- "\" appears more than once in the input file. Please check the column names. \n"
 	msg1 <- "\n\nThe standard column name \""
-	msg2 <-  "\" could not be found in the .pir file. \nWhich of the following columns does represent "
+	msg2 <-  "\" could not be found in the input-file. \nWhich of the following columns does represent "
 	msg3 <- "?\nPlease enter the appropriate number; type 0 for not represented; type any non-numeric to stop.\n"
-	msg2_zero <- "\" could not be found in the .pir file. \nPlease confirm by typing '0' that "
+	msg2_zero <- "\" could not be found in the input-file. \nPlease confirm by typing '0' that "
 	msg3_zero <- " is not represented in this data set; type any non-numeric to stop.\n"
 	notRep <- " 0 -- not represented \n "
 	##
@@ -1022,6 +1028,9 @@ imp_searchAskColumns <- function(allC_var, allY_var) {
 					nrOk <- checkNumber(a, cle)
 				} # end while
 				if (a == 0) { # user chooses to set to NULL
+					if (stdColumnNames[[k]][i] == paste(yPref, conSNrColn, sep="") & is.null(slType) ) { # so we choose to *not* assigne the cons. scan column and we do *not* have a sample list imported
+						stop(paste("You need a column for the consec. scan in your dataset. Please, add a column called \"", yPref, conSNrColn, "\" to the file containing the spectral data.", sep=""), call.=FALSE)
+					}
 					assign(listElementNames[[k]][i], NULL, pos=parent.frame(n=1))
 				} else { # so we have (checked) a valid input giving a representation
 					assign(listElementNames[[k]][i], as.data.frame(allVars[[k]][, a]), pos=parent.frame(n=1))
@@ -1047,10 +1056,8 @@ imp_searchAskColumns <- function(allC_var, allY_var) {
 	} # end for k
 } # EOF
 
-## maybe add here the user-function for re-making the T and RH classes
+## maybe add the user-function for re-making the T and RH classes
 # XXX
-
-# make tutorial;
 
 ## note: make @numRep in Aquacalc to take numerics OR character, because if we have more than 8 elements...  :-)
 
