@@ -95,13 +95,9 @@ from the raw-data.}
 the 'R-data' folder after import from the raw-data file. Defaults to 'TRUE'.}
 }
 \value{
-An object of class 'aquap_data' containing four slots:
+An object of class 'aquap_data' containing a data frame and one slot:
 \itemize{
- \item header A data frame with all the class- and numerical variables, and
- possibly with the timestamp and time-distance.
- \item colRep A data frame with the color-representation of every class variable
- present in the header.
- \item NIR A matrix with the NIR data.
+ \item dataframe Consists of 'header', 'colRep' and 'NIR'.
  \item ncpwl Numeric length one, the number of characters before the wavelength
  in the column names of the NIR spectra.
 }
@@ -156,5 +152,7 @@ conscious handling of the files.
 }
 \seealso{
 \code{\link{readSpectra}}, \code{\link{readHeader}}
+
+Other Core functions: \code{\link{gdmm}}
 }
 

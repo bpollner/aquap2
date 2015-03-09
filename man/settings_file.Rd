@@ -47,6 +47,7 @@ Once you have specified a folder under the variable \code{AQUAP2SH} in
  your changes will be lost.
 }
 \seealso{
-Other fileDocs: \code{\link{metadata_file}}
+Other fileDocs: \code{\link{anproc_file}};
+  \code{\link{metadata_file}}
 }
 

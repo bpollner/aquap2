@@ -20,7 +20,7 @@ Read in the metadata from the default or a custom metadata file
 located in the metadata-folder.
 }
 \details{
-The name of the default metadata-file can be specified in the settings..
+The name of the default metadata-file can be specified in the settings.
 }
 \examples{
 \dontrun{
@@ -29,6 +29,6 @@ md <- getmd("myFile.r")
 }
 }
 \seealso{
-\code{\link{metadata_file}}
+\code{\link{metadata_file}}, \code{\link{getap}}
 }
 

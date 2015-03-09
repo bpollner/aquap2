@@ -2,8 +2,10 @@
 
 export(esl)
 export(exportSampleList)
+export(gdmm)
 export(genFolderStr)
 export(getFullData)
+export(getap)
 export(getmd)
 export(gfd)
 export(imp_searchAskColumns)

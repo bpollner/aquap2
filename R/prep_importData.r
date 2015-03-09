@@ -580,11 +580,14 @@ getFullData <- function(md=getmd(), filetype="def", naString="NA", slType="def",
 	NIR <- si$NIR
 	rownames(NIR) <- make.unique(rownames(NIR)) # just to be sure
 	rownames(headerFusion) <- rownames(colRep) <- rownames(NIR)
-#	fd <- data.frame(I(header), I(colRep), I(NIR))
-	fullData <- new("aquap_data")
-	fullData@header <- headerFusion
-	fullData@colRep <- colRep
-	fullData@NIR <- NIR
+	#
+	header <- headerFusion
+	fd <- data.frame(I(header), I(colRep), I(NIR))
+	fullData <- new("aquap_data", fd)
+#	fullData <- new("aquap_data")
+#	fullData@header <- headerFusion
+#	fullData@colRep <- colRep
+#	fullData@NIR <- NIR
 	fullData@ncpwl <- si$info$nCharPrevWl
 	if (stf) {
 		saveAQdata(fullData, md, verbose=TRUE)

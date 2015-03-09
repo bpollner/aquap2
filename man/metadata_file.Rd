@@ -61,6 +61,7 @@ The classes and their sub-classes can be defined in the L1 and L2
 \seealso{
 \code{\link{getmd}}
 
-Other fileDocs: \code{\link{settings_file}}
+Other fileDocs: \code{\link{anproc_file}};
+  \code{\link{settings_file}}
 }
 

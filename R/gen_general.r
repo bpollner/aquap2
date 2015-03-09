@@ -296,6 +296,13 @@ instAquap2Examples <- function() {
 } # EOF
 
 
+getWavelengths <- function(dataset) {
+	a <- colnames(dataset$NIR)
+	ncpwl <- getNcpwl(dataset)
+	wls <- as.numeric(substr(a, 1+ncpwl, nchar(a)))
+	return(wls)	
+} # EOF
+
 
 
 

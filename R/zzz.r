@@ -3,6 +3,6 @@
 
 .onLoad <- function(libname, pkgname) {
     .initializeAQ2Classes()
-    .initializeAQM2ethods()
+    .initializeAQ2Methods()
     .GlobalEnv$.ap2 <- new.env()
 } # EOF
