@@ -311,7 +311,8 @@ gfd_checkNrOfRows <- function(header, headerFilePath, nrowsNIR, spectraFilePath,
 gfd_getExpNameNoSplit <- function(metadata, nRows) {
 	cPref <- .ap2$stn$p_ClassVarPref
 	makeExpNameColumn <- .ap2$stn$imp_makeExpNameColumn
-	makeNoSplitColumn <- .ap2$stn$imp_makeNoSplitColumn
+#	makeNoSplitColumn <- .ap2$stn$imp_makeNoSplitColumn
+	makeNoSplitColumn <- TRUE
 	##
 	if (makeExpNameColumn) {
 		expName <- data.frame(rep(metadata$meta$expName, nRows))

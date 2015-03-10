@@ -19,12 +19,11 @@
 
 .initializeAQ2Methods <- function() {
 	setMethod("show", signature(object = "aquap_data"), definition = show_aquap_data )
+	setMethod("show", signature(object = "aquap_cube"), definition = showCube )
 
 	setGeneric("getNcpwl", function(object) standardGeneric("getNcpwl"))
 	setMethod("getNcpwl", "aquap_data", function(object) object@ncpwl)
 
-	
-	
-	
+		
 } # EOF
 str
