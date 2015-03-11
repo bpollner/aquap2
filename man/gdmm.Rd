@@ -23,7 +23,7 @@ then calculate the models as specified in the analysis procedure on all of the
 datasets.
 }
 \details{
-XXX
+XXX combinations that yield no result get cleaned out
 }
 \seealso{
 Other Core functions: \code{\link{getFullData}},

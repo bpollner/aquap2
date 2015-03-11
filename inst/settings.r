@@ -47,7 +47,7 @@ stn <- list(
 	allSilent = FALSE,						## if false, "status" messages will be displayed
 	autoUpdateSettings = TRUE, 				## if the settings should be automatically updated when calling a function from package 'aquap2'. Recommended value is TRUE.
 	numberOfCPUs = 7, 						## the number of CPUs used for parallel computing
-
+	gen_showData_NIR = FALSE, 				## if the first rows of the NIR data should be printed as well wenn printing an object of class 'aquap_data' to the screen.
 
 	## Import Data
 	imp_specFileType = "vision_NSAS.da",	## the filetype of the spectral data. Refer to the help for 'getFullData'  for possible values
@@ -70,6 +70,10 @@ stn <- list(
 
 
 
+	## generate Datasets
+	gd_keepECs = TRUE,						## if the environmental controls should be kept in the dataset when splitting after the provided variables.
+
+
 	## Colors
 	col_RampForTRH = c("blue", "red", "yellow2"), 	## used for color-coding any column that contains the characters defined as names for the temperature and rel. humidity column. Provide at least two colors.
 
@@ -81,6 +85,10 @@ stn <- list(
 	sm_savGolayLength_n = 25,				## 
 	sm_savGolayDeriv_m = 0, 				## 
 
+
+
+	## noise
+	noi_noiseLevel = 1e-6, 					## the system-specific noise level XXX 
 
 
 	### Misc: Values for time-estimates etc. 

@@ -303,10 +303,108 @@ getWavelengths <- function(dataset) {
 	return(wls)	
 } # EOF
 
+#' @title Select Observations
+#' @description Create includes or excludes from the dataset by selecting 
+#' from any variable in any logical combination, using the available logical 
+#' operators like e.g. '|' and '&'.
+#' @details The column names are provided as is, i.e. without quotes, while for 
+#' characters the values have to be enclosed in quotation marks - see examples.
+#' @param dataset An object of class 'aquap_data'
+#' @param criteria The selection criteria in the format 
+#' \code{variableName == value}, possibly joined by logical operators.
+#' @param include Logical. If the observations matching the criteria should be 
+#' included or excluded from the dataset.
+#' @param keepEC If *all* the environmental control observations should be kept 
+#' in the dataset. Only evaluated if 'include' is TRUE.
+#' @return The standard dataset as described in \code{\link{getFullData}}
+#'  @examples
+#'  \dontrun{
+#'  ds <- ssc(dataset, C_Group=="Control")
+#'  # keeps all the controls
+#'  ds <- ssc(dataset, C_Group!="Control", include=FALSE)
+#'  # the same as above
+#'  ds <- ssc(dataset, C_Group=="Control" & C_Repl=="R1")
+#'  # keeps only the first replicate of the controls
+#'  ds <- ssc(dataset, C_Group=="Control" | C_Repl=="R1")
+#'  # keeps all the first replicate and all the controls
+#'  ds <- ssc(dataset, C_Group=="Control" & C_Repl=="R1", keepEC=TRUE)
+#'  # keeps the first replicate of the controls and all the environmental controls
+#'  ds <- ssc(dataset, C_Group=="Control" & C_Repl=="R1", include=FALSE)
+#'  # keeps everything except the first replicate of the controls
+#'  ds <- ssc(dataset, (C_Group=="Control" | C_Group=="Treatment") & Y_conSNr==1)
+#'  # keeps the first consec. scan of the controls and the treatment group.
+#'  ds <- ssc(dataset, (C_Group=="Control" | C_Group=="MQ") & C_conSNr=="1")
+#'  # keeps the first consec. scan of the controls and the environmental controls
+#'  ds <- ssc(dataset, Y_Temp==22.5)
+#'  ds <- ssc(dataset, Y_Temp==22.5 & Y_conSNr==1)
+#'  ds <- ssc(dataset, Y_conSNr==1) # keeps only the first consecutive scan
+#'  }
+#' @family Data pre-preatment functions
+#' @export
+ssc <- function(dataset, criteria, include=TRUE, keepEC=FALSE) {
+	cPref <- .ap2$stn$p_ClassVarPref
+	ecrmCol <- .ap2$stn$p_ECRMCol
+	ecLabel <- .ap2$stn$p_envControlLabel
+	string <- deparse(substitute(criteria))
+	cns <- colnames(dataset$header)
+	cnsPres <- cns[which(lapply(cns, function(x) grep(x, string)) > 0)] # gives back only those column names that appear in the string
+	stri <- string
+	for (i in 1: length(cnsPres)) {
+		stri <- gsub(cnsPres[i], paste("dataset$header$", cnsPres[i], sep=""), stri)
+	}
+	if (include) {
+		if (keepEC) {
+			stri <- paste("(", stri, ") |  dataset$header$", cPref, ecrmCol, " == \"", ecLabel, "\"", sep="")
+		}
+		d <- dataset[which(eval(parse(text=stri))),]
+	} else {
+		d <- dataset[-(which(eval(parse(text=stri)))),]
+	}
+	if (nrow(d) == 0) {
+		stop(paste("Your selection criteria yielded no results. Please check your input."), call.=FALSE)
+	}
+	return(new("aquap_data", reFactor(d)))
+} # EOF
+
+# to be called from the system
+ssc_s <- function(dataset, variable, value, keepEC=TRUE) {
+	origDataset <- dataset
+	# variable and value are always data frames with one row and 1 or *more* columns
+#	print(str(variable)); print(str(value)); wait()
+	cPref <- .ap2$stn$p_ClassVarPref
+	ecrmCol <- .ap2$stn$p_ECRMCol
+	ecLabel <- .ap2$stn$p_envControlLabel
+	for (i in 1: ncol(variable)) { # both variable and value have the same number of columns
+		ind <- which(colnames(dataset$header) == variable[1,i])
+		val <- as.character(value[1,i])
+		selInd <-  which(dataset$header[,ind] == val)
+		dataset <- dataset[ selInd,]
+		if (nrow(dataset) == 0) {
+		#	message(paste("The observation selection criteria for ", variable[1,i], "==\"", val, "\" yielded no results in one combination, sorry.", sep=""))
+			return(NULL)	
+		}	
+	} # end for i
+	if (keepEC) {
+		indEC <- which(colnames(origDataset$header) == paste(cPref, ecrmCol, sep=""))
+		selIndEC <- which(origDataset$header[,indEC] == ecLabel)
+		dataset <- rbind(dataset, origDataset[selIndEC,])
+#		dataset <- dataset[ union(selInd, selIndEC) , ]
+	}
+	return(new("aquap_data", reFactor(dataset)))
+} # EOF
 
 
-
-
+## @rdname remakeSampleNumber
+## @family Helper Functions
+## @export
+reFactor <- function(dataset) {
+	for (i in 1: ncol(dataset$header)) {
+		if (is.factor(dataset$header[,i])) {
+			dataset$header[i] <- factor(dataset$header[,i])
+		}
+	}
+	return(dataset)
+} # EOF
 
 
 

@@ -86,7 +86,7 @@ getNIRData_Vision_da <- function(dataFile) {
 getNirData_plainText <- function(dataFile, naStrings="NA") {
 	sampleNr <- conSNr <- timePoints <- ecrm <- repl <- group <- temp  <- relHum <- C_cols <- Y_cols <- timestamp <- NULL
 	info <- list(nCharPrevWl=1)
-	NIR <- read.table(dataFile, na.strings=naStrings)
+	NIR <- as.matrix(read.table(dataFile, na.strings=naStrings))
 	return(list(sampleNr=sampleNr, conSNr=conSNr, timePoints=timePoints, ecrm=ecrm, repl=repl, group=group, temp=temp, relHum=relHum, C_cols=C_cols, Y_cols=Y_cols, timestamp=timestamp, info=info, NIR=NIR))
 } # EOF
 

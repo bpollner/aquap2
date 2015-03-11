@@ -104,9 +104,11 @@ out
 makeCPT <- function(patt) {
 	aquapCPT <- new("aquap_cpt")
 	a <- which(colnames(patt) == "class")
-	classes <- patt[, a]
+	classes <- as.data.frame(patt[, a])
+	colnames(classes) <- rep("classes", ncol(classes))
 	a <- which(colnames(patt) == "value")
-	values <- patt[, a]
+	values <- as.data.frame(patt[, a])
+	colnames(values) <- rep("values", ncol(values))
 	aquapCPT@splitVars <- list(classes=classes, values=values)
 	a <- as.character(patt[, which(colnames(patt) == "wlSplits")])
 	aquapCPT@wlSplit <- lapply(strsplit(a, "-to-"), as.numeric) 
@@ -214,12 +216,112 @@ ap_checExistence <- function(ap, dataset) {
 	}
 } # EOF
 
+#' @title Select Wavelengths
+#' @description XXX
+#' @details XXX
+#' @param dataset XXX
+#' @param from Numeric length one. XXX
+#' @param to XXX
+#' @family Data pre-preatment functions
+#' @export
+selectWls <- function(dataset, from, to) {
+	wls <- getWavelengths(dataset)
+	lowInd <- min(which(wls >= from)) # so we do not have to know the exact wavelength
+	highInd <- max(which(wls <= to))
+	NIRsel <- dataset$NIR[,lowInd:highInd]
+	dataset$NIR <- NIRsel
+	return(dataset)
+} # EOF
+
+performSmoothing <- function(dataset, siSmooth) {
+	if (siSmooth) {
+		sgp <- .ap2$stn$sm_savGolayOrder_p
+		sgn <- .ap2$stn$sm_savGolayLength_n
+		sgm <- .ap2$stn$sm_savGolayDeriv_m 
+		if (!.ap2$stn$allSilent) {cat("      smoothing...")}
+		dataset$NIR <- t(apply(dataset$NIR, 1, signal::sgolayfilt, p=sgp, n=sgn, m=sgm))
+		if (!.ap2$stn$allSilent) {cat(" ok\n")}
+	}
+	return(dataset)
+} # EOF
+
+performNoise <- function(dataset, siNoise) {
+	if (siNoise) {
+		noiseLevel <- .ap2$stn$noi_noiseLevel
+		if (!.ap2$stn$allSilent) {cat("      adding noise...")}
+		dataset$NIR <- dataset$NIR * rnorm(1, mean=1, sd=noiseLevel)
+		if (!.ap2$stn$allSilent) {cat(" ok\n")}
+	}
+	return(dataset)
+} # EOF
+
+makeIdString <- function(siClass, siValue, siWlSplit, siSmooth, siNoise) {
+	# siClass and siValue come in as dataframes with one row and one or more columns
+	varString <- NULL
+	for (i in 1: ncol(siClass)) {
+		varString <- paste(varString, siClass[1,i], ":", siValue[1,i], ", ", sep="")
+	}
+	varString <- substr(varString, 1, (nchar(varString)-2)) # to get rid of the last ","
+	varString <- paste(varString, " ", sep="")
+	more <- FALSE
+	if (siSmooth) {
+		more <- TRUE
+		smoothing <- "smo. "
+	} else {
+		smoothing <- ""
+	}
+	if (siNoise) {
+		more <- TRUE
+		noise <- "noise "
+	} else {
+		noise <- ""
+	}
+	if (more) {
+		moreAdd <- ", "
+	} else {
+		moreAdd <- ""
+	}
+	easy <- paste(varString, "@", siWlSplit[1], "-to-", siWlSplit[2], moreAdd, smoothing, noise, sep="")
+	return(easy)
+} # EOF
+
+processSingleRow_CPT <- function(dataset, siClass, siValue, siWlSplit, siSmooth, siNoise) { # si for single
+	keepEC <- .ap2$stn$gd_keepECs
+	newDataset <- ssc_s(dataset, siClass, siValue, keepEC) 
+	if (is.null(newDataset)) { # NULL is returned if a variable combination yields no data
+		return(NULL)
+	}
+	newDataset <- selectWls(newDataset, siWlSplit[1], siWlSplit[2])
+	newDataset <- performSmoothing(newDataset, siSmooth)
+	newDataset <- performNoise(newDataset, siNoise)
+	idString <- makeIdString(siClass, siValue, siWlSplit, siSmooth, siNoise)
+	out <- new("aquap_set", dataset=newDataset, idString=idString)
+	return(out)
+} # EOF
+
+correct_cpt <- function(cpt, nullInd) {
+	n <- nullInd
+	cpt@splitVars$classes <- cpt@splitVars$classes[-n,]
+	cpt@splitVars$values <- cpt@splitVars$values[-n,]
+	cpt@wlSplit <- cpt@wlSplit[-n]
+	cpt@smoothing <- cpt@smoothing[-n]
+	cpt@noise <- cpt@noise[-n]
+	cpt@len <- length(cpt@noise)
+	return(cpt)
+} # EOF
+
+printIds <- function(cube) {
+	for (i in 1: cube@cpt@len) {
+		print(cube[[i]]@idString)
+	}
+} # EOF
+
 #' @title Generate Datasets and make Models
 #' @description Generate several datasets by splitting up the original dataset 
 #' according to the variables and values provided in the analysis procedure and 
 #' then calculate the models as specified in the analysis procedure on all of the 
 #' datasets.
-#' @details XXX
+#' @details XXX combinations that yield no result get cleaned out
 #' @param dataset An object of class 'aquap_data'
 #' @param md The metadata, an object of class 'aquap_md'
 #' @param ap The analysis procedure, an object of class 'aquap_ap'
@@ -234,15 +336,45 @@ gdmm <- function(dataset, md=getmd(), ap=getap()) {
 	cp <- a$cp
 	cpt <- a$cpt
 	len <- cpt@len
-	cube <- new("aquap_cube")
+	set <- list()
+	length(set) <- len
 	##
+	classes <- cpt@splitVars$classes # ! is a data frame
+	values <- cpt@splitVars$values # !is a data frame
+	wlSplit <- cpt@wlSplit # ! is a list
+	smoothing <- cpt@smoothing # is a vector
+	noise <- cpt@noise # is a vector
+	
+	### generate datasets
+	if (!.ap2$stn$allSilent) {cat("Generating Datasets...\n")}
 	for (i in 1:len) {
-		# now make all the datasets according to the specifications in cpt
+		if (!.ap2$stn$allSilent) {cat(paste("   Working on #", i, " of ", len, "\n", sep=""))}
+		set[[i]] <- processSingleRow_CPT(dataset, as.data.frame(classes[i,]), as.data.frame(values[i,]), wlSplit[[i]], smoothing[i], noise[i]) # the "as.data.frame" is necessary if we only have one column
 	} # end for i
+	if (!.ap2$stn$allSilent) {cat("Done.\n")}
+	###
+	
+	
+	### clean out the NULL-datasets
+	nullInd <- which(unlist(lapply(set, is.null))) # which one of the split by variable resulted in zero rows (has been returned as NULL in ssc_s)
+	if (length(nullInd) > 0) {
+		set <- set[-nullInd]
+		cp <- cp[-nullInd,]
+		rownames(cp) <- 1:nrow(cp)
+		cpt <- correct_cpt(cpt, nullInd)
+		message(paste(length(nullInd), " of the split-by-variable combinations resulted in no data. Those datasets have been omitted.", sep=""))
+	}
+	###
+
+	### now make the models
+	
 	##
+	cube <- new("aquap_cube", set)
 	cube@metadata <- md
 	cube@anproc <- ap
 	cube@cp <- cp
 	cube@cpt <- cpt
 	return(cube)
 } # EOF
+
+# next move: write documentation for selectWls, for gdmm (describe returned structure)

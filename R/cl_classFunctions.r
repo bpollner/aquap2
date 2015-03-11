@@ -15,10 +15,12 @@ show_aquap_data <- function(object) {
 		cs <- 1:8
 	}	
 	print(object$header[rs,])
-	print(object$NIR[rs,cs])
+	if (.ap2$stn$gen_showData_NIR) {
+		print(object$NIR[rs,cs])
+	}
 } # EOF
 
 showCube <- function(object) {
-	cat(paste("Formal class 'aquap_cube', containing ", object@cpt@len, " datasets.\n", sep=""))
+	cat(paste("Formal class 'aquap_cube', containing ", object@cpt@len, " datasets.\n\n", sep=""))
 	print(object@cp)
 } # EOF

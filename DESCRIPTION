@@ -15,7 +15,8 @@ Imports:
     devtools,
     foreach,
     doParallel,
-    xlsx
+    xlsx,
+    signal
 Suggests:
     knitr
 VignetteBuilder: knitr
