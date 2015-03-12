@@ -163,17 +163,23 @@ ap_cleanOutZeroValues <- function(ap, dataset) {
 	cns <- colnames(dataset$header)
 	cnsM <- substr(cns, 1, le)
 	ind <- which(cnsM == cPref)
-	if (is.null(ap$pca$colorBy)) {
-		ap$pca$colorBy <- cns[ind]
+	if (!is.null(ap$pca)) {
+		if (is.null(ap$pca$colorBy)) {
+			ap$pca$colorBy <- cns[ind]
+		}
 	}
-	if (is.null(ap$simca$simcOn)) {
-		ap$simca$simcOn <- cns[ind]
+	if (!is.null(ap$simca)) {
+		if (is.null(ap$simca$simcOn)) {
+			ap$simca$simcOn <- cns[ind]
+		}
 	}
-	if (is.null(ap$plsr$regressOn)) {
-		le <- nchar(yPref)
-		cnsM <- substr(cns, 1, le)
-		ind <- which(cnsM == yPref)
-		ap$plsr$regressOn <- cns[ind]
+	if (!is.null(ap$plsr)) {
+		if (is.null(ap$plsr$regressOn)) {
+			le <- nchar(yPref)
+			cnsM <- substr(cns, 1, le)
+			ind <- which(cnsM == yPref)
+			ap$plsr$regressOn <- cns[ind]
+		}
 	}
 	return(ap)
 } # EOF
@@ -217,11 +223,17 @@ ap_checExistence <- function(ap, dataset) {
 } # EOF
 
 #' @title Select Wavelengths
-#' @description XXX
-#' @details XXX
-#' @param dataset XXX
-#' @param from Numeric length one. XXX
-#' @param to XXX
+#' @description Select wavelenghts from a dataset.
+#' @details It is not necessary to exactly know the numbers of the wavelengths 
+#' present in the dataset, as for the lower limit the same or the next highest 
+#' wavelength as \code{from}, and for the upper limit the same or the next 
+#' lowest wavelength as \code{to} will be selected.
+#' @param dataset An object of class 'aquap_data'
+#' @param from Numeric length one. The lower limit of the wavelengths to be 
+#' selected.
+#' @param to Numeric lengtho one. The upper limit of the wavelengths to be 
+#' selected.
+#' @return The standard dataset (class 'aquap_data')
 #' @family Data pre-preatment functions
 #' @export
 selectWls <- function(dataset, from, to) {
@@ -316,19 +328,9 @@ printIds <- function(cube) {
 	}
 } # EOF
 
-#' @title Generate Datasets and make Models
-#' @description Generate several datasets by splitting up the original dataset 
-#' according to the variables and values provided in the analysis procedure and 
-#' then calculate the models as specified in the analysis procedure on all of the 
-#' datasets.
-#' @details XXX combinations that yield no result get cleaned out
-#' @param dataset An object of class 'aquap_data'
-#' @param md The metadata, an object of class 'aquap_md'
-#' @param ap The analysis procedure, an object of class 'aquap_ap'
-#' @return XXX
-#' @family Core functions
+#' @rdname gdmm
 #' @export
-gdmm <- function(dataset, md=getmd(), ap=getap()) {
+gdmm <- function(dataset, ap=getap(), md=getmd() ) {
 	autoUpS()
 	ap <- ap_cleanOutZeroValues(ap, dataset)
 	ap_checExistence(ap, dataset)
@@ -336,8 +338,8 @@ gdmm <- function(dataset, md=getmd(), ap=getap()) {
 	cp <- a$cp
 	cpt <- a$cpt
 	len <- cpt@len
-	set <- list()
-	length(set) <- len
+	cubeList <- list()
+	length(cubeList) <- len
 	##
 	classes <- cpt@splitVars$classes # ! is a data frame
 	values <- cpt@splitVars$values # !is a data frame
@@ -349,32 +351,37 @@ gdmm <- function(dataset, md=getmd(), ap=getap()) {
 	if (!.ap2$stn$allSilent) {cat("Generating Datasets...\n")}
 	for (i in 1:len) {
 		if (!.ap2$stn$allSilent) {cat(paste("   Working on #", i, " of ", len, "\n", sep=""))}
-		set[[i]] <- processSingleRow_CPT(dataset, as.data.frame(classes[i,]), as.data.frame(values[i,]), wlSplit[[i]], smoothing[i], noise[i]) # the "as.data.frame" is necessary if we only have one column
+		cubeList[[i]] <- processSingleRow_CPT(dataset, as.data.frame(classes[i,]), as.data.frame(values[i,]), wlSplit[[i]], smoothing[i], noise[i]) # the "as.data.frame" is necessary if we only have one column
 	} # end for i
 	if (!.ap2$stn$allSilent) {cat("Done.\n")}
 	###
 	
 	
 	### clean out the NULL-datasets
-	nullInd <- which(unlist(lapply(set, is.null))) # which one of the split by variable resulted in zero rows (has been returned as NULL in ssc_s)
+	nullInd <- which(unlist(lapply(cubeList, is.null))) # which one of the split by variable resulted in zero rows (has been returned as NULL in ssc_s)
 	if (length(nullInd) > 0) {
-		set <- set[-nullInd]
+		cubeList <- cubeList[-nullInd]
 		cp <- cp[-nullInd,]
 		rownames(cp) <- 1:nrow(cp)
 		cpt <- correct_cpt(cpt, nullInd)
 		message(paste(length(nullInd), " of the split-by-variable combinations resulted in no data. Those datasets have been omitted.", sep=""))
 	}
 	###
-
-	### now make the models
+	
+	### now make the models (so far, we have only the dataset and the id-string in the set)
+	if (!.ap2$stn$allSilent) {cat("\nCalculating models...\n")}
+	for (i in 1: cpt@len) {
+		if (!.ap2$stn$allSilent) {cat(paste("   Working on dataset #", i, " of ", cpt@len, "\n", sep=""))}
+		cubeList[[i]] <- makeAllModels(cubeList[[i]], md, ap)
+	} # end for i
+	if (!.ap2$stn$allSilent) {cat("Done.\n")}
+	###
 	
 	##
-	cube <- new("aquap_cube", set)
+	cube <- new("aquap_cube", cubeList)
 	cube@metadata <- md
 	cube@anproc <- ap
 	cube@cp <- cp
 	cube@cpt <- cpt
 	return(cube)
 } # EOF
-
-# next move: write documentation for selectWls, for gdmm (describe returned structure)

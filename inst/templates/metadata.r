@@ -5,7 +5,7 @@
 ### do NOT change the names of the variables !!  ####
 
 	
-	experimentName <- "KCl-Dilutions"		## the name of the experiment
+	expName <- "KCl-Dilutions"				## the name of the experiment
 
 	commonValue <- "def"					## provide a value that will be the same in all rows of the dataset, leave at 'def' to take the default from the settings
 

@@ -196,8 +196,8 @@ esl_checkDefaults <- function(form) {
 	assign("form", form, pos=parent.frame(n=1))	
 } # EOF
 
-############################################################################################
-####### MASTER ################################################
+
+#### MASTER ##
 #' @title Create and Export Sample Lists
 #' @description Creates and exports the randomized sample list to file.
 #' @details Possible formats to export are XXX. For the time estimates, 
@@ -228,6 +228,7 @@ esl_checkDefaults <- function(form) {
 #' # in an experiment home-folder you will have probably only one metadata file 
 #' # but several analysis procedure files.
 #' }
+#' @family Core functions
 #' @export exportSampleList
 exportSampleList <- function(md=getmd(), form="def", showFirstRows=TRUE, timeEstimate=FALSE) {
 	autoUpS()

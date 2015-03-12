@@ -3,7 +3,7 @@
 \name{getFullData}
 \alias{getFullData}
 \alias{gfd}
-\title{Get / Import Spectral Data}
+\title{*** Get / Import Spectral Data ***}
 \usage{
 getFullData(md = getmd(), filetype = "def", naString = "NA",
   slType = "def", trhLog = "def", multiplyRows = "def", ttl = TRUE,
@@ -140,6 +140,8 @@ conscious handling of the files.
  md <- getmd()
  fd <- getFullData(md)
  fd <- getFullData() # the same as above
+ fd <- gfd(getmd(expName="Foo")) # to override the experiment name specified in
+ # the metadata.r file and load the dataset called 'Foo' instead. (see ?getmd)
  fd <- gfd(md=getmd("foo.r")) # loads metadata from file 'foo.r'
  fd <- getFullData(filetype="custom@myFunc.r", slType="xls")
  # This would use a custom function to read in the raw spectra, and read in
@@ -153,6 +155,8 @@ conscious handling of the files.
 \seealso{
 \code{\link{readSpectra}}, \code{\link{readHeader}}
 
-Other Core functions: \code{\link{gdmm}}
+Other Core functions: \code{\link{esl}}, \code{\link{esl}},
+  \code{\link{exportSampleList}}; \code{\link{gdmm}},
+  \code{\link{gdmm}}
 }
 

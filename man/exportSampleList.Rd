@@ -52,4 +52,10 @@ sl <- esl(md=getmd("myMetadataFile.r"), form="txt", showFirstRows=FALSE)
 # but several analysis procedure files.
 }
 }
+\seealso{
+Other Core functions: \code{\link{gdmm}},
+  \code{\link{gdmm}}; \code{\link{getFullData}},
+  \code{\link{getFullData}}, \code{\link{gfd}},
+  \code{\link{gfd}}
+}
 

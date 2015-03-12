@@ -4,32 +4,45 @@
 \alias{getap}
 \title{Get Analysis Procedure}
 \usage{
-getap(fn = "def")
+getap(fn = "def", ...)
 }
 \arguments{
 \item{fn}{Character length one. If left at 'def', the default filename for an
 analysis procedure file as specified in the settings (factory default is
 "anproc.r") is read in. Provide any other valid name of an analysis procedure
 file to load it. (Do not forget the '.r' at the end.)}
+
+\item{...}{Any of the arguments of the 'statistics' section as defined in the
+analysis procedure - please  see \code{\link{anproc_file}}.
+Any argument/value provided via \code{...} will  override the value in the
+analysis procedure .r file.}
 }
 \value{
 A list with the analysis procedure.
 }
 \description{
 Read in the analysis procedure from the default or a custom
-analysis procedure file located in the metadata-folder.
+analysis procedure file located in the metadata-folder. By providing any of
+the arguments of the statistics section of the analysis procedure file
+(see \code{\link{anproc_file}} to the function you can override the values
+in the file with the provided values.
 }
 \details{
 The name of the default analysis procedure file can be specified in
-the settings.
+the settings. Other arguments than precise matches to the available arguments
+will be ignored. Arguments in the 'split dataset' section of the analysis
+procedure get exclusively read in from file.
 }
 \examples{
 \dontrun{
-ap <- getap()
+ap <- getap(); str(ap); names(ap)
 ap <- getap("myFile.r")
+ap <- getap(pca.colorBy="C_Group") # change the value of 'pca.colorBy'
+from the .r file to 'C_Group'
+ap <- getap(do.sim=FALSE) # switch off the calculation of SIMCA models
 }
 }
 \seealso{
-\code{\link{anproc_file}}, \code{\link{getmd}}
+\code{\link{anproc_file}}, \code{\link{getmd}}, \code{\link{gdmm}}
 }
 

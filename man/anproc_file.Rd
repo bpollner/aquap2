@@ -22,67 +22,155 @@ unsmoothed data will be used as well in addition to the smoothed data.}
 \item{do_noiseTest}{Logical. If artifical noise should be added to the dataset.}
 
 \item{noiseTest_useRaw}{If, should the noise-test be performed, the raw data
-will be used as well in addition to the noise-data.}
+ will be used as well in addition to the noise-data.}
 
-\item{do_PCA}{Logical. If a PCA should be calculated with a given dataset}
+\item{do.pca}{Logical. If a PCA should be calculated with a given dataset}
 
-\item{pca_colorByVariable}{NULL or character vector. Which class-variables
-should be used for coloring the PCA score plot. Set to NULL for using all
-available class variables for coloring.}
+\item{pca.colorBy}{NULL or character vector. Which class-variables
+ should be used for coloring the PCA score plot. Set to NULL for using all
+ available class variables for coloring.}
 
-\item{do_SIMCA}{Logical.If SIMCA models of the dataset should be calculated.}
+\item{do.sim}{Logical.If SIMCA models of the dataset should be calculated.}
 
-\item{simca_variables}{NULL or character vector. Which variables should be
+\item{sim.vars}{NULL or character vector. Which variables should be
 used to group the data. Set to NULL for using all available class-variables,
 or provide a character vector with the column names of class variables to group
 the data along those for calculating SIMCA models.}
 
-\item{simca_K}{Numeric length one. The number of components used for calculating
-the SIMCA models. In mode 'robust' leave at '0' for automatic detection of
-optimal number of components.}
+\item{sim.K}{Numeric length one. The number of components used for calculating
+ the SIMCA models. In mode 'robust' leave at '0' for automatic detection of
+ optimal number of components. [It is a capital 'K' in the argument.]}
 
-\item{do_PLSR}{Logical. If PLSR models should be calculated with a given dataset.}
+\item{do.pls}{Logical. If PLSR models should be calculated with a given dataset.}
 
-\item{plsr_regressOn}{NULL or character vector. Which variables should be used
+\item{pls.regOn}{NULL or character vector. Which variables should be used
 to regress on. Set to NULL for using all numerical variables to regress on, or
 provide a character vector with the column names of numerical variables to use
 those for regression in the PLSR.}
 
-\item{plsr_ncomp}{NULL or integer length one. The number of components used in
+\item{pls.ncomp}{NULL or integer length one. The number of components used in
 PLSR. Set to NULL for automatic detection, or provide an integer to use this
 number of components in the PLSR.}
 
-\item{plsr_valid}{Character. Which crossvalidation to use. Possible values are
+\item{pls.valid}{Character. Which crossvalidation to use. Possible values are
 \itemize{
-  \item CV for a 10-fold crossvalidation
-  \item LOO for a leave-one-out crossvalidation
-  \item XXX something here for the using a certain class-variable to make the
-  groupe !!! XXX
+  \item "def" Read in the default value from settings.r
+  \item "CV" for a 10-fold crossvalidation
+  \item "LOO" for a leave-one-out crossvalidation
+  \item XXX something here for using a certain class-variable for grouping XXX
 }}
 
-\item{plsr_classForColoring}{NULL or character. What class-variable should be
-used for coloring in the RMSEP and RMSECV plots. Set to NULL for no coloring,
-or provide a character length one with a single column name of a class
-variable that should be used for coloring.}
+\item{pls.colorBy}{NULL or character. What class-variable should be
+ used for coloring in the RMSEP and RMSECV plots. Set to NULL for no coloring,
+ or provide a character length one with a single column name of a class
+ variable that should be used for coloring.}
 
-\item{aquagram_variables}{NULL or character vector. Which class variables
+\item{do.aqg}{Logical. If Aquagrams should be calculated with a given dataset.}
+
+\item{aqg.vars}{NULL or character vector. Which class variables
 should be used for grouping the data for the Aquagram. Provide a character
 vector with the column names of class variables for grouping data and generate
 an Aquagram for every one of them, or set to NULL if you are providing the
 Aquagram class-variable later when calculating and plotting the Aquagram.}
+
+\item{aqg.nrCorr}{Character or Logical. If the number of observations in each
+spectral pattern should be corrected (if necessary by random sampling) so
+that all the spectral pattern are calculated out from the same number of
+observations. If left at the default "def", the default value from the settings
+will be used. Provide "TRUE" or "FALSE" to switch number correction manually
+on or off.}
+
+\item{aqg.spectra}{Logical or Character. If left at "FALSE" (the default)
+no additional spectra are calculated / prepared for plotting. Other possible
+values are one or more of:
+\itemize{
+ \item "raw" for the raw spectra
+ \item "avg" for the averaged spectra of the data represented in the aquagram;
+ \item "subtr" for subtractions in the averaged spectra (see \code{"minus"} below)
+ \item "all" for all of the aforementioned
+}}
+
+\item{aqg.minus}{Character. Which of the levels present in the variable
+provided in \code{aqg.vars} should be used for subtractions -- the average of
+this 'minus' gets subtracted from all the other averages. 'aqg.minus' is used for
+the subtractions in the raw spectra as well as for the subtractions within the
+Aquagram, should you choose any of the -diff modes.}
+
+\item{aqg.mod}{Character. What mode, what kind of Aquagram should be calculated?
+Possible values are: "classic", "classic-diff", "sfc", "sfc-diff", "aucs",
+"aucs-diff", "aucs.tn", "aucs.tn-diff", "aucs.tn.dce", "aucs.tn.dce-diff",
+"aucs.dce" and "aucs.dce-diff" and "def" for reading in the default from
+settings.r.}
+
+\item{aqg.TCalib}{Character, numeric or NULL. The default (leave at 'def') can be
+set in the settings.  If 'NULL' the complete temperature range of the
+calibration data is used for calibration.  Provide a numeric length two
+[c(x1, x2)] for manually determining the calibration range.  Provide a
+character 'symm@x', with 'x' being the plus and minus delta in temperature
+from the temperature of the experiment for having a calibration range from
+Texp-x to Texp+x.  The 'Factory' default is 'symm@2'.
+Applies to all modes except the 'classic' and 'sfc'  modes.
+If, in any of the modes showing percentages, the numbers on the
+Aquagram are below 0 or above 100, then the calibration range has to be
+extended.}
+
+\item{aqg.Texp}{Numeric length one. The temperature at which the
+spectra were taken. The default (leave at 'def') can be set in the settings.}
+
+\item{aqg.bootCI}{Logical. If confidence intervalls for the selected wavelengths
+should be calculated within each group (using bootstrap). Leave at 'def' for
+getting the default from the settings.}
+
+\item{aqg.R}{Character or numeric. Given aqg.bootCI = TRUE, how many bootstrap
+replicates should be performed? Leave at 'def' for choossing the default from
+the settings, where the factory-default is "nrow@3" for for 3 x nrow(samples).
+By manually providing a character in the form of 'nrow@x' where x is any
+number, you can set the factor with which the number of rows get multiplicated,
+the result of this multiplication is then used for the number of bootstrap
+replicates. By providing a length one numeric you can directly set the number
+of bootstrap replicates.}
+
+\item{aqg.smoothN}{Only used in the 'classic' and 'sfc' modes. Numeric length 1.
+Must be odd. Smoothing points for the Sav. Golay smoothing that is applied
+before making the calculations. Change to NULL or anything not-numeric to
+switch off smoothing.}
+
+\item{aqg.selWls}{Only used in the 'classic' and 'sfc' modes.  Numerical vector.
+If provided and in the mode "classic", classic-diff", "sfc" and "sfc-diff"
+these numbers will be used to determine the coordinates of the aquagram.
+Leave at 'def' to use the defaults from the settings file.}
+
+\item{aqg.msc}{Only used in the 'classic' and 'sfc' modes. Logical. If MSC
+should be performed.}
+
+\item{aqg.reference}{Only used in the 'classic' and 'sfc' modes. An optional
+numerical vector (loadings, etc..) used for MSC.}
 }
 \description{
 The analysis procedure file is used to first split the dataset
- according to the provided values in the first section, and then to tell the
- system which statistics to apply resp. what models to calculate on those
- datasets.
+ according to the provided values in the 'split dataset' section, and
+ then, in the 'statistics' section (starting with \code{do.pca}), to tell
+ the system which statistics to apply resp. what models to calculate on those
+ datasets. Arguments used to control the behaviour of statistics / calculations
+ start with a certain prefix:
+ \itemize{
+   \item "pca" for PCA models
+   \item "sim" for SIMCA models
+   \item "pls" for PLSR models
+   \item "aqg" for all arguments related to the calculation of Aquagrams
+ }
 }
 \details{
 
 
 The default name for the analysis procedure file can be set in
  settings.r. Any other .r file can be loaded by providing a valid .r filename
- to the appropriate argument, e.g. in the function \code{\link{getap}}
+ to the appropriate argument, e.g. in the function \code{\link{getap}}.
+ By providing any of the arguments of the statistis section (starting with
+ 'do.pca') of the analysis procedure file to the function \code{\link{getap}}
+ you can override the values in the file with the provided values. Arguments
+ in the 'split dataset' section (before 'do.pca') of the analysis procedure
+ get exclusively read in from file.
 }
 \seealso{
 \code{\link{getap}}

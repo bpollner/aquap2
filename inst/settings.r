@@ -49,6 +49,7 @@ stn <- list(
 	numberOfCPUs = 7, 						## the number of CPUs used for parallel computing
 	gen_showData_NIR = FALSE, 				## if the first rows of the NIR data should be printed as well wenn printing an object of class 'aquap_data' to the screen.
 
+
 	## Import Data
 	imp_specFileType = "vision_NSAS.da",	## the filetype of the spectral data. Refer to the help for 'getFullData'  for possible values
 	imp_startDate = "2014-06-01 00:00:00",	## the start-date used to calculate the absolute number of minutes since then
@@ -69,14 +70,12 @@ stn <- list(
 	imp_minutesTotalPrecision = 3, 			## the final precision in minutes that the log-data have to meet; if only for one spectrum under this value importing will be aborted
 
 
-
 	## generate Datasets
 	gd_keepECs = TRUE,						## if the environmental controls should be kept in the dataset when splitting after the provided variables.
 
 
 	## Colors
 	col_RampForTRH = c("blue", "red", "yellow2"), 	## used for color-coding any column that contains the characters defined as names for the temperature and rel. humidity column. Provide at least two colors.
-
 
 
 	### smoothing ###
@@ -86,17 +85,35 @@ stn <- list(
 	sm_savGolayDeriv_m = 0, 				## 
 
 
-
 	## noise
 	noi_noiseLevel = 1e-6, 					## the system-specific noise level XXX 
+
+
+	## Aquagram 
+	aqg_defaultMod = "aucs.dce-diff", 		## the default mode for the Aquagram
+	aqg_wlsAquagram = c(1342, 1364, 1374, 1384, 1412, 1426, 1440, 1452, 1462, 1476, 1488, 1512), 	## the wavelengths for the classic aquagram (argument aqg.selWls)
+	aqg_nrDigitsAquagram = 2,				## the number of digits displayed in the standard aquagram
+	aqg_linetypes = c(1,2,3),				## the default vector for the line-types to be used in the aquagram. Gets recycled.
+	aqg_correctNrOfObs = FALSE,				## if the number of observations in each spectral pattern should be corrected (if necessary by random sampling) so that all the spectral pattern are calculated out from the same number of observations
+	aqg_adPeakPlot = TRUE,					## if, should subtraction spectra be plotted, an additional plot with picked peaks should be added
+	aqg_AdLines = TRUE, 					## if the additional lines should be added to the plot (see XXX for details)
+	aqg_discrim = FALSE, 					## if, should subtraction spectra be plotted, it will be discriminated between "true" or "not true" positive peaks
+	aqg_bootCI = FALSE, 					## if confidence intervalls for the selected wavelengths should be calculated within each group (using bootstrap)
+	aquagr_bootUseParallel = TRUE, 			## if, should the CIs be calculated, this should be done in parallel
+	aqg_bootR = "nrow@3",					## if aqg_bootCI = TRUE, how many bootstrap replicates should be performed? leave at "nrow@3" for e.g. 3 x nrow(samples) or provide a length one numeric
+	aqg_saveBootRes = TRUE, 				## if the bootstrap result should be saved under "bootResult" to the analysis-data folder
+	aqg_smoothCalib = 17,					## the smoothing (sav. golay) applied for the aucs ("area-under-the-curve-stabilization") calibration data
+	aqg_calibTRange = "symm@2", 			## the temperatur range picked out from the calibration data. Either numeric length two [e.g. c(28,32)], or character starting with 'symm@x', with 'x' being the plus and minus delta in temperature from the temperature of the experiment
+	aqg_Texp = 28.6,						## the temperature at which the measurements were done
+	aqg_OT = "1st",							## what overtone (in development, leave at "1st")
+	aquagr_nCoord = 12, 					## only applies to the 1st overtone: how many coordinates to plot (can be 12 or 15)
+
 
 
 	### Misc: Values for time-estimates etc. 
 	#### misc
 	misc_durationSingleScan = 33, 			## time in seconds needed for a single scan
 	misc_handlingTime = 173, 				## the time needed for handling the cuvette, samples, etc.. (in seconds)
-
-
 	##
 	last = 0
 	## the last one without comma !!

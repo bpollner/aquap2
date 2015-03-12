@@ -7,17 +7,25 @@
 selectWls(dataset, from, to)
 }
 \arguments{
-\item{dataset}{XXX}
+\item{dataset}{An object of class 'aquap_data'}
 
-\item{from}{Numeric length one. XXX}
+\item{from}{Numeric length one. The lower limit of the wavelengths to be
+selected.}
 
-\item{to}{XXX}
+\item{to}{Numeric lengtho one. The upper limit of the wavelengths to be
+selected.}
+}
+\value{
+The standard dataset (class 'aquap_data')
 }
 \description{
-XXX
+Select wavelenghts from a dataset.
 }
 \details{
-XXX
+It is not necessary to exactly know the numbers of the wavelengths
+present in the dataset, as for the lower limit the same or the next highest
+wavelength as \code{from}, and for the upper limit the same or the next
+lowest wavelength as \code{to} will be selected.
 }
 \seealso{
 Other Data pre-preatment functions: \code{\link{ssc}}

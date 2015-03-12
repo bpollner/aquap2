@@ -14,7 +14,6 @@ showPathToAquap2 <- function() {
 	invisible(path)
 } # EOF
 
-
 copySettingsFile <- function(fromPath, toPath) {
 	a <- paste(toPath, "settings.r", sep="/")
 	b <- paste(toPath, "settings_OLD.r", sep="/")
@@ -370,7 +369,6 @@ ssc <- function(dataset, criteria, include=TRUE, keepEC=FALSE) {
 ssc_s <- function(dataset, variable, value, keepEC=TRUE) {
 	origDataset <- dataset
 	# variable and value are always data frames with one row and 1 or *more* columns
-#	print(str(variable)); print(str(value)); wait()
 	cPref <- .ap2$stn$p_ClassVarPref
 	ecrmCol <- .ap2$stn$p_ECRMCol
 	ecLabel <- .ap2$stn$p_envControlLabel

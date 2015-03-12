@@ -1,0 +1,70 @@
+---
+title: "Split Dataset and Make Models"
+author: ""
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Split Dataset and Make Models}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}  
+---
+
+```{r, echo = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+[(back to introduction)](introduction.html)
+
+## Split up the Dataset and make Models
+
+Splitting up the data and calculating the specified statistical models on each of the split-variations of the dataset is all done by the function `gdmm`:
+```
+cube <- gdmm(dataset)
+```
+The values as specified in the analysis procedure in the 'split dataset' section will be used for splitting / grouping the data. In the next step the values as specified in the `statistics` section will be used to control the behaviour when calculating one or more of the available statistical models.
+
+By providing custom filenames to the `getap` and `getmd` function any file holding an analysis procedure or metadata (where at this step only the experiment name is used) can be loaded:
+```
+cube <- gdmm(dataset, getap(fn="myAp1.r"), getmd(fn="myMd1.r"))
+```
+
+The final product of the function `gdmm` is an object of class `aquap_cube`, what contains an object of class `aquap_set` in each of its list-elements. One `aquap_set` now contains a single split-variation of the dataset and all the statistical models / calculations that were obtained from this specific dataset. 
+
+This `str(cube)` is not a nice structure to look at, so when you just type the name of a cube-object
+```
+cube
+#> Formal class 'aquap_cube', containing 6 datasets.
+#> 
+#>     class value     wlSplits Smoothing Noise
+#> 1 C_Group  Cont 1300-to-1600        no    no
+#> 2 C_Group  GDum 1300-to-1600        no    no
+#> 3 C_Group  GPos 1300-to-1600        no    no
+#> 4 C_Group  Cont 1300-to-1600        no   yes
+#> 5 C_Group  GDum 1300-to-1600        no   yes
+#> 6 C_Group  GPos 1300-to-1600        no   yes
+```
+you will see an informative data frame where each row represents a split-variation of the dataset, showing the parameters that describe this dataset. For every row in this data frame there is a collection of several statistical models and calculations available in the background, i.e. in the object `aquap_set` that is in each list element of the cube.
+
+You can access e.g. the first `aquap_set` and the models and calculations therein (though you probably will not need to do this directly) by
+```
+set <- cube[[1]]
+```
+Please refer to the help for `?aquap_set` and `?aquap_cube` for more information about their structures.
+
+
+## Override Arguments in the Analysis Procedure File
+
+It is possible to override any of the arguments in the 'statistics' section of the analysis procedure file by providing the appropriate argument to the `getap` function, what is the default way to obtain the analysis procedure:
+```
+cube <- gdmm(dataset, ap=getap(do.pca=TRUE))
+```
+This would override the value for `do.pca` in the analysis procedure .r file with the `TRUE`.
+
+Overring arguments can of course be combined with custom filenames:
+```
+cube <- gdmm(dataset, getap(fn="myAp1.r", do.pca=TRUE), getmd(fn="myMd1.r", expName="Foo"))
+```
+what would override the experiment name in `myMd1.r` as well. (see details in ?`getmd`)
+
+
+For possible arguments to `getap` please see the help for `?getap` and `?anproc_file`.

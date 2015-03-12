@@ -1,4 +1,4 @@
-#' @title Get / Import Spectral Data
+#' @title *** Get / Import Spectral Data *** 
 #' @description If everyting is left at the defaults, the function first tries 
 #' to load an R-object containing previously imported spectral data. If this was 
 #' not found, it tries to import spectral data from a file in the rawdata-folder, 
@@ -112,6 +112,8 @@
 #'  md <- getmd()
 #'  fd <- getFullData(md)
 #'  fd <- getFullData() # the same as above
+#'  fd <- gfd(getmd(expName="Foo")) # to override the experiment name specified in 
+#'  # the metadata.r file and load the dataset called 'Foo' instead. (see ?getmd)
 #'  fd <- gfd(md=getmd("foo.r")) # loads metadata from file 'foo.r'
 #'  fd <- getFullData(filetype="custom@@myFunc.r", slType="xls")
 #'  # This would use a custom function to read in the raw spectra, and read in 

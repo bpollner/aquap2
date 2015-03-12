@@ -41,7 +41,7 @@ After the initial setup (only has to be done once, see [Setup](setup.html)), the
 
 After the data aquisition you can **import data** either from one of the supported data formats, or you can easily plug in your own data import function to read your very specific data format. (It is possible to automatically allign data from a provided temperature and relative humidity log file to the timestamp in your dataset, should you have one.)
 
-Once your data are imported into the standard dataset of `aquap2`, you can use the analysis procedure `anProc.r` to split up and group the data (**"splice datasets"**), and then use the implemented methods and tools to **analyse** your data.
+Once your data are imported into the standard dataset of `aquap2`, you can use the analysis procedure `anProc.r` to **split up and group the data**, **calculate various models** and then use the implemented methods and tools to **analyse** your data.
 
 
 ### Generate Folder Structure
@@ -99,16 +99,25 @@ If you used the sample list, rename it so that it ends in "-in" instead of "-out
 If you have a temperature and humidity log-file and a timestamp in your spectral data and you want to automatically align the temperature and humidity values to the spectral data, rename the logfile as specified in your settings.r (default is "TRHlog"), put it in the rawdata folder as well and set the `trhLog` argument accordingly.
 
 ```
-fullData <- gfd()
+dataset <- gfd()
 ```
 will then import the spectral data, import the class- and numerical variables from your sample list file, possibly align data from a logger and save the resulting dataset in the folder `R-data`.
 
 See the help for `?gfd` and [here](importing_data.html) for more information and some examples on data import.
 
 
-### Splicing the Dataset
-The analysis procedure.
-
+### Generate Dataset and Make Models
+The previously obtained dataset now can be split up / grouped as specified in the analysis procedure, and several statistical models can be calculated on each of the split-versions of the dataset.
+All this is done by the function `gdmm`.
+```
+cube <- gdmm(dataset)
+```
+It is possible to override any of the arguments in the 'statistics' section of the analysis procedure file by providing the appropriate argument to the `getap` function, what is the default way to obtain the analysis procedure:
+```
+cube <- gdmm(dataset, ap=getap(do.pca=TRUE))
+```
+This would override the value for `do.pca` in the analysis procedure .r file with the `TRUE`.
+For possible arguments to `getap` please see the help for `?getap` and `?anproc_file`; for further information on generating datasets and making models please see [here](SplitMakeModels.html)
 
 
 
