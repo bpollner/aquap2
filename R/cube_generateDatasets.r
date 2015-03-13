@@ -485,6 +485,28 @@ printIds <- function(cube) {
 	}
 } # EOF
 
+checkForStats <- function(ap) {
+	cnt <- 0
+	char <- NULL
+	if (!is.null(ap$pca)) { 
+		cnt <- cnt + 1 
+		char <- c(char, "pca")
+	}
+	if (!is.null(ap$simca)) { 
+		cnt <- cnt + 1
+		char <- c(char, "simca")
+	}
+	if (!is.null(ap$plsr)) { 
+		cnt <- cnt + 1
+		char <- c(char, "plsr")
+	}
+	if (!is.null(ap$aquagr)) {
+		cnt <- cnt + 1
+		char <- c(char, "Aquagram")
+	}
+	return(list(cnt=cnt, char=char))
+} # EOF
+
 #' @title *** Generate Datasets and make Models *** 
 #' @description Generate several datasets by splitting up the original dataset 
 #' according to the variables and values as specified in the analysis procedure 
@@ -524,9 +546,11 @@ gdmm <- function(dataset, ap=getap(), md=getmd() ) {
 	autoUpS()
 	ap <- ap_cleanOutZeroValues(ap, dataset)
 	ap <- ap_checExistence_Defaults(ap, dataset)
+#	print(str(ap)); wait()
 	a <- makeCompPattern(dataset$header, md, ap)
 	cp <- a$cp
 	cpt <- a$cpt
+#	print(str(cpt)); wait()
 	len <- cpt@len
 	cubeList <- list()
 	length(cubeList) <- len
@@ -559,12 +583,14 @@ gdmm <- function(dataset, ap=getap(), md=getmd() ) {
 	###
 	
 	### now make the models (so far, we have only the dataset and the id-string in the set)
-	if (!.ap2$stn$allSilent) {cat("\nCalculating models...\n")}
+	stat <- checkForStats(ap) 	#  check the ap if and where we calculate a model
+	if (!.ap2$stn$allSilent & (stat$cnt != 0)) {cat("\nCalculating models...\n")}
 	for (i in 1: cpt@len) {
-		if (!.ap2$stn$allSilent) {cat(paste("   Working on dataset #", i, " of ", cpt@len, "\n", sep=""))}
+		if (!.ap2$stn$allSilent & (stat$cnt != 0)) {cat(paste("   Working on dataset #", i, " of ", cpt@len, "\n", sep=""))}
 		cubeList[[i]] <- makeAllModels(cubeList[[i]], md, ap)
 	} # end for i
-	if (!.ap2$stn$allSilent) {cat("Done.\n")}
+	if (!.ap2$stn$allSilent & (stat$cnt != 0)) {cat("Done.\n")}
+	if (!.ap2$stn$allSilent & (stat$cnt == 0)) {cat("No models were calculated.\n")}
 	###
 	
 	##

@@ -372,6 +372,8 @@ ssc_s <- function(dataset, variable, value, keepEC=TRUE) {
 	cPref <- .ap2$stn$p_ClassVarPref
 	ecrmCol <- .ap2$stn$p_ECRMCol
 	ecLabel <- .ap2$stn$p_envControlLabel
+	noSplitCol <- paste(cPref, .ap2$stn$p_commonNoSplitCol, sep="")
+	#
 	for (i in 1: ncol(variable)) { # both variable and value have the same number of columns
 		ind <- which(colnames(dataset$header) == variable[1,i])
 		val <- as.character(value[1,i])
@@ -382,7 +384,8 @@ ssc_s <- function(dataset, variable, value, keepEC=TRUE) {
 			return(NULL)	
 		}	
 	} # end for i
-	if (keepEC) {
+	nsc <- any(noSplitCol %in% variable[1,])
+	if (keepEC & !nsc) { # so only rbinds the ECs if we do NOT have the no-split column in the variable  XXX possible problem here !!??!??
 		indEC <- which(colnames(origDataset$header) == paste(cPref, ecrmCol, sep=""))
 		selIndEC <- which(origDataset$header[,indEC] == ecLabel)
 		dataset <- rbind(dataset, origDataset[selIndEC,])

@@ -21,6 +21,14 @@ show_aquap_data <- function(object) {
 } # EOF
 
 showCube <- function(object) {
-	cat(paste("Formal class 'aquap_cube', containing ", object@cpt@len, " datasets.\n\n", sep=""))
+	stats <- checkForStats(object@anproc)  ## list(cnt=cnt, char=char)
+	if (stats$cnt == 0) {
+		add <- " and no models."
+	} else {
+		add <- paste(" and ", stats$cnt, " models (", paste(stats$char, collapse=", "), ") in each set.\n", sep="")
+	}
+	cat(paste("Formal class 'aquap_cube', containing ", object@cpt@len, " datasets", add, "\n", sep=""))
+
+	cat("\n")
 	print(object@cp)
 } # EOF

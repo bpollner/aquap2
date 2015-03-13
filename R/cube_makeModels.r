@@ -54,8 +54,3 @@ makeAllModels <- function(set, md, ap) {
 	newSet@idString <- set@idString
 	return(newSet)
 } # EOF
-
-
-## next move: clean out defs at aquagram
-## at ap_checExistence: check for the numbers, all the aquagram things
-## add check if NOT modells are calculated at all - then appropriate message in line 351 at generate datasets
