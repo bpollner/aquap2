@@ -6,18 +6,18 @@
 
 	################################################################
 	##### split dataset #####
-	splitByVariable <- NULL					## by which variables should the dataset be split? leave empty c() or set to NULL for *no* splitting by class variables
-#	splitByVariable <- c("C_Group", "C_Mode")
+	spl.var <- NULL							## by which variables should the dataset be split? leave empty c() or set to NULL for *no* splitting by class variables
+#	spl.var <- c("C_Group", "C_Mode")
 
-	splitByWavelength <- NULL				## which wavelengths to use? leave empty c() or set to NULL for using all available wavelengths
-#	splitByWavelength <- "1300-to-1600"
-#	splitByWavelength <- c("1000-to-2000", "1300-to-1600")
+	spl.wl <- NULL							## which wavelengths to use? leave empty c() or set to NULL for using all available wavelengths
+#	spl.wl <- "1300-to-1600"
+#	spl.wl <- c("1000-to-2000", "1300-to-1600")
 	 
-	do_smooth <- FALSE						## if smoothing of dataset should be performed
-	smooth_useRaw <- TRUE					## if, should smoothing be performed, the raw unsmoothed data should be used as well
+	spl.do.smo <- FALSE						## if smoothing of dataset should be performed
+	spl.smo.raw <- TRUE						## if, should smoothing be performed, the raw unsmoothed data should be used as well
 
-	do_noiseTest <- FALSE					## if artificial noise should be added to the dataset
-	noiseTest_useRaw <- TRUE				## if, should the noise-test be performed, the raw original data should be used as well. Recommended value = TRUE
+	spl.do.noise <- FALSE					## if artificial noise should be added to the dataset
+	spl.noise.raw <- TRUE					## if, should the noise-test be performed, the raw original data should be used as well. Recommended value = TRUE
 	################################################################
 			
 

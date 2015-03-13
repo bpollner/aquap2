@@ -112,7 +112,7 @@ All this is done by the function `gdmm`.
 ```
 cube <- gdmm(dataset)
 ```
-It is possible to override any of the arguments in the 'statistics' section of the analysis procedure file by providing the appropriate argument to the `getap` function, what is the default way to obtain the analysis procedure:
+It is possible to override any of the arguments of the analysis procedure file by providing the appropriate argument to the `getap` function, what is the default way to obtain the analysis procedure:
 ```
 cube <- gdmm(dataset, ap=getap(do.pca=TRUE))
 ```
@@ -122,6 +122,6 @@ For possible arguments to `getap` please see the help for `?getap` and `?anproc_
 
 
 ### Data Analysis
-Yes Yes  Very much so.
+maybe eben calling it data analysis is not good here, as the analysis is already done in the previous step ?? Maybe it is just plotting here??
 what is implemented, and the Aquagram
 

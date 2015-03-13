@@ -4,24 +4,24 @@
 \alias{anproc_file}
 \title{Analysis Procedure File}
 \arguments{
-\item{splitByVariable}{NULL or character vector. If NULL, no splitting of the
+\item{spl.var}{NULL or character vector. If NULL, no splitting of the
 dataset will be performed. Provide a character vector with the column names
 of class variables to split the dataset along these variables.}
 
-\item{splitByWavelength}{NULL or character vector. If NULL, all in the dataset
+\item{spl.wl}{NULL or character vector. If NULL, all in the dataset
 available wavelengths will be used. Provide a character vector in the format
 "wlFrom-to-wlTo" (e.g. c("1000-to-2000", "1300-to-1600", ...))
 to use all previously defined splits in these wavelengths.}
 
-\item{do_smooth}{Logical. If smoothing of the NIR data should be performed. The
+\item{spl.do.smo}{Logical. If smoothing of the NIR data should be performed. The
 values for the smoothing operation itself are defined in the settings.}
 
-\item{smooth_useRaw}{Logical. If, should smoothing be performed, the raw
+\item{spl.smo.raw}{Logical. If, should smoothing be performed, the raw
 unsmoothed data will be used as well in addition to the smoothed data.}
 
-\item{do_noiseTest}{Logical. If artifical noise should be added to the dataset.}
+\item{spl.do.noise}{Logical. If artifical noise should be added to the dataset.}
 
-\item{noiseTest_useRaw}{If, should the noise-test be performed, the raw data
+\item{spl.noise.raw}{If, should the noise-test be performed, the raw data
  will be used as well in addition to the noise-data.}
 
 \item{do.pca}{Logical. If a PCA should be calculated with a given dataset}
@@ -151,14 +151,20 @@ The analysis procedure file is used to first split the dataset
  according to the provided values in the 'split dataset' section, and
  then, in the 'statistics' section (starting with \code{do.pca}), to tell
  the system which statistics to apply resp. what models to calculate on those
- datasets. Arguments used to control the behaviour of statistics / calculations
- start with a certain prefix:
+ datasets. Arguments used to control thes split-process and the behaviour of
+ statistics / calculations start with a certain prefix:
  \itemize{
-   \item "pca" for PCA models
-   \item "sim" for SIMCA models
-   \item "pls" for PLSR models
+   \item "spl" for all arguments related to the split-process
+   \item "pca" for all arguments related to PCA models (except do.pca)
+   \item "sim" for all arguments realted to SIMCA models (except do.sim)
+   \item "pls" for all arguments related to PLSR models (except do.pls)
    \item "aqg" for all arguments related to the calculation of Aquagrams
+         (except do.aqg)
  }
+ By providing any of the arguments of the analysis procedure file to the
+ function \code{\link{getap}}, also when using it inside the function
+ \code{\link{gdmm}}, you can override the values in the file with the
+ provided values. See examples at \code{\link{gdmm}}.
 }
 \details{
 
@@ -166,14 +172,13 @@ The analysis procedure file is used to first split the dataset
 The default name for the analysis procedure file can be set in
  settings.r. Any other .r file can be loaded by providing a valid .r filename
  to the appropriate argument, e.g. in the function \code{\link{getap}}.
- By providing any of the arguments of the statistis section (starting with
- 'do.pca') of the analysis procedure file to the function \code{\link{getap}}
- you can override the values in the file with the provided values. Arguments
- in the 'split dataset' section (before 'do.pca') of the analysis procedure
- get exclusively read in from file.
+ By providing any of the arguments of the analysis procedure file to the
+ function \code{\link{getap}} also when using it inside the function
+ \code{\link{gdmm}}, you can override the values in the file with the
+ provided values. See examples at \code{\link{gdmm}}.
 }
 \seealso{
-\code{\link{getap}}
+\code{\link{getap}}, \code{\link{gdmm}}
 
 Other fileDocs: \code{\link{metadata_file}};
   \code{\link{settings_file}}

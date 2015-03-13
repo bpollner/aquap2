@@ -1,3 +1,4 @@
+#' @param do.aqg Logical. If Aquagrams should be calculated with a given dataset.
 #' @param aqg.vars NULL or character vector. Which class variables 
 #' should be used for grouping the data for the Aquagram. Provide a character 
 #' vector with the column names of class variables for grouping data and generate 

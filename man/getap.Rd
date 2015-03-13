@@ -23,15 +23,14 @@ A list with the analysis procedure.
 \description{
 Read in the analysis procedure from the default or a custom
 analysis procedure file located in the metadata-folder. By providing any of
-the arguments of the statistics section of the analysis procedure file
-(see \code{\link{anproc_file}} to the function you can override the values
-in the file with the provided values.
+the arguments of the analysis procedure file (see \code{\link{anproc_file}}
+to the function you can override the values in the file with the provided
+values.
 }
 \details{
 The name of the default analysis procedure file can be specified in
 the settings. Other arguments than precise matches to the available arguments
-will be ignored. Arguments in the 'split dataset' section of the analysis
-procedure get exclusively read in from file.
+will be ignored.
 }
 \examples{
 \dontrun{
@@ -40,6 +39,7 @@ ap <- getap("myFile.r")
 ap <- getap(pca.colorBy="C_Group") # change the value of 'pca.colorBy'
 from the .r file to 'C_Group'
 ap <- getap(do.sim=FALSE) # switch off the calculation of SIMCA models
+ap <- getap(spl.var="C_Group") # change the split variable to "C_Group"
 }
 }
 \seealso{

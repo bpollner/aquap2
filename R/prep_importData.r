@@ -536,7 +536,7 @@ gfd_check_trhLog_defaults <- function(trhLog) {
 } # EOF
 
 # get full data ---------------------------------------------------------------
-#' @rdname getFullData
+#' @template mr_getFullData
 #' @export
 getFullData <- function(md=getmd(), filetype="def", naString="NA", slType="def", trhLog="def", multiplyRows="def", ttl=TRUE, stf=TRUE) {
 	autoUpS()

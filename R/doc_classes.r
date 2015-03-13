@@ -1,36 +1,3 @@
-#' @title *** Generate Datasets and make Models *** 
-#' @description Generate several datasets by splitting up the original dataset 
-#' according to the variables and values as specified in the analysis procedure 
-#' in the 'split dataset' section and then calculate the models as specified 
-#' in the 'statistics' section on all of the  datasets. By providing additional 
-#' arguments to the function \code{\link{getap}} (what is the default way to get 
-#' the analysis procedure 'ap') you can override any value of the 'statistics' 
-#' section in the analysis procedure. Please see examples and \code{\link{getap}} 
-#' and  \code{\link{anproc_file}} for further information.
-#' @details Split-combinations that yield no result will automatically be omitted.
-#' @param dataset An object of class 'aquap_data'
-#' @param md The metadata, an object of class 'aquap_md'
-#' @param ap The analysis procedure, an object of class 'aquap_ap'
-#' @return An object of class \code{\link{aquap_cube}} containing all the 
-#' statistical models / calculations that were performed on the split-variations 
-#' of the dataset.
-#' @seealso \code{\link{getap}}, \code{\link{getmd}}
-#' @examples
-#' \dontrun{
-#' dataset <- gfd() # will load or import data
-#' cube <- gdmm(dataset) # split up the dataset and make models, execute the 
-#' # analysis procedure as specified in its .r file
-#' cube <- gdmm(dataset, getap(aqg.bootCI=FALSE)) # same as above, but override 
-#' the value in 'aqg.bootCI' of the analysis procedure with 'FALSE'. 
-#' cube <- gdmm(dataset, getap(do.sim=FALSE, pls.regOn="Y_Temp"))
-#' }
-#' @family Core functions
-#' @name gdmm
-NULL
-# gdmm <- function(dataset, ap=getap(), md=getmd() )
-
-
-
 #' @title Class 'aquap_cube'
 #' @description Holds all the statistical models / calculations that were 
 #' performed on the split-variations of the dataset by the function 

@@ -3,35 +3,41 @@
 #'  according to the provided values in the 'split dataset' section, and 
 #'  then, in the 'statistics' section (starting with \code{do.pca}), to tell 
 #'  the system which statistics to apply resp. what models to calculate on those 
-#'  datasets. Arguments used to control the behaviour of statistics / calculations 
-#'  start with a certain prefix:
+#'  datasets. Arguments used to control thes split-process and the behaviour of  
+#'  statistics / calculations start with a certain prefix:
 #'  \itemize{
-#'    \item "pca" for PCA models
-#'    \item "sim" for SIMCA models
-#'    \item "pls" for PLSR models
-#'    \item "aqg" for all arguments related to the calculation of Aquagrams
+#'    \item "spl" for all arguments related to the split-process
+#'    \item "pca" for all arguments related to PCA models (except do.pca)
+#'    \item "sim" for all arguments realted to SIMCA models (except do.sim)
+#'    \item "pls" for all arguments related to PLSR models (except do.pls)
+#'    \item "aqg" for all arguments related to the calculation of Aquagrams 
+#'          (except do.aqg)
 #'  }
+#'  By providing any of the arguments of the analysis procedure file to the 
+#'  function \code{\link{getap}}, also when using it inside the function 
+#'  \code{\link{gdmm}}, you can override the values in the file with the 
+#'  provided values. See examples at \code{\link{gdmm}}.
 #'  @details The default name for the analysis procedure file can be set in 
 #'  settings.r. Any other .r file can be loaded by providing a valid .r filename 
 #'  to the appropriate argument, e.g. in the function \code{\link{getap}}. 
-#'  By providing any of the arguments of the statistis section (starting with 
-#'  'do.pca') of the analysis procedure file to the function \code{\link{getap}} 
-#'  you can override the values in the file with the provided values. Arguments 
-#'  in the 'split dataset' section (before 'do.pca') of the analysis procedure 
-#'  get exclusively read in from file.
-#'  @param splitByVariable NULL or character vector. If NULL, no splitting of the 
+#'  By providing any of the arguments of the analysis procedure file to the 
+#'  function \code{\link{getap}} also when using it inside the function 
+#'  \code{\link{gdmm}}, you can override the values in the file with the 
+#'  provided values. See examples at \code{\link{gdmm}}.
+#'  
+#'  @param spl.var NULL or character vector. If NULL, no splitting of the 
 #'  dataset will be performed. Provide a character vector with the column names 
 #'  of class variables to split the dataset along these variables.
-#'  @param splitByWavelength NULL or character vector. If NULL, all in the dataset 
+#'  @param spl.wl NULL or character vector. If NULL, all in the dataset 
 #'  available wavelengths will be used. Provide a character vector in the format 
 #'  "wlFrom-to-wlTo" (e.g. c("1000-to-2000", "1300-to-1600", ...)) 
 #'  to use all previously defined splits in these wavelengths.
-#'  @param do_smooth Logical. If smoothing of the NIR data should be performed. The 
+#'  @param spl.do.smo Logical. If smoothing of the NIR data should be performed. The 
 #'  values for the smoothing operation itself are defined in the settings.
-#'  @param smooth_useRaw Logical. If, should smoothing be performed, the raw 
+#'  @param spl.smo.raw Logical. If, should smoothing be performed, the raw 
 #'  unsmoothed data will be used as well in addition to the smoothed data.
-#'  @param do_noiseTest Logical. If artifical noise should be added to the dataset.
-#'  @param noiseTest_useRaw  If, should the noise-test be performed, the raw data 
+#'  @param spl.do.noise Logical. If artifical noise should be added to the dataset.
+#'  @param spl.noise.raw  If, should the noise-test be performed, the raw data 
 #'  will be used as well in addition to the noise-data.
 #'  
 #'  @param do.pca Logical. If a PCA should be calculated with a given dataset
@@ -68,10 +74,9 @@
 #'  or provide a character length one with a single column name of a class 
 #'  variable that should be used for coloring.
 #'  
-#'  @param do.aqg Logical. If Aquagrams should be calculated with a given dataset.
 #'  @template mr_aqg_calcparam
 #'  
-#'  @seealso \code{\link{getap}}
+#'  @seealso \code{\link{getap}}, \code{\link{gdmm}}
 #'  @family fileDocs
 #'  @name anproc_file
 NULL

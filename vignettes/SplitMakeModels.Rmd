@@ -30,7 +30,7 @@ cube <- gdmm(dataset, getap(fn="myAp1.r"), getmd(fn="myMd1.r"))
 
 The final product of the function `gdmm` is an object of class `aquap_cube`, what contains an object of class `aquap_set` in each of its list-elements. One `aquap_set` now contains a single split-variation of the dataset and all the statistical models / calculations that were obtained from this specific dataset. 
 
-This `str(cube)` is not a nice structure to look at, so when you just type the name of a cube-object
+The `str(cube)` is not nice to look at, so when you just type the name of a cube-object
 ```
 cube
 #> Formal class 'aquap_cube', containing 6 datasets.
@@ -54,7 +54,7 @@ Please refer to the help for `?aquap_set` and `?aquap_cube` for more information
 
 ## Override Arguments in the Analysis Procedure File
 
-It is possible to override any of the arguments in the 'statistics' section of the analysis procedure file by providing the appropriate argument to the `getap` function, what is the default way to obtain the analysis procedure:
+It is possible to override any of the arguments of the analysis procedure file by providing the appropriate argument to the `getap` function, what is the default way to obtain the analysis procedure:
 ```
 cube <- gdmm(dataset, ap=getap(do.pca=TRUE))
 ```
@@ -66,5 +66,5 @@ cube <- gdmm(dataset, getap(fn="myAp1.r", do.pca=TRUE), getmd(fn="myMd1.r", expN
 ```
 what would override the experiment name in `myMd1.r` as well. (see details in ?`getmd`)
 
+The possible arguments for `getap` are exactly the same as you find in the (template for the) analysis procedure; for a comprehensive list of possible arguments please see the help for `?anproc_file`.
 
-For possible arguments to `getap` please see the help for `?getap` and `?anproc_file`.

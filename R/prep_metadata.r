@@ -252,15 +252,15 @@ getap_core <- function(fn="def") {
 	sys.source(path, envir=e)
 	check_apVersion(localEnv=e) 	### Version check here !!
 	##
-	ucl <- list(splitClasses=e$splitByVariable, splitWl=e$splitByWavelength)
-	if (e$do_smooth == FALSE) {e$smooth_useRaw <- TRUE} # just to be sure that one is true
-	smoothing <- list(useSmooth=e$do_smooth, useRaw=e$smooth_useRaw)
-	if (e$do_noiseTest == FALSE) {e$noiseTest_useRaw <- TRUE} # just to be sure that one is true
-	noise <- list(useNoise=e$do_noiseTest, useRaw=e$noiseTest_useRaw)
+	ucl <- list(splitClasses=e$spl.var, splitWl=e$spl.wl)
+	if (e$spl.do.smo == FALSE) {e$spl.smo.raw <- TRUE} # just to be sure that one is true
+	smoothing <- list(useSmooth=e$spl.do.smo, useRaw=e$spl.smo.raw)
+	if (e$spl.do.noise == FALSE) {e$spl.noise.raw <- TRUE} # just to be sure that one is true
+	noise <- list(useNoise=e$spl.do.noise, useRaw=e$spl.noise.raw)
 	dpt <- list(smoothing=smoothing, noise=noise)
 	##
 	pca <- list(doPCA=e$do.pca, colorBy=e$pca.colorBy)
-	simca <- list(doSIMCA=e$do.sim, simcOn=e$sim.vars, simcK=e$sim.k)
+	simca <- list(doSIMCA=e$do.sim, simcOn=e$sim.vars, simcK=e$sim.K)
 	plsr <- list(doPLSR=e$do.pls, regressOn=e$pls.regOn, ncomp=e$pls.ncomp, valid=e$pls.valid, colorBy=e$pls.colorBy)	
 	aquagr <- list(doAqg=e$do.aqg, vars=e$aqg.vars, nrCorr=e$aqg.nrCorr, spectra=e$aqg.spectra, minus=e$aqg.minus, TCalib=e$aqg.TCalib, Texp=e$aqg.Texp, bootCI=e$aqg.bootCI, R=e$aqg.R, smoothN=e$aqg.smoothN, selWls=e$aqg.selWls, msc=e$aqg.msc, reference=e$aqg.reference)	
 	##
@@ -268,16 +268,16 @@ getap_core <- function(fn="def") {
 	return(new("aquap_ap", ap))
 } #EOF
 
+
 #' @title Get Analysis Procedure
 #' @description Read in the analysis procedure from the default or a custom 
 #' analysis procedure file located in the metadata-folder. By providing any of 
-#' the arguments of the statistics section of the analysis procedure file 
-#' (see \code{\link{anproc_file}} to the function you can override the values 
-#' in the file with the provided values.
+#' the arguments of the analysis procedure file (see \code{\link{anproc_file}} 
+#' to the function you can override the values in the file with the provided 
+#' values.
 #' @details The name of the default analysis procedure file can be specified in 
 #' the settings. Other arguments than precise matches to the available arguments 
-#' will be ignored. Arguments in the 'split dataset' section of the analysis 
-#' procedure get exclusively read in from file.
+#' will be ignored.
 #' @param fn Character length one. If left at 'def', the default filename for an 
 #' analysis procedure file as specified in the settings (factory default is 
 #' "anproc.r") is read in. Provide any other valid name of an analysis procedure 
@@ -295,14 +295,32 @@ getap_core <- function(fn="def") {
 #' ap <- getap(pca.colorBy="C_Group") # change the value of 'pca.colorBy'
 #' from the .r file to 'C_Group'
 #' ap <- getap(do.sim=FALSE) # switch off the calculation of SIMCA models
+#' ap <- getap(spl.var="C_Group") # change the split variable to "C_Group"
 #' }
 #' @export
 getap <- function(fn="def", ...) {
 	autoUpS()
 	ap <- getap_core(fn) # first load the analysis procedure as defined in the .r file, then possibly modify it. If no additional arguments get supplied by the  user, the original values from the .r file get passed on.
 	apMod <- new("aquap_ap")
-	apMod$ucl <- ap$ucl # copy unchanged
-	apMod$dpt <- ap$dpt # copy unchanged
+	
+	###
+	UCL <- ap$ucl
+	modifyUCL <- function(spl.var=UCL$splitClasses, spl.wl=UCL$splitWl, ...) {
+		return(list(splitClasses=spl.var, splitWl=spl.wl))
+	} # EOIF
+	apMod$ucl <- modifyUCL(...)
+	###
+	DP <- ap$dpt
+	modifyDPT <- function(spl.do.smo=DP$smoothing$useSmooth, spl.smo.raw=DP$smoothing$useRaw, spl.do.noise=DP$noise$useNoise, spl.noise.raw=DP$noise$useRaw, ...) {
+		if (spl.do.smo == FALSE) {spl.smo.raw <- TRUE} # just to be sure that one is true
+		if (spl.do.noise == FALSE) {spl.noise.raw <- TRUE}
+		smoothing <- list(useSmooth=spl.do.smo, useRaw=spl.smo.raw)
+		noise <- list(useNoise=spl.do.noise, useRaw=spl.noise.raw)
+		return(list(smoothing=smoothing, noise=noise))
+	} # EOIF
+	apMod$dpt <- modifyDPT(...)
+	###
+			
 	###
 	PC <- ap$pca
 	modifyPCA <- function(do.pca=PC$doPCA, pca.colorBy=PC$colorBy, ...) { # define the default of the function as the value coming in in the analysis procedure ap (getap_core); need the ... to "ignore" all the other arguments that do not match
@@ -345,6 +363,5 @@ getap <- function(fn="def", ...) {
 	} # EOIF
 	apMod$aquagr <- modifyAquagram(...)
 	###
-#	print(str(apMod)); wait()
 	return(apMod)
 } # EOF

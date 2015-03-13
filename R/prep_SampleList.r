@@ -202,7 +202,7 @@ esl_checkDefaults <- function(form) {
 #' @description Creates and exports the randomized sample list to file.
 #' @details Possible formats to export are XXX. For the time estimates, 
 #' 	you can fill in your own values at the bottom of the settings.r file.
-#' @aliases exportSampleList esl
+## @aliases exportSampleList esl
 #' @param md List. An object with the metadata of the experiment. Defaults to 
 #' 	\code{getmd()}, what is calling the default filename for the metadata file. 
 #' See \code{\link{getmd}} and \code{\link{metadata_file}}.

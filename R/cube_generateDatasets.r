@@ -184,7 +184,126 @@ ap_cleanOutZeroValues <- function(ap, dataset) {
 	return(ap)
 } # EOF
 
-ap_checExistence <- function(ap, dataset) {
+ap_checkAquagramDefaults <- function(ap, header) {
+	if (!is.null(ap$aquagr)) {
+		a <- ap$aquagr
+		###
+		nrCorr <- a$nrCorr
+		if (all(nrCorr == "def")) {
+			nrCorr <- .ap2$stn$aqg_correctNrOfObs
+		} else { 
+			if (!is.logical(nrCorr)) {
+				stop("Please provide either 'def', 'TRUE' or 'FALSE' for the argument 'aqg.nrCorr'.", call.=FALSE)
+			}
+		}
+		ap$aquagr$nrCorr <- nrCorr
+		###
+		spectra <- a$spectra
+		if (any(spectra != FALSE)) {
+			possibleValues <- c("raw", "avg", "subtr", "all") # XXXVARXXX
+			if (!any(spectra %in% possibleValues) | all(spectra == TRUE)) {
+				stop("Please provide either 'FALSE', or one or more of 'raw', 'avg', 'subtr', or 'all' to the argument 'plotSpectra'.", call.=FALSE)
+			}
+			ss <- c("subtr", "all")
+			if ((any(spectra %in% ss)) & is.null(a$minus)) {
+				stop("You have to provide a value for 'minus' in order to plot subtracted spectra", call.=FALSE)
+			}
+		}
+		###
+		if (!is.null(a$minus)) {
+			if (!all(is.character(a$minus)) | length(a$minus) != 1) {
+				stop("Please provide a character length one for the argument 'aqg.minus'", call.=FALSE)
+			}
+			groupingVars <- a$vars
+			for (i in 1: length(groupingVars)) {
+				ind <- which(colnames(header) == groupingVars[i])
+				levelsChar <- levels(header[,ind])
+				if (!a$minus %in% levelsChar) {
+					stop(paste("Sorry, it appears that the provided value \"", a$minus, "\" for the argument 'aqg.minus' is not present in the Aquagram grouping variable \"", groupingVars[i], "\". \nPlease check your input at 'aqg.minus' and 'aqg.vars'", sep=""), call.=FALSE)
+				}
+			} # end for i
+		}
+		###
+		TCalib <- a$TCalib
+		if (all(TCalib=="def")) {
+			TCalib <- .ap2$stn$aqg_calibTRange
+		} else {
+			if (!is.null(TCalib)) {
+				if (!all(is.numeric(TCalib)) | length(TCalib) !=2) {
+					stop("Please provide either 'def', or a length 2 numeric for the argument 'aqg.TCalib'.", call.=FALSE)	
+				}
+			}
+		}
+		ap$aquagr$TCalib <- TCalib
+		###
+		Texp <- a$Texp
+		if (all(Texp=="def")) {
+			Texp <- .ap2$stn$aqg_Texp
+		} else {
+			if (!is.numeric(Texp) | (length(Texp) != 1) ) {
+				stop("Please provide either 'def', or a length 1 numeric for the argument 'aqg.Texp'.", call.=FALSE)			
+			}
+		}
+		ap$aquagr$Texp <- Texp
+		###
+		bootCI <- a$bootCI
+		if (all(bootCI=="def")) {
+			bootCI <- .ap2$stn$aqg_bootCI
+		} else {
+			if (!is.logical(bootCI)) {
+				stop("Please provide either 'def', 'TRUE' or 'FALSE' for the argument 'aqg.bootCI'.", call.=FALSE)		
+			}
+		}
+		ap$aquagr$bootCI <- bootCI	
+		###
+		if (nrCorr & bootCI) {
+			msg <- ("WARNING: \nPerforming number correction AND bootstrap on the aquagram can lead to unrepresentative / irreal graphics \n------\nDo you want to continue anyway? \n( y / n)")
+			message(msg)
+			a <- readLines(n=1)
+			if (a != "y" & a != "Y") {
+				stop("'gdmm' aborted.", call.=FALSE)		
+			}	
+		}
+		###
+		R <- a$R
+		if (all(R=="def")) {
+			R <- .ap2$stn$aqg_bootR
+		} else {
+			if (!grepl("nrow@", R)) {
+				if (!is.numeric(R) | (length(R)!=1)) {
+					stop("Please provide either 'def', 'nrow@x' (with x being a number),  or a length 1 numeric for the argument 'aqg.R'.", call.=FALSE)			
+				}
+			}
+		}
+		if (!is.numeric(R)) {
+			num <- as.numeric(unlist(strsplit(R, "@"))[2])
+			R <- nrow(header) * num
+		}
+		ap$aquagr$R <- R
+		###
+		if (!is.numeric(a$smoothN) | length(a$smoothN)!=1) {
+			stop("Please provide an odd length 1 numeric to the argument 'aqg.smoothN'", call.=FALSE)
+		}
+		###
+		selWls <- a$selWls
+		if (all(selWls=="def")) {
+			selWls <- .ap2$stn$aqg_wlsAquagram
+		} else {
+			if ( !all(is.numeric(selWls)) ) {
+				stop("Please provide either 'def',  or a numeric vector for the argument 'aqg.selWls'.", call.=FALSE)			
+			}
+		}
+		ap$aquagr$selWls <- selWls
+		###
+		if (!is.logical(a$msc)) {
+			stop("Please provide either TRUE or FALSE to the argument 'aqg.msc'", call.=FALSE)
+		}
+		###
+	} # end if !is.null(ap$aquagr)
+	return(ap)
+} # EOF
+
+ap_checExistence_Defaults <- function(ap, dataset) {
 	cPref <- .ap2$stn$p_ClassVarPref
 	yPref <- .ap2$stn$p_yVarPref
 	cns <- colnames(dataset$header)
@@ -192,11 +311,11 @@ ap_checExistence <- function(ap, dataset) {
 		a <- which(!charVec %in% cns)
 		if (length(a) != 0) {
 			vars <- paste(charVec[a], collapse=", ")
-			stop(paste("Sorry, the variable \"", vars, "\" appears not to exist in your dataset. \nPlease check the ", where, " part of the analysis procedure.", sep=""), call.=FALSE)
+			stop(paste("Sorry, the variable \"", vars, "\" appears not to exist in your dataset. \nPlease check the ", where, " part of the analysis procedure / your input.", sep=""), call.=FALSE)
 		}
 		a <- substr(charVec, 1, nchar(what))
 		if (any(a != what)) {
-			stop(paste("Not all of the provided variables are of the the required type \"", what, "\".\nPlease check the ", where, " part of the analysis procedure.", sep=""), call.=FALSE)
+			stop(paste("Not all of the provided variables are of the the required type \"", what, "\".\nPlease check the ", where, " part of the analysis procedure / your input.", sep=""), call.=FALSE)
 		}
 	} # EOIF
 	checkEx(ap$ucl$splitClasses, "variable split", cPref)
@@ -204,8 +323,12 @@ ap_checExistence <- function(ap, dataset) {
 	checkEx(ap$simca$simcOn, "SIMCA", cPref)
 	checkEx(ap$plsr$regressOn, "PLSR (regress on)", yPref)
 	checkEx(ap$plsr$colorBy, "PLSR (color by)", cPref)
-	if (!is.null(ap$aquagr$vars)) {
-		checkEx(ap$aquagr$vars, "Aquagram", cPref)
+	if (!is.null(ap$aquagr)) {
+		if (is.null(ap$aquagr$vars)) {
+			stop(paste("Sorry, you have to provide one or more values for \"aqg.vars\". Please check the Aquagram part of the analysis procedure."), call.=FALSE)
+		} else {
+			checkEx(ap$aquagr$vars, "Aquagram", cPref)		
+		}
 	}
 	wls <- getWavelengths(dataset)
 	splitWl <- ap$ucl$splitWl
@@ -220,7 +343,41 @@ ap_checExistence <- function(ap, dataset) {
 			stop(paste("Sorry, the specified wavelengths \"", splitWl[i], "\" are out of the available range.", sep=""), call.=FALSE)
 		}
 	}
+	####
+	ap <- ap_checkAquagramDefaults(ap, dataset$header)
+	# add more default checking for other statistics here
+	return(ap)
 } # EOF
+
+OLD_OLD_getCheckDefaultsAndInput_OLD_OLD <- function(nrCorr, TCalib, Texp, bootCI, R, nrowDat, selWls, plotSpectra, minus,  smoothN, msc, fsa, fss) {
+	if (all(!is.logical(fsa)) & any(fsa!=TRUE)) {
+		if (!is.character(fsa)) {
+			if (!all(is.numeric(fsa)) | length(fsa)!=2) {
+				stop("Please provide a numeric length two as argument for 'fsa' to manually provide a fix scale for the aquagrams.", call.=FALSE)
+			}
+		} else {
+			a <- c("both", "only")
+			if (!any(fsa %in% a)) {
+		 		stop("Please provide either 'both' or 'only' as argument for 'fsa' (see help).", call.=FALSE)
+		 	}
+		}
+	}
+	###
+	if (all(!is.logical(fss)) & any(fss!=TRUE)) {
+		if (!is.character(fss)) {
+			if (!all(is.numeric(fss)) | length(fss)!=2) {
+				stop("Please provide a numeric length two as argument for 'fss' to manually provide a fix scale for the subtraction spectra.", call.=FALSE)
+			}
+		} else {
+			a <- c("both", "only")
+			if (!any(fss %in% a)) {
+		 		stop("Please provide either 'both' or 'only' as argument for 'fss' (see help).", call.=FALSE)
+		 	}
+		}
+	}
+	###
+} # EOF
+
 
 #' @title Select Wavelengths
 #' @description Select wavelenghts from a dataset.
@@ -328,12 +485,45 @@ printIds <- function(cube) {
 	}
 } # EOF
 
-#' @rdname gdmm
+#' @title *** Generate Datasets and make Models *** 
+#' @description Generate several datasets by splitting up the original dataset 
+#' according to the variables and values as specified in the analysis procedure 
+#' in the 'split dataset' section and then calculate the models as specified 
+#' in the 'statistics' section on all of the  datasets. By providing additional 
+#' arguments to the function \code{\link{getap}} (what is the default way to get 
+#' the analysis procedure 'ap') you can override any value in the analysis 
+#' procedure. Please see examples and \code{\link{getap}} and  
+#' \code{\link{anproc_file}} for further information.
+#' @details Split-combinations that yield no result will automatically be omitted.
+#' It is recommended to first  make the analysis procedure file as complete and 
+#' accurate as possible, and then to override only a few parameters if necessary.
+#' @param dataset An object of class 'aquap_data'
+#' @param md The metadata, an object of class 'aquap_md'
+#' @param ap The analysis procedure, an object of class 'aquap_ap'
+#' @return An object of class \code{\link{aquap_cube}} containing all the 
+#' statistical models / calculations that were performed on the split-variations 
+#' of the dataset.
+#' @seealso \code{\link{getap}}, \code{\link{getmd}}
+#' @examples
+#' \dontrun{
+#' dataset <- gfd() # will load or import data
+#' cube <- gdmm(dataset) # split up the dataset and make models, execute the 
+#' # analysis procedure as specified in its .r file
+#' cube <- gdmm(dataset, getap(spl.var="C_Group")) # split the dataset by "C_Group"
+#' cube <- gdmm(dataset, getap(spl.var=c("C_Group", "C_Temp))) # split the dataset 
+#' # by "C_Group", then by "C_Temp"
+#' cube <- gdmm(dataset, getap(spl.wl="1300-to-1600")) # override 'spl.wl' in the 
+#' # analysis procedure
+#' cube <- gdmm(dataset, getap(aqg.bootCI=FALSE)) # override the value in 
+#' # 'aqg.bootCI' of the analysis procedure with 'FALSE'. 
+#' cube <- gdmm(dataset, getap(do.sim=FALSE, pls.regOn="Y_Temp"))
+#' }
+#' @family Core functions
 #' @export
 gdmm <- function(dataset, ap=getap(), md=getmd() ) {
 	autoUpS()
 	ap <- ap_cleanOutZeroValues(ap, dataset)
-	ap_checExistence(ap, dataset)
+	ap <- ap_checExistence_Defaults(ap, dataset)
 	a <- makeCompPattern(dataset$header, md, ap)
 	cp <- a$cp
 	cpt <- a$cpt
