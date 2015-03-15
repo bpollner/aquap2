@@ -54,6 +54,8 @@ sl <- esl(md=getmd("myMetadataFile.r"), form="txt", showFirstRows=FALSE)
 }
 \seealso{
 Other Core functions: \code{\link{gdmm}};
-  \code{\link{getFullData}}, \code{\link{gfd}}
+  \code{\link{getFullData}}, \code{\link{gfd}};
+  \code{\link{plot}}, \code{\link{plot,aquap_cube-method}},
+  \code{\link{plot_cube}}
 }
 

@@ -243,7 +243,7 @@ check_apVersion <- function(localEnv) {
 	}
 } # EOF
 
-getap_core <- function(fn="def") {
+getap_core_file <- function(fn="def") {
 	check_apDefaults(fn)
 	##
 	path <- .ap2$stn$fn_metadata
@@ -259,15 +259,27 @@ getap_core <- function(fn="def") {
 	noise <- list(useNoise=e$spl.do.noise, useRaw=e$spl.noise.raw)
 	dpt <- list(smoothing=smoothing, noise=noise)
 	##
-	pca <- list(doPCA=e$do.pca, colorBy=e$pca.colorBy)
+	pca <- list(doPCA=e$do.pca, colorBy=e$pca.colorBy, what=e$pca.what, pcs=e$pca.sc, pcSc=e$pca.sc.pairs, pcLo=e$pca.lo)
 	simca <- list(doSIMCA=e$do.sim, simcOn=e$sim.vars, simcK=e$sim.K)
 	plsr <- list(doPLSR=e$do.pls, regressOn=e$pls.regOn, ncomp=e$pls.ncomp, valid=e$pls.valid, colorBy=e$pls.colorBy)	
-	aquagr <- list(doAqg=e$do.aqg, vars=e$aqg.vars, nrCorr=e$aqg.nrCorr, spectra=e$aqg.spectra, minus=e$aqg.minus, TCalib=e$aqg.TCalib, Texp=e$aqg.Texp, bootCI=e$aqg.bootCI, R=e$aqg.R, smoothN=e$aqg.smoothN, selWls=e$aqg.selWls, msc=e$aqg.msc, reference=e$aqg.reference)	
+	aquagr <- list(doAqg=e$do.aqg, vars=e$aqg.vars, nrCorr=e$aqg.nrCorr, spectra=e$aqg.spectra, minus=e$aqg.minus, mod=e$aqg.mod, TCalib=e$aqg.TCalib, Texp=e$aqg.Texp, bootCI=e$aqg.bootCI, R=e$aqg.R, smoothN=e$aqg.smoothN, selWls=e$aqg.selWls, msc=e$aqg.msc, reference=e$aqg.reference)	
+	genPlot <- list(where=e$pg.where, onMain=e$pg.main, onSub=e$pg.sub, fns=e$pg.fns)
 	##
-	ap <- list(ucl=ucl, dpt=dpt, pca=pca, simca=simca, plsr=plsr, aquagr=aquagr)
+	ap <- list(ucl=ucl, dpt=dpt, pca=pca, simca=simca, plsr=plsr, aquagr=aquagr, genPlot=genPlot)
 	return(new("aquap_ap", ap))
 } #EOF
 
+getap_core <- function(fn, .lafw_fromWhere="load", cube=NULL, ...) {
+	if (.lafw_fromWhere == "load") {
+		return(getap_core_file(fn))
+	} else {
+		if (.lafw_fromWhere == "cube") {
+			return(cube@anproc)
+		} else {
+			stop("An error at obtaining the analysis procedure occured. Please stay calm.", call.=FALSE) # this is not likely to ever happen
+		}
+	}
+} # EOF
 
 #' @title Get Analysis Procedure
 #' @description Read in the analysis procedure from the default or a custom 
@@ -277,7 +289,9 @@ getap_core <- function(fn="def") {
 #' values.
 #' @details The name of the default analysis procedure file can be specified in 
 #' the settings. Other arguments than precise matches to the available arguments 
-#' will be ignored.
+#' will be ignored. The provided value and defaults will be checked in 
+#' \code{\link{gdmm}} and the resulting \code{\link{aquap_cube}} contains the 
+#' final analysis procedure in its slot @@anproc.
 #' @param fn Character length one. If left at 'def', the default filename for an 
 #' analysis procedure file as specified in the settings (factory default is 
 #' "anproc.r") is read in. Provide any other valid name of an analysis procedure 
@@ -300,9 +314,9 @@ getap_core <- function(fn="def") {
 #' @export
 getap <- function(fn="def", ...) {
 	autoUpS()
-	ap <- getap_core(fn) # first load the analysis procedure as defined in the .r file, then possibly modify it. If no additional arguments get supplied by the  user, the original values from the .r file get passed on.
+	ap <- getap_core(fn, ...) 	# first load the analysis procedure as defined in the .r file, then possibly modify it. If no additional arguments get supplied by the  user, the original values from the .r file get passed on.
+								# depending on a possible additional argument in ... (.lafw_fromWhere), either the ap from the file is loaded, or,  in case of a call from a plotting function, the ap from the cube (what then is also present in the ... argument) is taken
 	apMod <- new("aquap_ap")
-	
 	###
 	UCL <- ap$ucl
 	modifyUCL <- function(spl.var=UCL$splitClasses, spl.wl=UCL$splitWl, ...) {
@@ -320,21 +334,36 @@ getap <- function(fn="def", ...) {
 	} # EOIF
 	apMod$dpt <- modifyDPT(...)
 	###
-			
+	checkDo <- function(root, do) { # provide do as character
+		if (is.null(root)) {		# the whole root is not here
+			return(FALSE)
+		} else {
+			if (is.null(root[do][[1]])) { # the root is here, but no "do.xxx" directive (coming from the cube)
+				return(TRUE)
+			}
+			if (root[do][[1]]) {	 # so if the "do.xxx" is TRUE - root is here, "do.xxx" directive is here (coming from loading)
+				return(TRUE)
+			} else {
+				return(FALSE) 		# root is here, do.xxx is FALSE - (coming from loading)
+			}
+		}
+	} # EOIF
 	###
 	PC <- ap$pca
-	modifyPCA <- function(do.pca=PC$doPCA, pca.colorBy=PC$colorBy, ...) { # define the default of the function as the value coming in in the analysis procedure ap (getap_core); need the ... to "ignore" all the other arguments that do not match
+#	if (is.null(PC)) {doIt <- FALSE} else { if (PC$doPCA) {doIt <- TRUE} else {doIt <- FALSE}} # have to correct for the possibility that we get the core-ap from the cube: in this case we do not have the "do.XXX" argument
+	doIt <- checkDo(PC, "doPCA")
+	modifyPCA <- function(do.pca=doIt, pca.colorBy=PC$colorBy, pca.what=PC$what, pca.sc=PC$pcs, pca.sc.pairs=PC$pcSc, pca.lo=PC$pcLo, ...) { # define the default of the function as the value coming in in the analysis procedure ap (getap_core); need the ... to "ignore" all the other arguments that do not match
 		if (!do.pca) {
 			return(NULL)
 		} else {
-			return(list(colorBy=pca.colorBy)) # return the same name as in the ap before
+			return(list(colorBy=pca.colorBy, what=pca.what, pcs=pca.sc, pcSc=pca.sc.pairs, pcLo=pca.lo)) # return the same name as in the ap before
 		}
-	
 	} # EOIF
 	apMod$pca <- modifyPCA(...) # if no values are provided in ... , then the defaults (who are all the values from the .r file) are taken. If one or more values are provided, they replace the default.
 	###
 	SI <- ap$simca
-	modifySIMCA <- function(do.sim=SI$doSIMCA, sim.vars=SI$simcOn, sim.K=SI$simcK, ...) {
+	doIt <- checkDo(SI, "doSIMCA")
+	modifySIMCA <- function(do.sim=doIt, sim.vars=SI$simcOn, sim.K=SI$simcK, ...) {
 		if (!do.sim) {
 			return(NULL)
 		} else {
@@ -344,7 +373,8 @@ getap <- function(fn="def", ...) {
 	apMod$simca <- modifySIMCA(...)
 	###
 	PL <- ap$plsr
-	modifyPLSR <- function(do.pls=PL$doPLSR, pls.regOn=PL$regressOn, pls.ncomp=PL$ncomp, pls.valid=PL$valid, pls.colorBy=PL$colorBy, ...) {
+	doIt <- checkDo(PL, "doPLSR")
+	modifyPLSR <- function(do.pls=doIt, pls.regOn=PL$regressOn, pls.ncomp=PL$ncomp, pls.valid=PL$valid, pls.colorBy=PL$colorBy, ...) {
 		if (!do.pls) {
 			return(NULL)
 		} else {
@@ -354,14 +384,26 @@ getap <- function(fn="def", ...) {
 	apMod$plsr <- modifyPLSR(...)	
 	###
 	AQ <- ap$aquagr
-	modifyAquagram <- function(do.aqg=AQ$doAqg, aqg.vars=AQ$vars, aqg.nrCorr=AQ$nrCorr, aqg.spectra=AQ$spectra, aqg.minus=AQ$minus, aqg.TCalib=AQ$TCalib, aqg.Texp=AQ$Texp, aqg.bootCI=AQ$bootCI, aqg.R=AQ$R, aqg.smoothN=AQ$smoothN, aqg.selWls=AQ$selWls, aqg.msc=AQ$msc, aqg.reference=AQ$reference, ...) {
+	doIt <- checkDo(AQ, "doAqg")
+	modifyAquagram <- function(do.aqg=doIt, aqg.vars=AQ$vars, aqg.nrCorr=AQ$nrCorr, aqg.spectra=AQ$spectra, aqg.minus=AQ$minus, aqg.mod=AQ$mod, aqg.TCalib=AQ$TCalib, aqg.Texp=AQ$Texp, aqg.bootCI=AQ$bootCI, aqg.R=AQ$R, aqg.smoothN=AQ$smoothN, aqg.selWls=AQ$selWls, aqg.msc=AQ$msc, aqg.reference=AQ$reference, ...) {
 		if (!do.aqg) {
 			return(NULL)
 		} else {
-			return(list(vars=aqg.vars, nrCorr=aqg.nrCorr, spectra=aqg.spectra, minus=aqg.minus, TCalib=aqg.TCalib, Texp=aqg.Texp, bootCI=aqg.bootCI, R=aqg.R, smoothN=aqg.smoothN, selWls=aqg.selWls, msc=aqg.msc, reference=aqg.reference))
+			return(list(vars=aqg.vars, nrCorr=aqg.nrCorr, spectra=aqg.spectra, minus=aqg.minus, mod=aqg.mod, TCalib=aqg.TCalib, Texp=aqg.Texp, bootCI=aqg.bootCI, R=aqg.R, smoothN=aqg.smoothN, selWls=aqg.selWls, msc=aqg.msc, reference=aqg.reference))
 		}
 	} # EOIF
 	apMod$aquagr <- modifyAquagram(...)
 	###
+	cnt <- checkForStats(apMod)$cnt # returns 0 if not a single model has been calculated; we have do check at the modified ap !!
+	GP <- ap$genPlot
+	modifyGenPlot <- function(pg.where=GP$where, pg.main=GP$onMain, pg.sub=GP$onSub, pg.fns=GP$fns, ...) {
+		if (cnt == 0) {
+			return(NULL)
+		} else {
+			return(list(where=pg.where, onMain=pg.main, onSub=pg.sub, fns=pg.fns))
+		}	
+	} # EOIF
+	apMod$genPlot <- modifyGenPlot(...)
+	###	
 	return(apMod)
 } # EOF

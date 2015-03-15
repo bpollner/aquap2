@@ -24,11 +24,28 @@ unsmoothed data will be used as well in addition to the smoothed data.}
 \item{spl.noise.raw}{If, should the noise-test be performed, the raw data
  will be used as well in addition to the noise-data.}
 
-\item{do.pca}{Logical. If a PCA should be calculated with a given dataset}
+\item{do.pca}{Logical. If used in \code{gdmm}, if a PCA should be calculated
+with a given dataset.}
+
+\item{do.pca}{Logical. If used in a plotting function, if PCA score / loading
+plots should be plotted.}
 
 \item{pca.colorBy}{NULL or character vector. Which class-variables
- should be used for coloring the PCA score plot. Set to NULL for using all
- available class variables for coloring.}
+should be used for coloring the PCA score plot. Set to NULL for using all
+available class variables for coloring.}
+
+\item{pca.what}{Character length one. What element of the PCA analysis to plot.
+Possible values are 'both', 'scores', 'loadings'.}
+
+\item{pca.sc}{Numeric length 2. Two PCs to be plotted against each other
+in the score plots.}
+
+\item{pca.sc.pairs}{Numeric vector of length >=2, indicating what PCs
+to plot in the score pairs plot. Set to NULL for *not* plotting the pairs
+plot.}
+
+\item{pca.lo}{Numeric vector of length >=2, indicating what PCs to plot in
+the loadingplot.}
 
 \item{do.sim}{Logical.If SIMCA models of the dataset should be calculated.}
 
@@ -97,10 +114,10 @@ the subtractions in the raw spectra as well as for the subtractions within the
 Aquagram, should you choose any of the -diff modes.}
 
 \item{aqg.mod}{Character. What mode, what kind of Aquagram should be calculated?
-Possible values are: "classic", "classic-diff", "sfc", "sfc-diff", "aucs",
-"aucs-diff", "aucs.tn", "aucs.tn-diff", "aucs.tn.dce", "aucs.tn.dce-diff",
-"aucs.dce" and "aucs.dce-diff" and "def" for reading in the default from
-settings.r.}
+Possible values are: 'classic', 'classic-diff', 'sfc', 'sfc-diff', 'aucs',
+'aucs-diff', 'aucs.tn', 'aucs.tn-diff', 'aucs.tn.dce', 'aucs.tn.dce-diff',
+'aucs.dce', 'aucs.dce-diff' and 'def' for reading in the default from
+settings.r. XXX where do we have the explanation of the mods? XXX}
 
 \item{aqg.TCalib}{Character, numeric or NULL. The default (leave at 'def') can be
 set in the settings.  If 'NULL' the complete temperature range of the
@@ -151,15 +168,20 @@ The analysis procedure file is used to first split the dataset
  according to the provided values in the 'split dataset' section, and
  then, in the 'statistics' section (starting with \code{do.pca}), to tell
  the system which statistics to apply resp. what models to calculate on those
- datasets. Arguments used to control thes split-process and the behaviour of
- statistics / calculations start with a certain prefix:
+ datasets. It also contains specific and general plotting options that are used
+ by the \code{\link{plot}} function.
+ Arguments used to control the split-process, the behaviour of statistics /
+ calculations / specific plotting options and the general plotting options
+ start with a certain prefix:
  \itemize{
    \item "spl" for all arguments related to the split-process
    \item "pca" for all arguments related to PCA models (except do.pca)
-   \item "sim" for all arguments realted to SIMCA models (except do.sim)
+   \item "sim" for all arguments related to SIMCA models (except do.sim)
    \item "pls" for all arguments related to PLSR models (except do.pls)
    \item "aqg" for all arguments related to the calculation of Aquagrams
          (except do.aqg)
+   \item "pg" for the general plotting options that are used in each of the
+   plotting functions.
  }
  By providing any of the arguments of the analysis procedure file to the
  function \code{\link{getap}}, also when using it inside the function

@@ -5,7 +5,7 @@
 ### do NOT change the names of the variables !!  ####
 
 	################################################################
-	##### split dataset #####
+	################## split dataset ###############################
 	spl.var <- NULL							## by which variables should the dataset be split? leave empty c() or set to NULL for *no* splitting by class variables
 #	spl.var <- c("C_Group", "C_Mode")
 
@@ -22,46 +22,58 @@
 			
 
 
+
 	################################################################
-	##### statistics ########
+	########## statistics & specific plotting options ##############
 	#########################
-	## PCA
+	### PCA 
 	do.pca <- FALSE							## if PCA of the given datasets should be performed
+	
+	# plotting 
 	pca.colorBy <- NULL						## which variables to use for coloring the score plots. leave empty c() or set to NULL for using all available class-variables for coloring 
 #	pca.colorBy <- c("C_Group", "C_Temp", "C_RelHum")
+	pca.what <- "both"						## can be either 'both' for plotting both PCA scores and loadings, or 'scores' or 'loadings' for plotting only one of them.
+	pca.sc <- c(1, 2)						## Numeric length 2, the two PCs to be plotted against each other in the score plots.
+	pca.sc.pairs <- 1:6 					## Numeric sequence of length >=2, indicating what PC components to plot in the score pairs plot. Set to NULL for not plotting the pairs plot.
+	pca.lo <- 1:6							## Numeric sequence of length >=2, indicating what PC components to plot in the loadingplot.
 	#########################
 	 
-
+	 
 	#########################
-	## SIMCA
+	### SIMCA
 	do.sim <- FALSE							## if SIMCA models of the given datasets should be calculated
 	sim.vars <- NULL						## which variables should be use to group the data? Leave empty c() or set to NULL for using all available class-variables
 #	sim.vars <- c("C_Group")
 	sim.K <- 0								## The number of components. In mode "robust", leave at 0 for automatic detection. (it is a capital "K")
+	
+	# plotting
+	
 	#########################
 
 
 	#########################
-	## PLSR
+	### PLSR
 	do.pls <- FALSE							## if PLSR models of the given datasets should be calculated
 	pls.regOn <- NULL						## which variables should be used to regress on? Leave empty c() or set to NULL for using all numerical variables
 #	pls.regOn <- c("Y_Temp")
 	pls.ncomp <- NULL						## number of components, leave at NULL for automatic detection of optimal number of components
 	pls.valid <- "CV"						## "CV" will perform a 10-fold crossvalidation, "LOO" a leave-one-out crossvalidation
+	
+	# plotting
 	pls.colorBy <- NULL						## What class-variable should be used for coloring in the RMSEP and RMSECV plots? Leave empty c() or set to NULL for no coloring
 #	pls.colorBy <- "C_Temp"
 	#########################
 
 
 	#########################
-	## Aquagram
+	### Aquagram
 	do.aqg <- FALSE							## if Aquagrams of the given datasets should be calculated
 	aqg.vars <- NULL						## which variables should be use to group the data? Leave empty c() or set to NULL if you want to decide later
 #	aqg.vars <- c("C_Group")
 	aqg.nrCorr <- "def"						## please see the help for ?anproc_file (and ?gdmm) for further information regarding these arguments.
 	aqg.spectra <- FALSE
 	aqg.minus <- NULL
-	aqg.mod <- "def"  	## new def here!!!
+	aqg.mod <- "def"  
 	aqg.TCalib <- "def"
 	aqg.Texp <- "def"
 	aqg.bootCI <- "def"
@@ -70,9 +82,22 @@
 	aqg.selWls <- "def"
 	aqg.msc <- TRUE
 	aqg.reference <- NULL
+	
+	# plotting
+	
 	#########################	
 	################################################################
+	
 
+
+	################################################################
+	############### general plotting options #######################
+	#########################
+	pg.where <- "pdf"						## for plotting PDFs provide "pdf", for plotting to graphics device provide anything but "pdf"
+	pg.main <- ""							## the additional text on the title of each single plot
+	pg.sub <- ""							## the additional text on the subtitle of each single plot
+	pg.fns <- ""							## 'filename suffix', the additional text in the filename of the pdf.
+	################################################################
 
 ### do NOT change the names of the variables !!  ####
 ####################################################################

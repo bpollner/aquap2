@@ -3,29 +3,6 @@
 \name{settings_file}
 \alias{settings_file}
 \title{The Settings File}
-\arguments{
-\item{fn_analysisData}{The folder name for storing any analysis data}
-
-\item{fn_exports}{The folder name for any exported file}
-
-\item{fn_rcode}{The folder where all the r-code is kept}
-
-\item{fn_rawdata}{The folder where you put the raw-data from your data
-acquisition}
-
-\item{fn_rdata}{The folder where R is keeping all its raw-data after importing
-from the data-acquisition format}
-
-\item{fn_metadata}{The folder where you put the metadata and the analysis
-procedure r-files}
-
-\item{fn_results}{The folder where all the result-pdfs get saved}
-
-\item{fn_sampleLists}{The folder for the sample lists used in randomizing the
-samples and for importing the raw-data}
-
-\item{XXX}{complete this}
-}
 \description{
 The settings file is used to store parameters and constants used
  in several functions, and it is living in the folder specified by the

@@ -5,18 +5,43 @@ Version: 0.0.1
 Date: 2015-02-17
 Author: Bernhard Pollner, Zoltan Kovacs
 Maintainer: Bernhard Pollner <bernhard.pollner@mac.com>
-Description: Methods and tools to analyse NIRS data from an Aquaphotomics perspective
+Description: Methods and tools to analyse NIRS data from an Aquaphotomics
+    perspective
 License: GPL (>=2)
 LazyLoad: yes
-Depends: 
+Depends:
     R (>= 2.8.0)
-Imports: 
+Imports:
     methods,
     devtools,
     foreach,
     doParallel,
     xlsx,
-    signal
+    signal,
+    ChemometricsWithR
 Suggests:
     knitr
 VignetteBuilder: knitr
+Collate:
+    'aquap2.r'
+    'cl_classFunctions.r'
+    'cl_classDefs.r'
+    'cube_generateDatasets.r'
+    'cube_makeModels.r'
+    'doc_anproc.r'
+    'doc_classes.r'
+    'doc_customImport.r'
+    'doc_customTRH.r'
+    'doc_metadata.r'
+    'doc_settings.r'
+    'gen_general.r'
+    'gen_parallel.r'
+    'gen_possibleValues.r'
+    'gen_roxygenHelpers.r'
+    'plot_all.r'
+    'plot_pca.r'
+    'prep_SampleList.r'
+    'prep_importData.r'
+    'prep_importData_specific.r'
+    'prep_metadata.r'
+    'zzz.r'

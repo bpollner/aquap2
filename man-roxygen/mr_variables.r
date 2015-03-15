@@ -1,1 +1,1 @@
-#' @templateVar possSpecFiletypes Test
+#' @templateVar varT Test

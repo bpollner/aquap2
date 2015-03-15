@@ -25,10 +25,10 @@
 #' the subtractions in the raw spectra as well as for the subtractions within the
 #' Aquagram, should you choose any of the -diff modes.
 #' @param aqg.mod Character. What mode, what kind of Aquagram should be calculated?
-#' Possible values are: "classic", "classic-diff", "sfc", "sfc-diff", "aucs",
-#' "aucs-diff", "aucs.tn", "aucs.tn-diff", "aucs.tn.dce", "aucs.tn.dce-diff",
-#' "aucs.dce" and "aucs.dce-diff" and "def" for reading in the default from 
-#' settings.r.
+#' Possible values are: 'classic', 'classic-diff', 'sfc', 'sfc-diff', 'aucs',
+#' 'aucs-diff', 'aucs.tn', 'aucs.tn-diff', 'aucs.tn.dce', 'aucs.tn.dce-diff',
+#' 'aucs.dce', 'aucs.dce-diff' and 'def' for reading in the default from 
+#' settings.r. XXX where do we have the explanation of the mods? XXX
 #' @param aqg.TCalib Character, numeric or NULL. The default (leave at 'def') can be 
 #' set in the settings.  If 'NULL' the complete temperature range of the 
 #' calibration data is used for calibration.  Provide a numeric length two 

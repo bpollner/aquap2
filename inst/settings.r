@@ -98,15 +98,24 @@ stn <- list(
 	aqg_adPeakPlot = TRUE,					## if, should subtraction spectra be plotted, an additional plot with picked peaks should be added
 	aqg_AdLines = TRUE, 					## if the additional lines should be added to the plot (see XXX for details)
 	aqg_discrim = FALSE, 					## if, should subtraction spectra be plotted, it will be discriminated between "true" or "not true" positive peaks
+	aqg_defaultMod= "aucs.dce", 			## the default mode for the aquagram. See the help for XXX for possible values.
 	aqg_bootCI = FALSE, 					## if confidence intervalls for the selected wavelengths should be calculated within each group (using bootstrap)
-	aquagr_bootUseParallel = TRUE, 			## if, should the CIs be calculated, this should be done in parallel
+	aqg_bootUseParallel = TRUE, 			## if, should the CIs be calculated, this should be done in parallel
 	aqg_bootR = "nrow@3",					## if aqg_bootCI = TRUE, how many bootstrap replicates should be performed? leave at "nrow@3" for e.g. 3 x nrow(samples) or provide a length one numeric
 	aqg_saveBootRes = TRUE, 				## if the bootstrap result should be saved under "bootResult" to the analysis-data folder
 	aqg_smoothCalib = 17,					## the smoothing (sav. golay) applied for the aucs ("area-under-the-curve-stabilization") calibration data
 	aqg_calibTRange = "symm@2", 			## the temperatur range picked out from the calibration data. Either numeric length two [e.g. c(28,32)], or character starting with 'symm@x', with 'x' being the plus and minus delta in temperature from the temperature of the experiment
 	aqg_Texp = 28.6,						## the temperature at which the measurements were done
 	aqg_OT = "1st",							## what overtone (in development, leave at "1st")
-	aquagr_nCoord = 12, 					## only applies to the 1st overtone: how many coordinates to plot (can be 12 or 15)
+	aqq_nCoord = 12,	 					## only applies to the 1st overtone: how many coordinates to plot (can be 12 or 15)
+	
+	
+	
+	## plotting PDFs
+	pdf_Height_ws = 5,						## when plotting to pdf, the settings for the format
+	pdf_Width_ws = 8.9,						## ws for widescreen (e.g. regressionvector, loading plots, raw)
+	pdf_Height_sq = 9,						## sq for square (e.g. scoreplots)
+	pdf_Width_sq = 9, 
 
 
 

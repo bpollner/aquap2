@@ -202,7 +202,7 @@ ap_checkAquagramDefaults <- function(ap, header) {
 		if (any(spectra != FALSE)) {
 			possibleValues <- c("raw", "avg", "subtr", "all") # XXXVARXXX
 			if (!any(spectra %in% possibleValues) | all(spectra == TRUE)) {
-				stop("Please provide either 'FALSE', or one or more of 'raw', 'avg', 'subtr', or 'all' to the argument 'plotSpectra'.", call.=FALSE)
+				stop("Please provide either 'FALSE', or one or more of 'raw', 'avg', 'subtr', or 'all' to the argument 'aqg.spectra'.", call.=FALSE)
 			}
 			ss <- c("subtr", "all")
 			if ((any(spectra %in% ss)) & is.null(a$minus)) {
@@ -223,6 +223,18 @@ ap_checkAquagramDefaults <- function(ap, header) {
 				}
 			} # end for i
 		}
+		###
+		mod <- a$mod
+	#	possibleValues <- c("classic", "classic-diff", "sfc", "sfc-diff", "aucs", "aucs-diff", "aucs.tn", "aucs.tn-diff", "aucs.tn.dce", "aucs.tn.dce-diff", "aucs.dce",  "aucs.dce-diff") ## XXXVARXXX
+		possibleValues <- pv_AquagramModes
+		if (all(mod=="def")) {
+			mod <- .ap2$stn$aqg_defaultMod
+		} else {
+			if (!any(mod %in% possibleValues) | length(mod) !=1 ) {
+				stop(paste("Please provide one of \n", paste(possibleValues, collapse=", "), "; \nor 'def' for reading in the default from the settings.r file to the argument 'aqg.mod'.", sep=""), call.=FALSE)
+			}
+		}		
+		ap$aquagr$mod <- mod
 		###
 		TCalib <- a$TCalib
 		if (all(TCalib=="def")) {
@@ -303,6 +315,36 @@ ap_checkAquagramDefaults <- function(ap, header) {
 	return(ap)
 } # EOF
 
+ap_check_pca_defaults <- function(ap, header) {
+	if (!is.null(ap$pca)) {
+		a <- ap$pca
+		###
+		what <- a$what
+		possVal <- pv_pca_what
+		if (!any(what %in% possVal) | length(what) !=1) {
+			stop(paste("Please provide one of \n'", paste(possVal, collapse="', '"), "'\n to the argument 'pca.what'.", sep=""), call.=FALSE)
+		}
+		###
+		pcs <- a$pcs
+		if (!all(is.numeric(pcs)) | length(pcs) !=2) {
+			stop(paste("Please provide a length two numeric to the argument 'pca.sc'"), call.=FALSE)
+		}
+		###
+		pcSc <- a$pcSc
+		if (!is.null(pcSc)) {
+			if (!all(is.numeric(pcSc))) {
+				stop(paste("Please provide a numeric vector to the argument 'pca.sc.pairs'"), call.=FALSE)
+			}
+		}
+		###
+		pcLo <- a$pcLo
+		if (!all(is.numeric(pcLo))) {
+			stop(paste("Please provide a numeric vector to the argument 'pca.lo'"), call.=FALSE)
+		}
+	} # end if !is.null(ap$pca) 
+	return(ap)
+} # EOF
+
 ap_checExistence_Defaults <- function(ap, dataset) {
 	cPref <- .ap2$stn$p_ClassVarPref
 	yPref <- .ap2$stn$p_yVarPref
@@ -325,7 +367,7 @@ ap_checExistence_Defaults <- function(ap, dataset) {
 	checkEx(ap$plsr$colorBy, "PLSR (color by)", cPref)
 	if (!is.null(ap$aquagr)) {
 		if (is.null(ap$aquagr$vars)) {
-			stop(paste("Sorry, you have to provide one or more values for \"aqg.vars\". Please check the Aquagram part of the analysis procedure."), call.=FALSE)
+			stop(paste("Sorry, you have to provide one or more values for \"aqg.vars\". Please check the Aquagram part of the analysis procedure / your input."), call.=FALSE)
 		} else {
 			checkEx(ap$aquagr$vars, "Aquagram", cPref)		
 		}
@@ -345,9 +387,12 @@ ap_checExistence_Defaults <- function(ap, dataset) {
 	}
 	####
 	ap <- ap_checkAquagramDefaults(ap, dataset$header)
+	ap <- ap_check_pca_defaults(ap, dataset$header)
 	# add more default checking for other statistics here
 	return(ap)
 } # EOF
+
+# ap_cleanAndCheckAll <- function(ap, dataset) {} # EOF
 
 OLD_OLD_getCheckDefaultsAndInput_OLD_OLD <- function(nrCorr, TCalib, Texp, bootCI, R, nrowDat, selWls, plotSpectra, minus,  smoothN, msc, fsa, fss) {
 	if (all(!is.logical(fsa)) & any(fsa!=TRUE)) {
@@ -378,6 +423,11 @@ OLD_OLD_getCheckDefaultsAndInput_OLD_OLD <- function(nrCorr, TCalib, Texp, bootC
 	###
 } # EOF
 
+ap_cleanZeroValuesCheckExistenceDefaults <- function(ap, dataset) {
+	ap <- ap_cleanOutZeroValues(ap, dataset)
+	ap <- ap_checExistence_Defaults(ap, dataset)
+	return(ap)
+} # EOF
 
 #' @title Select Wavelengths
 #' @description Select wavelenghts from a dataset.
@@ -418,7 +468,10 @@ performNoise <- function(dataset, siNoise) {
 	if (siNoise) {
 		noiseLevel <- .ap2$stn$noi_noiseLevel
 		if (!.ap2$stn$allSilent) {cat("      adding noise...")}
-		dataset$NIR <- dataset$NIR * rnorm(1, mean=1, sd=noiseLevel)
+		nr <- nrow(dataset$NIR)
+		nc <- ncol(dataset$NIR)
+		noise <- matrix(rnorm(nr*nc, mean=1, sd=noiseLevel), nr, nc)
+		dataset$NIR <- dataset$NIR * noise
 		if (!.ap2$stn$allSilent) {cat(" ok\n")}
 	}
 	return(dataset)
@@ -428,7 +481,8 @@ makeIdString <- function(siClass, siValue, siWlSplit, siSmooth, siNoise) {
 	# siClass and siValue come in as dataframes with one row and one or more columns
 	varString <- NULL
 	for (i in 1: ncol(siClass)) {
-		varString <- paste(varString, siClass[1,i], ":", siValue[1,i], ", ", sep="")
+#		varString <- paste(varString, siClass[1,i], ":", siValue[1,i], ", ", sep="")
+		varString <- paste(siValue[1,i], ", ", sep="")
 	}
 	varString <- substr(varString, 1, (nchar(varString)-2)) # to get rid of the last ","
 	varString <- paste(varString, " ", sep="")
@@ -544,8 +598,9 @@ checkForStats <- function(ap) {
 #' @export
 gdmm <- function(dataset, ap=getap(), md=getmd() ) {
 	autoUpS()
-	ap <- ap_cleanOutZeroValues(ap, dataset)
-	ap <- ap_checExistence_Defaults(ap, dataset)
+#	ap <- ap_cleanOutZeroValues(ap, dataset)
+#	ap <- ap_checExistence_Defaults(ap, dataset)
+	ap <- ap_cleanZeroValuesCheckExistenceDefaults(ap, dataset)
 #	print(str(ap)); wait()
 	a <- makeCompPattern(dataset$header, md, ap)
 	cp <- a$cp

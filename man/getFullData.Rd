@@ -156,6 +156,8 @@ conscious handling of the files.
 \code{\link{readSpectra}}, \code{\link{readHeader}}
 
 Other Core functions: \code{\link{esl}},
-  \code{\link{exportSampleList}}; \code{\link{gdmm}}
+  \code{\link{exportSampleList}}; \code{\link{gdmm}};
+  \code{\link{plot}}, \code{\link{plot,aquap_cube-method}},
+  \code{\link{plot_cube}}
 }
 

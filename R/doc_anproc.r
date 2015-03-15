@@ -3,15 +3,20 @@
 #'  according to the provided values in the 'split dataset' section, and 
 #'  then, in the 'statistics' section (starting with \code{do.pca}), to tell 
 #'  the system which statistics to apply resp. what models to calculate on those 
-#'  datasets. Arguments used to control thes split-process and the behaviour of  
-#'  statistics / calculations start with a certain prefix:
+#'  datasets. It also contains specific and general plotting options that are used 
+#'  by the \code{\link{plot}} function. 
+#'  Arguments used to control the split-process, the behaviour of statistics / 
+#'  calculations / specific plotting options and the general plotting options 
+#'  start with a certain prefix:
 #'  \itemize{
 #'    \item "spl" for all arguments related to the split-process
 #'    \item "pca" for all arguments related to PCA models (except do.pca)
-#'    \item "sim" for all arguments realted to SIMCA models (except do.sim)
+#'    \item "sim" for all arguments related to SIMCA models (except do.sim)
 #'    \item "pls" for all arguments related to PLSR models (except do.pls)
 #'    \item "aqg" for all arguments related to the calculation of Aquagrams 
 #'          (except do.aqg)
+#'    \item "pg" for the general plotting options that are used in each of the 
+#'    plotting functions.
 #'  }
 #'  By providing any of the arguments of the analysis procedure file to the 
 #'  function \code{\link{getap}}, also when using it inside the function 
@@ -40,10 +45,8 @@
 #'  @param spl.noise.raw  If, should the noise-test be performed, the raw data 
 #'  will be used as well in addition to the noise-data.
 #'  
-#'  @param do.pca Logical. If a PCA should be calculated with a given dataset
-#'  @param pca.colorBy NULL or character vector. Which class-variables 
-#'  should be used for coloring the PCA score plot. Set to NULL for using all 
-#'  available class variables for coloring.
+#'  @template mr_pca_calc_param
+#'  @template mr_pca_plot_param
 #'  
 #'  @param do.sim Logical.If SIMCA models of the dataset should be calculated.
 #'  @param sim.vars NULL or character vector. Which variables should be 
@@ -74,7 +77,7 @@
 #'  or provide a character length one with a single column name of a class 
 #'  variable that should be used for coloring.
 #'  
-#'  @template mr_aqg_calcparam
+#'  @template mr_aqg_calc_param
 #'  
 #'  @seealso \code{\link{getap}}, \code{\link{gdmm}}
 #'  @family fileDocs

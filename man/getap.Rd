@@ -30,7 +30,9 @@ values.
 \details{
 The name of the default analysis procedure file can be specified in
 the settings. Other arguments than precise matches to the available arguments
-will be ignored.
+will be ignored. The provided value and defaults will be checked in
+\code{\link{gdmm}} and the resulting \code{\link{aquap_cube}} contains the
+final analysis procedure in its slot @anproc.
 }
 \examples{
 \dontrun{
