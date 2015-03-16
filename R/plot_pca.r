@@ -27,7 +27,7 @@ makePCAScorePlots <- function(cube, ap, comps=c(1:5), pcs=c(1,2), onMain="", onS
 } #EOF
 
 plotPCA_Scores <- function(cube, ap, where="pdf", comps= c(1:5), pcs=c(1,2), onMain="", onSub="", fns="") {
-	if (!.ap2$stn$allSilent & (where == "pdf" )) {cat("Making score plots... \n")}
+	if (!.ap2$stn$allSilent & (where == "pdf" )) {cat("Plotting PCA score plots... ")}
 	expName <- getExpName(cube)
 	height <-.ap2$stn$pdf_Height_sq
 	width <- .ap2$stn$pdf_Width_sq
@@ -41,7 +41,7 @@ plotPCA_Scores <- function(cube, ap, where="pdf", comps= c(1:5), pcs=c(1,2), onM
 	if (where != "pdf" & Sys.getenv("RSTUDIO") != 1) {dev.new()}	
 	makePCAScorePlots(cube, ap, comps, pcs, onMain, onSub)
 	if (where == "pdf") {dev.off()}
-	if (!.ap2$stn$allSilent & (where == "pdf" )) {cat(paste(message, "plotted.\n")) }
+	if (!.ap2$stn$allSilent & (where == "pdf" )) {cat("ok\n") }
 } # EOF
 
 makePCALoadingPlots<- function(cube, ap, comps=c(1:5), onMain="", onSub="", where="pdf") {	# not in use; the template from demar
@@ -88,7 +88,7 @@ makePCALoadingPlots2 <- function (cube, ap, npcs, onMain="", onSub="", where="")
 } #EOF
 
 plotPCA_Loadings <- function(cube, ap, where="pdf", comps=c(1:5), onMain="", onSub="", fns="") {
-	if (!.ap2$stn$allSilent & (where == "pdf" )) {cat("Making loading plots... \n")}
+	if (!.ap2$stn$allSilent & (where == "pdf" )) {cat("Plotting PCA loading plots... ")}
 	expName <- getExpName(cube)
 	height <-.ap2$stn$pdf_Height_ws
 	width <- .ap2$stn$pdf_Width_ws
@@ -102,7 +102,7 @@ plotPCA_Loadings <- function(cube, ap, where="pdf", comps=c(1:5), onMain="", onS
 	if (where != "pdf" & Sys.getenv("RSTUDIO") != 1) {dev.new()}	
 	makePCALoadingPlots2(cube, ap, npcs=comps, onMain, onSub, where)
 	if (where == "pdf") {dev.off()}
-	if (!.ap2$stn$allSilent & (where == "pdf" )) {cat(paste(message, "plotted.\n")) }
+	if (!.ap2$stn$allSilent & (where == "pdf" )) {cat("ok\n") }
 } # EOF
 
 #'  @title Plot PCA

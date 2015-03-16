@@ -11,13 +11,13 @@ plot_cube <- function(x, what="all", ...) {
 		plot_pca(x, ...)
 	}
 	if (any(c(pv[1], pv[3]) %in% what)) { # SIMCA
-	
+		plot_sim(x, ...)	
 	}
 	if (any(c(pv[1], pv[4]) %in% what)) { # PLSR
-	
+		plot_pls(x, ...)
 	}
 	if (any(c(pv[1], pv[5]) %in% what)) { # Aquagram
-	
+		plot_aqg(x, ...)
 	}
 	invisible(NULL)
 } # EOIF
