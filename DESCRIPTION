@@ -23,6 +23,7 @@ Suggests:
     knitr
 VignetteBuilder: knitr
 Collate:
+    'an_pickPeaks.r'
     'aquap2.r'
     'cl_classFunctions.r'
     'cl_classDefs.r'

@@ -203,11 +203,3 @@ NULL
 #' @family PCA documentation
 #' @name calc_pca_args
 NULL
-
-
-
-
-
-# make nice elements for anproc to be used in topic specific documentation
-# make documentation for plot_cube and plot_pca
-# document general plotting optinos in anproc

@@ -140,7 +140,7 @@ strict and conscious handling of the files.
  md <- getmd()
  fd <- getFullData(md)
  fd <- getFullData() # the same as above
- fd <- gfd(getmd(expName="Foo")) # to override the experiment name specified in
+ fd <- gfd(getmd(expName="OtherName")) # to override the experiment name specified in
  # the metadata.r file and load the dataset called 'Foo' instead. (see ?getmd)
  fd <- gfd(md=getmd("foo.r")) # loads metadata from file 'foo.r'
  fd <- getFullData(filetype="custom@myFunc.r", slType="xls")

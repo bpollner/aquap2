@@ -10,22 +10,22 @@
 #'  start with a certain prefix:
 #'  \itemize{
 #'    \item "spl" for all arguments related to the split-process 
-#'    (For a separate listing please see  \code{\link{split_dataset}})
+#'         (For a separate listing please see  \code{\link{split_dataset}})
 #'    \item "pca" for all arguments related to PCA models (except do.pca)
-#'    (For a separate listing see \code{\link{calc_pca_args}} and 
-#'    \code{\link{plot_pca_args}})
+#'        (For a separate listing see \code{\link{calc_pca_args}} and 
+#'        \code{\link{plot_pca_args}})
 #'    \item "sim" for all arguments related to SIMCA models (except do.sim)
-#'     (For a separate listing see \code{\link{calc_sim_args}} and 
-#'      \code{\link{plot_sim_args}})
+#'         (For a separate listing see \code{\link{calc_sim_args}} and 
+#'        \code{\link{plot_sim_args}})
 #'    \item "pls" for all arguments related to PLSR models (except do.pls)
-#'     (For a separate listing see \code{\link{calc_pls_args}} and 
-#'    \code{\link{plot_pls_args}})
-#'    \item "aqg" for all arguments related to the calculation of Aquagrams 
-#'    (except do.aqg)  (For a separate listing see \code{\link{calc_aqg_args}} 
-#'    and \code{\link{plot_aqg_args}})
+#'        (For a separate listing see \code{\link{calc_pls_args}} and 
+#'        \code{\link{plot_pls_args}})
+#'    \item "aqg" for all arguments related to Aquagrams (except do.aqg)  
+#'         (For a separate listing see \code{\link{calc_aqg_args}} and 
+#'        \code{\link{plot_aqg_args}})
 #'    \item "pg" for the general plotting options that are used in each of the 
-#'    plotting functions. (For a separate listing see 
-#'    \code{\link{plot_pg_args}})
+#'         plotting functions. (For a separate listing see 
+#'         \code{\link{plot_pg_args}})
 #'  }
 #'  By providing any of the arguments of the analysis procedure file to the 
 #'  function \code{\link{getap}}, also when using it inside the function 

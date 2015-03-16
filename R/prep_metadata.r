@@ -156,6 +156,7 @@ getmd_core <- function(fn="def") {
 #' md <- getmd("myFile.r")
 #' md <- getmd(expName="OtherName") # to override the experiment name as specified 
 #' # in the metadata.r file.
+#' dataset <- gfd(getmd(expName="OtherName"))
 #' }
 #' @export
 getmd <- function(fn="def", ...) {
@@ -262,7 +263,7 @@ getap_core_file <- function(fn="def") {
 	pca <- list(doPCA=e$do.pca, colorBy=e$pca.colorBy, what=e$pca.what, pcs=e$pca.sc, pcSc=e$pca.sc.pairs, pcLo=e$pca.lo)
 	simca <- list(doSIMCA=e$do.sim, simcOn=e$sim.vars, simcK=e$sim.K)
 	plsr <- list(doPLSR=e$do.pls, regressOn=e$pls.regOn, ncomp=e$pls.ncomp, valid=e$pls.valid, colorBy=e$pls.colorBy)	
-	aquagr <- list(doAqg=e$do.aqg, vars=e$aqg.vars, nrCorr=e$aqg.nrCorr, spectra=e$aqg.spectra, minus=e$aqg.minus, mod=e$aqg.mod, TCalib=e$aqg.TCalib, Texp=e$aqg.Texp, bootCI=e$aqg.bootCI, R=e$aqg.R, smoothN=e$aqg.smoothN, selWls=e$aqg.selWls, msc=e$aqg.msc, reference=e$aqg.reference)	
+	aquagr <- list(doAqg=e$do.aqg, vars=e$aqg.vars, nrCorr=e$aqg.nrCorr, spectra=e$aqg.spectra, minus=e$aqg.minus, mod=e$aqg.mod, TCalib=e$aqg.TCalib, Texp=e$aqg.Texp, bootCI=e$aqg.bootCI, R=e$aqg.R, smoothN=e$aqg.smoothN, selWls=e$aqg.selWls, msc=e$aqg.msc, reference=e$aqg.reference, fsa=e$aqg.fsa, fss=e$aqg.fss, ccol=e$aqg.ccol, clt=e$aqg.clt, pplot=e$aqg.pplot, plines=e$aqg.plines, discr=e$aqg.discr)	
 	genPlot <- list(where=e$pg.where, onMain=e$pg.main, onSub=e$pg.sub, fns=e$pg.fns)
 	##
 	ap <- list(ucl=ucl, dpt=dpt, pca=pca, simca=simca, plsr=plsr, aquagr=aquagr, genPlot=genPlot)
@@ -384,11 +385,11 @@ getap <- function(fn="def", ...) {
 	###
 	AQ <- ap$aquagr
 	doIt <- checkDo(AQ, "doAqg")
-	modifyAquagram <- function(do.aqg=doIt, aqg.vars=AQ$vars, aqg.nrCorr=AQ$nrCorr, aqg.spectra=AQ$spectra, aqg.minus=AQ$minus, aqg.mod=AQ$mod, aqg.TCalib=AQ$TCalib, aqg.Texp=AQ$Texp, aqg.bootCI=AQ$bootCI, aqg.R=AQ$R, aqg.smoothN=AQ$smoothN, aqg.selWls=AQ$selWls, aqg.msc=AQ$msc, aqg.reference=AQ$reference, ...) {
+	modifyAquagram <- function(do.aqg=doIt, aqg.vars=AQ$vars, aqg.nrCorr=AQ$nrCorr, aqg.spectra=AQ$spectra, aqg.minus=AQ$minus, aqg.mod=AQ$mod, aqg.TCalib=AQ$TCalib, aqg.Texp=AQ$Texp, aqg.bootCI=AQ$bootCI, aqg.R=AQ$R, aqg.smoothN=AQ$smoothN, aqg.selWls=AQ$selWls, aqg.msc=AQ$msc, aqg.reference=AQ$reference, aqg.fsa=AQ$fsa, aqg.fss=AQ$fss, aqg.ccol=AQ$ccol, aqg.clt=AQ$clt, aqg.pplot=AQ$pplot, aqg.plines=AQ$plines, aqg.discr=AQ$discr, ...) {
 		if (!do.aqg) {
 			return(NULL)
 		} else {
-			return(list(vars=aqg.vars, nrCorr=aqg.nrCorr, spectra=aqg.spectra, minus=aqg.minus, mod=aqg.mod, TCalib=aqg.TCalib, Texp=aqg.Texp, bootCI=aqg.bootCI, R=aqg.R, smoothN=aqg.smoothN, selWls=aqg.selWls, msc=aqg.msc, reference=aqg.reference))
+			return(list(vars=aqg.vars, nrCorr=aqg.nrCorr, spectra=aqg.spectra, minus=aqg.minus, mod=aqg.mod, TCalib=aqg.TCalib, Texp=aqg.Texp, bootCI=aqg.bootCI, R=aqg.R, smoothN=aqg.smoothN, selWls=aqg.selWls, msc=aqg.msc, reference=aqg.reference, fsa=aqg.fsa, fss=aqg.fss, ccol=aqg.ccol, clt=aqg.clt, pplot=aqg.pplot, plines=aqg.plines, discr=aqg.discr))
 		}
 	} # EOIF
 	apMod$aquagr <- modifyAquagram(...)

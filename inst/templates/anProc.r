@@ -5,7 +5,8 @@
 ### do NOT change the names of the variables !!  ####
 
 	################################################################
-	################## split dataset ###############################
+	##################### split dataset ############################
+	################################################################
 	spl.var <- NULL							## by which variables should the dataset be split? leave empty c() or set to NULL for *no* splitting by class variables
 #	spl.var <- c("C_Group", "C_Mode")
 
@@ -25,6 +26,8 @@
 
 	################################################################
 	########## statistics & specific plotting options ##############
+	################################################################
+
 	#########################
 	### PCA 
 	do.pca <- FALSE							## if PCA of the given datasets should be performed
@@ -84,15 +87,22 @@
 	aqg.reference <- NULL
 	
 	# plotting
-	
+	aqg.fsa <- 	"only"						## 'Fix scale for Aquagram'. Logical, numeric or character.
+	aqg.fss <- 	"only"						## 'Fix scale for spectra'. Logical, numeric or character.
+	aqg.ccol <- NULL						## custom color vector 
+	aqg.clt <- "def"						## custom line-type
+	aqg.pplot <- "def" 						## if peak plot should be added to the spectra
+	aqg.plines <- "def"						## if "lines" XXX should be added to the peak plot
+	aqg.discr <- "def"						## Logical or character 'def'. If set to TRUE, negative (resp. positive) peaks can be only found in peak-heights below (resp. above) zero.
 	#########################	
+	
 	################################################################
 	
 
 
 	################################################################
-	############### general plotting options #######################
-	#########################
+	################ general plotting options ######################
+	################################################################
 	pg.where <- "pdf"						## for plotting PDFs provide "pdf", for plotting to graphics device provide anything but "pdf"
 	pg.main <- ""							## the additional text on the title of each single plot
 	pg.sub <- ""							## the additional text on the subtitle of each single plot

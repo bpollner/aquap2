@@ -174,27 +174,60 @@ numerical vector (loadings, etc..) used for MSC.}
 \item{do.aqg}{Logical. If used in a plotting function, if Aquagrams should
 be plotted.}
 
-\item{fsa}{Fix scale for the Aquagrams.
-Logical, numeric or Character. If left at the default logical FALSE,
-every single aquagram will be plotted in its own, independent
-scale. If a numeric vector length two is provided, all the aquagrams to be
-plotted (normal AND bootstrapped ones) will be in the provided range,
-no independently scaled aquagrams will be plotted.
-If character, the following values are possible:
-\code{"both"}: both independently scaled AND automatically calculated
-fix-scaled aquagrams will be plotted; \code{"only"}: only the automatically
-calculated fix-scaled aquagrams will be plotted. (normal AND bootstrap)}
+\item{aqg.fsa}{'Fix scale for Aquagram'. Logical, numeric or Character.
+If left at the default logical FALSE, every single aquagram will be plotted in
+its own, independent scale. If a numeric vector length two is provided, all the
+aquagrams to be plotted (normal AND bootstrapped ones) will be in the provided
+range, no independently scaled aquagrams will be plotted.  If character, the
+following values are possible:
+\itemize{
+ \item  \code{"both"}: both independently scaled AND automatically calculated
+     fix-scaled aquagrams will be plotted
+ \item \code{"only"}: only the automatically calculated fix-scaled aquagrams
+     will be plotted. (normal AND bootstrap)
+}}
 
-\item{fss}{Fix scale for the subtraction spectra.
-Logical, numeric or character. If left at the default logical FALSE', every
-single subtraction-spectra plot will be plotted in its own, independendent
+\item{aqg.fss}{'Fix scale for subtraction spectra'. Logical, numeric or
+character. If left at the default logical FALSE', every single
+subtraction-spectra plot will be plotted in its own, independendent
 scale. If a numeric vector length two is provided, all the subtraction-spectra
 to be plotted (if 'plotSpectra' contains 'subtr', and 'minus' contains a
 valid value) will be in the provided range, no independently scaled
 subtraction-spectra will be plotted. If character, the following values are
-possible: \code{"both"}: both independently scaled AND automatically calculated
-fix-scaled spectra will be plotted; \code{"only"}: only the  automatically
-calulated fix-scaled subtraction spectra will be plotted.}
+possible:
+\itemize{
+ \item \code{"both"}: both independently scaled AND automatically calculated
+     fix-scaled spectra will be plotted
+ \item \code{"only"}: only the  automatically
+calulated fix-scaled subtraction spectra will be plotted
+}}
+
+\item{aqg.ccol}{Custom Color - NULL, Numeric or Character vector.
+Custom colors for  drawing the lines in the aquagram. Length must exactly match
+the number of groups to be plotted in the aquagram. If not, the default coloring
+from the dataset is used. This can be used when plotting aquagrams with
+different numbers of groups: only this group that matches the number of provided
+custom colors is colored differently. Especially useful when you have more than
+8 lines to be plotted -- custom-color similar groups in similar colors.}
+
+\item{aqg.clt}{Character or Integer vector. Custom line type for plotting the
+lines in the Aquagram. If left at the default 'def', the vector provided in the
+settings.r file is taken (and recycled). If an integer vector is provided, this
+is used (and recycled) as line-types in the Aquagram.}
+
+\item{aqg.pplot}{Logical or character 'def'. If, should spectra be plotted, an
+additional plot with picked peaks should be added. If left at the default value
+'def', the default from the settings.r file is used.}
+
+\item{aqg.plines}{Logical, numeric or character 'def'. If set to \code{FALSE},
+no additional lines, if set to \code{TRUE} all the additional lines will be
+plotted. If a numerical vector (containing no "1") is provided, one or more of
+the additional lines get plotted. See \code{\link{adLinesToVector}} for details.
+If left at the default value 'def', the default from the settings.r file is
+used.}
+
+\item{aqg.discr}{Logical or character 'def'. If set to TRUE, negative (resp.
+positive) peaks can be only found in peak-heights below (resp. above) zero.}
 
 \item{pg.where}{Character length one. For plotting PDFs provide "pdf", for
 plotting to graphics device provide anything but "pdf".}
@@ -220,22 +253,22 @@ The analysis procedure file is used to first split the dataset
  start with a certain prefix:
  \itemize{
    \item "spl" for all arguments related to the split-process
-   (For a separate listing please see  \code{\link{split_dataset}})
+        (For a separate listing please see  \code{\link{split_dataset}})
    \item "pca" for all arguments related to PCA models (except do.pca)
-   (For a separate listing see \code{\link{calc_pca_args}} and
-   \code{\link{plot_pca_args}})
+       (For a separate listing see \code{\link{calc_pca_args}} and
+       \code{\link{plot_pca_args}})
    \item "sim" for all arguments related to SIMCA models (except do.sim)
-    (For a separate listing see \code{\link{calc_sim_args}} and
-     \code{\link{plot_sim_args}})
+        (For a separate listing see \code{\link{calc_sim_args}} and
+       \code{\link{plot_sim_args}})
    \item "pls" for all arguments related to PLSR models (except do.pls)
-    (For a separate listing see \code{\link{calc_pls_args}} and
-   \code{\link{plot_pls_args}})
-   \item "aqg" for all arguments related to the calculation of Aquagrams
-   (except do.aqg)  (For a separate listing see \code{\link{calc_aqg_args}}
-   and \code{\link{plot_aqg_args}})
+       (For a separate listing see \code{\link{calc_pls_args}} and
+       \code{\link{plot_pls_args}})
+   \item "aqg" for all arguments related to Aquagrams (except do.aqg)
+        (For a separate listing see \code{\link{calc_aqg_args}} and
+       \code{\link{plot_aqg_args}})
    \item "pg" for the general plotting options that are used in each of the
-   plotting functions. (For a separate listing see
-   \code{\link{plot_pg_args}})
+        plotting functions. (For a separate listing see
+        \code{\link{plot_pg_args}})
  }
  By providing any of the arguments of the analysis procedure file to the
  function \code{\link{getap}}, also when using it inside the function

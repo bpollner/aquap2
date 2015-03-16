@@ -36,6 +36,7 @@ md <- getmd(); str(md); names(md)
 md <- getmd("myFile.r")
 md <- getmd(expName="OtherName") # to override the experiment name as specified
 # in the metadata.r file.
+dataset <- gfd(getmd(expName="OtherName"))
 }
 }
 \seealso{

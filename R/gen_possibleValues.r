@@ -9,3 +9,7 @@ pv_what_subPlots <- c("all", "pca", "sim", "pls", "aqg")
 
 ## PCA plotting
 pv_pca_what <- c("both", "scores", "loadings")
+
+
+## Aquagram plotting
+pv_fsa_fss <- c("both", "only")

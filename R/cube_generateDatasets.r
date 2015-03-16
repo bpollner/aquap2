@@ -191,10 +191,9 @@ ap_checkAquagramDefaults <- function(ap, header) {
 		nrCorr <- a$nrCorr
 		if (all(nrCorr == "def")) {
 			nrCorr <- .ap2$stn$aqg_correctNrOfObs
-		} else { 
-			if (!is.logical(nrCorr)) {
-				stop("Please provide either 'def', 'TRUE' or 'FALSE' for the argument 'aqg.nrCorr'.", call.=FALSE)
-			}
+		}
+		if (!is.logical(nrCorr)) {
+			stop("Please provide either 'def', 'TRUE' or 'FALSE' for the argument 'aqg.nrCorr'.", call.=FALSE)
 		}
 		ap$aquagr$nrCorr <- nrCorr
 		###
@@ -225,24 +224,30 @@ ap_checkAquagramDefaults <- function(ap, header) {
 		}
 		###
 		mod <- a$mod
-	#	possibleValues <- c("classic", "classic-diff", "sfc", "sfc-diff", "aucs", "aucs-diff", "aucs.tn", "aucs.tn-diff", "aucs.tn.dce", "aucs.tn.dce-diff", "aucs.dce",  "aucs.dce-diff") ## XXXVARXXX
 		possibleValues <- pv_AquagramModes
 		if (all(mod=="def")) {
 			mod <- .ap2$stn$aqg_defaultMod
-		} else {
-			if (!any(mod %in% possibleValues) | length(mod) !=1 ) {
-				stop(paste("Please provide one of \n", paste(possibleValues, collapse=", "), "; \nor 'def' for reading in the default from the settings.r file to the argument 'aqg.mod'.", sep=""), call.=FALSE)
-			}
+		}
+		if (!any(mod %in% possibleValues) | length(mod) !=1 ) {
+			stop(paste("Please provide one of \n", paste(possibleValues, collapse=", "), "; \nor 'def' for reading in the default from the settings.r file to the argument 'aqg.mod'.", sep=""), call.=FALSE)
 		}		
 		ap$aquagr$mod <- mod
 		###
 		TCalib <- a$TCalib
 		if (all(TCalib=="def")) {
 			TCalib <- .ap2$stn$aqg_calibTRange
-		} else {
-			if (!is.null(TCalib)) {
+		}
+		if (!is.null(TCalib)) {
+			if (!any(grepl("symm@", TCalib)) ) {
 				if (!all(is.numeric(TCalib)) | length(TCalib) !=2) {
-					stop("Please provide either 'def', or a length 2 numeric for the argument 'aqg.TCalib'.", call.=FALSE)	
+					stop("Please provide either 'def', 'symm@x' with x being a numeric, or a length 2 numeric for the argument 'aqg.TCalib'.", call.=FALSE)	
+				}
+			} else { # so we have "symm@" 
+				options(warn=-1)
+				nums <- as.numeric(unlist(strsplit(TCalib, "@")))[2]
+				options(warn=0)
+				if (any(is.na(nums))) {
+					stop(paste("Please provide an input in the format 'symm@x', with x being a numeric, to the argument 'aqg.TCalib'"), call.=FALSE)
 				}
 			}
 		}
@@ -251,20 +256,18 @@ ap_checkAquagramDefaults <- function(ap, header) {
 		Texp <- a$Texp
 		if (all(Texp=="def")) {
 			Texp <- .ap2$stn$aqg_Texp
-		} else {
-			if (!is.numeric(Texp) | (length(Texp) != 1) ) {
-				stop("Please provide either 'def', or a length 1 numeric for the argument 'aqg.Texp'.", call.=FALSE)			
-			}
+		}
+		if (!is.numeric(Texp) | (length(Texp) != 1) ) {
+			stop("Please provide either 'def', or a length 1 numeric for the argument 'aqg.Texp'.", call.=FALSE)			
 		}
 		ap$aquagr$Texp <- Texp
 		###
 		bootCI <- a$bootCI
 		if (all(bootCI=="def")) {
 			bootCI <- .ap2$stn$aqg_bootCI
-		} else {
-			if (!is.logical(bootCI)) {
-				stop("Please provide either 'def', 'TRUE' or 'FALSE' for the argument 'aqg.bootCI'.", call.=FALSE)		
-			}
+		}
+		if (!is.logical(bootCI)) {
+			stop("Please provide either 'def', 'TRUE' or 'FALSE' for the argument 'aqg.bootCI'.", call.=FALSE)		
 		}
 		ap$aquagr$bootCI <- bootCI	
 		###
@@ -280,11 +283,10 @@ ap_checkAquagramDefaults <- function(ap, header) {
 		R <- a$R
 		if (all(R=="def")) {
 			R <- .ap2$stn$aqg_bootR
-		} else {
-			if (!grepl("nrow@", R)) {
-				if (!is.numeric(R) | (length(R)!=1)) {
-					stop("Please provide either 'def', 'nrow@x' (with x being a number),  or a length 1 numeric for the argument 'aqg.R'.", call.=FALSE)			
-				}
+		}
+		if (!grepl("nrow@", R)) {
+			if (!is.numeric(R) | (length(R)!=1)) {
+				stop("Please provide either 'def', 'nrow@x' (with x being a number),  or a length 1 numeric for the argument 'aqg.R'.", call.=FALSE)			
 			}
 		}
 		if (!is.numeric(R)) {
@@ -300,16 +302,91 @@ ap_checkAquagramDefaults <- function(ap, header) {
 		selWls <- a$selWls
 		if (all(selWls=="def")) {
 			selWls <- .ap2$stn$aqg_wlsAquagram
-		} else {
-			if ( !all(is.numeric(selWls)) ) {
-				stop("Please provide either 'def',  or a numeric vector for the argument 'aqg.selWls'.", call.=FALSE)			
-			}
+		}
+		if ( !all(is.numeric(selWls)) ) {
+			stop("Please provide either 'def',  or a numeric vector for the argument 'aqg.selWls'.", call.=FALSE)			
 		}
 		ap$aquagr$selWls <- selWls
 		###
 		if (!is.logical(a$msc)) {
 			stop("Please provide either TRUE or FALSE to the argument 'aqg.msc'", call.=FALSE)
 		}
+		###
+		fsa <- a$fsa
+		if (all(!is.logical(fsa)) & any(fsa!=TRUE)) {
+			if (!is.character(fsa)) {
+				if (!all(is.numeric(fsa)) | length(fsa)!=2) {
+					stop("Please provide a numeric length two as argument for 'aqg.fsa' to manually provide a fix scale for the aquagrams.", call.=FALSE)
+				}
+			} else {
+				pv <- pv_fsa_fss # ("both", "only")
+				if (!any(fsa %in% pv)) {
+		 			stop(paste("Please provide one of '", paste(pv, collapse="', '"), "' to the argument 'aqg.fsa'.", sep=""), call.=FALSE)
+			 	}
+			}
+		}
+		###
+		fss <- a$fss
+		if (all(!is.logical(fss)) & any(fss!=TRUE)) {
+			if (!is.character(fss)) {
+				if (!all(is.numeric(fss)) | length(fss)!=2) {
+					stop("Please provide a numeric length two as argument for 'fss' to manually provide a fix scale for the subtraction spectra.", call.=FALSE)
+				}
+			} else {
+				pv <- pv_fsa_fss # ("both", "only")
+				if (!any(fss %in% pv)) {
+		 			stop(paste("Please provide one of '", paste(pv, collapse="', '"), "' to the argument 'aqg.fss'.", sep=""), call.=FALSE)
+				}
+			}
+		}
+		###	
+		# the custom color aqg.ccol remains unchecked for now
+		###
+		clt <- a$clt
+		if (all(clt=="def")) {
+			clt <- .ap2$stn$aqg_linetypes
+		}
+		msg <- "Please provide an integer vector to the argument 'aqg.clt'."
+		if ( !all(is.numeric(clt)) ) {
+			stop(msg, call.=FALSE)			
+		}
+		if (any(!is.wholenumber(clt)) ) {
+			stop(msg, call.=FALSE)
+		}
+		ap$aquagr$clt <- clt
+		###
+		pplot <- a$pplot
+		if (all(pplot=="def")) {
+			pplot <- .ap2$stn$aqg_adPeakPlot
+		}
+		if (!all(is.logical(pplot)) | length(pplot) != 1) {
+			stop("Please provide either 'def', or 'TRUE' or 'FALSE' to the argument 'aqg.pplot'", call.=FALSE)
+		}
+		ap$aquagr$pplot <- pplot
+		###
+		plines <- a$plines
+		if (all(plines=="def")) {
+			plines <- .ap2$stn$aqg_AdLines
+		}
+		msg <- "Please provide an integer vector to the argument 'aqg.plines'"
+		if (!all(is.logical(plines))) {
+			if (!all(is.numeric(plines)) )  {
+				stop(msg, call.=FALSE)
+			}
+			if (!all(is.wholenumber(plines))) {
+				stop(msg, call.=FALSE)
+			}
+		}
+		ap$aquagr$plines <- plines
+		###
+		discr <- a$discr
+		if (all(discr=="def")) {
+			discr <- .ap2$stn$aqg_discrim
+		}
+		if (!all(is.logical(discr)) | length(discr) != 1) {
+			stop("Please provide either 'def' or TRUE or FALSE to the argument 'aqg.discr'", call.=FALSE)
+		}
+		ap$aquagr$discr <- discr		
 		###
 	} # end if !is.null(ap$aquagr)
 	return(ap)
@@ -342,6 +419,24 @@ ap_check_pca_defaults <- function(ap, header) {
 			stop(paste("Please provide a numeric vector to the argument 'pca.lo'"), call.=FALSE)
 		}
 	} # end if !is.null(ap$pca) 
+	return(ap)
+} # EOF
+
+ap_check_gp_generalPlottingDefaults <- function(ap) {
+	if (!is.null(ap$genPlot)) {
+		pg <- ap$genPlot
+		###
+		checkForLengthOneChar <- function(char, argName) {
+			if (!all(is.character(char)) | length(char) !=1) {
+				stop(paste("Please provide a length one character to the argument '", argName, "'.", sep=""), call.=FALSE)
+			}	
+		} # EOIF
+		###
+		checkForLengthOneChar(pg$where, "pg.where")
+		checkForLengthOneChar(pg$onMain, "pg.main")
+		checkForLengthOneChar(pg$onSub, "pg.sub")
+		checkForLengthOneChar(pg$fns, "pg.fns")
+	} # end if !is.null(ap$genPlot)
 	return(ap)
 } # EOF
 
@@ -379,7 +474,7 @@ ap_checExistence_Defaults <- function(ap, dataset) {
 		nums <- as.numeric(strsplit(splitWl[i], "-to-")[[1]])
 		options(warn=0)
 		if (any(is.na(nums))) {
-			stop(paste("Please check the analysis procedure at the wavelength-split input; provide the wavelength split in the format like e.g. '1300-to-1600'."), call.=FALSE)
+			stop(paste("Please check the analysis procedure / your input at the wavelength-split; provide the wavelength split in the format like e.g. '1300-to-1600'."), call.=FALSE)
 		}
 		if (min(nums) < min(wls) | max(nums) > max(wls)) {
 			stop(paste("Sorry, the specified wavelengths \"", splitWl[i], "\" are out of the available range.", sep=""), call.=FALSE)
@@ -388,39 +483,9 @@ ap_checExistence_Defaults <- function(ap, dataset) {
 	####
 	ap <- ap_checkAquagramDefaults(ap, dataset$header)
 	ap <- ap_check_pca_defaults(ap, dataset$header)
+	ap <- ap_check_gp_generalPlottingDefaults(ap)
 	# add more default checking for other statistics here
 	return(ap)
-} # EOF
-
-# ap_cleanAndCheckAll <- function(ap, dataset) {} # EOF
-
-OLD_OLD_getCheckDefaultsAndInput_OLD_OLD <- function(nrCorr, TCalib, Texp, bootCI, R, nrowDat, selWls, plotSpectra, minus,  smoothN, msc, fsa, fss) {
-	if (all(!is.logical(fsa)) & any(fsa!=TRUE)) {
-		if (!is.character(fsa)) {
-			if (!all(is.numeric(fsa)) | length(fsa)!=2) {
-				stop("Please provide a numeric length two as argument for 'fsa' to manually provide a fix scale for the aquagrams.", call.=FALSE)
-			}
-		} else {
-			a <- c("both", "only")
-			if (!any(fsa %in% a)) {
-		 		stop("Please provide either 'both' or 'only' as argument for 'fsa' (see help).", call.=FALSE)
-		 	}
-		}
-	}
-	###
-	if (all(!is.logical(fss)) & any(fss!=TRUE)) {
-		if (!is.character(fss)) {
-			if (!all(is.numeric(fss)) | length(fss)!=2) {
-				stop("Please provide a numeric length two as argument for 'fss' to manually provide a fix scale for the subtraction spectra.", call.=FALSE)
-			}
-		} else {
-			a <- c("both", "only")
-			if (!any(fss %in% a)) {
-		 		stop("Please provide either 'both' or 'only' as argument for 'fss' (see help).", call.=FALSE)
-		 	}
-		}
-	}
-	###
 } # EOF
 
 ap_cleanZeroValuesCheckExistenceDefaults <- function(ap, dataset) {

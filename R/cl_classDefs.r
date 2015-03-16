@@ -19,7 +19,7 @@ setMethod("show", signature(object = "aquap_data"), definition = show_aquap_data
 setMethod("show", signature(object = "aquap_cube"), definition = showCube )
 
 
-#' @title *** Plot Analysis ***
+#' @title *** Plot All Available Models ***
 #' @description Plot all available analysis graphics from the models in the 
 #' cube-object. Function \code{plot} is a convenience function, it basically 
 #' calls  \code{plot_cube}, what is the work-horse for plotting the 

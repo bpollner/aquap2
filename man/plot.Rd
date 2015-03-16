@@ -5,7 +5,7 @@
 \alias{plot}
 \alias{plot,aquap_cube-method}
 \alias{plot_cube}
-\title{*** Plot Analysis ***}
+\title{*** Plot All Available Models ***}
 \usage{
 plot(x, y, ...)
 
