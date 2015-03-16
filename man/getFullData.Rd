@@ -131,9 +131,9 @@ If you import from a .pir file and have all the class- and numerical variables
 inside the .pir file, set argument 'slType'to NULL
 }
 \section{Note}{
- The strict regime with the filenames seems maybe at first at
-bit complicated, but it proved to be good practise to ensure a strict and
-conscious handling of the files.
+ The strict regime with the filenames (see Details) seems maybe
+at first at bit complicated, but it proved to be good practise to ensure a
+strict and conscious handling of the files.
 }
 \examples{
 \dontrun{

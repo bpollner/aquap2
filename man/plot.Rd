@@ -19,22 +19,27 @@ plot_cube(x, what = "all", ...)
 \item{y}{will be ignored}
 
 \item{...}{Additional parameter to override the values of the graphical
-parameter in the analysis procedure file of the cube-object.}
+parameter in the analysis procedure file of the cube-object, see details.}
 
 \item{what}{Character length one. What type of analysis to plot. Possible
-values are XXX.}
+values are 'all', 'pca', 'sim', 'pls', 'aqg'.}
 }
 \value{
 A PDF or graphic device.
 }
 \description{
 Plot all available analysis graphics from the models in the
+cube-object. Function \code{plot} is a convenience function, it basically
+calls  \code{plot_cube}, what is the work-horse for plotting the
 cube-object.
 }
 \details{
 The graphical parameters are taken from the analysis procedure
 stored in the cube-object. Via the \code{...} argument it is possible to
-override any these parameters. Please see XXX for XXX.
+override any of these parameters. Please see \code{\link{anproc_file}} for a
+complete listing and e.g. \code{\link{plot_pca_args}} and there the other
+functions of the 'Plot arguments' family for a separate listing of possible
+arguments.
 }
 \examples{
 \dontrun{
@@ -50,6 +55,8 @@ Other Core functions: \code{\link{esl}},
   \code{\link{exportSampleList}}; \code{\link{gdmm}};
   \code{\link{getFullData}}, \code{\link{gfd}}
 
-Other Plot functions: \code{\link{plot_pca}}
+Other Plot functions: \code{\link{plot_aqg}};
+  \code{\link{plot_pca}}; \code{\link{plot_pls}};
+  \code{\link{plot_sim}}
 }
 

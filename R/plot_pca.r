@@ -105,15 +105,23 @@ plotPCA_Loadings <- function(cube, ap, where="pdf", comps=c(1:5), onMain="", onS
 	if (!.ap2$stn$allSilent & (where == "pdf" )) {cat(paste(message, "plotted.\n")) }
 } # EOF
 
-#'  @title PCA - plot
+#'  @title Plot PCA
 #'  @description Plot PCA scoresplots and / or loadings.
 #'  @details The width and height of the resulting pdf can be set in the settings.
 #'  @param cube An object of class 'aquap_cube' as produced by \code{\link{gdmm}}.
 #'  @param ... Optional pca plotting parameters to override the values in the 
-#'  analysis procedure stored in the 'cube' - see below.
-#'  @template mr_pca_plot_param
+#'  analysis procedure stored in the 'cube' - for possible argument see 
+#'  \code{\link{plot_pca_args}}.
 #'  @return A pdf or graphic device.
 #'  @family Plot functions
+#'  @family PCA documentation
+#'  @examples
+#'  \dontrun{
+#'  dataset <- gfd()
+#'  cube <- gdmm(dataset)
+#'  plot(cube)
+#'  plot_pca(cube)
+#'  }
 #'	@export
 plot_pca <- function(cube, ...) {
 	autoUpS()
@@ -139,6 +147,66 @@ plot_pca <- function(cube, ...) {
 		plotPCA_Loadings(cube, ap, where, comps=pcLo, onMain, onSub, fns)	# XXX not ok!
 	}
 } # EOF
+
+
+#' @title Plot PCA - Arguments
+#' @description The following parameters can be used in the \code{...} argument in 
+#' function \code{\link{plot}} and \code{\link{plot_pca}} to override the values 
+#' in the analysis procedure file and so to modify the graphics of score and 
+#' loading plots - see examples.
+#' 
+#' \code{plot(cube, ...)}
+#' 
+#' \code{plot_pca(cube, ...)}
+#' 
+#' @template mr_details_allParams
+#' @template mr_pca_plot_param
+#' @template mr_pg_genParams
+#' @seealso \code{\link{plot_pca}}
+#' @examples
+#' \dontrun{
+#' dataset <- gfd()
+#' cube <- gdmm(dataset)
+#' plot(cube, pca.colorBy="C_Group", pca.sc.pairs=NULL) 
+#' # will plot every availalbe model
+#' plot_pca(cube, pca.colorBy="C_Group", pca.sc.pairs=NULL) 
+#' # will plot only the PCA
+#' plot_pca(cube, pca.what="scores")
+#' }
+#' @family Plot arguments
+#' @family PCA documentation
+#' @name plot_pca_args
+NULL
+
+
+#' @title Calculate PCA - Arguments
+#' @description The following parameters can be used in the \code{...} argument in 
+#' function \code{\link{getap}}, also within function \code{\link{gdmm}}, to 
+#' override the values in the analysis procedure file and so to modify the 
+#' calculation of PCA - see examples.
+#' 
+#' \code{getap(...)}
+#'  
+#' \code{gdmm(dataset, ap=getap(...))}
+#' 
+#' @section Note: Calculation of PCA is done with the function 
+#' \code{\link[ChemometricsWithR]{PCA}}
+#' @template mr_details_allParams
+#' @template mr_pca_calc_param
+#' @seealso \code{\link{gdmm}}
+#' @examples
+#' \dontrun{
+#'  dataset <- gfd()
+#'  cube <- gdmm(dataset, getap(do.pca=TRUE))
+#' }
+#' @family Calc. arguments
+#' @family PCA documentation
+#' @name calc_pca_args
+NULL
+
+
+
+
 
 # make nice elements for anproc to be used in topic specific documentation
 # make documentation for plot_cube and plot_pca

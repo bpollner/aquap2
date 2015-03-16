@@ -1,4 +1,5 @@
-#' @param do.aqg Logical. If Aquagrams should be calculated with a given dataset.
+#' @param do.aqg Logical. If used in \code{getap}, if Aquagrams should be 
+#' calculated with a given dataset.
 #' @param aqg.vars NULL or character vector. Which class variables 
 #' should be used for grouping the data for the Aquagram. Provide a character 
 #' vector with the column names of class variables for grouping data and generate 
@@ -25,10 +26,9 @@
 #' the subtractions in the raw spectra as well as for the subtractions within the
 #' Aquagram, should you choose any of the -diff modes.
 #' @param aqg.mod Character. What mode, what kind of Aquagram should be calculated?
-#' Possible values are: 'classic', 'classic-diff', 'sfc', 'sfc-diff', 'aucs',
-#' 'aucs-diff', 'aucs.tn', 'aucs.tn-diff', 'aucs.tn.dce', 'aucs.tn.dce-diff',
-#' 'aucs.dce', 'aucs.dce-diff' and 'def' for reading in the default from 
-#' settings.r. XXX where do we have the explanation of the mods? XXX
+#' Possible values are: <%=r_listize(pv_AquagramModes)%>, and 'def' for reading in 
+#' the default from settings.r. Please see \code{\link{calc_aqg_modes}} for an 
+#' explanation of the different modes.
 #' @param aqg.TCalib Character, numeric or NULL. The default (leave at 'def') can be 
 #' set in the settings.  If 'NULL' the complete temperature range of the 
 #' calibration data is used for calibration.  Provide a numeric length two 

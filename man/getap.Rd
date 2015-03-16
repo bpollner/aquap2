@@ -12,10 +12,9 @@ analysis procedure file as specified in the settings (factory default is
 "anproc.r") is read in. Provide any other valid name of an analysis procedure
 file to load it. (Do not forget the '.r' at the end.)}
 
-\item{...}{Any of the arguments of the 'statistics' section as defined in the
-analysis procedure - please  see \code{\link{anproc_file}}.
-Any argument/value provided via \code{...} will  override the value in the
-analysis procedure .r file.}
+\item{...}{Any of the arguments of the analysis procedure - please  see
+\code{\link{anproc_file}}. Any argument/value provided via \code{...} will
+override the value in the analysis procedure .r file.}
 }
 \value{
 A list with the analysis procedure.
@@ -23,7 +22,7 @@ A list with the analysis procedure.
 \description{
 Read in the analysis procedure from the default or a custom
 analysis procedure file located in the metadata-folder. By providing any of
-the arguments of the analysis procedure file (see \code{\link{anproc_file}}
+the arguments of the analysis procedure file (see \code{\link{anproc_file}})
 to the function you can override the values in the file with the provided
 values.
 }

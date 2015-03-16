@@ -22,9 +22,9 @@ unsmoothed data will be used as well in addition to the smoothed data.}
 \item{spl.do.noise}{Logical. If artifical noise should be added to the dataset.}
 
 \item{spl.noise.raw}{If, should the noise-test be performed, the raw data
- will be used as well in addition to the noise-data.}
+will be used as well in addition to the noise-data.}
 
-\item{do.pca}{Logical. If used in \code{gdmm}, if a PCA should be calculated
+\item{do.pca}{Logical. If used in \code{getap}, if a PCA should be calculated
 with a given dataset.}
 
 \item{do.pca}{Logical. If used in a plotting function, if PCA score / loading
@@ -47,7 +47,8 @@ plot.}
 \item{pca.lo}{Numeric vector of length >=2, indicating what PCs to plot in
 the loadingplot.}
 
-\item{do.sim}{Logical.If SIMCA models of the dataset should be calculated.}
+\item{do.sim}{Logical. If used in \code{getap}, if SIMCA models of the dataset
+should be calculated.}
 
 \item{sim.vars}{NULL or character vector. Which variables should be
 used to group the data. Set to NULL for using all available class-variables,
@@ -55,10 +56,14 @@ or provide a character vector with the column names of class variables to group
 the data along those for calculating SIMCA models.}
 
 \item{sim.K}{Numeric length one. The number of components used for calculating
- the SIMCA models. In mode 'robust' leave at '0' for automatic detection of
- optimal number of components. [It is a capital 'K' in the argument.]}
+the SIMCA models. In mode 'robust' leave at '0' for automatic detection of
+optimal number of components. [It is a capital 'K' in the argument.]}
 
-\item{do.pls}{Logical. If PLSR models should be calculated with a given dataset.}
+\item{do.sim}{Logical. If used in a plotting function, if analysis of SIMCA
+models should be plotted.}
+
+\item{do.pls}{Logical. If used in \code{getap}, if PLSR models should be
+calculated with a given dataset.}
 
 \item{pls.regOn}{NULL or character vector. Which variables should be used
 to regress on. Set to NULL for using all numerical variables to regress on, or
@@ -77,12 +82,16 @@ number of components in the PLSR.}
   \item XXX something here for using a certain class-variable for grouping XXX
 }}
 
-\item{pls.colorBy}{NULL or character. What class-variable should be
- used for coloring in the RMSEP and RMSECV plots. Set to NULL for no coloring,
- or provide a character length one with a single column name of a class
- variable that should be used for coloring.}
+\item{do.pls}{Logical. If used in a plotting function, if analysis from PLSR
+models should be plotted.}
 
-\item{do.aqg}{Logical. If Aquagrams should be calculated with a given dataset.}
+\item{pls.colorBy}{NULL or character. What class-variable should be
+used for coloring in the RMSEP and RMSECV plots. Set to NULL for no coloring,
+or provide a character length one with a single column name of a class
+variable that should be used for coloring.}
+
+\item{do.aqg}{Logical. If used in \code{getap}, if Aquagrams should be
+calculated with a given dataset.}
 
 \item{aqg.vars}{NULL or character vector. Which class variables
 should be used for grouping the data for the Aquagram. Provide a character
@@ -114,10 +123,9 @@ the subtractions in the raw spectra as well as for the subtractions within the
 Aquagram, should you choose any of the -diff modes.}
 
 \item{aqg.mod}{Character. What mode, what kind of Aquagram should be calculated?
-Possible values are: 'classic', 'classic-diff', 'sfc', 'sfc-diff', 'aucs',
-'aucs-diff', 'aucs.tn', 'aucs.tn-diff', 'aucs.tn.dce', 'aucs.tn.dce-diff',
-'aucs.dce', 'aucs.dce-diff' and 'def' for reading in the default from
-settings.r. XXX where do we have the explanation of the mods? XXX}
+Possible values are: 'classic', 'classic-diff', 'sfc', 'sfc-diff', 'aucs', 'aucs-diff', 'aucs.tn', 'aucs.tn-diff', 'aucs.tn.dce', 'aucs.tn.dce-diff', 'aucs.dce', 'aucs.dce-diff', and 'def' for reading in
+the default from settings.r. Please see \code{\link{calc_aqg_modes}} for an
+explanation of the different modes.}
 
 \item{aqg.TCalib}{Character, numeric or NULL. The default (leave at 'def') can be
 set in the settings.  If 'NULL' the complete temperature range of the
@@ -162,6 +170,43 @@ should be performed.}
 
 \item{aqg.reference}{Only used in the 'classic' and 'sfc' modes. An optional
 numerical vector (loadings, etc..) used for MSC.}
+
+\item{do.aqg}{Logical. If used in a plotting function, if Aquagrams should
+be plotted.}
+
+\item{fsa}{Fix scale for the Aquagrams.
+Logical, numeric or Character. If left at the default logical FALSE,
+every single aquagram will be plotted in its own, independent
+scale. If a numeric vector length two is provided, all the aquagrams to be
+plotted (normal AND bootstrapped ones) will be in the provided range,
+no independently scaled aquagrams will be plotted.
+If character, the following values are possible:
+\code{"both"}: both independently scaled AND automatically calculated
+fix-scaled aquagrams will be plotted; \code{"only"}: only the automatically
+calculated fix-scaled aquagrams will be plotted. (normal AND bootstrap)}
+
+\item{fss}{Fix scale for the subtraction spectra.
+Logical, numeric or character. If left at the default logical FALSE', every
+single subtraction-spectra plot will be plotted in its own, independendent
+scale. If a numeric vector length two is provided, all the subtraction-spectra
+to be plotted (if 'plotSpectra' contains 'subtr', and 'minus' contains a
+valid value) will be in the provided range, no independently scaled
+subtraction-spectra will be plotted. If character, the following values are
+possible: \code{"both"}: both independently scaled AND automatically calculated
+fix-scaled spectra will be plotted; \code{"only"}: only the  automatically
+calulated fix-scaled subtraction spectra will be plotted.}
+
+\item{pg.where}{Character length one. For plotting PDFs provide "pdf", for
+plotting to graphics device provide anything but "pdf".}
+
+\item{pg.main}{Character length one. The additional text on the title of each
+single plot.}
+
+\item{pg.sub}{Character length one. The additional text on the subtitle of
+each single plot.}
+
+\item{pg.fns}{Character length one. The additional text in the filename of
+the pdf.}
 }
 \description{
 The analysis procedure file is used to first split the dataset
@@ -175,13 +220,22 @@ The analysis procedure file is used to first split the dataset
  start with a certain prefix:
  \itemize{
    \item "spl" for all arguments related to the split-process
+   (For a separate listing please see  \code{\link{split_dataset}})
    \item "pca" for all arguments related to PCA models (except do.pca)
+   (For a separate listing see \code{\link{calc_pca_args}} and
+   \code{\link{plot_pca_args}})
    \item "sim" for all arguments related to SIMCA models (except do.sim)
+    (For a separate listing see \code{\link{calc_sim_args}} and
+     \code{\link{plot_sim_args}})
    \item "pls" for all arguments related to PLSR models (except do.pls)
+    (For a separate listing see \code{\link{calc_pls_args}} and
+   \code{\link{plot_pls_args}})
    \item "aqg" for all arguments related to the calculation of Aquagrams
-         (except do.aqg)
+   (except do.aqg)  (For a separate listing see \code{\link{calc_aqg_args}}
+   and \code{\link{plot_aqg_args}})
    \item "pg" for the general plotting options that are used in each of the
-   plotting functions.
+   plotting functions. (For a separate listing see
+   \code{\link{plot_pg_args}})
  }
  By providing any of the arguments of the analysis procedure file to the
  function \code{\link{getap}}, also when using it inside the function
@@ -196,8 +250,9 @@ The default name for the analysis procedure file can be set in
  to the appropriate argument, e.g. in the function \code{\link{getap}}.
  By providing any of the arguments of the analysis procedure file to the
  function \code{\link{getap}} also when using it inside the function
- \code{\link{gdmm}}, you can override the values in the file with the
- provided values. See examples at \code{\link{gdmm}}.
+ \code{\link{gdmm}} or to any of the \code{\link{plot}} functions, you can
+ override the values in the file with the provided values. See examples at
+ \code{\link{gdmm}} and \code{\link{plot}}.
 }
 \seealso{
 \code{\link{getap}}, \code{\link{gdmm}}

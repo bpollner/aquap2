@@ -1,3 +1,5 @@
+#' @param do.aqg Logical. If used in a plotting function, if Aquagrams should 
+#' be plotted.
 #' @param fsa Fix scale for the Aquagrams.
 #' Logical, numeric or Character. If left at the default logical FALSE, 
 #' every single aquagram will be plotted in its own, independent

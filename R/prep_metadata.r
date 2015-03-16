@@ -284,7 +284,7 @@ getap_core <- function(fn, .lafw_fromWhere="load", cube=NULL, ...) {
 #' @title Get Analysis Procedure
 #' @description Read in the analysis procedure from the default or a custom 
 #' analysis procedure file located in the metadata-folder. By providing any of 
-#' the arguments of the analysis procedure file (see \code{\link{anproc_file}} 
+#' the arguments of the analysis procedure file (see \code{\link{anproc_file}}) 
 #' to the function you can override the values in the file with the provided 
 #' values.
 #' @details The name of the default analysis procedure file can be specified in 
@@ -296,10 +296,9 @@ getap_core <- function(fn, .lafw_fromWhere="load", cube=NULL, ...) {
 #' analysis procedure file as specified in the settings (factory default is 
 #' "anproc.r") is read in. Provide any other valid name of an analysis procedure 
 #' file to load it. (Do not forget the '.r' at the end.)
-#' @param ... Any of the arguments of the 'statistics' section as defined in the 
-#' analysis procedure - please  see \code{\link{anproc_file}}. 
-#' Any argument/value provided via \code{...} will  override the value in the 
-#' analysis procedure .r file.
+#' @param ... Any of the arguments of the analysis procedure - please  see 
+#' \code{\link{anproc_file}}. Any argument/value provided via \code{...} will 
+#' override the value in the analysis procedure .r file.
 #' @return A list with the analysis procedure.
 #' @seealso \code{\link{anproc_file}}, \code{\link{getmd}}, \code{\link{gdmm}}
 #' @examples

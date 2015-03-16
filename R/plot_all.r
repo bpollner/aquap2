@@ -1,6 +1,5 @@
 #' @rdname plot
-#' @param what Character length one. What type of analysis to plot. Possible 
-#' values are XXX.
+#' @template mr_whatPlotSubtypes
 #' @export
 plot_cube <- function(x, what="all", ...) {
 	autoUpS()
@@ -24,3 +23,27 @@ plot_cube <- function(x, what="all", ...) {
 } # EOIF
 
 
+#' @title Plot - General Plotting  Arguments
+#' @description The following parameters can be used in the \code{...} argument in 
+#' any of the plotting-functions (see \code{\link{plot}}) to override the values 
+#' in the analysis procedure file and so to modify the graphics / the pdf - see 
+#' examples.
+#' 
+#' \code{plot(cube, ...)}
+#' 
+#' \code{plot_cube(cube, ...)}
+#' 
+#' @template mr_details_allParams
+#' @template mr_pg_genParams
+#' @examples
+#' \dontrun{
+#' dataset <- gfd()
+#' cube <- gdmm(dataset)
+#' plot(cube, pg.main="Foo") 
+#' # prints an additional "Foo" on the title of each plot.
+#' plot(cube, pg.main="Foo", pg.fns="_foo")
+#' # adds the string "_foo" to each of the generated pdfs.
+#' }
+#' @family Plot arguments
+#' @name plot_pg_args
+NULL
