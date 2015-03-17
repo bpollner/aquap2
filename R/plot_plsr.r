@@ -1,5 +1,3 @@
-
-
 #'  @title Plot PLSR
 #'  @description Plot PLSR XXX.
 #'  @details The width and height of the resulting pdf can be set in the settings.
