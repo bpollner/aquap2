@@ -12,10 +12,10 @@ setClass("aquap_ap", contains="list")
 setClass("aquap_data", slots=c(ncpwl="numeric"), contains="data.frame")
 setClass("aquap_cpt", slots=c(splitVars="list", wlSplit="list", smoothing="logical", noise="logical", len="numeric"))
 setClass("aqg_calc", slots = c(ID="character", classVar="character", itemIndex="numeric", avg="matrix", colRep="numChar", possN="numeric", selInds="numeric", bootRes="matNull", rawSpec="dfNull", avgSpec="dfNull", subtrSpec="dfNull"))
-setClassUnion(name="aqgCalcNull", members =c("aqg_calc", "NULL"))
+#setClass("aqg_cr", slots = c(res="list", ran="listNull"))
+#setClassUnion(name="aqgCrNull", members =c("aqg_cr", "NULL"))
 setClass("aquap_set", slots=c(dataset="aquap_data", idString="character", pca="listNull", plsr="listNull", simca="listNull", aquagr="listNull")) 
-setClass("aquap_cube", slots=c(metadata="aquap_md", anproc="aquap_ap", cp="data.frame", cpt="aquap_cpt"), contains="list")
-setClass("aqg_cr", slots = c(res="list", ran="listNull"))
+setClass("aquap_cube", slots=c(metadata="aquap_md", anproc="aquap_ap", cp="data.frame", cpt="aquap_cpt", aqgRan="listNull"), contains="list")
 
 
 # methods ----------------------------------------
@@ -43,7 +43,7 @@ setMethod("[", signature(x = "aquap_data"), definition = function(x, i) {
 			drop=FALSE
 			header <- x$header[i, , drop=drop]
 			colRep <- x$colRep[i, , drop=drop]
-			NIR <- matrix(x$NIR, nrow=nrow(x$NIR))[i, , drop=drop]	      
+			NIR <- x$NIR[i, , drop=drop]
 			rownames(NIR) <- rownames(x$NIR)[i]
 			colnames(NIR) <- colnames(x$NIR)
 			fd <- reFactor(data.frame(I(header), I(colRep), I(NIR)))
@@ -109,6 +109,17 @@ setMethod("getHeader", "aquap_set", function(object) object@dataset$header)
 
 setGeneric("getIdString", function(object) standardGeneric("getIdString"))
 setMethod("getIdString", "aquap_set", function(object) object@idString)
+setMethod("getIdString", "aqg_calc", function(object) object@ID )
 
 setGeneric("getDataset", function(object) standardGeneric("getDataset"))
 setMethod("getDataset", "aquap_set", function(object) object@dataset)
+
+setGeneric("getAqgResList", function(object) standardGeneric("getAqgResList"))
+setMethod("getAqgResList", "aquap_set", function(object) object@aquagr)
+
+setGeneric("getClassVar", function(object) standardGeneric("getClassVar"))
+setMethod("getClassVar", "aqg_calc", function(object) object@classVar)
+
+setGeneric("getItemIndex", function(object) standardGeneric("getItemIndex"))
+setMethod("getItemIndex", "aqg_calc", function(object) object@itemIndex)
+

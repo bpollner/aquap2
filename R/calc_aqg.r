@@ -48,7 +48,7 @@ aquCoreCalc_Classic_diff <- function(dataset, smoothN, reference, msc, selIndsWL
 	classic <- aquCoreCalc_Classic(dataset, smoothN, reference, msc, selIndsWL, colInd)
 	ind <- which(rownames(classic) == minus)
 	if (length(ind) < 1) {
-		stop("I am sorry, please provide a valid value for 'minus' to perform subtractions within the aquagram. Thanks.", call.=FALSE)
+		stop("\nI am sorry, please provide a valid value for 'minus' to perform subtractions within the aquagram. Thanks.", call.=FALSE)
 	}
 	subtr <- as.numeric(classic[ind,])
 	out <- t(apply(classic, 1, function(x) x-subtr))
@@ -67,7 +67,7 @@ aquCoreCalc_AUCstabilized_diff <- function(dataset, smoothN, colInd, minus) {
 	perc <- aquCoreCalc_AUCstabilized(dataset, smoothN, colInd)
 	ind <- which(rownames(perc) == minus)
 	if (length(ind) < 1) {
-		stop("I am sorry, please provide a valid value for 'minus' to perform subtractions within the aquagram. Thanks.", call.=FALSE)
+		stop("\nI am sorry, please provide a valid value for 'minus' to perform subtractions within the aquagram. Thanks.", call.=FALSE)
 	}
 #	subtr <- as.numeric(perc[ind,])
 #	out <- t(apply(perc, 1, function(x) x-subtr))
@@ -91,7 +91,7 @@ aquCoreCalc_NormForeignCenter_diff <- function(dataset, smoothN, reference, msc,
 	values <- aquCoreCalc_NormForeignCenter(dataset, smoothN, reference, msc, selIndsWL, colInd)
 	ind <- which(rownames(values) == minus)
 	if (length(ind) < 1) {
-		stop("I am sorry, please provide a valid value for 'minus' to perform subtractions within the aquagram. Thanks.", call.=FALSE)
+		stop("\nI am sorry, please provide a valid value for 'minus' to perform subtractions within the aquagram. Thanks.", call.=FALSE)
 	}
 #	out <- sweep(values, 2, values[ind,])
 	subtr <- as.numeric(values[ind,])
@@ -107,7 +107,7 @@ aquCoreCalc_aucs_tempNorm_diff <- function(dataset, smoothN, colInd, minus) {
 	values <- aquCoreCalc_aucs_tempNorm(dataset, smoothN, colInd)
 	ind <- which(rownames(values) == minus)
 	if (length(ind) < 1) {
-		stop("I am sorry, please provide a valid value for 'minus' to perform subtractions within the aquagram. Thanks.", call.=FALSE)
+		stop("\nI am sorry, please provide a valid value for 'minus' to perform subtractions within the aquagram. Thanks.", call.=FALSE)
 	}
 	subtr <- as.numeric(values[ind,])
 	out <- t(apply(values, 1, function(x) x-subtr))
@@ -130,7 +130,7 @@ aquCoreCalc_aucs_tempNorm_DCE_diff <- function(dataset, smoothN, colInd, TCalib,
 	values <- aquCoreCalc_aucs_tempNorm_DCE(dataset, smoothN, colInd, TCalib, Texp)
 	ind <- which(rownames(values) == minus)
 	if (length(ind) < 1) {
-		stop("I am sorry, please provide a valid value for 'minus' to perform subtractions within the aquagram. Thanks.", call.=FALSE)
+		stop("\nI am sorry, please provide a valid value for 'minus' to perform subtractions within the aquagram. Thanks.", call.=FALSE)
 	}
 	subtr <- as.numeric(values[ind,])
 	out <- t(apply(values, 1, function(x) x-subtr))
@@ -152,7 +152,7 @@ aquCoreCalc_aucs_DCE_diff <- function(dataset, smoothN, colInd, TCalib, minus) {
 	values <- aquCoreCalc_aucs_DCE(dataset, smoothN, colInd, TCalib)
 	ind <- which(rownames(values) == minus)
 	if (length(ind) < 1) {
-		stop("I am sorry, please provide a valid value for 'minus' to perform subtractions within the aquagram. Thanks.", call.=FALSE)
+		stop("\nI am sorry, please provide a valid value for 'minus' to perform subtractions within the aquagram. Thanks.", call.=FALSE)
 	}
 	subtr <- as.numeric(values[ind,])
 	out <- t(apply(values, 1, function(x) x-subtr))	
@@ -201,14 +201,15 @@ calc_aquagr_CORE <- function(dataset, smoothN, reference, msc, selIndsWL, colInd
 ##############
 
 calc_aquagr_bootCI <- function(dataset, smoothN, reference, msc, selIndsWL, colInd, useMC, R, mod, minus, TCalib, Texp) {
-	path <- paste(get("stngs")$analysisData, "bootResult", sep="")
-	saveBootResult <- get("stngs")$aquagr_saveBootRes
+	path <- paste(.ap2$stn$fn_analysisData, "bootResult", sep="")
+	saveBootResult <- .ap2$stn$aqg_saveBootRes
 	innerWorkings <- function(x, ind) {
 		out <- as.matrix(calc_aquagr_CORE(x[ind,], smoothN, reference, msc, selIndsWL, colInd, mod, minus, TCalib, Texp))
 	} # EOIF
-	if (!get("stngs")$allSilent) {cat(paste("      Calculating", R, "bootstrap replicates... \n")) }
+	if (!.ap2$stn$allSilent) {cat(paste("      calc.", R, "bootstrap replicates... ")) }
 	thisR <- R
-	bootResult <- boot::boot(dataset, innerWorkings, R=thisR, strata=dataset[,colInd], parallel=useMC, ncpus=get("stngs")$numberOfCPUs)   	### here the bootstrap replicates happen
+	bootResult <- boot::boot(dataset, innerWorkings, R=thisR, strata=dataset$header[,colInd], parallel=useMC, ncpus=.ap2$stn$gen_numberOfCPUs)   	### here the bootstrap replicates happen
+	if (!.ap2$stn$allSilent) {cat("ok\n")}
 	if (saveBootResult) {
 		save(bootResult, file=path)
 	}
@@ -230,7 +231,7 @@ calc_aquagr_bootCI <- function(dataset, smoothN, reference, msc, selIndsWL, colI
 #	print(str(bootResult)); print(bootResult$t0); print(bootResult$t[1:5, 1:12]); wait()
 	nRows <- dim(bootResult$t0)[1]
 	nCols <- dim(bootResult$t0)[2]
-	if (!get("stngs")$allSilent) {cat("      Calculating confidence intervals... \n")}
+	if (!.ap2$stn$allSilent) {cat("      calc. confidence intervals... ")}
 #	ciMat <- matrix(NA, nRows*2, nCols)
 #	kseq <- seq(1, nRows*2, by=2)
 #	for (i in 1: nCols) {
@@ -243,6 +244,7 @@ calc_aquagr_bootCI <- function(dataset, smoothN, reference, msc, selIndsWL, colI
 	mat2er <- foreach(i = 1: (nRows*nCols), .combine="cbind") %dopar% {
 			a <- boot::boot.ci(bootResult, index = i, type="bca")$bca[,4:5]    #### here the CIs are calculated 
 	} # end dopar i
+	if (!.ap2$stn$allSilent) {cat("ok\n")}
 	ciMat <- matrix(mat2er, ncol=nCols) 
 	####
 	origMat <- bootResult$t0
@@ -331,7 +333,7 @@ tempCalibReadRaw <- function() {
 		File <- "/pData/tcalib"
 		filepath <- paste(a, File, sep="")
 	}
-	if (!.ap2$stn$allSilent) {cat(" * Reading in calibration data... ")}
+	if (!.ap2$stn$allSilent) {cat(" * Reading in AUC calibration data... ")}
 	load(filepath)
 	out <- get("tcalib")
 #	rm(tcalib)
@@ -692,7 +694,6 @@ calcAquagramSingle <- function(dataset, md, ap, classVar, idString) {
 		possibleNrPartic <- possN <- checkRes$nrPart
 		selInds <- checkRes$selInds
 	dataset <- dataset[selInds,]  	### it might be reduced or not
-#	groupAverage <- avg <- calc_aquagr_CORE(dataset, smoothN, reference, msc, selIndsWL, colInd, mod, minus, TCalib, Texp)
 	groupAverage <- avg <- as.matrix(calc_aquagr_CORE(dataset, smoothN, reference, msc, selIndsWL, colInd, mod, minus, TCalib, Texp))
 	avgSpec <- subtrSpec <- rawSpec <-  NULL
 	if (is.character(plotSpectra)) {
@@ -732,37 +733,4 @@ calcAquagramSingle <- function(dataset, md, ap, classVar, idString) {
 	aqRes@avgSpec <- avgSpec
 	aqRes@subtrSpec <- subtrSpec
 	return(aqRes)
-} # EOF
-
-collectRanges <- function(aquCalcRes, lengthClasses) {
-	ranAvg <- ranBootRes <- ranSubtrSpec <- NULL
-	ranColl <- list() # the range collection
-	length(ranColl) <- lengthClasses
-	iwo <- function(x, xslot, varn=NULL) {
-		if (!is.null(slot(x, xslot))) {
-			if (is.null(varn)) {
-				return(range(slot(x, xslot)))
-			} else {
-				a <- slot(x, xslot)
-				return(range(a[varn]))
-			}
-		} else {
-			return(1212)
-		}
-	} # EOIF
-	owo <- function(classObj, xslot, varn=NULL) {
-		a <- range(sapply(classObj, iwo, xslot, varn))
-		if (a[1] == 1212) {
-			return(NULL)
-		} else {
-			return(a)
-		}
-	} # EOIF
-	for (i in 1: lengthClasses) {
-			ranAvg <- owo(aquCalcRes[[i]], "avg")
-			ranBootRes <-  owo(aquCalcRes[[i]], "bootRes")
-			ranSubtrSpec <-  owo(aquCalcRes[[i]], "subtrSpec", varn="NIR")
-			ranColl[[i]] <- list(ranAvg=ranAvg, ranBootRes=ranBootRes, ranSubtrSpec=ranSubtrSpec)
-	} # end for i
-	return(ranColl)
 } # EOF

@@ -9,7 +9,6 @@ calculatePCA <- function(dataset, md, ap) {
 	return(list(model=pcaModel))
 } # EOF
 
-
 calculatePLSR <- function(dataset, md, ap) {
 	if (is.null(ap$plsr)) {
 		return(NULL)
@@ -36,6 +35,8 @@ calculateAquagram <- function(dataset, md, ap, idString) {
 	}
 	aq_loadGlobalAquagramCalibData()
 	if (is.character(ap$aquagr$spectra)) { message <- "      calc. Aquagrams & spectra... "	} else { message <- "      calc. Aquagrams... "	}
+	if (ap$aquagr$bootCI) {bootTxtCorr <- "\n"; bootTxtClosingAdd <- "      Aquagrams ok.\n" } else {bootTxtCorr <- ""; bootTxtClosingAdd <- "ok\n"}
+	message <- paste(message, bootTxtCorr)
 	if (!.ap2$stn$allSilent) {cat(message)}
 	ap <- aq_getTCalibRange(ap) 	# checks with the calibration file if the temperature range is ok
 	aq_makeGlobals(.ap2$tcd, TCalib=ap$aquagr$TCalib, Texp=ap$aquagr$Texp, ot=getOvertoneCut(.ap2$stn$aqg_OT), smoothN=.ap2$stn$aqg_smoothCalib) ## generate the global variables with TCalib and Texp
@@ -49,11 +50,10 @@ calculateAquagram <- function(dataset, md, ap, idString) {
 	for (i in 1: length(vars)) {
 		aquCalcRes[[i]] <- calcAquagramSingle(dataset, md, ap, vars[i], idString)
 	} # end for i
-	if (!.ap2$stn$allSilent) {cat(" ok\n")}
+	
+	if (!.ap2$stn$allSilent) {cat(bootTxtClosingAdd)}
 	return(aquCalcRes)
 } # EOF
-
-
 
 # works on a single element of the list in the cube
 makeAllModels <- function(set, md, ap) {

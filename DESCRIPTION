@@ -23,7 +23,8 @@ Imports:
     geometry,
     som,
     pls,
-    boot
+    boot,
+    fmsb
 Suggests:
     knitr
 VignetteBuilder: knitr
@@ -46,6 +47,7 @@ Collate:
     'gen_parallel.r'
     'gen_possibleValues.r'
     'gen_roxygenHelpers.r'
+    'peaks_specWl.r'
     'plot_all.r'
     'plot_aqg.r'
     'plot_pca.r'

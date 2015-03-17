@@ -198,30 +198,15 @@ ap_checkAquagramDefaults <- function(ap, header) {
 		ap$aquagr$nrCorr <- nrCorr
 		###
 		spectra <- a$spectra
+		pvSubSpectra <- c("subtr", "all") # XXXVARXXX
 		if (any(spectra != FALSE)) {
 			possibleValues <- c("raw", "avg", "subtr", "all") # XXXVARXXX
 			if (!any(spectra %in% possibleValues) | all(spectra == TRUE)) {
 				stop("Please provide either 'FALSE', or one or more of 'raw', 'avg', 'subtr', or 'all' to the argument 'aqg.spectra'.", call.=FALSE)
 			}
-			ss <- c("subtr", "all")
-			if ((any(spectra %in% ss)) & is.null(a$minus)) {
-				stop("You have to provide a value for 'minus' in order to plot subtracted spectra", call.=FALSE)
+			if ((any(spectra %in% pvSubSpectra)) & is.null(a$minus)) {
+				stop("You have to provide a value for 'aqg.minus' in order to plot subtracted spectra", call.=FALSE)
 			}
-		}
-		###
-		minus <- a$minus
-		if (!is.null(minus)) {
-			if (!all(is.character(minus)) | length(minus) != 1) {
-				stop("Please provide a character length one for the argument 'aqg.minus'", call.=FALSE)
-			}
-			groupingVars <- a$vars
-			for (i in 1: length(groupingVars)) {
-				ind <- which(colnames(header) == groupingVars[i])
-				levelsChar <- levels(header[,ind])
-				if (!minus %in% levelsChar) {
-					stop(paste("Sorry, it appears that the provided value \"", minus, "\" for the argument 'aqg.minus' is not present in the Aquagram grouping variable \"", groupingVars[i], "\". \nPlease check your input at 'aqg.minus' and 'aqg.vars'", sep=""), call.=FALSE)
-				}
-			} # end for i
 		}
 		###
 		mod <- a$mod
@@ -233,6 +218,24 @@ ap_checkAquagramDefaults <- function(ap, header) {
 			stop(paste("Please provide one of \n", paste(possibleValues, collapse=", "), "; \nor 'def' for reading in the default from the settings.r file to the argument 'aqg.mod'.", sep=""), call.=FALSE)
 		}		
 		ap$aquagr$mod <- mod
+		###
+		minus <- a$minus
+		if (!is.null(minus)) {
+			if (!all(is.character(minus)) | length(minus) != 1) {
+				stop("Please provide a character length one for the argument 'aqg.minus'", call.=FALSE)
+			}
+			groupingVars <- a$vars
+			for (i in 1: length(groupingVars)) {
+				ind <- which(colnames(header) == groupingVars[i])
+				levelsChar <- levels(header[,ind])
+				if ((!minus %in% levelsChar) & grepl("diff", mod) ) {
+					stop(paste("Sorry, it appears that the provided value \"", minus, "\" for the argument 'aqg.minus' is not present in the Aquagram grouping variable \"", groupingVars[i], "\". \nPlease check your input at 'aqg.minus' and 'aqg.vars'", sep=""), call.=FALSE)
+				}
+				if ((!minus %in% levelsChar) & any(spectra %in% pvSubSpectra)) {
+					stop(paste("Sorry, you have to provide a value for 'aqg.minus' in order to plot subtracted spectra"), call.=FALSE)
+				}
+			} # end for i
+		}
 		###
 		if (grepl("diff", mod) & is.null(minus)) {
 			stop(paste("Please provide a value for 'minus' to perform subtractions within the aquagram."), call.=FALSE)
@@ -296,7 +299,7 @@ ap_checkAquagramDefaults <- function(ap, header) {
 		}
 		if (!is.numeric(R)) {
 			num <- as.numeric(unlist(strsplit(R, "@"))[2])
-			R <- nrow(header) * num
+			R <- round(nrow(header) * num, 0)
 		}
 		ap$aquagr$R <- R
 		###
@@ -707,9 +710,14 @@ gdmm <- function(dataset, ap=getap(), md=getmd() ) {
 	stat <- checkForStats(ap) 	#  check the ap if and where we calculate a model
 	if (!.ap2$stn$allSilent & (stat$cnt != 0)) {cat("\nCalculating models...\n")}
 	for (i in 1: cpt@len) {
-		if (!.ap2$stn$allSilent & (stat$cnt != 0)) {cat(paste("   Working on dataset #", i, " of ", cpt@len, "\n", sep=""))}
+		if (!.ap2$stn$allSilent & (stat$cnt != 0)) {cat(paste("   Working on dataset #", i, " of ", cpt@len, " (", getIdString(cubeList[[i]]), ") \n", sep=""))}
 		cubeList[[i]] <- makeAllModels(cubeList[[i]], md, ap)
 	} # end for i
+	# collect the ranges for aquagram (if any)
+	rangesColl <- NULL
+	if ( (any(ap$aquagr$fsa!=FALSE) | any(ap$aquagr$fss!=FALSE)) & !is.null(ap$aquagr) ) {
+		rangesColl <- collectRanges(cubeList, length(ap$aquagr$vars)) # returns a list with each element representing the range through all sets in a classVariable, so, one list-element for each class-variable
+	}
 	if (!.ap2$stn$allSilent & (stat$cnt != 0)) {cat("Done.\n")}
 	if (!.ap2$stn$allSilent & (stat$cnt == 0)) {cat("No models were calculated.\n")}
 	###
@@ -720,9 +728,47 @@ gdmm <- function(dataset, ap=getap(), md=getmd() ) {
 	cube@anproc <- ap
 	cube@cp <- cp
 	cube@cpt <- cpt
+	cube@aqgRan <- rangesColl
 	return(cube)
 } # EOF
 
+
+collectRanges <- function(cubeList, lengthClasses) {
+	aquCalcRes  <- 111
+	ranAvg <- ranBootRes <- ranSubtrSpec <- NULL
+	ranColl <- list() # the range collection
+	length(ranColl) <- lengthClasses
+	###	
+	iwo2 <- function(x, xslot, varn=NULL, classIndex) {
+		aqgCalc <- getAqgResList(x)[[classIndex]]
+		if (!is.null(slot(aqgCalc, xslot))) {
+			if (is.null(varn)) {
+				return(range(slot(aqgCalc, xslot)))
+			} else {
+				a <- slot(aqgCalc, xslot)
+				return(range(a[varn]))
+			}
+		} else {
+			return(1212)
+		}
+	} # EOIF
+	owo2 <- function(cubeList, xslot, varn=NULL, classIndex) {
+		a <- range(sapply(cubeList, iwo2, xslot, varn, classIndex))
+		if (a[1] == 1212) {
+			return(NULL)
+		} else {
+			return(a)
+		}
+	} # EOIF
+	###
+	for (i in 1: lengthClasses) {
+			ranAvg <- owo2(cubeList, "avg", classIndex=i)
+			ranBootRes <-  owo2(cubeList, "bootRes", classIndex=i)
+			ranSubtrSpec <-  owo2(cubeList, "subtrSpec", varn="NIR", classIndex=i)
+			ranColl[[i]] <- list(ranAvg=ranAvg, ranBootRes=ranBootRes, ranSubtrSpec=ranSubtrSpec)
+	} # end for i
+	return(ranColl)
+} # EOF
 
 
 #' @title Split Dataset

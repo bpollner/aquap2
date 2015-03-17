@@ -46,7 +46,7 @@ stn <- list(
 	## General behaviour & settings
 	allSilent = FALSE,						## if false, "status" messages will be displayed
 	autoUpdateSettings = TRUE, 				## if the settings should be automatically updated when calling a function from package 'aquap2'. Recommended value is TRUE.
-	numberOfCPUs = 7, 						## the number of CPUs used for parallel computing
+	gen_numberOfCPUs = 7, 						## the number of CPUs used for parallel computing
 	gen_showData_NIR = FALSE, 				## if the first rows of the NIR data should be printed as well wenn printing an object of class 'aquap_data' to the screen.
 
 

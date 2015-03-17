@@ -26,7 +26,12 @@ showCube <- function(object) {
 		add <- "and no models."
 	} else {
 		ModNames <- paste(stats$char, collapse=", ")
-		txt <- sub("Aquagram", paste("Aquagram [", object@anproc$aquagr$mod, "]", sep=""), ModNames)
+		if (is.logical(object@anproc$aquagr$spectra)) { # so it is FALSE
+			specTxt <- ""
+		} else {
+			specTxt <- "+spectra"
+		}
+		txt <- sub("Aquagram", paste("Aquagram", specTxt," [", object@anproc$aquagr$mod, "]", sep=""), ModNames)
 		add <- paste("and ", stats$cnt, " models (", txt, ") in each set.", sep="")
 	}
 	cat(paste("Formal class 'aquap_cube', containing ", object@cpt@len, " datasets in total ", add, "\n", sep=""))
