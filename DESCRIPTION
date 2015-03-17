@@ -18,13 +18,20 @@ Imports:
     doParallel,
     xlsx,
     signal,
-    ChemometricsWithR
+    ChemometricsWithR,
+    plyr,
+    geometry,
+    som,
+    pls,
+    boot,
+    fmsb
 Suggests:
     knitr
 VignetteBuilder: knitr
 Collate:
     'an_pickPeaks.r'
     'aquap2.r'
+    'calc_aqg.r'
     'cl_classFunctions.r'
     'cl_classDefs.r'
     'cube_generateDatasets.r'
@@ -35,10 +42,12 @@ Collate:
     'doc_customTRH.r'
     'doc_metadata.r'
     'doc_settings.r'
+    'gen_coreDataManip.r'
     'gen_general.r'
     'gen_parallel.r'
     'gen_possibleValues.r'
     'gen_roxygenHelpers.r'
+    'peaks_specWl.r'
     'plot_all.r'
     'plot_aqg.r'
     'plot_pca.r'

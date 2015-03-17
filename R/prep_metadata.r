@@ -271,6 +271,26 @@ getap_core_file <- function(fn="def") {
 } #EOF
 
 getap_core <- function(fn, .lafw_fromWhere="load", cube=NULL, ...) {
+	### check if any unknown argument is there
+	checkTdArgs <- function(pv, ...) {
+		a <- substitute(c(...))
+		chars <- names(eval(a))
+		if (!is.null(chars)) {
+			out <- NULL
+			for (i in 1: length(chars)) {
+				ind <- which(pv == chars[i])
+				if (length(ind) == 0) {
+					out <- c(out, i)
+				}
+			}
+			if (!is.null(out)) {
+				msg <- paste("Sorry, the provided arguments '", paste(chars[out], collapse="', '"), "' can not be recognized.", sep="")
+				stop(msg, call.=FALSE)
+			}
+		}
+	} # EOIF
+	checkTdArgs(pv_tripleDotsMod, ...)
+	#####	
 	if (.lafw_fromWhere == "load") {
 		return(getap_core_file(fn))
 	} else {
@@ -316,6 +336,7 @@ getap <- function(fn="def", ...) {
 	autoUpS()
 	ap <- getap_core(fn, ...) 	# first load the analysis procedure as defined in the .r file, then possibly modify it. If no additional arguments get supplied by the  user, the original values from the .r file get passed on.
 								# depending on a possible additional argument in ... (.lafw_fromWhere), either the ap from the file is loaded, or,  in case of a call from a plotting function, the ap from the cube (what then is also present in the ... argument) is taken
+	###
 	apMod <- new("aquap_ap")
 	###
 	UCL <- ap$ucl

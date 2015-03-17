@@ -46,7 +46,7 @@ stn <- list(
 	## General behaviour & settings
 	allSilent = FALSE,						## if false, "status" messages will be displayed
 	autoUpdateSettings = TRUE, 				## if the settings should be automatically updated when calling a function from package 'aquap2'. Recommended value is TRUE.
-	numberOfCPUs = 7, 						## the number of CPUs used for parallel computing
+	gen_numberOfCPUs = 7, 						## the number of CPUs used for parallel computing
 	gen_showData_NIR = FALSE, 				## if the first rows of the NIR data should be printed as well wenn printing an object of class 'aquap_data' to the screen.
 
 
@@ -90,7 +90,7 @@ stn <- list(
 
 
 	## Aquagram 
-	aqg_defaultMod = "aucs.dce-diff", 		## the default mode for the Aquagram
+	aqg_defaultMod = "aucs.dce", 		## the default mode for the Aquagram
 	aqg_wlsAquagram = c(1342, 1364, 1374, 1384, 1412, 1426, 1440, 1452, 1462, 1476, 1488, 1512), 	## the wavelengths for the classic aquagram (argument aqg.selWls)
 	aqg_nrDigitsAquagram = 2,				## the number of digits displayed in the standard aquagram
 	aqg_linetypes = c(1,2,3),				## the default vector for the line-types to be used in the aquagram. Gets recycled.

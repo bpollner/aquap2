@@ -1,5 +1,5 @@
 registerParallelBackend <- function() {
-	nrWorkers <- .ap2$numberOfCPUs
+	nrWorkers <- .ap2$stn$gen_numberOfCPUs
 	havePar <- getDoParRegistered()
 	if (!havePar) {
 		if (is.na(nrWorkers)) {

@@ -36,24 +36,34 @@ characters the values have to be enclosed in quotation marks - see examples.
  # keeps all the controls
  ds <- ssc(dataset, C_Group!="Control", include=FALSE)
  # the same as above
+
+
  ds <- ssc(dataset, C_Group=="Control" & C_Repl=="R1")
  # keeps only the first replicate of the controls
  ds <- ssc(dataset, C_Group=="Control" | C_Repl=="R1")
  # keeps all the first replicate and all the controls
+
+
  ds <- ssc(dataset, C_Group=="Control" & C_Repl=="R1", keepEC=TRUE)
  # keeps the first replicate of the controls and all the environmental controls
  ds <- ssc(dataset, C_Group=="Control" & C_Repl=="R1", include=FALSE)
  # keeps everything except the first replicate of the controls
+
+
  ds <- ssc(dataset, (C_Group=="Control" | C_Group=="Treatment") & Y_conSNr==1)
  # keeps the first consec. scan of the controls and the treatment group.
  ds <- ssc(dataset, (C_Group=="Control" | C_Group=="MQ") & C_conSNr=="1")
  # keeps the first consec. scan of the controls and the environmental controls
+
+
  ds <- ssc(dataset, Y_Temp==22.5)
  ds <- ssc(dataset, Y_Temp==22.5 & Y_conSNr==1)
- ds <- ssc(dataset, Y_conSNr==1) # keeps only the first consecutive scan
+ ds <- ssc(dataset, Y_conSNr==1)
+ # keeps only the first consecutive scan
  }
 }
 \seealso{
-Other Data pre-preatment functions: \code{\link{selectWls}}
+Other Data pre-treatment functions: \code{\link{do_msc}};
+  \code{\link{do_sgolay}}; \code{\link{selectWls}}
 }
 
