@@ -322,23 +322,32 @@ getWavelengths <- function(dataset) {
 #'  # keeps all the controls
 #'  ds <- ssc(dataset, C_Group!="Control", include=FALSE)
 #'  # the same as above
+#'  
+#'  
 #'  ds <- ssc(dataset, C_Group=="Control" & C_Repl=="R1")
 #'  # keeps only the first replicate of the controls
 #'  ds <- ssc(dataset, C_Group=="Control" | C_Repl=="R1")
 #'  # keeps all the first replicate and all the controls
+#'  
+#'  
 #'  ds <- ssc(dataset, C_Group=="Control" & C_Repl=="R1", keepEC=TRUE)
 #'  # keeps the first replicate of the controls and all the environmental controls
 #'  ds <- ssc(dataset, C_Group=="Control" & C_Repl=="R1", include=FALSE)
 #'  # keeps everything except the first replicate of the controls
+#'  
+#'  
 #'  ds <- ssc(dataset, (C_Group=="Control" | C_Group=="Treatment") & Y_conSNr==1)
 #'  # keeps the first consec. scan of the controls and the treatment group.
 #'  ds <- ssc(dataset, (C_Group=="Control" | C_Group=="MQ") & C_conSNr=="1")
 #'  # keeps the first consec. scan of the controls and the environmental controls
+#'  
+#'  
 #'  ds <- ssc(dataset, Y_Temp==22.5)
 #'  ds <- ssc(dataset, Y_Temp==22.5 & Y_conSNr==1)
-#'  ds <- ssc(dataset, Y_conSNr==1) # keeps only the first consecutive scan
+#'  ds <- ssc(dataset, Y_conSNr==1) 
+#'  # keeps only the first consecutive scan
 #'  }
-#' @family Data pre-preatment functions
+#' @family Data pre-treatment functions
 #' @export
 ssc <- function(dataset, criteria, include=TRUE, keepEC=FALSE) {
 	cPref <- .ap2$stn$p_ClassVarPref
@@ -362,42 +371,53 @@ ssc <- function(dataset, criteria, include=TRUE, keepEC=FALSE) {
 	if (nrow(d) == 0) {
 		stop(paste("Your selection criteria yielded no results. Please check your input."), call.=FALSE)
 	}
-	return(new("aquap_data", reFactor(d)))
+#	return(new("aquap_data", reFactor(d)))
+	return(d)
 } # EOF
 
 # to be called from the system
-ssc_s <- function(dataset, variable, value, keepEC=TRUE) {
-	origDataset <- dataset
+ssc_s <- function(dataset, variable, value, keepEC=FALSE) {
 	# variable and value are always data frames with one row and 1 or *more* columns
 	cPref <- .ap2$stn$p_ClassVarPref
 	ecrmCol <- .ap2$stn$p_ECRMCol
 	ecLabel <- .ap2$stn$p_envControlLabel
 	noSplitCol <- paste(cPref, .ap2$stn$p_commonNoSplitCol, sep="")
+	indEC <- which(colnames(dataset$header) == paste(cPref, ecrmCol, sep=""))
+	selIndOut <-  NULL
 	#
-	for (i in 1: ncol(variable)) { # both variable and value have the same number of columns
-		ind <- which(colnames(dataset$header) == variable[1,i])
-		val <- as.character(value[1,i])
-		selInd <-  which(dataset$header[,ind] == val)
-		dataset <- dataset[ selInd,]
-		if (nrow(dataset) == 0) {
-		#	message(paste("The observation selection criteria for ", variable[1,i], "==\"", val, "\" yielded no results in one combination, sorry.", sep=""))
+	getECInd <- function(variable) { # because we must not add the ec´s if they are already present in the case of the no-split column
+		nsc <- any(noSplitCol %in% variable)
+		if (keepEC & !nsc) {
+			return(which(dataset$header[,indEC] == ecLabel))
+		} else {
+			return(NULL)
+		}
+	} # EOIF
+	###
+	if (class(variable) == "data.frame") {
+		for (i in 1: ncol(variable)) { # both variable and value have the same number of columns
+			ind <- which(colnames(dataset$header) == variable[1,i])
+			val <- as.character(value[1,i])
+			selInd <-  which(dataset$header[,ind] == val)
+			if (length(selInd) == 0) {
+				return(NULL)	
+			}
+			selIndOut <- c(selInd, selIndOut)
+		} # end for i
+		selIndEC <- getECInd(variable[1,])
+	} else {
+		ind <- which(colnames(dataset$header) == variable)
+		val <- as.character(value)
+		selIndOut <-  which(dataset$header[,ind] == val)
+		if (length(selIndOut) == 0) {
 			return(NULL)	
-		}	
-	} # end for i
-	nsc <- any(noSplitCol %in% variable[1,])
-	if (keepEC & !nsc) { # so only rbinds the ECs if we do NOT have the no-split column in the variable  XXX possible problem here !!??!??
-		indEC <- which(colnames(origDataset$header) == paste(cPref, ecrmCol, sep=""))
-		selIndEC <- which(origDataset$header[,indEC] == ecLabel)
-		dataset <- rbind(dataset, origDataset[selIndEC,])
-#		dataset <- dataset[ union(selInd, selIndEC) , ]
-	}
-	return(new("aquap_data", reFactor(dataset)))
+		}
+		selIndEC <- getECInd(variable)	
+	}	
+	return(dataset[c(selIndOut, selIndEC),])
 } # EOF
 
 
-## @rdname remakeSampleNumber
-## @family Helper Functions
-## @export
 reFactor <- function(dataset) {
 	for (i in 1: ncol(dataset$header)) {
 		if (is.factor(dataset$header[,i])) {

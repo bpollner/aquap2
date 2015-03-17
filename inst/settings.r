@@ -90,7 +90,7 @@ stn <- list(
 
 
 	## Aquagram 
-	aqg_defaultMod = "aucs.dce-diff", 		## the default mode for the Aquagram
+	aqg_defaultMod = "aucs.dce", 		## the default mode for the Aquagram
 	aqg_wlsAquagram = c(1342, 1364, 1374, 1384, 1412, 1426, 1440, 1452, 1462, 1476, 1488, 1512), 	## the wavelengths for the classic aquagram (argument aqg.selWls)
 	aqg_nrDigitsAquagram = 2,				## the number of digits displayed in the standard aquagram
 	aqg_linetypes = c(1,2,3),				## the default vector for the line-types to be used in the aquagram. Gets recycled.

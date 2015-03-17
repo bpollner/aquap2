@@ -33,12 +33,12 @@ The width and height of the resulting pdf can be set in the settings.
  }
 }
 \seealso{
-Other PLSR documentation: \code{\link{calc_pls_args}};
-  \code{\link{plot_pls_args}}
-
 Other Plot functions: \code{\link{plot_aqg}};
   \code{\link{plot_pca}}; \code{\link{plot_sim}};
   \code{\link{plot}}, \code{\link{plot,aquap_cube-method}},
   \code{\link{plot_cube}}
+
+Other PLSR documentation: \code{\link{calc_pls_args}};
+  \code{\link{plot_pls_args}}
 }
 

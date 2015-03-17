@@ -20,7 +20,7 @@
 #'  \item "subtr" for subtractions in the averaged spectra (see \code{"minus"} below)
 #'  \item "all" for all of the aforementioned
 #' }
-#' @param aqg.minus Character. Which of the levels present in the variable 
+#' @param aqg.minus Character or NULL. Which of the levels present in the variable 
 #' provided in \code{aqg.vars} should be used for subtractions -- the average of 
 #' this 'minus' gets subtracted from all the other averages. 'aqg.minus' is used for 
 #' the subtractions in the raw spectra as well as for the subtractions within the

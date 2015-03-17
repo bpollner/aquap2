@@ -209,16 +209,17 @@ ap_checkAquagramDefaults <- function(ap, header) {
 			}
 		}
 		###
-		if (!is.null(a$minus)) {
-			if (!all(is.character(a$minus)) | length(a$minus) != 1) {
+		minus <- a$minus
+		if (!is.null(minus)) {
+			if (!all(is.character(minus)) | length(minus) != 1) {
 				stop("Please provide a character length one for the argument 'aqg.minus'", call.=FALSE)
 			}
 			groupingVars <- a$vars
 			for (i in 1: length(groupingVars)) {
 				ind <- which(colnames(header) == groupingVars[i])
 				levelsChar <- levels(header[,ind])
-				if (!a$minus %in% levelsChar) {
-					stop(paste("Sorry, it appears that the provided value \"", a$minus, "\" for the argument 'aqg.minus' is not present in the Aquagram grouping variable \"", groupingVars[i], "\". \nPlease check your input at 'aqg.minus' and 'aqg.vars'", sep=""), call.=FALSE)
+				if (!minus %in% levelsChar) {
+					stop(paste("Sorry, it appears that the provided value \"", minus, "\" for the argument 'aqg.minus' is not present in the Aquagram grouping variable \"", groupingVars[i], "\". \nPlease check your input at 'aqg.minus' and 'aqg.vars'", sep=""), call.=FALSE)
 				}
 			} # end for i
 		}
@@ -232,6 +233,10 @@ ap_checkAquagramDefaults <- function(ap, header) {
 			stop(paste("Please provide one of \n", paste(possibleValues, collapse=", "), "; \nor 'def' for reading in the default from the settings.r file to the argument 'aqg.mod'.", sep=""), call.=FALSE)
 		}		
 		ap$aquagr$mod <- mod
+		###
+		if (grepl("diff", mod) & is.null(minus)) {
+			stop(paste("Please provide a value for 'minus' to perform subtractions within the aquagram."), call.=FALSE)
+		}
 		###
 		TCalib <- a$TCalib
 		if (all(TCalib=="def")) {
@@ -506,7 +511,7 @@ ap_cleanZeroValuesCheckExistenceDefaults <- function(ap, dataset) {
 #' @param to Numeric lengtho one. The upper limit of the wavelengths to be 
 #' selected.
 #' @return The standard dataset (class 'aquap_data')
-#' @family Data pre-preatment functions
+#' @family Data pre-treatment functions
 #' @export
 selectWls <- function(dataset, from, to) {
 	wls <- getWavelengths(dataset)
@@ -663,14 +668,10 @@ checkForStats <- function(ap) {
 #' @export
 gdmm <- function(dataset, ap=getap(), md=getmd() ) {
 	autoUpS()
-#	ap <- ap_cleanOutZeroValues(ap, dataset)
-#	ap <- ap_checExistence_Defaults(ap, dataset)
 	ap <- ap_cleanZeroValuesCheckExistenceDefaults(ap, dataset)
-#	print(str(ap)); wait()
 	a <- makeCompPattern(dataset$header, md, ap)
 	cp <- a$cp
 	cpt <- a$cpt
-#	print(str(cpt)); wait()
 	len <- cpt@len
 	cubeList <- list()
 	length(cubeList) <- len

@@ -25,12 +25,15 @@ showCube <- function(object) {
 	if (stats$cnt == 0) {
 		add <- "and no models."
 	} else {
-		add <- paste("and ", stats$cnt, " models (", paste(stats$char, collapse=", "), ") in each set.", sep="")
+		ModNames <- paste(stats$char, collapse=", ")
+		txt <- sub("Aquagram", paste("Aquagram [", object@anproc$aquagr$mod, "]", sep=""), ModNames)
+		add <- paste("and ", stats$cnt, " models (", txt, ") in each set.", sep="")
 	}
 	cat(paste("Formal class 'aquap_cube', containing ", object@cpt@len, " datasets in total ", add, "\n", sep=""))
 	cat("\n")
 	print(object@cp)
 } # EOF
+
 
 plot_cube_M <- function(x, ...) {
   plot_cube(x, ...)
