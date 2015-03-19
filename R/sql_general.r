@@ -14,6 +14,13 @@ makeDBPlyr <- function() {
 	dbplyr <- src_mysql(dbname=dbname, host=host, user=user, password=pwd)
 } # EOF
 
+makeRandomString <- function(n=28) {
+	pool <- sample(c(letters, LETTERS, seq(1:9)))
+	a <- paste("nird_", paste(sample(pool, n), collapse=""), sep="")
+	return(a)
+} # EOF
+
+###########################
 
 if (!exists("dbplyr")) {
 	dbplyr <- makeDBPlyr()
@@ -22,31 +29,44 @@ if (!exists("dbplyr")) {
 if (!exists("dbcon")) {
 	dbcon <- makeDBCon()
 }
+############################
 
-nt <- tbl(dbplyr, sql("select * from nir"))
 
-getNIRdb <- function(eid, nirtable=nt) {
-	fullRow <- collect(filter(nirtable, expId==eid))
-	nirmat <- matrix(as.numeric(eval(parse(text=paste("c('", gsub(" ", "', '", fullRow$nirdata), "')", sep="")))), nrow=fullRow$nrows)
-#	colnames(nirmat) <- eval(parse(text=paste("c('", gsub(" ", "', '", fullRow$wls), "')", sep="")))
-#	rownames(nirmat) <- eval(parse(text=paste("c('", gsub(" ", "', '", fullRow$rowNames), "')", sep="")))
-	return(invisible(nirmat))
-} # EOF
+wr  <- function(dataset, eid, con=dbcon) {
+	path <- Sys.getenv("AQUAP2DATA")
+	fn <- makeRandomString()
+	pathName <- paste(path, fn, sep="/")
+	NIR <- dataset$NIR
+	wls <- getWavelengths(dataset)
+	wlsR <- range(wls)
+	diffwls <- diff(wls)
+	if( (sd(diffwls)== 0) ) {
+		dwl <- mean(diffwls)
+	} else {
+		dwl <- NA
+	}
+	datf <- data.frame(expId=eid, nir_as3="", nir_loc=fn, nrows=nrow(NIR), ncols=ncol(NIR), ncpwl=dataset@ncpwl, delta_wl=dwl, ranFrom=wlsR[1], ranTo=wlsR[2])
+	DBI::dbWriteTable(con, "nir", datf, append=TRUE, row.names=FALSE)
+	save(NIR, file=pathName)
+	invisible(NULL)
+}
 
-# x is the dataset
-writeNIRdb <- function(x, eid=4, con=dbcon) {
-	wlsR <- range(getWavelengths(x))
-	nird <- paste(as.character(c(x$NIR)), collapse=" ")
-	rns <- paste(rownames(x$NIR), collapse=" ")
-	wlsn <- paste(colnames(x$NIR), collapse=" ")
-	datframe <- data.frame(expId=eid, nirdata=nird, nrows=nrow(x$NIR), wls=wlsn, rowNames=rns, ncpwl=x@ncpwl, ranFrom=wlsR[1], ranTo=wlsR[2])
-	DBI::dbWriteTable(con, "nir", datframe, append=TRUE, row.names=FALSE)
-	invisible(NULL)	
-} # EOF
+rr <- function(eid) {
+	path <- Sys.getenv("AQUAP2DATA")
+	nt <- tbl(dbplyr, sql("select * from nir"))
+	fullRow <- collect(filter(nt, expId==eid))
+	localName <- fullRow$nir_loc
+	pathName <- paste(path, localName, sep="/")
+	nir <- eval(parse(text=(load(pathName)))) # :-)
+	return(invisible(nir))
+}
 
-	
-makeNir <- function(dataset) {
-	return(c(dataset$NIR))
-} 
+
+
+
+
+
+
+
 
 

@@ -25,7 +25,10 @@ Imports:
     pls,
     boot,
     fmsb,
-    dplyr
+    dplyr,
+    DBI,
+    RMySQL,
+    RAmazonS3
 Suggests:
     knitr
 VignetteBuilder: knitr
