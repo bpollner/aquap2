@@ -24,7 +24,8 @@ Imports:
     som,
     pls,
     boot,
-    fmsb
+    fmsb,
+    dplyr
 Suggests:
     knitr
 VignetteBuilder: knitr
