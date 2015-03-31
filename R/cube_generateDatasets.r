@@ -670,7 +670,7 @@ checkForStats <- function(ap) {
 #' @family Core functions
 #' @export
 gdmm <- function(dataset, ap=getap(), md=getmd() ) {
-	autoUpS()
+	autoUpS(); ap; md ;
 	ap <- ap_cleanZeroValuesCheckExistenceDefaults(ap, dataset)
 	a <- makeCompPattern(dataset$header, md, ap)
 	cp <- a$cp

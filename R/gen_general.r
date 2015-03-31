@@ -134,7 +134,7 @@ updateSettings <- function(packageName="aquap2", silent=FALSE) {
 		}
 		invisible(.ap2$stn)
 	} else { # so if the settings check was not ok
-	return(NULL)
+	return(invisible(NULL))
 	}
 } # EOF
 
