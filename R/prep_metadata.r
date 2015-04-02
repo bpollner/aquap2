@@ -276,6 +276,18 @@ getap_core <- function(fn, .lafw_fromWhere="load", cube=NULL, ...) {
 		a <- substitute(c(...))
 		chars <- names(eval(a))
 		if (!is.null(chars)) {
+		## begin nameX correction
+		for (i in 2:20) { # to correct for the 'nameX'behaviour for the arguments that can have more than one value
+			ind <- grep(i, chars)
+			if (length(ind) != 0) {
+				chars <- chars[-ind]
+			}
+		} # end for i
+		ind <- grep(1, chars)
+		if (length(ind) != 0) {
+				chars[ind] <- substr(chars[ind], 1, nchar(chars[ind])-1) # cut away the "1" from the remaining chars that have a "1" 
+		}
+		## end nameX correction		
 			out <- NULL
 			for (i in 1: length(chars)) {
 				ind <- which(pv == chars[i])
