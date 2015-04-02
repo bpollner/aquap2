@@ -216,7 +216,7 @@ genFolderStr <- function() {
 #'  }
 #'  @export
 updateAquap <- function(branch="master") {
-	github_pat <- "7fc5ade6d6b5bfe07de528b17b959d37b4d1b01d"
+	github_pat <- ""
 	devtools::install_github(repo="bpollner/aquap2", ref=branch, auth_token=github_pat, build_vignettes=TRUE)
 } # EOF
 
