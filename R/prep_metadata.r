@@ -142,7 +142,8 @@ getmd_core <- function(fn="def") {
 #' @details The name of the default metadata-file can be specified in the settings.
 #' Only the experiment name can be changed via the \code{...} argument by providing 
 #' the argument 'expName'. Other arguments will be ignored.
-#' @param fn Character length one. If left at 'def', the default filename for 
+#' @param fn Character length one.  The filename of the metadata file to load. 
+#' If left at 'def', the default filename for 
 #' a metadata-file as specified in the settings (what is "metadata.r") is read 
 #' in. Provide any other valid name of a metadata-file to load it. (Do not forget 
 #' the '.r' at the end.)
@@ -324,10 +325,11 @@ getap_core <- function(fn, .lafw_fromWhere="load", cube=NULL, ...) {
 #' the settings. The provided value and defaults will be checked in 
 #' \code{\link{gdmm}} and the resulting \code{\link{aquap_cube}} contains the 
 #' final analysis procedure in its slot @@anproc.
-#' @param fn Character length one. If left at 'def', the default filename for an 
-#' analysis procedure file as specified in the settings (factory default is 
-#' "anproc.r") is read in. Provide any other valid name of an analysis procedure 
-#' file to load it. (Do not forget the '.r' at the end.)
+#' @param fn Character length one. The filename of the analysis procedure file 
+#' to load. If left at 'def', the default filename for an analysis procedure 
+#' file as specified in the settings (factory default is "anproc.r") is read in. 
+#' Provide any other valid name of an analysis procedure file to load it. (Do not 
+#' forget the '.r' at the end.)
 #' @param ... Any of the arguments of the analysis procedure - please see 
 #' \code{\link{anproc_file}}. Any argument/value provided via \code{...} will 
 #' override the value in the analysis procedure .r file.

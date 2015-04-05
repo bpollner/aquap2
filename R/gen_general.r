@@ -28,7 +28,13 @@ checkSettings <- function() {
 	pspath <- paste(path.package("aquap2"), "/settings.r", sep="")
 	pathSH <- Sys.getenv("AQUAP2SH")
 	if (nchar(pathSH) == 0) { 			## so the variable is *not* defined in .Renviron
-		msg <- ("It appears you did not yet define the path to your aquap2 settings.r home directory in the '.Renviron' file. \nPlease do this by going to the .Renviron file (in your home directory 'user/home') and there define the variable 'AQUAP2SH' as the path to a folder of your liking. \nIf you do not have a '.Renviron' file you have to create one. \nRestart R for the changes to become effective. \nSee the help for '?updateSettings' for additional information")
+		homePath <- "user/home"
+		hp <- try(path.expand("~"), silent=TRUE)
+		if (class(hp) != "try-Error") {
+			homePath <- hp
+		}
+		homePath <- paste(homePath, "/.Renviron", sep="")
+		msg <- paste("It appears you did not yet define the path to your aquap2 settings.r home directory in the '.Renviron' file. \nPlease do this by going to the .Renviron file (in your home directory '", homePath, "') and there define the variable 'AQUAP2SH' as the path to a folder of your liking. \nIf you do not have a '.Renviron' file you have to create one. (You can do this conveniently e.g. with R-Studio by creating a new R-script and saving it under '", homePath, "')\nRestart R for the changes to become effective. \nSee the help for '?updateSettings' for additional information", sep="")
 		message(msg)
 		return(FALSE)
 	} else { ## so we have something defined under AQUAP2SH

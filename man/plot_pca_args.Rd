@@ -58,7 +58,7 @@ please see \code{\link{anproc_file}}.
 dataset <- gfd()
 cube <- gdmm(dataset)
 plot(cube, pca.colorBy="C_Group", pca.sc.pairs=NULL)
-# will plot every availalbe model
+# will plot every available model
 plot_pca(cube, pca.colorBy="C_Group", pca.sc.pairs=NULL)
 # will plot only the PCA
 plot_pca(cube, pca.what="scores")

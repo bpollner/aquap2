@@ -7,7 +7,8 @@
 getmd(fn = "def", ...)
 }
 \arguments{
-\item{fn}{Character length one. If left at 'def', the default filename for
+\item{fn}{Character length one.  The filename of the metadata file to load.
+If left at 'def', the default filename for
 a metadata-file as specified in the settings (what is "metadata.r") is read
 in. Provide any other valid name of a metadata-file to load it. (Do not forget
 the '.r' at the end.)}

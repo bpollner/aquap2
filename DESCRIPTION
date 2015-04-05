@@ -57,4 +57,5 @@ Collate:
     'prep_importData.r'
     'prep_importData_specific.r'
     'prep_metadata.r'
+    'prep_writeMfiles.r'
     'zzz.r'

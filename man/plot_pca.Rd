@@ -10,7 +10,7 @@ plot_pca(cube, ...)
 \item{cube}{An object of class 'aquap_cube' as produced by \code{\link{gdmm}}.}
 
 \item{...}{Optional pca plotting parameters to override the values in the
-analysis procedure stored in the 'cube' - for possible argument see
+analysis procedure stored in the 'cube' - for possible arguments see
 \code{\link{plot_pca_args}}.}
 }
 \value{

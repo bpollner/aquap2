@@ -21,7 +21,7 @@ Once you have specified a folder under the variable \code{AQUAP2SH} in
  You will get notified if there should be a newer version of
  the settings.r file available within the  package. If you changed some values
  of the settings.r file and then copy a new setings.r file from the package,
- your changes will be lost.
+ you have to adapt the newly copied file to contain your changed values.
 }
 \seealso{
 Other fileDocs: \code{\link{anproc_file}};

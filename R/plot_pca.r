@@ -110,7 +110,7 @@ plotPCA_Loadings <- function(cube, ap, where="pdf", comps=c(1:5), onMain="", onS
 #'  @details The width and height of the resulting pdf can be set in the settings.
 #'  @param cube An object of class 'aquap_cube' as produced by \code{\link{gdmm}}.
 #'  @param ... Optional pca plotting parameters to override the values in the 
-#'  analysis procedure stored in the 'cube' - for possible argument see 
+#'  analysis procedure stored in the 'cube' - for possible arguments see 
 #'  \code{\link{plot_pca_args}}.
 #'  @return A pdf or graphic device.
 #'  @family Plot functions
@@ -168,7 +168,7 @@ plot_pca <- function(cube, ...) {
 #' dataset <- gfd()
 #' cube <- gdmm(dataset)
 #' plot(cube, pca.colorBy="C_Group", pca.sc.pairs=NULL) 
-#' # will plot every availalbe model
+#' # will plot every available model
 #' plot_pca(cube, pca.colorBy="C_Group", pca.sc.pairs=NULL) 
 #' # will plot only the PCA
 #' plot_pca(cube, pca.what="scores")

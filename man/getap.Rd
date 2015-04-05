@@ -7,12 +7,13 @@
 getap(fn = "def", ...)
 }
 \arguments{
-\item{fn}{Character length one. If left at 'def', the default filename for an
-analysis procedure file as specified in the settings (factory default is
-"anproc.r") is read in. Provide any other valid name of an analysis procedure
-file to load it. (Do not forget the '.r' at the end.)}
+\item{fn}{Character length one. The filename of the analysis procedure file
+to load. If left at 'def', the default filename for an analysis procedure
+file as specified in the settings (factory default is "anproc.r") is read in.
+Provide any other valid name of an analysis procedure file to load it. (Do not
+forget the '.r' at the end.)}
 
-\item{...}{Any of the arguments of the analysis procedure - please  see
+\item{...}{Any of the arguments of the analysis procedure - please see
 \code{\link{anproc_file}}. Any argument/value provided via \code{...} will
 override the value in the analysis procedure .r file.}
 }
@@ -28,8 +29,7 @@ values.
 }
 \details{
 The name of the default analysis procedure file can be specified in
-the settings. Other arguments than precise matches to the available arguments
-will be ignored. The provided value and defaults will be checked in
+the settings. The provided value and defaults will be checked in
 \code{\link{gdmm}} and the resulting \code{\link{aquap_cube}} contains the
 final analysis procedure in its slot @anproc.
 }
