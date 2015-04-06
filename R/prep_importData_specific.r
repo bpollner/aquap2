@@ -144,7 +144,7 @@ getPirTable <- function(dataFile, fromPosi, toPosi, nRow, nColAll) {
   a <- a[1:(nRow*nColAll)]
   a[which(a==9.99999968028569246551e+37)] <- NA
   
-  out <- NIR <- matrix(a, nRow, nColAll)
+  out <- NIR <- matrix(round(a, 7), nRow, nColAll)
 }#Eof function
 
 getPirHead <- function(dataFile, fromPosi, toPosi, lengthHead) {
