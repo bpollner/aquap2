@@ -3,7 +3,7 @@
 ###########################################################################################
 
 stn <- list(
-	# tag = value,
+	# tag = value, # with a comma !!
 	
 	
 	## Folder Management
@@ -30,6 +30,7 @@ stn <- list(
 	p_ECRMCol = "ECRM", 					## the name of the column holding the class for indicating either environmental control or real measurement
 	p_tempCol = "Temp",						## the name of the column holding the room temperature at which the measurements were taken
 	p_RHCol ="RelHum",						## the name of the column holding the relative humidity at which the measurements were taken 
+	p_userDefinedSpecialColnames = c("Conc", "Weight"),		## the special column names where the colors defined in "col_userDefinedRamps" will be used
 	p_expNameCol = "ExpName",				## the name of the column holding the experiment name 
 	p_commonNoSplitCol = "all", 			## the name of the column containing the common "no-split" value
 	p_commonNoSplit = "all", 				## a common value for all the rows in the dataset in the "noSplit" column
@@ -76,7 +77,7 @@ stn <- list(
 
 	## Colors
 	col_RampForTRH = c("blue", "red", "yellow2"), 	## used for color-coding any column that contains the characters defined as names for the temperature and rel. humidity column. Provide at least two colors.
-
+	col_userDefinedRamps = list(c("green", "red"), c("blue", "yellow2")), 	## used for coloring the in "p_userDefinedSpecialColnames" defined special column names.   XXX make nicer colors here
 
 	### smoothing ###
 	## settings for the Sav. Golay filter at the smoothing process

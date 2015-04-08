@@ -60,7 +60,7 @@
 #'          be the case if you use a custom-function to import your spectral 
 #'          data and all the necessary class- and numerical variables are already 
 #'          defined in the same file that holds the spectral data. Please refer to
-#'          \code{\link{custom_import}} for furhter information on the requirements 
+#'          \code{\link{custom_import}} for further information on the requirements 
 #'          for this custom import function.
 #'          You can use a custom function to import spectral data and at the same 
 #'          time import additional variables from a sample-list file by providing 
@@ -84,11 +84,15 @@
 #' }
 #' @param multiplyRows Character or Logical. If all the rows in the sample list 
 #' should be multiplied by the number of consecutive scans as specified in the 
-#' metadata of the experiment. If 'FALSE' (what would be the case if you, during 
+#' metadata of the experiment. 
+#' If left at 'def' the value from the settings.r file is used. 
+#' If 'FALSE' (what would be the case if you are using a sample list and, during 
 #' your measurements, had to divert from the planned number of consecutive scans
 #' or had to make other changes so that the number of consecutive scans is not 
 #' the same for every sample) you have to manually insert the column (default name 
-#' would be 'C_conSNr' and provide the values for every row.
+#' would be 'C_conSNr') into the sample list and provide the values for every row.
+#' Set to 'TRUE' for multiplying every row in the sample list by the number of 
+#' consecutive scans as specified in the metadata of the experiment.
 #' @param ttl Logical, 'try to load'. If a possibly existing r-data file should be 
 #' loaded. From the provided metadata (argument 'md') the experiment name is 
 #' extracted, and if a file having the same name as the experiment name is found 

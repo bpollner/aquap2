@@ -1,0 +1,25 @@
+---
+title: "Coloring"
+author: ""
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Coloring}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}  
+---
+
+```{r, echo = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+[(back to introduction)](introduction.html)
+
+## Custom Coloring
+The following possibilites exist for custom coloring the data
+
+  - Via the Temperature and TRH color palette
+  - Via the two user definded variales in the settings - any number of color palettes, and any number of "keywords" those color palettes are associated with. (XXX explain better)
+  
+  If one of the user-defined characters is detected in the column name, the associated color palette is automatically used for coloring these data.
+  XXX explain better.

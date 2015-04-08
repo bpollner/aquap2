@@ -125,3 +125,6 @@ For possible arguments to `getap` please see the help for `?getap` and `?anproc_
 maybe eben calling it data analysis is not good here, as the analysis is already done in the previous step ?? Maybe it is just plotting here??
 what is implemented, and the Aquagram
 
+## Further Links
+ - Special options for [coloring](Coloring.html) the data.
+ 

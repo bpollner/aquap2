@@ -2,7 +2,7 @@
 #  @description Displays a character string with the path to the packae 
 #    'Aquap2'
 #  @details This is where you can find the source of the 
-#' \code{\link{settings_file}}.
+#  \code{\link{settings_file}}.
 #  @return A character string with the path.
 #  @family Helper Functions
 #  @export

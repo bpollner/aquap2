@@ -650,7 +650,7 @@ loadAQdata <- function(md=getmd(), verbose=TRUE) {
 		if (verbose & !.ap2$stn$allSilent) {
 			cat(paste("Dataset \"", path, "\" loaded.", sep=""))
 		}
-		invisible(get("dataset"))	
+		return(invisible(eval(parse(text=a))))
 	} else {
 		if (verbose) {
 			message(paste("Dataset \"", path, "\" does not seem to exist, sorry.", sep=""))
@@ -667,8 +667,7 @@ transformNrsIntoColorCharacters <- function(numbers) {
 	return(as.character(colorChar[numbers]))
 } # EOF
 
-generateHeatMapColorCoding <- function(numbers) {
-	whatColors <- .ap2$stn$col_RampForTRH
+generateHeatMapColorCoding <- function(whatColors, numbers) {
 	colRamp <- colorRampPalette(whatColors)
 	colorChar <- colRamp(length(unique(numbers)))
 	out <- as.character(colorChar[numbers])
@@ -677,6 +676,9 @@ generateHeatMapColorCoding <- function(numbers) {
 extractClassesForColRep <- function(header) { ## does not need "NIR" present in the data frame
 	tempCol <- .ap2$stn$p_tempCol ## depends on "grepl" or not
 	RHCol <- .ap2$stn$p_RHCol
+	TRHColors <- .ap2$stn$col_RampForTRH
+	userRampColors <- .ap2$stn$col_userDefinedRamps # is a list
+	userColnames <- .ap2$stn$p_userDefinedSpecialColnames # is a vector
 	out <- data.frame(matrix(NA, nrow=nrow(header)))
 	for (i in 1: ncol(header)) {
 		if (is.factor(header[,i])) {
@@ -684,11 +686,16 @@ extractClassesForColRep <- function(header) { ## does not need "NIR" present in 
 			levelsA <- unique(a[,1])
 			cn <- colnames(header[i])
 			if (grepl(tempCol, cn) | grepl(RHCol, cn)) {
-				a[1] <- generateHeatMapColorCoding(a[,1])
+				a[1] <- generateHeatMapColorCoding(TRHColors, a[,1])
 			} else {
-				if (length(levelsA) > 8) { ## we only have 8 integer representations for colors
-					a[1] <- transformNrsIntoColorCharacters(a[,1])
-				} # end if
+				ind <- which(lapply(userColnames, function(x) grep(x, cn)) == TRUE)
+				if (length(ind) != 0) { # so there is a user defined special colname character in the colname cn
+					a[1] <- generateHeatMapColorCoding(userRampColors[[ind]], a[,1])
+				} else {
+					if (length(levelsA) > 8) { # so we have none of the special cases and more than 8 levels (we only have 8 standard integer representations for colors)
+						a[1] <- transformNrsIntoColorCharacters(a[,1])
+					} # end if
+				}
 			}
 			names(a) <- colnames(header[i])
 			out <- data.frame(out,a)
