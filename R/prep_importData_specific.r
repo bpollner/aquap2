@@ -130,31 +130,21 @@ PirIndexes <- function(dataFile, nByts) { #could be quicker with for like in hea
 
 getPirTable <- function(dataFile, fromPosi, toPosi, nRow, nColAll) {
   fCon <- file(dataFile, open = "rb")
-  a<-readBin(fCon, raw(), fromPosi+4)
+  a <- readBin(fCon, raw(), fromPosi + 4) # jump to the start point
   
-  no <- no0 <- 0
-  if (nRow > 29+32) {
-    no0<-length(seq(29,nRow,32))
-  }
-  nrRowsAdd <- nRow+no0+2
-  noData<-nrRowsAdd*(nColAll+0.1)
-  DatatoRead <- noData
-  if (nRow > 29+32) {
-    no <- seq(29,noData,32)
-    DatatoRead <- noData-61
-  }
+  DatatoRead <- toPosi - fromPosi
+  a <- readBin(fCon, raw(), DatatoRead) # read all the data as raw
   
-  a <- readBin(fCon, double(), size=4, DatatoRead)#52)
+  IndNoData <- seq(116, length(a), 128)
+  IndNoData <- sort(c(IndNoData, IndNoData-1, IndNoData-2, IndNoData-3))
+  
+  a <- a[-IndNoData] # eliminate the byte indexes (one block contains 128 units but always starts with FF FF FF FF, we do not need)
   close(fCon)
-  if (nRow > 29+32){
-    a <- a[-no]
-  }
-  lengtha <- length(a)
+  a <- readBin(a, double(), size=4, DatatoRead) # translet it into numbers
   a <- a[1:(nRow*nColAll)]
-  lengtha <- lengtha-length(a)
   a[which(a==9.99999968028569246551e+37)] <- NA
   
-  return(matrix(a, nRow, nColAll)) # NIR
+  out <- NIR <- matrix(round(a, 7), nRow, nColAll)
 }#Eof function
 
 getPirHead <- function(dataFile, fromPosi, toPosi, lengthHead) {
