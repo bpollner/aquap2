@@ -24,7 +24,9 @@ Imports:
     som,
     pls,
     boot,
-    fmsb
+    fmsb,
+    lattice,
+    latticeExtra
 Suggests:
     knitr
 VignetteBuilder: knitr

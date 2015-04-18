@@ -14,6 +14,18 @@ makePCAScorePlots <- function(cube, ap, comps=c(1:5), pcs=c(1,2), onMain="", onS
 			mainText <- paste(onMain, idString)
 			subText <- paste("color by ", classList[i], " ", onSub, sep="")
 			#
+			x <- PCAObject$scores[, pcs[1]]
+			y <- PCAObject$scores[, pcs[2]]
+			xlab <- paste("PC ", pcs[1], sep="")
+			ylab <- paste("PC ", pcs[2], sep="")
+			grouping <- header[, colInd]
+			latCol <- unique(numRepCol)
+			lattice::xyplot(x ~ y, sub=subText, main=mainText, groups=grouping, xlab=xlab, ylab=ylab, col=latCol, pch=16, cex=1, 
+				panel=function(x, y, ...) {
+					lattice::panel.xyplot(x, y, ...) # plot the data
+					latticeExtra::panel.ellipse(x, y, col=latCol, center.pch="X", robust=TRUE, groups=grouping, scales="free", level=0.95, lwd=1, lty=c(1,2), subscripts=TRUE)
+				}
+			) # end of call to lattice xyplot
 			ChemometricsWithR::scoreplot.PCA(PCAObject, c(pcs[1], pcs[2]), col=numRepCol, pch=16, main=mainText, sub=subText)
 			legendText <- unique(header[,colInd])
 			lto <- order(legendText)
