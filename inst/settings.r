@@ -90,6 +90,14 @@ stn <- list(
 	noi_noiseLevel = 1e-6, 					## the system-specific noise level XXX 
 
 
+	## PCA
+	pca_nrDigitsVariance = 3, 				## rounding for the display of explained variances in PCA plots
+	pca_CI_ellipse_robust = TRUE,			## logical (TRUE or FALSE); if the CI-ellipse in PCA score plots should be calculated robust or not
+	pca_CI_ellipse_centerPch = "X",			## the character in the center of a cluster in PCA score plots
+	pca_CI_ellipse_lty = c(1,2),			## the linetypes (get recycled) of the CI-ellipses
+	pca_CI_ellipse_lwd = 1, 				## the line width of the CI-ellipse
+	
+	
 	## Aquagram 
 	aqg_defaultMod = "aucs.dce", 		## the default mode for the Aquagram
 	aqg_wlsAquagram = c(1342, 1364, 1374, 1384, 1412, 1426, 1440, 1452, 1462, 1476, 1488, 1512), 	## the wavelengths for the classic aquagram (argument aqg.selWls)
