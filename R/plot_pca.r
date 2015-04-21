@@ -4,6 +4,15 @@ makePCAScorePlots <- function(cube, ap, comps=c(1:5), pcs=c(1,2), onMain="", onS
 	trCenterPch <- .ap2$stn$pca_CI_ellipse_centerPch
 	trLty <- .ap2$stn$pca_CI_ellipse_lty
 	trLwd <- .ap2$stn$pca_CI_ellipse_lwd
+	trElci <- ap$pca$elci
+	trAlphaBG <- 1
+	el2colorBy <- ap$pca$elcolorBy
+	classList <- getPCAClassList(ap)
+	if (!is.null(el2colorBy)) {
+		if (length(el2colorBy) == 1) {
+			el2colorBy <- rep(el2colorBy, length(classList))
+		}
+	}
 	if (onSub == "") {
 		onSubFill <- " "
 	} else {
@@ -12,18 +21,17 @@ makePCAScorePlots <- function(cube, ap, comps=c(1:5), pcs=c(1,2), onMain="", onS
 	for (k in 1: length(cube)) {
 		set <- cube[[k]]
 		PCAObject <- getPCAObject(set)
-		classList <- getPCAClassList(ap)
 		numRep <- getColRep(set)
 		header <- getHeader(set)
 		idString <- getIdString(set)
 		allVariancesPCs <- round((ChemometricsWithR::variances(PCAObject) / PCAObject$totalvar)*100, .ap2$stn$pca_nrDigitsVariance)
 		cumSumVars <- cumsum(allVariancesPCs)
 		ind99 <- which(cumSumVars >= 99)[1]
-		ind99Txt <- paste("(", ind99, " PCs for 99% var.)", sep="")
+		ind99Txt <- paste("   [", ind99, " PCs for 99% var.]", sep="")
 		indNoChange <- max(which(diff(cumSumVars) != 0)) # the last one where the variance is increasing; not yet in use
 		x <- PCAObject$scores[, pcs[1]]
 		y <- PCAObject$scores[, pcs[2]]
-		xlab <- paste("PC ", pcs[1], " (", allVariancesPCs[pcs[1]], "%)", sep="")
+		xlab <- paste("PC ", pcs[1], " (", allVariancesPCs[pcs[1]], "%)", ind99Txt, sep="")
 		ylab <- paste("PC ", pcs[2], " (", allVariancesPCs[pcs[2]], "%)", sep="")
 		mainText <- paste(onMain, idString)
 		for (i in 1: length(classList)) {
@@ -32,29 +40,48 @@ makePCAScorePlots <- function(cube, ap, comps=c(1:5), pcs=c(1,2), onMain="", onS
 			numRepCol <- numRep[,indNumRep]
 			#
 			grouping <- header[, colInd]
-			partN <- sapply(levels(grouping), function(x, grAll) length(which(grAll==x)), grAll=grouping)
-			if (length(unique(partN)) == 1) {
-				partN <- unique(partN)
-			} else {
-				partN <- paste(partN, collapse=", ")
-
-			}
-			partNText <- paste("  N = ", partN, sep="")
 			legendText <- as.character(unique(header[,colInd]))
 			lto <- order(legendText)
+			partN <- sapply(levels(grouping), function(x, grAll) length(which(grAll==x)), grAll=grouping)
+			legendTextExtended <- paste(legendText[lto], "   N=", partN, "", sep="") # have it in every line			
 			latCol <- unique(numRepCol)[lto]
-			trLegend <- list(corner=c(1,1), border=TRUE, points=list(pch=16, col=latCol), text=list(legendText[lto]), alpha.background=0.8)
-			subText <- paste("color by ", classList[i], onSubFill, ind99Txt, partNText, sep="")
+			trLegend <- list(corner=c(1,1), border=TRUE, points=list(pch=16, col=latCol), text=list(legendTextExtended), alpha.background=trAlphaBG, title=classList[i])
+			subText <- paste("color by ", classList[i], onSubFill, sep="")
 			trSub <- list(label=subText, fontface=1)
-			## make ellipses for other grouping + helped by pch
-			trelPlot <- lattice::xyplot(y ~ x, sub=trSub, main=mainText, groups=grouping, xlab=xlab, ylab=ylab, col=latCol, pch=16, cex=0.85, key=trLegend, 
+			trelPlot1 <- lattice::xyplot(y ~ x, sub=trSub, main=mainText, groups=grouping, xlab=xlab, ylab=ylab, col=latCol, pch=16, cex=0.85, key=trLegend, 
 				panel=function(x, y, ...) {
 					lattice::panel.xyplot(x, y, ...) # plot the data
 		    	    lattice::panel.abline(h=0, v=0, lty=2, col="gray")
-					latticeExtra::panel.ellipse(x, y, col=latCol, center.pch=trCenterPch, robust=trRobust, groups=grouping, scales="free", level=0.95, lwd=trLwd, lty=trLty, subscripts=TRUE)
+					if (!is.null(trElci)) {
+						latticeExtra::panel.ellipse(x, y, col=latCol, center.pch=trCenterPch, robust=trRobust, groups=grouping, scales="free", level=trElci, lwd=trLwd, lty=trLty, subscripts=TRUE)
+					}
 				}
-			) # end of call to lattice xyplot
-			print(trelPlot)
+			) # end of call to trelPlot1
+			print(trelPlot1)
+			if (!is.null(el2colorBy) & !is.null(trElci)) { # so we want an other plot with additional CI ellipses
+				colInd2 <- which(colnames(header)==el2colorBy[i])
+				indNumRep2 <- which(colnames(numRep) == el2colorBy[i])
+				numRepCol2 <- numRep[,indNumRep2]
+				grouping2 <- header[, colInd2]
+				pch2 <- makePchSingle(grouping2)
+				legendText2 <- as.character(unique(header[,colInd2]))
+				lto2 <- order(legendText2)
+				partN2 <- sapply(levels(grouping2), function(x, grAll) length(which(grAll==x)), grAll=grouping2)
+				legendTextExtended2 <- paste(legendText2[lto2], "   N=", partN2, "", sep="") # have it in every line			
+				latCol2Ell <- unique(numRepCol2)[lto2]
+				trLegend2 <- list(corner=c(0.2,0.2), border=TRUE, points=list(pch=unique(pch2)[lto2], col="black"), lines=list(lwd=1, col=latCol2Ell, lty=trLty), text=list(legendTextExtended2), title=el2colorBy[i], alpha.background=trAlphaBG)
+				trSub2 <- list(label=paste(subText, ", CI ellipses by ", el2colorBy[i], sep=""), fontface=1)
+				trelPlot2 <- lattice::xyplot(y ~ x, sub=trSub2, main=mainText, xlab=xlab, ylab=ylab, col=numRepCol, pch=pch2, cex=0.85, key=trLegend, 
+					panel=function(x, y, ...) {
+						lattice::panel.xyplot(x, y, ...) # plot the data
+		    	    	lattice::panel.abline(h=0, v=0, lty=2, col="gray")
+						latticeExtra::panel.ellipse(x, y, col=latCol2Ell, center.pch=trCenterPch, robust=trRobust, groups=grouping2, scales="free", level=trElci, lwd=trLwd, lty=trLty, subscripts=TRUE)
+#						latticeExtra::panel.key(corner=c(0,0), text=legendText2[lto2], points=list(pch=4, col="black"))
+						lattice::draw.key(trLegend2, draw=TRUE)
+					}
+				) # end of call to trelPlot2
+				print(trelPlot2)
+			} # end !is.null(el2colorBy)
 			#
 			ChemometricsWithR::scoreplot.PCA(PCAObject, c(pcs[1], pcs[2]), col=numRepCol, pch=16, main=mainText, sub=subText)
 			legendText <- unique(header[,colInd])

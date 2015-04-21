@@ -261,7 +261,10 @@ getap_core_file <- function(fn="def") {
 	noise <- list(useNoise=e$spl.do.noise, useRaw=e$spl.noise.raw)
 	dpt <- list(smoothing=smoothing, noise=noise)
 	##
-	pca <- list(doPCA=e$do.pca, colorBy=e$pca.colorBy, what=e$pca.what, pcs=e$pca.sc, pcSc=e$pca.sc.pairs, pcLo=e$pca.lo)
+	pca.elci <- 0.95						## the confidence interval for the ellipse to draw around groups in score plots; set to NULL for not drawing ellipses at all
+	pca.el2colorBy <- NULL					## which variables to use for plotting additional confidence intervall ellipses. Set to NULL for using the same as in pca.colorBy. Provide one variable (gets recycled) or a vector with equal length as pca.colorBy to have the additional ci-ellipses along these variables.
+
+	pca <- list(doPCA=e$do.pca, colorBy=e$pca.colorBy, elci=e$pca.elci, elcolorBy=e$pca.elcolorBy, what=e$pca.what, pcs=e$pca.sc, pcSc=e$pca.sc.pairs, pcLo=e$pca.lo)
 	simca <- list(doSIMCA=e$do.sim, simcOn=e$sim.vars, simcK=e$sim.K)
 	plsr <- list(doPLSR=e$do.pls, regressOn=e$pls.regOn, ncomp=e$pls.ncomp, valid=e$pls.valid, colorBy=e$pls.colorBy)	
 	aquagr <- list(doAqg=e$do.aqg, vars=e$aqg.vars, nrCorr=e$aqg.nrCorr, spectra=e$aqg.spectra, minus=e$aqg.minus, mod=e$aqg.mod, TCalib=e$aqg.TCalib, Texp=e$aqg.Texp, bootCI=e$aqg.bootCI, R=e$aqg.R, smoothN=e$aqg.smoothN, selWls=e$aqg.selWls, msc=e$aqg.msc, reference=e$aqg.reference, fsa=e$aqg.fsa, fss=e$aqg.fss, ccol=e$aqg.ccol, clt=e$aqg.clt, pplot=e$aqg.pplot, plines=e$aqg.plines, discr=e$aqg.discr)	
@@ -386,11 +389,11 @@ getap <- function(fn="def", ...) {
 	PC <- ap$pca
 #	if (is.null(PC)) {doIt <- FALSE} else { if (PC$doPCA) {doIt <- TRUE} else {doIt <- FALSE}} # have to correct for the possibility that we get the core-ap from the cube: in this case we do not have the "do.XXX" argument
 	doIt <- checkDo(PC, "doPCA")
-	modifyPCA <- function(do.pca=doIt, pca.colorBy=PC$colorBy, pca.what=PC$what, pca.sc=PC$pcs, pca.sc.pairs=PC$pcSc, pca.lo=PC$pcLo, ...) { # define the default of the function as the value coming in in the analysis procedure ap (getap_core); need the ... to "ignore" all the other arguments that do not match
+	modifyPCA <- function(do.pca=doIt, pca.colorBy=PC$colorBy, pca.elci=PC$elci, pca.elcolorBy=PC$elcolorBy, pca.what=PC$what, pca.sc=PC$pcs, pca.sc.pairs=PC$pcSc, pca.lo=PC$pcLo, ...) { # define the default of the function as the value coming in in the analysis procedure ap (getap_core); need the ... to "ignore" all the other arguments that do not match
 		if (!do.pca) {
 			return(NULL)
 		} else {
-			return(list(colorBy=pca.colorBy, what=pca.what, pcs=pca.sc, pcSc=pca.sc.pairs, pcLo=pca.lo)) # return the same name as in the ap before
+			return(list(colorBy=pca.colorBy, elci=pca.elci, elcolorBy=pca.elcolorBy, what=pca.what, pcs=pca.sc, pcSc=pca.sc.pairs, pcLo=pca.lo)) # return the same name as in the ap before
 		}
 	} # EOIF
 	apMod$pca <- modifyPCA(...) # if no values are provided in ... , then the defaults (who are all the values from the .r file) are taken. If one or more values are provided, they replace the default.

@@ -92,6 +92,7 @@ stn <- list(
 
 	## PCA
 	pca_nrDigitsVariance = 3, 				## rounding for the display of explained variances in PCA plots
+	pca_CI_ellipse_level = 0.95, 			## the CI level to be calculated
 	pca_CI_ellipse_robust = TRUE,			## logical (TRUE or FALSE); if the CI-ellipse in PCA score plots should be calculated robust or not
 	pca_CI_ellipse_centerPch = "X",			## the character in the center of a cluster in PCA score plots
 	pca_CI_ellipse_lty = c(1,2),			## the linetypes (get recycled) of the CI-ellipses

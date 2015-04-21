@@ -35,6 +35,9 @@
 	# plotting 
 	pca.colorBy <- NULL						## which variables to use for coloring the score plots. leave empty c() or set to NULL for using all available class-variables for coloring 
 #	pca.colorBy <- c("C_Group", "C_Temp", "C_RelHum")
+	pca.elci <- "def"						## the confidence interval for the ellipse to draw around groups in score plots; leave at 'def' to read in the default from the settings.r file; provide a numeric length one (e.g. 0.95); or set to NULL for not drawing ellipses at all
+	pca.elcolorBy <- NULL					## which variables to use for plotting additional confidence intervall ellipses. Set to NULL for not drawing additional CI-ellipses. Provide one variable (gets recycled) or a vector with equal length as pca.colorBy to have the additional ci-ellipses along these variables.
+#	pca.elcolorBy <- "C_RelHum"
 	pca.what <- "both"						## can be either 'both' for plotting both PCA scores and loadings, or 'scores' or 'loadings' for plotting only one of them.
 	pca.sc <- c(1, 2)						## Numeric length 2, the two PCs to be plotted against each other in the score plots.
 	pca.sc.pairs <- 1:6 					## Numeric sequence of length >=2, indicating what PC components to plot in the score pairs plot. Set to NULL for not plotting the pairs plot.

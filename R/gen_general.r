@@ -437,3 +437,37 @@ reFactor <- function(dataset) {
 is.wholenumber <- function(x, tol = .Machine$double.eps^0.5) {
 	 return(abs(x - round(x)) < tol)
 } # EOF
+
+
+makePchSingle<- function(PchToReFact, extra = FALSE) {  #PchToReFact: the factor what you want to display with different pch, extra: additional not nice pch
+	nr <- length(unique(PchToReFact))
+ 	if (extra) {
+ 		nicePch<-c(0:20,35,127,134,135,164,169,171,174,182,187)
+ 	} else {
+ 		nicePch<-c(0:20)
+ 	}
+ 	if (nr > length(nicePch)){
+   		nicePch <- rep(nicePch,ceiling(nr/length(nicePch)))
+ 	}
+ 	return(nicePch[PchToReFact])
+ 	##
+ 	newPch <- rep(NA, length(PchToReFact))
+ 	for (p in 1:nr){
+   		a <- which(PchToReFact==unique(PchToReFact)[p])
+   		newPch[a] <- nicePch[p]
+ 	}
+ 	return(newPch)
+} # EOF
+
+makePchGroup <- function(PchToReFact, extra = FALSE) {
+	nr <- length(unique(PchToReFact))
+ 	if (extra) {
+ 		nicePch<-c(0:20,35,127,134,135,164,169,171,174,182,187)
+ 	} else {
+ 		nicePch<-c(0:20)
+ 	}
+ 	if (nr > length(nicePch)){
+   		nicePch <- rep(nicePch,ceiling(nr/length(nicePch)))
+ 	}
+ 	return(nicePch[unique(PchToReFact)])
+} # EOF

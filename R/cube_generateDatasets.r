@@ -412,20 +412,45 @@ ap_check_pca_defaults <- function(ap, header) {
 		###
 		pcs <- a$pcs
 		if (!all(is.numeric(pcs)) | length(pcs) !=2) {
-			stop(paste("Please provide a length two numeric to the argument 'pca.sc'"), call.=FALSE)
+			stop(paste("Please provide a length two numeric to the argument 'pca.sc'."), call.=FALSE)
 		}
 		###
 		pcSc <- a$pcSc
 		if (!is.null(pcSc)) {
 			if (!all(is.numeric(pcSc))) {
-				stop(paste("Please provide a numeric vector to the argument 'pca.sc.pairs'"), call.=FALSE)
+				stop(paste("Please provide a numeric vector to the argument 'pca.sc.pairs'."), call.=FALSE)
 			}
 		}
 		###
 		pcLo <- a$pcLo
 		if (!all(is.numeric(pcLo))) {
-			stop(paste("Please provide a numeric vector to the argument 'pca.lo'"), call.=FALSE)
+			stop(paste("Please provide a numeric vector to the argument 'pca.lo'."), call.=FALSE)
 		}
+		###
+		elci <- a$elci
+		if (!is.null(elci)) {
+			if (all(elci=="def")) {
+				elci <- .ap2$stn$pca_CI_ellipse_level
+			}
+			if (!all(is.numeric(elci)) | length(elci) != 1) {
+				stop("Please provide a length one numeric to the argument 'pca.elci'.", call.=FALSE)
+			}
+			if (elci <= 0 | elci >= 1) {
+				stop("Please provide a number between 0 and 1 to the argument 'pca.elci'.", call.=FALSE)
+			}
+		} # end !is.null(elci)
+		ap$pca$elci <- elci
+		###
+		co <- a$colorBy
+		co2 <- a$elcolorBy
+		if (!is.null(co2)) {
+			if (length(co2) != 1) {
+				if (length(co2) != length(co)) {
+					stop("Please provide a vector with the same length as in 'pca.colorBy' to the argument 'pca.elcolorBy'.", call.=FALSE)
+				}
+			}
+		}
+		###
 	} # end if !is.null(ap$pca) 
 	return(ap)
 } # EOF
@@ -465,6 +490,10 @@ ap_checExistence_Defaults <- function(ap, dataset) {
 	} # EOIF
 	checkEx(ap$ucl$splitClasses, "variable split", cPref)
 	checkEx(ap$pca$colorBy, "PCA", cPref)
+	el2c <- ap$pca$elcolorBy
+	if (!is.null(el2c)) {
+		checkEx(el2c, "PCA (elcolorBy)", cPref)	
+	}
 	checkEx(ap$simca$simcOn, "SIMCA", cPref)
 	checkEx(ap$plsr$regressOn, "PLSR (regress on)", yPref)
 	checkEx(ap$plsr$colorBy, "PLSR (color by)", cPref)
