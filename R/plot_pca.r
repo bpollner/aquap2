@@ -5,7 +5,8 @@ makePCAScorePlots <- function(cube, ap, comps=c(1:5), pcs=c(1,2), onMain="", onS
 	trLty <- .ap2$stn$pca_CI_ellipse_lty
 	trLwd <- .ap2$stn$pca_CI_ellipse_lwd
 	trElci <- ap$pca$elci
-	trAlphaBG <- 1
+	trKeyBGCol <- "white"
+	trAlphaBG <- 0.85 # 0 is completely transparent
 	el2colorBy <- ap$pca$elcolorBy
 	classList <- getPCAClassList(ap)
 	if (!is.null(el2colorBy)) {
@@ -45,7 +46,7 @@ makePCAScorePlots <- function(cube, ap, comps=c(1:5), pcs=c(1,2), onMain="", onS
 			partN <- sapply(levels(grouping), function(x, grAll) length(which(grAll==x)), grAll=grouping)
 			legendTextExtended <- paste(legendText[lto], "   N=", partN, "", sep="") # have it in every line			
 			latCol <- unique(numRepCol)[lto]
-			trLegend <- list(corner=c(1,1), border=TRUE, points=list(pch=16, col=latCol), text=list(legendTextExtended), alpha.background=trAlphaBG, title=classList[i])
+			trLegend <- list(corner=c(1,1), border=TRUE, points=list(pch=16, col=latCol), text=list(legendTextExtended), background=trKeyBGCol, alpha.background=trAlphaBG, title=classList[i])
 			subText <- paste("color by ", classList[i], onSubFill, sep="")
 			trSub <- list(label=subText, fontface=1)
 			trelPlot1 <- lattice::xyplot(y ~ x, sub=trSub, main=mainText, groups=grouping, xlab=xlab, ylab=ylab, col=latCol, pch=16, cex=0.85, key=trLegend, 
@@ -69,24 +70,23 @@ makePCAScorePlots <- function(cube, ap, comps=c(1:5), pcs=c(1,2), onMain="", onS
 				partN2 <- sapply(levels(grouping2), function(x, grAll) length(which(grAll==x)), grAll=grouping2)
 				legendTextExtended2 <- paste(legendText2[lto2], "   N=", partN2, "", sep="") # have it in every line			
 				latCol2Ell <- unique(numRepCol2)[lto2]
-				trLegend2 <- list(corner=c(0.2,0.2), border=TRUE, points=list(pch=unique(pch2)[lto2], col="black"), lines=list(lwd=1, col=latCol2Ell, lty=trLty), text=list(legendTextExtended2), title=el2colorBy[i], alpha.background=trAlphaBG)
+				trLegend2 <- list(border=TRUE, points=list(pch=unique(pch2)[lto2], col="black"), lines=list(lwd=1, col=latCol2Ell, lty=trLty), text=list(legendTextExtended2), title=el2colorBy[i], background=trKeyBGCol, alpha.background=trAlphaBG)
 				trSub2 <- list(label=paste(subText, ", CI ellipses by ", el2colorBy[i], sep=""), fontface=1)
-				trelPlot2 <- lattice::xyplot(y ~ x, sub=trSub2, main=mainText, xlab=xlab, ylab=ylab, col=numRepCol, pch=pch2, cex=0.85, key=trLegend, 
+				trAllLegends <- list(inside=list(fun=lattice::draw.key(trLegend), corner=c(1,1)), inside=list(fun=lattice::draw.key(trLegend2), corner=c(0,0)))
+				trelPlot2 <- lattice::xyplot(y ~ x, sub=trSub2, main=mainText, xlab=xlab, ylab=ylab, col=numRepCol, pch=pch2, cex=0.85, legend=trAllLegends, 
 					panel=function(x, y, ...) {
 						lattice::panel.xyplot(x, y, ...) # plot the data
 		    	    	lattice::panel.abline(h=0, v=0, lty=2, col="gray")
 						latticeExtra::panel.ellipse(x, y, col=latCol2Ell, center.pch=trCenterPch, robust=trRobust, groups=grouping2, scales="free", level=trElci, lwd=trLwd, lty=trLty, subscripts=TRUE)
-#						latticeExtra::panel.key(corner=c(0,0), text=legendText2[lto2], points=list(pch=4, col="black"))
-						lattice::draw.key(trLegend2, draw=TRUE)
 					}
 				) # end of call to trelPlot2
 				print(trelPlot2)
 			} # end !is.null(el2colorBy)
 			#
-			ChemometricsWithR::scoreplot.PCA(PCAObject, c(pcs[1], pcs[2]), col=numRepCol, pch=16, main=mainText, sub=subText)
-			legendText <- unique(header[,colInd])
-			lto <- order(legendText)
-			legend("topright", legend=legendText[lto], col=unique(numRepCol)[lto], pch=16)
+#			ChemometricsWithR::scoreplot.PCA(PCAObject, c(pcs[1], pcs[2]), col=numRepCol, pch=16, main=mainText, sub=subText)
+#			legendText <- unique(header[,colInd])
+#			lto <- order(legendText)
+#			legend("topright", legend=legendText[lto], col=unique(numRepCol)[lto], pch=16)
 			#
 			if (!is.null(comps)) {
 				pairs(PCAObject$scores[,comps], col=numRepCol, pch=16, main=mainText, sub=subText )
