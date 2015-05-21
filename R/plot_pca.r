@@ -44,9 +44,10 @@ makePCAScorePlots <- function(cube, ap, comps=c(1:5), pcs=c(1,2), onMain="", onS
 			legendText <- as.character(unique(header[,colInd]))
 			lto <- order(legendText)
 			partN <- sapply(levels(grouping), function(x, grAll) length(which(grAll==x)), grAll=grouping)
-			legendTextExtended <- paste(legendText[lto], "   N=", partN, "", sep="") # have it in every line			
-			latCol <- unique(numRepCol)[lto]
-			trLegend <- list(corner=c(1,1), border=TRUE, points=list(pch=16, col=latCol), text=list(legendTextExtended), background=trKeyBGCol, alpha.background=trAlphaBG, title=classList[i])
+			legendTextExtended <- paste(legendText[lto], "   N=", partN[lto], "", sep="") # have it in every line			
+			latCol <- unique(numRepCol)
+			latColLgnd <- latCol[lto]
+			trLegend <- list(corner=c(1,1), border=TRUE, points=list(pch=16, col=latColLgnd), text=list(legendTextExtended), background=trKeyBGCol, alpha.background=trAlphaBG, title=classList[i], cex.title=1)
 			subText <- paste("color by ", classList[i], onSubFill, sep="")
 			trSub <- list(label=subText, fontface=1)
 			trelPlot1 <- lattice::xyplot(y ~ x, sub=trSub, main=mainText, groups=grouping, xlab=xlab, ylab=ylab, col=latCol, pch=16, cex=0.85, key=trLegend, 
@@ -68,9 +69,10 @@ makePCAScorePlots <- function(cube, ap, comps=c(1:5), pcs=c(1,2), onMain="", onS
 				legendText2 <- as.character(unique(header[,colInd2]))
 				lto2 <- order(legendText2)
 				partN2 <- sapply(levels(grouping2), function(x, grAll) length(which(grAll==x)), grAll=grouping2)
-				legendTextExtended2 <- paste(legendText2[lto2], "   N=", partN2, "", sep="") # have it in every line			
-				latCol2Ell <- unique(numRepCol2)[lto2]
-				trLegend2 <- list(border=TRUE, points=list(pch=unique(pch2)[lto2], col="black"), lines=list(lwd=1, col=latCol2Ell, lty=trLty), text=list(legendTextExtended2), title=el2colorBy[i], background=trKeyBGCol, alpha.background=trAlphaBG)
+				legendTextExtended2 <- paste(legendText2[lto2], "   N=", partN2[lto2], "", sep="") # have it in every line			
+				latCol2Ell <- unique(numRepCol2)
+				latCol2EllLgnd <- latCol2Ell[lto2]
+				trLegend2 <- list(border=TRUE, points=list(pch=unique(pch2)[lto2], col="black"), lines=list(lwd=1, col=latCol2EllLgnd, lty=trLty[lto2]), text=list(legendTextExtended2), title=el2colorBy[i], cex.title=1, background=trKeyBGCol, alpha.background=trAlphaBG)
 				trSub2 <- list(label=paste(subText, ", CI ellipses by ", el2colorBy[i], sep=""), fontface=1)
 				trAllLegends <- list(inside=list(fun=lattice::draw.key(trLegend), corner=c(1,1)), inside=list(fun=lattice::draw.key(trLegend2), corner=c(0,0)))
 				trelPlot2 <- lattice::xyplot(y ~ x, sub=trSub2, main=mainText, xlab=xlab, ylab=ylab, col=numRepCol, pch=pch2, cex=0.85, legend=trAllLegends, 
