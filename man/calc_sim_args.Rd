@@ -3,6 +3,19 @@
 \name{calc_sim_args}
 \alias{calc_sim_args}
 \title{Calculate SIMCA - Arguments}
+\arguments{
+\item{do.sim}{Logical. If used in \code{getap}, if SIMCA models of the dataset 
+should be calculated.}
+
+\item{sim.vars}{NULL or character vector. Which variables should be 
+used to group the data. Set to NULL for using all available class-variables, 
+or provide a character vector with the column names of class variables to group
+the data along those for calculating SIMCA models.}
+
+\item{sim.K}{Numeric length one. The number of components used for calculating 
+the SIMCA models. In mode 'robust' leave at '0' for automatic detection of 
+optimal number of components. [It is a capital 'K' in the argument.]}
+}
 \description{
 The following parameters can be used in the \code{...} argument in 
 function \code{\link{getap}}, also within function \code{\link{gdmm}}, to 
@@ -12,16 +25,6 @@ calculation of SIMCA models - see examples.
 \code{getap(...)}
  
 \code{gdmm(dataset, ap=getap(...))}
-
-@param do.sim Logical. If used in \code{getap}, if SIMCA models of the dataset 
- should be calculated.
- @param sim.vars NULL or character vector. Which variables should be 
- used to group the data. Set to NULL for using all available class-variables, 
- or provide a character vector with the column names of class variables to group
- the data along those for calculating SIMCA models.
- @param sim.K Numeric length one. The number of components used for calculating 
- the SIMCA models. In mode 'robust' leave at '0' for automatic detection of 
- optimal number of components. [It is a capital 'K' in the argument.]
 }
 \details{
 For a list of all parameters that can be used in the \code{...} 
@@ -47,6 +50,7 @@ Other Calc. arguments: \code{\link{calc_aqg_args}},
   \code{\link{calc_pca_args}}, \code{\link{calc_pls_args}},
   \code{\link{split_dataset}}
 
-Other SIMCA documentation: \code{\link{plot_sim_args}}
+Other SIMCA documentation: \code{\link{plot_sim_args}},
+  \code{\link{plot_sim}}
 }
 

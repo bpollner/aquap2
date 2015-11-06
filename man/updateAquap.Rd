@@ -2,35 +2,31 @@
 % Please edit documentation in R/gen_general.r
 \name{updateAquap}
 \alias{updateAquap}
-\title{@title Update the aquap2-package.
- @description Download and install the latest version of package 'aquap2' 
- from its github repository
- @details Always downloads and installs the latest available version, also 
- if the same up-to-date version is already installed.
- @param branch Character, the name of the branch to downlaod. Defaults to 
- "master".
- @family Helper Functions
- @examples
- \dontrun{
- updateAquap()
- }
- @export}
+\title{Update the aquap2-package.}
 \usage{
 updateAquap(branch = "master")
 }
+\arguments{
+\item{branch}{Character, the name of the branch to downlaod. Defaults to 
+"master".}
+}
 \description{
-@title Update the aquap2-package.
- @description Download and install the latest version of package 'aquap2' 
+Download and install the latest version of package 'aquap2' 
  from its github repository
- @details Always downloads and installs the latest available version, also 
+}
+\details{
+Always downloads and installs the latest available version, also 
  if the same up-to-date version is already installed.
- @param branch Character, the name of the branch to downlaod. Defaults to 
- "master".
- @family Helper Functions
- @examples
+}
+\examples{
  \dontrun{
  updateAquap()
  }
- @export
+}
+\seealso{
+Other Helper Functions: \code{\link{genFolderStr}},
+  \code{\link{instAquap2Examples}},
+  \code{\link{printStdColnames}}, \code{\link{saveAQdata}},
+  \code{\link{updateSettings}}
 }
 

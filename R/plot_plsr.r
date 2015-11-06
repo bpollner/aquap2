@@ -1,21 +1,21 @@
-#'  @title Plot PLSR
-#'  @description Plot PLSR XXX.
-#'  @details The width and height of the resulting pdf can be set in the settings.
-#'  @param cube An object of class 'aquap_cube' as produced by \code{\link{gdmm}}.
-#'  @param ... Optional 'pls' plotting parameters to override the values in the 
+#' @title Plot PLSR
+#' @description Plot PLSR XXX.
+#' @details The width and height of the resulting pdf can be set in the settings.
+#' @param cube An object of class 'aquap_cube' as produced by \code{\link{gdmm}}.
+#' @param ... Optional 'pls' plotting parameters to override the values in the 
 #'  analysis procedure stored in the 'cube' - for possible arguments see 
 #'  \code{\link{plot_pls_args}}.
-#'  @return A pdf or graphic device.
-#'  @family Plot functions
-#'  @family PLSR documentation
-#'  @examples
+#' @return A pdf or graphic device.
+#' @examples
 #'  \dontrun{
 #'  dataset <- gfd()
 #'  cube <- gdmm(dataset)
 #'  plot(cube)
 #'  plot_pls(cube)
 #'  }
-#'  @export
+#' @family Plot functions
+#' @family PLSR documentation
+#' @export
 plot_pls <- function(cube, ...) {
   autoUpS()
   ap <- getap(.lafw_fromWhere="cube", cube=cube, ...)  		 # the ... are here used for additionally modifying (if matching arguments) the analysis procedure obtained from the cube

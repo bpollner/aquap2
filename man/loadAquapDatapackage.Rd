@@ -2,35 +2,26 @@
 % Please edit documentation in R/gen_general.r
 \name{loadAquapDatapackage}
 \alias{loadAquapDatapackage}
-\title{@title Load the aquap2 data and examples package.
- @description Download and install the latest version of package 'aquapData' 
- from its github repository. 
-	Package 'aquapData' contains the data and examples used in package 'aquap2'.
- @details Always downloads and installs the latest available version, also 
- if the same up-to-date version is already installed.
- @param branch Character, the name of the branch to downlaod. Defaults to 
- "master".
- @examples
- \dontrun{
- loadAquapDatapackage()
- }
- @export}
+\title{Load the aquap2 data and examples package.}
 \usage{
 loadAquapDatapackage(branch = "master")
 }
+\arguments{
+\item{branch}{Character, the name of the branch to downlaod. Defaults to 
+"master".}
+}
 \description{
-@title Load the aquap2 data and examples package.
- @description Download and install the latest version of package 'aquapData' 
+Download and install the latest version of package 'aquapData' 
  from its github repository. 
 	Package 'aquapData' contains the data and examples used in package 'aquap2'.
- @details Always downloads and installs the latest available version, also 
+}
+\details{
+Always downloads and installs the latest available version, also 
  if the same up-to-date version is already installed.
- @param branch Character, the name of the branch to downlaod. Defaults to 
- "master".
- @examples
+}
+\examples{
  \dontrun{
  loadAquapDatapackage()
  }
- @export
 }
 

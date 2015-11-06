@@ -98,7 +98,8 @@ plot(cube)
 \seealso{
 \code{\link{plot_aqg}}
 
-Other Aquagram documentation: \code{\link{calc_aqg_args}}
+Other Aquagram documentation: \code{\link{calc_aqg_args}},
+  \code{\link{plot_aqg}}
 
 Other Plot arguments: \code{\link{plot_pca_args}},
   \code{\link{plot_pg_args}}, \code{\link{plot_pls_args}},

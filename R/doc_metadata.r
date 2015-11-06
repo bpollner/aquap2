@@ -36,5 +36,5 @@
 #'  and "Control")
 #'  @seealso \code{\link{getmd}}
 #'  @family fileDocs
-#'  @name metadata_file
-
+#' @name metadata_file
+NULL

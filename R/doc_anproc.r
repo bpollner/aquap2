@@ -1,5 +1,5 @@
-#'  @title Analysis Procedure File
-#'	@description The analysis procedure file is used to first split the dataset 
+#'@title Analysis Procedure File
+#'@description The analysis procedure file is used to first split the dataset 
 #'  according to the provided values in the 'split dataset' section, and 
 #'  then, in the 'statistics' section (starting with \code{do.pca}), to tell 
 #'  the system which statistics to apply resp. what models to calculate on those 
@@ -32,23 +32,23 @@
 #'  \code{\link{gdmm}}, you can override the values in the file with the 
 #'  provided values. See examples at \code{\link{gdmm}}.
 #'  
-#'  @template mr_spl_split_param
+#'@template mr_spl_split_param
 #'  
-#'  @template mr_pca_calc_param
-#'  @template mr_pca_plot_param
+#'@template mr_pca_calc_param
+#'@template mr_pca_plot_param
+#'
+#'@template mr_sim_calc_param
+#'@template mr_sim_plot_param
 #'  
-#'  @template mr_sim_calc_param
-#'  @template mr_sim_plot_param
+#'@template mr_pls_calc_param
+#'@template mr_pls_plot_param
 #'  
-#'  @template mr_pls_calc_param
-#'  @template mr_pls_plot_param
+#'@template mr_aqg_calc_param
+#'@template mr_aqg_plot_param
 #'  
-#'  @template mr_aqg_calc_param
-#'  @template mr_aqg_plot_param
+#'@template mr_pg_genParams
 #'  
-#'  @template mr_pg_genParams
-#'  
-#'  @details The default name for the analysis procedure file can be set in 
+#'@details The default name for the analysis procedure file can be set in 
 #'  settings.r. Any other .r file can be loaded by providing a valid .r filename 
 #'  to the appropriate argument, e.g. in the function \code{\link{getap}}. 
 #'  By providing any of the arguments of the analysis procedure file to the 
@@ -57,6 +57,7 @@
 #'  override the values in the file with the provided values. See examples at 
 #'  \code{\link{gdmm}} and \code{\link{plot}}.
 #'  
-#'  @seealso \code{\link{getap}}, \code{\link{gdmm}}
-#'  @family fileDocs
-#'  @name anproc_file
+#'@seealso \code{\link{getap}}, \code{\link{gdmm}}
+#'@family fileDocs
+#'@name anproc_file
+NULL

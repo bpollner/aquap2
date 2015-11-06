@@ -4,6 +4,14 @@
 \alias{plot_pls_args}
 \title{Plot PLSR - Arguments}
 \arguments{
+\item{do.pls}{Logical. If used in a plotting function, if analysis from PLSR 
+models should be plotted.}
+
+\item{pls.colorBy}{NULL or character. What class-variable should be 
+used for coloring in the RMSEP and RMSECV plots. Set to NULL for no coloring, 
+or provide a character length one with a single column name of a class 
+variable that should be used for coloring.}
+
 \item{pg.where}{Character length one. For plotting PDFs provide "pdf", for 
 plotting to graphics device provide anything but "pdf".}
 
@@ -24,13 +32,6 @@ in the analysis procedure file and so to modify the graphics - see examples.
 \code{plot(cube, ...)}
 
 \code{plot_pls(cube, ...)}
-
-@param do.pls Logical. If used in a plotting function, if analysis from PLSR 
- models should be plotted.
- @param pls.colorBy NULL or character. What class-variable should be 
- used for coloring in the RMSEP and RMSECV plots. Set to NULL for no coloring, 
- or provide a character length one with a single column name of a class 
- variable that should be used for coloring.
 }
 \details{
 For a list of all parameters that can be used in the \code{...} 
@@ -49,10 +50,11 @@ plot_pls(cube, pls.colorBy="C_Temp")
 \seealso{
 \code{\link{plot_pls}}
 
+Other PLSR documentation: \code{\link{calc_pls_args}},
+  \code{\link{plot_pls}}
+
 Other Plot arguments: \code{\link{plot_aqg_args}},
   \code{\link{plot_pca_args}}, \code{\link{plot_pg_args}},
   \code{\link{plot_sim_args}}
-
-Other PLSR documentation: \code{\link{calc_pls_args}}
 }
 

@@ -348,24 +348,24 @@ plotAquagram_single <- function(aquCalc, classVarRanges, where, onSub, onMain, c
 
 
 # new below --------------------------------
-#'  @title Plot Aquagram
-#'  @description Plot Aquagram XXX.
-#'  @details The width and height of the resulting pdf can be set in the settings.
-#'  @param cube An object of class 'aquap_cube' as produced by \code{\link{gdmm}}.
-#'  @param ... Optional 'aqg' plotting parameters to override the values in the 
+#' @title Plot Aquagram
+#' @description Plot Aquagram XXX.
+#' @details The width and height of the resulting pdf can be set in the settings.
+#' @param cube An object of class 'aquap_cube' as produced by \code{\link{gdmm}}.
+#' @param ... Optional 'aqg' plotting parameters to override the values in the 
 #'  analysis procedure stored in the 'cube' - for possible arguments see 
 #'  \code{\link{plot_aqg_args}}.
-#'  @return A pdf or graphic device.
-#'  @family Plot functions
-#'  @family Aquagram documentation
-#'  @examples
+#' @return A pdf or graphic device.
+#' @family Plot functions
+#' @family Aquagram documentation
+#' @examples
 #'  \dontrun{
 #'  dataset <- gfd()
 #'  cube <- gdmm(dataset)
 #'  plot(cube)
 #'  plot_aqg(cube)
 #'  }
-#'  @export
+#' @export
 plot_aqg <- function(cube, ...) {
   	autoUpS()
   	ap <- getap(.lafw_fromWhere="cube", cube=cube, ...)    	 # the ... are here used for additionally modifying (if matching arguments) the analysis procedure obtained from the cube

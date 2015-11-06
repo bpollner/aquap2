@@ -44,6 +44,6 @@ loadAQdata()
 Other Helper Functions: \code{\link{genFolderStr}},
   \code{\link{instAquap2Examples}},
   \code{\link{printStdColnames}},
-  \code{\link{updateSettings}}
+  \code{\link{updateAquap}}, \code{\link{updateSettings}}
 }
 

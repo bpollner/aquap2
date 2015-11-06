@@ -2,45 +2,40 @@
 % Please edit documentation in R/plot_aqg.r
 \name{plot_aqg}
 \alias{plot_aqg}
-\title{@title Plot Aquagram
- @description Plot Aquagram XXX.
- @details The width and height of the resulting pdf can be set in the settings.
- @param cube An object of class 'aquap_cube' as produced by \code{\link{gdmm}}.
- @param ... Optional 'aqg' plotting parameters to override the values in the 
- analysis procedure stored in the 'cube' - for possible arguments see 
- \code{\link{plot_aqg_args}}.
- @return A pdf or graphic device.
- @family Plot functions
- @family Aquagram documentation
- @examples
- \dontrun{
- dataset <- gfd()
- cube <- gdmm(dataset)
- plot(cube)
- plot_aqg(cube)
- }
- @export}
+\title{Plot Aquagram}
 \usage{
 plot_aqg(cube, ...)
 }
+\arguments{
+\item{cube}{An object of class 'aquap_cube' as produced by \code{\link{gdmm}}.}
+
+\item{...}{Optional 'aqg' plotting parameters to override the values in the 
+analysis procedure stored in the 'cube' - for possible arguments see 
+\code{\link{plot_aqg_args}}.}
+}
+\value{
+A pdf or graphic device.
+}
 \description{
-@title Plot Aquagram
- @description Plot Aquagram XXX.
- @details The width and height of the resulting pdf can be set in the settings.
- @param cube An object of class 'aquap_cube' as produced by \code{\link{gdmm}}.
- @param ... Optional 'aqg' plotting parameters to override the values in the 
- analysis procedure stored in the 'cube' - for possible arguments see 
- \code{\link{plot_aqg_args}}.
- @return A pdf or graphic device.
- @family Plot functions
- @family Aquagram documentation
- @examples
+Plot Aquagram XXX.
+}
+\details{
+The width and height of the resulting pdf can be set in the settings.
+}
+\examples{
  \dontrun{
  dataset <- gfd()
  cube <- gdmm(dataset)
  plot(cube)
  plot_aqg(cube)
  }
- @export
+}
+\seealso{
+Other Aquagram documentation: \code{\link{calc_aqg_args}},
+  \code{\link{plot_aqg_args}}
+
+Other Plot functions: \code{\link{plot_pca}},
+  \code{\link{plot_pls}}, \code{\link{plot_sim}},
+  \code{\link{plot}}
 }
 

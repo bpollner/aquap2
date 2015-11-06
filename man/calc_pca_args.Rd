@@ -3,6 +3,10 @@
 \name{calc_pca_args}
 \alias{calc_pca_args}
 \title{Calculate PCA - Arguments}
+\arguments{
+\item{do.pca}{Logical. If used in \code{getap}, if a PCA should be calculated 
+with a given dataset.}
+}
 \description{
 The following parameters can be used in the \code{...} argument in 
 function \code{\link{getap}}, also within function \code{\link{gdmm}}, to 
@@ -12,9 +16,6 @@ calculation of PCA - see examples.
 \code{getap(...)}
  
 \code{gdmm(dataset, ap=getap(...))}
-
-@param do.pca Logical. If used in \code{getap}, if a PCA should be calculated 
- with a given dataset.
 }
 \details{
 For a list of all parameters that can be used in the \code{...} 
@@ -38,6 +39,7 @@ Other Calc. arguments: \code{\link{calc_aqg_args}},
   \code{\link{calc_pls_args}}, \code{\link{calc_sim_args}},
   \code{\link{split_dataset}}
 
-Other PCA documentation: \code{\link{plot_pca_args}}
+Other PCA documentation: \code{\link{plot_pca_args}},
+  \code{\link{plot_pca}}
 }
 

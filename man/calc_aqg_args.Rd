@@ -113,7 +113,8 @@ XXX hopefully a nice reference to the Aquagram paper!! XXX
 \seealso{
 \code{\link{gdmm}}
 
-Other Aquagram documentation: \code{\link{plot_aqg_args}}
+Other Aquagram documentation: \code{\link{plot_aqg_args}},
+  \code{\link{plot_aqg}}
 
 Other Calc. arguments: \code{\link{calc_pca_args}},
   \code{\link{calc_pls_args}}, \code{\link{calc_sim_args}},

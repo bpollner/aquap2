@@ -176,24 +176,24 @@ plotPCA_Loadings <- function(cube, ap, where="pdf", comps=c(1:5), onMain="", onS
 	if (!.ap2$stn$allSilent & (where == "pdf" )) {cat("ok\n") }
 } # EOF
 
-#'  @title Plot PCA
-#'  @description Plot PCA scoresplots and / or loadings.
-#'  @details The width and height of the resulting pdf can be set in the settings.
-#'  @param cube An object of class 'aquap_cube' as produced by \code{\link{gdmm}}.
-#'  @param ... Optional pca plotting parameters to override the values in the 
+#' @title Plot PCA
+#' @description Plot PCA scoresplots and / or loadings.
+#' @details The width and height of the resulting pdf can be set in the settings.
+#' @param cube An object of class 'aquap_cube' as produced by \code{\link{gdmm}}.
+#' @param ... Optional pca plotting parameters to override the values in the 
 #'  analysis procedure stored in the 'cube' - for possible arguments see 
 #'  \code{\link{plot_pca_args}}.
-#'  @return A pdf or graphic device.
-#'  @family Plot functions
-#'  @family PCA documentation
-#'  @examples
+#' @return A pdf or graphic device.
+#' @family Plot functions
+#' @family PCA documentation
+#' @examples
 #'  \dontrun{
 #'  dataset <- gfd()
 #'  cube <- gdmm(dataset)
 #'  plot(cube)
 #'  plot_pca(cube)
-#'  }
-#'	@export
+#' }
+#'@export
 plot_pca <- function(cube, ...) {
 	autoUpS()
 	ap <- getap(.lafw_fromWhere="cube", cube=cube, ...)			 # the ... are here used for additionally modifying (if matching arguments) the analysis procedure obtained from the cube

@@ -20,7 +20,17 @@ in the dataset. Only evaluated if 'include' is TRUE.}
 }
 \value{
 The standard dataset as described in \code{\link{getFullData}}
- @examples
+}
+\description{
+Create includes or excludes from the dataset by selecting 
+from any variable in any logical combination, using the available logical 
+operators like e.g. '|' and '&'.
+}
+\details{
+The column names are provided as is, i.e. without quotes, while for 
+characters the values have to be enclosed in quotation marks - see examples.
+}
+\examples{
  \dontrun{
  ds <- ssc(dataset, C_Group=="Control")
  # keeps all the controls
@@ -51,15 +61,6 @@ The standard dataset as described in \code{\link{getFullData}}
  ds <- ssc(dataset, Y_conSNr==1) 
  # keeps only the first consecutive scan
  }
-}
-\description{
-Create includes or excludes from the dataset by selecting 
-from any variable in any logical combination, using the available logical 
-operators like e.g. '|' and '&'.
-}
-\details{
-The column names are provided as is, i.e. without quotes, while for 
-characters the values have to be enclosed in quotation marks - see examples.
 }
 \seealso{
 Other Data pre-treatment functions: \code{\link{do_msc}},

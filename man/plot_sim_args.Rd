@@ -49,6 +49,7 @@ Other Plot arguments: \code{\link{plot_aqg_args}},
   \code{\link{plot_pca_args}}, \code{\link{plot_pg_args}},
   \code{\link{plot_pls_args}}
 
-Other SIMCA documentation: \code{\link{calc_sim_args}}
+Other SIMCA documentation: \code{\link{calc_sim_args}},
+  \code{\link{plot_sim}}
 }
 

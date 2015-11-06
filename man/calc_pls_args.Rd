@@ -3,6 +3,27 @@
 \name{calc_pls_args}
 \alias{calc_pls_args}
 \title{Calculate PLSR - Arguments}
+\arguments{
+\item{do.pls}{Logical. If used in \code{getap}, if PLSR models should be 
+calculated with a given dataset.}
+
+\item{pls.regOn}{NULL or character vector. Which variables should be used 
+to regress on. Set to NULL for using all numerical variables to regress on, or 
+provide a character vector with the column names of numerical variables to use 
+those for regression in the PLSR.}
+
+\item{pls.ncomp}{NULL or integer length one. The number of components used in 
+PLSR. Set to NULL for automatic detection, or provide an integer to use this 
+number of components in the PLSR.}
+
+\item{pls.valid}{Character. Which crossvalidation to use. Possible values are
+\itemize{
+  \item "def" Read in the default value from settings.r
+  \item "CV" for a 10-fold crossvalidation
+  \item "LOO" for a leave-one-out crossvalidation
+  \item XXX something here for using a certain class-variable for grouping XXX
+}}
+}
 \description{
 The following parameters can be used in the \code{...} argument in 
 function \code{\link{getap}}, also within function \code{\link{gdmm}}, to 
@@ -12,23 +33,6 @@ calculation of PLSR models - see examples.
 \code{getap(...)}
  
 \code{gdmm(dataset, ap=getap(...))}
-
-@param do.pls Logical. If used in \code{getap}, if PLSR models should be 
- calculated with a given dataset.
- @param pls.regOn NULL or character vector. Which variables should be used 
- to regress on. Set to NULL for using all numerical variables to regress on, or 
- provide a character vector with the column names of numerical variables to use 
- those for regression in the PLSR.
- @param pls.ncomp NULL or integer length one. The number of components used in 
- PLSR. Set to NULL for automatic detection, or provide an integer to use this 
- number of components in the PLSR.
- @param pls.valid Character. Which crossvalidation to use. Possible values are
- \itemize{
-   \item "def" Read in the default value from settings.r
-   \item "CV" for a 10-fold crossvalidation
-   \item "LOO" for a leave-one-out crossvalidation
-   \item XXX something here for using a certain class-variable for grouping XXX
- }
 }
 \details{
 For a list of all parameters that can be used in the \code{...} 
@@ -53,6 +57,7 @@ Other Calc. arguments: \code{\link{calc_aqg_args}},
   \code{\link{calc_pca_args}}, \code{\link{calc_sim_args}},
   \code{\link{split_dataset}}
 
-Other PLSR documentation: \code{\link{plot_pls_args}}
+Other PLSR documentation: \code{\link{plot_pls_args}},
+  \code{\link{plot_pls}}
 }
 

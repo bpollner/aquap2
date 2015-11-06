@@ -53,5 +53,9 @@ arguments.
 \seealso{
 Other Core functions: \code{\link{exportSampleList}},
   \code{\link{gdmm}}, \code{\link{getFullData}}
+
+Other Plot functions: \code{\link{plot_aqg}},
+  \code{\link{plot_pca}}, \code{\link{plot_pls}},
+  \code{\link{plot_sim}}
 }
 

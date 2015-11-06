@@ -17,6 +17,6 @@ in the .Renviron file. (see \code{\link{updateSettings}})
 \seealso{
 Other Helper Functions: \code{\link{genFolderStr}},
   \code{\link{printStdColnames}}, \code{\link{saveAQdata}},
-  \code{\link{updateSettings}}
+  \code{\link{updateAquap}}, \code{\link{updateSettings}}
 }
 

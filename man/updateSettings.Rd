@@ -45,6 +45,7 @@ ls(.ap2)
 
 Other Helper Functions: \code{\link{genFolderStr}},
   \code{\link{instAquap2Examples}},
-  \code{\link{printStdColnames}}, \code{\link{saveAQdata}}
+  \code{\link{printStdColnames}}, \code{\link{saveAQdata}},
+  \code{\link{updateAquap}}
 }
 

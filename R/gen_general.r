@@ -1,11 +1,11 @@
-#  @title Show Path to Package Aquap2
-#  @description Displays a character string with the path to the packae 
+# @title Show Path to Package Aquap2
+# @description Displays a character string with the path to the packae 
 #    'Aquap2'
-#  @details This is where you can find the source of the 
+# @details This is where you can find the source of the 
 #  \code{\link{settings_file}}.
-#  @return A character string with the path.
-#  @family Helper Functions
-#  @export
+# @return A character string with the path.
+# @family Helper Functions
+# @export
 showPathToAquap2 <- function() {
 	path <- path.package("aquap2")
 	cat("The path to this package is: \n")
@@ -208,38 +208,38 @@ genFolderStr <- function() {
 } # EOF
 
 
-#'  @title Update the aquap2-package.
-#'  @description Download and install the latest version of package 'aquap2' 
+#' @title Update the aquap2-package.
+#' @description Download and install the latest version of package 'aquap2' 
 #'  from its github repository
-#'  @details Always downloads and installs the latest available version, also 
+#' @details Always downloads and installs the latest available version, also 
 #'  if the same up-to-date version is already installed.
-#'  @param branch Character, the name of the branch to downlaod. Defaults to 
+#' @param branch Character, the name of the branch to downlaod. Defaults to 
 #'  "master".
-#'  @family Helper Functions
-#'  @examples
+#' @family Helper Functions
+#' @examples
 #'  \dontrun{
 #'  updateAquap()
 #'  }
-#'  @export
+#' @export
 updateAquap <- function(branch="master") {
 	github_pat <- "c4818f3957df95d831de2bd36ac7ce46ad3ad340"
 	devtools::install_github(repo="bpollner/aquap2", ref=branch, auth_token=github_pat, build_vignettes=TRUE)
 } # EOF
 
 
-#'  @title Load the aquap2 data and examples package.
-#'  @description Download and install the latest version of package 'aquapData' 
+#' @title Load the aquap2 data and examples package.
+#' @description Download and install the latest version of package 'aquapData' 
 #'  from its github repository. 
 #' 	Package 'aquapData' contains the data and examples used in package 'aquap2'.
-#'  @details Always downloads and installs the latest available version, also 
+#' @details Always downloads and installs the latest available version, also 
 #'  if the same up-to-date version is already installed.
-#'  @param branch Character, the name of the branch to downlaod. Defaults to 
+#' @param branch Character, the name of the branch to downlaod. Defaults to 
 #'  "master".
-#'  @examples
+#' @examples
 #'  \dontrun{
 #'  loadAquapDatapackage()
 #'  }
-#'  @export
+#' @export
 loadAquapDatapackage <- function(branch="master") {
 	github_pat <- "26728e1a8199df859170a83fc4025f8a34deb25b"
 	devtools::install_github(repo="bpollner/aquapData", ref=branch, auth_token=github_pat)
@@ -322,7 +322,7 @@ getWavelengths <- function(dataset) {
 #' @param keepEC If *all* the environmental control observations should be kept 
 #' in the dataset. Only evaluated if 'include' is TRUE.
 #' @return The standard dataset as described in \code{\link{getFullData}}
-#'  @examples
+#' @examples
 #'  \dontrun{
 #'  ds <- ssc(dataset, C_Group=="Control")
 #'  # keeps all the controls
