@@ -63,8 +63,8 @@
 #' fileExtension <- ".xlsx"
 #' ##
 #' spectralImport <- function(dataFile) {
-#'    require(xlsx)
-#'    import <- read.xlsx(dataFile, sheetIndex=1)
+#'    require(openxlsx)
+#'    import <- openxlsx::read.xlsx(dataFile)
 #'    #
 #'    sampleNr <- import[1]
 #'    conSNr <- import[2]

@@ -910,7 +910,7 @@ readHeader <- function(md=getmd(), slType="def", multiplyRows="def") {
 	if (slType == "xls") {
 		ext <- "-in.xlsx"
 		check_sl_existence(filename, ext)
-		rawHead <- xlsx::read.xlsx(paste(slInFolder, filename, ext, sep=""), sheetIndex=1, header = TRUE)
+		rawHead <- openxlsx::read.xlsx(paste(slInFolder, filename, ext, sep=""))
 	}
 	assign("headerFilePath", paste(slInFolder, filename, ext, sep=""), pos=parent.frame(n=1))
 	###
@@ -955,8 +955,8 @@ readHeader <- function(md=getmd(), slType="def", multiplyRows="def") {
 #' fileExtension <- ".xlsx"
 #' ##
 #' spectralImport <- function(dataFile) {
-#'    require(xlsx)
-#'    import <- read.xlsx(dataFile, sheetIndex=1)
+#'    require(openxlsx)
+#'    import <- openxlsx::read.xlsx(dataFile)
 #'    #
 #'    allY_var <- import[,c(1,2,10,11,6)]
 #'    allC_var <- import[, c(3,4,8,9,5,7)] 

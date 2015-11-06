@@ -263,11 +263,11 @@ exportSampleList <- function(md=getmd(), form="def", showFirstRows=TRUE, timeEst
 		write.table(b, filename, sep="\t", row.names=FALSE)	
 	} else {
 		ok <- TRUE
-#		ok <- require(xlsx, quietly=TRUE)
-		if (ok) {		## the error only comes up when using "write.xlsx2", while "write.xlsx" does work fine, although it is slower.
-			xlsx::write.xlsx(b, filename, row.names=FALSE, sheetName=expName)
+#		ok <- require(openxlsx, quietly=TRUE)
+		if (ok) {		## !! valid only for package xlsx: the error only comes up when using "write.xlsx2", while "write.xlsx" does work fine, although it is slower.
+			openxlsx::write.xlsx(b, filename, rowNames=FALSE, sheetName=expName)
 		} else {
-			stop("Package 'xlsx' does not seem to be available. The sample list could not be exported to Excel. Sorry.", call.=FALSE)
+			stop("Package 'openxlsx' does not seem to be available. The sample list could not be exported to Excel. Sorry.", call.=FALSE)
 		}
 	}
  	cat(paste("A sample list in ", msg, " format with ", nrow(b), " rows has been saved to \"", fn_sl, "/", fn_sl_out, "\".\n", sep="") )
