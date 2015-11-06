@@ -59,7 +59,7 @@ plot_sim <- function(cube, ...) {
 #' @family Plot arguments
 #' @family SIMCA documentation
 #' @name plot_sim_args
-#' NULL
+NULL
 
 
 
@@ -88,4 +88,4 @@ plot_sim <- function(cube, ...) {
 #' @family Calc. arguments
 #' @family SIMCA documentation
 #' @name calc_sim_args
-#' NULL
+NULL

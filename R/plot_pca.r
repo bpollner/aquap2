@@ -247,7 +247,7 @@ plot_pca <- function(cube, ...) {
 #' @family Plot arguments
 #' @family PCA documentation
 #' @name plot_pca_args
-#' NULL
+NULL
 
 
 #' @title Calculate PCA - Arguments
@@ -273,4 +273,4 @@ plot_pca <- function(cube, ...) {
 #' @family Calc. arguments
 #' @family PCA documentation
 #' @name calc_pca_args
-#' NULL
+NULL

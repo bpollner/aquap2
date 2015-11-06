@@ -428,7 +428,7 @@ plot_aqg <- function(cube, ...) {
 #' @family Plot arguments
 #' @family Aquagram documentation
 #' @name plot_aqg_args
-#' NULL
+NULL
 
 
 
@@ -456,7 +456,7 @@ plot_aqg <- function(cube, ...) {
 #' @family Calc. arguments
 #' @family Aquagram documentation
 #' @name calc_aqg_args
-#' NULL
+NULL
 
 
 
@@ -494,5 +494,5 @@ plot_aqg <- function(cube, ...) {
 #' @seealso \code{\link{calc_aqg_args}}
 #' @references XXX the Aquagram paper XXX
 #' @name calc_aqg_modes
-#' NULL
+NULL
 

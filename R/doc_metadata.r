@@ -37,4 +37,4 @@
 #'  @seealso \code{\link{getmd}}
 #'  @family fileDocs
 #'  @name metadata_file
-#' NULL
+NULL

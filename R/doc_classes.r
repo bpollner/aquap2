@@ -16,7 +16,7 @@
 #' @seealso \code{\link{gdmm}}
 #' @family Class documentations
 #' @name aquap_cube
-#' NULL
+NULL
 
 
 
@@ -38,7 +38,7 @@
 #' @seealso \code{\link{gdmm}}
 #' @family Class documentations
 #' @name aquap_cpt
-#' NULL
+NULL
 
 
 
@@ -57,4 +57,4 @@
 #' @seealso \code{\link{gdmm}}
 #' @family Class documentations
 #' @name aquap_set
-#' NULL
+NULL
