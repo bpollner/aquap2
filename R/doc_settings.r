@@ -13,4 +13,4 @@
 #'  you have to adapt the newly copied file to contain your changed values.
 #'  @family fileDocs
 #'  @name settings_file
-NULL
+#' NULL

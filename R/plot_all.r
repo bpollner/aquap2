@@ -46,4 +46,4 @@ plot_cube <- function(x, what="all", ...) {
 #' }
 #' @family Plot arguments
 #' @name plot_pg_args
-NULL
+#' NULL

@@ -57,7 +57,7 @@ plot_pls <- function(cube, ...) {
 #' @family Plot arguments
 #' @family PLSR documentation
 #' @name plot_pls_args
-NULL
+#' NULL
 
 
 
@@ -85,4 +85,4 @@ NULL
 #' @family Calc. arguments
 #' @family PLSR documentation
 #' @name calc_pls_args
-NULL
+#' NULL

@@ -823,5 +823,5 @@ collectRanges <- function(cubeList, lengthClasses) {
 #' }
 #' @family Calc. arguments
 #' @name split_dataset
-NULL
+#' NULL
 

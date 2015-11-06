@@ -21,4 +21,4 @@
 #'
 #'@docType package
 #'@name aquap2
-NULL
+#' NULL
