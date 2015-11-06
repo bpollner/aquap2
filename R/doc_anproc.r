@@ -60,4 +60,3 @@
 #'  @seealso \code{\link{getap}}, \code{\link{gdmm}}
 #'  @family fileDocs
 #'  @name anproc_file
-NULL

@@ -688,7 +688,7 @@ checkForStats <- function(ap) {
 #' cube <- gdmm(dataset) # split up the dataset and make models, execute the 
 #' # analysis procedure as specified in its .r file
 #' cube <- gdmm(dataset, getap(spl.var="C_Group")) # split the dataset by "C_Group"
-#' cube <- gdmm(dataset, getap(spl.var=c("C_Group", "C_Temp))) # split the dataset 
+#' cube <- gdmm(dataset, getap(spl.var=c("C_Group", "C_Temp"))) # split the dataset 
 #' # by "C_Group", then by "C_Temp"
 #' cube <- gdmm(dataset, getap(spl.wl="1300-to-1600")) # override 'spl.wl' in the 
 #' # analysis procedure
@@ -816,7 +816,7 @@ collectRanges <- function(cubeList, lengthClasses) {
 #' \dontrun{
 #' dataset <- gfd() # will load or import data
 #' cube <- gdmm(dataset, getap(spl.var="C_Group")) # split the dataset by "C_Group"
-#' cube <- gdmm(dataset, getap(spl.var=c("C_Group", "C_Temp))) # split the dataset 
+#' cube <- gdmm(dataset, getap(spl.var=c("C_Group", "C_Temp"))) # split the dataset 
 #' # by "C_Group", then by "C_Temp"
 #' cube <- gdmm(dataset, getap(spl.wl="1300-to-1600")) # override 'spl.wl' in the 
 #' # analysis procedure 
