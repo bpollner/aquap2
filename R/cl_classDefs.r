@@ -32,6 +32,7 @@ setMethod("show", signature(object = "aquap_cube"), definition = showCube )
 #' @param i subsricpting indices for rows 
 #' @docType methods
 #' @rdname aquap_data-methods
+#' @aliases [,aquap_data-method
 #' @examples 
 #' \dontrun{
 #'  dataset <- gfd()

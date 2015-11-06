@@ -6,7 +6,7 @@ Date: 2015-02-17
 Author: Bernhard Pollner, Zoltan Kovacs
 Maintainer: Bernhard Pollner <bernhard.pollner@mac.com>
 Description: Methods and tools to analyse NIRS data from an Aquaphotomics
-    perspective
+    perspective.
 License: GPL (>=2)
 LazyLoad: yes
 Depends:
