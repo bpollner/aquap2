@@ -15,6 +15,38 @@ check_mdDefaults <- function(fn) {
 	}	
 } # EOF
 
+check_mdDefaultValues <- function(localEnv) {
+	# realMeasurementLabel  
+	le <- localEnv
+	#
+	noSplitVal <- le$commonValue
+	if (all(noSplitVal == "def")) {
+		noSplitVal <- .ap2$stn$p_commonNoSplit
+	}
+	if (length(noSplitVal) != 1 | !all(is.character(noSplitVal))) {
+		stop("Please provide a character length one to the variable 'commonValue' in the metadata file.", call.=FALSE)
+	}
+	assign("noSplitLabel", noSplitVal, pos=parent.frame(n=1))
+	#
+	ecl <- le$envControlLabel 
+	if (all(ecl == "def")) {
+		ecl <- .ap2$stn$p_envControlLabel
+	}
+	if (length(ecl) != 1 | !all(is.character(ecl))) {
+		stop("Please provide a character length one to the variable 'envControlLabel' in the metadata file.", call.=FALSE)
+	}
+	assign("ECLabel", ecl, pos=parent.frame(n=1))	
+	#
+	rml <- le$realMeasurementLabel
+	if (all(rml == "def")) {
+		rml <- .ap2$stn$p_realMeasurementLabel
+	}
+	if (length(rml) != 1 | !all(is.character(rml))) {
+		stop("Please provide a character length one to the variable 'realMeasurementLabel' in the metadata file.", call.=FALSE)
+	}
+	assign("RMLabel", rml, pos=parent.frame(n=1))	
+} # EOF
+
 copyMetadataFile <- function(fromPath, toPath) {
 	ok <- file.copy(fromPath, toPath, overwrite=TRUE)
 	if (ok) { cat("A fresh template of the metadata file has been copied from the package.\n")}			
@@ -84,36 +116,27 @@ getmd_core <- function(fn="def") {
 	tempCol <- paste(yPref, .ap2$stn$p_tempCol, sep="")
 	rhCol <- paste(yPref, .ap2$stn$p_RHCol, sep="")
 	# defaults:
-	defNoSplit <- .ap2$stn$p_commonNoSplit
-	defECLabel <- .ap2$stn$p_envControlLabel
-	defRMLabel <- .ap2$stn$p_realMeasurementLabel
 	defReplPref <- .ap2$stn$p_replicatePrefix
 	defNoTime <- .ap2$stn$p_noTimePointsLabel
 	##
-	expNameCol <- paste(clPref, .ap2$stn$p_expNameCol, sep="")
-	sampleNrCol <- paste(yPref, .ap2$stn$p_sampleNrCol, sep="")
-	conSNrCol <- paste(yPref, .ap2$stn$p_conSNrCol, sep="")
-	deleteCol <- paste(clPref, .ap2$stn$p_deleteCol, sep="")
+#	expNameCol <- paste(clPref, .ap2$stn$p_expNameCol, sep="")
+#	sampleNrCol <- paste(yPref, .ap2$stn$p_sampleNrCol, sep="")
+#	conSNrCol <- paste(yPref, .ap2$stn$p_conSNrCol, sep="")
+#	deleteCol <- paste(clPref, .ap2$stn$p_deleteCol, sep="")
 	### the above 4 are not used here
 	path <- .ap2$stn$fn_metadata
 	path <- paste(path, fn, sep="/")
 	e <- new.env()
 	sys.source(path, envir=e)
 	check_mdVersion(localEnv=e) 	### Version check here !!
+	noSplitLabel <- ECLabel <- RMLabel <- NULL # gets assigned below
+	check_mdDefaultValues(localEnv=e) ### checking and assigning
 	##
-#	Repls <- list(paste(defReplPref, seq(1, e$Repls), sep="")) 		
 	Repls <- (paste(defReplPref, seq(1, e$Repls), sep=""))
-#	Group <- list(e$Group)										
 	Group <- e$Group
-#	ECRMlabel <- list(defECLabel, defRMLabel)						
-	ECRMlabel <- c(defECLabel, defRMLabel)
-#	noSplitLabel <- list(defNoSplit)
-	noSplitLabel <- defNoSplit
 	if (all(e$TimePoints == FALSE)) {
-#		TimePoints <- list(defNoTime)
 		TimePoints <- defNoTime
 	} else {
-#		TimePoints <- list(e$TimePoints)							# 	TimePoints=list("TN")
 		TimePoints <- e$TimePoints
 	}
 	if (length(e$columnNamesL1) != length(e$columnNamesL2)) {
@@ -127,7 +150,7 @@ getmd_core <- function(fn="def") {
 	###
 	## put together
  	expClasses <- list(L1=e$L1, L2=e$L2, Repls=Repls, Group=Group, timeLabels=TimePoints)
- 	postProc <- list(spacing=e$spacing, ECRMLabel=ECRMlabel, noSplitLabel=noSplitLabel, nrConScans=e$nrConScans)
+ 	postProc <- list(spacing=e$spacing, ECRMLabel=c(ECLabel, RMLabel), noSplitLabel=noSplitLabel, nrConScans=e$nrConScans)
  	meta <- list(expName=e$expName, coluNames=coluNames)
 	expMetaData <- list(expClasses = expClasses, postProc = postProc, meta = meta)
 	return(new("aquap_md", expMetaData))

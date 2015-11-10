@@ -1,7 +1,7 @@
 Package: aquap2
 Type: Package
 Title: Aquaphotomics NIRS Analysis
-Version: 0.1.0
+Version: 0.1.1
 Date: 2015-02-17
 Author: Bernhard Pollner, Zoltan Kovacs
 Maintainer: Bernhard Pollner <bernhard.pollner@mac.com>
