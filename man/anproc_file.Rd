@@ -299,6 +299,7 @@ The default name for the analysis procedure file can be set in
 \seealso{
 \code{\link{getap}}, \code{\link{gdmm}}
 
-Other fileDocs: \code{\link{settings_file}}
+Other fileDocs: \code{\link{metadata_file}},
+  \code{\link{settings_file}}
 }
 

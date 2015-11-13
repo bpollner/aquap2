@@ -2,10 +2,13 @@
 readSpec_checkDefaults <- function(possibleFiletypes, md, filetype, naString) {
 	if (all(filetype == "def")) {
 		filetype <- .ap2$stn$imp_specFileType
-	} else {
-		if (!all(is.character(filetype)) | length(filetype) != 1) {
-			stop("Please provide a character length one to the argument 'filetype'. Refer to the help for 'getFullData' for possible values.", call.=FALSE)
+		# If a value other than "def" is provided in the argument "filetype" in "getFullData", this is overriding the value of "filetype" in the metadata file.
+		if (md$meta$filetype != filetype) { # we only look at the value for "filetype" in the metadata if filetype in getFullData is "def"
+			filetype <- md$meta$filetype
 		}
+	}
+	if (!all(is.character(filetype)) | length(filetype) != 1) {
+		stop("Please provide a character length one to the argument 'filetype'. Refer to the help for 'getFullData' for possible values.", call.=FALSE)
 	}
 	if (grepl("custom@", filetype)) {
 		custName <- strsplit(filetype, "custom@")[[1]][2]
@@ -54,24 +57,24 @@ readSpec_checkDefaults <- function(possibleFiletypes, md, filetype, naString) {
 #' @export
 readSpectra <- function(md=getmd(), filetype="def", naString="NA") {
 	autoUpS()
-	possibleFiletypes <- c("vision_NSAS.da", "tabDelim.txt", "Pirouette.pir") # they get handed down to the checking function !  # XXVARXX
+	possibleFiletypes <- pv_filetypes #global constant, they get handed down to the checking function !  	# 	pv_filetypes <- c("vision_NSAS.da", "tabDelim.txt", "Pirouette.pir")
 	filename <- NULL # will be changed in the checking
 	readSpec_checkDefaults(possibleFiletypes, md, filetype, naString)
 	rawFolder <- .ap2$stn$fn_rawdata
 	folderFile <- paste(rawFolder, "/", filename, sep="")
 	##
-	if (filetype == "vision_NSAS.da") {
+	if (filetype == possibleFiletypes[1]) {
 		a <- paste(folderFile, ".da", sep="")
 		assign("spectraFilePath", a, pos=parent.frame(n=1))
 		return(getNIRData_Vision_da(a))
 	}
 	##
-	if (filetype == "tabDelim.txt") {
+	if (filetype == possibleFiletypes[2]) {
 		a <- paste(folderFile, ".txt", sep="")
 		assign("spectraFilePath", a, pos=parent.frame(n=1))
  		return(getNirData_plainText(a, naString))
 	}
-	if (filetype == "Pirouette.pir") {
+	if (filetype == possibleFiletypes[3]) {
 		a <- paste(folderFile, ".pir", sep="")
 		assign("spectraFilePath", a, pos=parent.frame(n=1))
  		return(getNIRData_Pirouette(a))

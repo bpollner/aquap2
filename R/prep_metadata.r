@@ -44,7 +44,25 @@ check_mdDefaultValues <- function(localEnv) {
 	if (length(rml) != 1 | !all(is.character(rml))) {
 		stop("Please provide a character length one to the variable 'realMeasurementLabel' in the metadata file.", call.=FALSE)
 	}
-	assign("RMLabel", rml, pos=parent.frame(n=1))	
+	assign("RMLabel", rml, pos=parent.frame(n=1))
+	# 
+	ft <- le$filetype
+	if (all(ft == "def")) {
+		ft <- .ap2$stn$imp_specFileType
+	}
+	if (length(ft) != 1 | !all(is.character(ft))) {
+		stop("Please provide a character length one to the variable 'filetype' in the metadata file.", call.=FALSE)
+	}
+	if (grepl("custom@", ft)) {
+		cfn <- strsplit(ft, "custom@")[[1]][2] # isolate the filename
+		pathSH <- Sys.getenv("AQUAP2SH")
+		path <- paste(pathSH,  cfn, sep="/")
+		if (!file.exists(path)) {
+			stop(paste("The custom data-import file with the name '", cfn, "' does not seem to exist in \n\"", pathSH, "\".", sep=""), call.=FALSE)
+		}
+	}
+	assign("filetype", ft, pos=parent.frame(n=1))	
+	#
 } # EOF
 
 copyMetadataFile <- function(fromPath, toPath) {
@@ -129,7 +147,7 @@ getmd_core <- function(fn="def") {
 	e <- new.env()
 	sys.source(path, envir=e)
 	check_mdVersion(localEnv=e) 	### Version check here !!
-	noSplitLabel <- ECLabel <- RMLabel <- NULL # gets assigned below
+	noSplitLabel <- ECLabel <- RMLabel <- filetype <- NULL # gets assigned below
 	check_mdDefaultValues(localEnv=e) ### checking and assigning
 	##
 	Repls <- (paste(defReplPref, seq(1, e$Repls), sep=""))
@@ -151,7 +169,7 @@ getmd_core <- function(fn="def") {
 	## put together
  	expClasses <- list(L1=e$L1, L2=e$L2, Repls=Repls, Group=Group, timeLabels=TimePoints)
  	postProc <- list(spacing=e$spacing, ECRMLabel=c(ECLabel, RMLabel), noSplitLabel=noSplitLabel, nrConScans=e$nrConScans)
- 	meta <- list(expName=e$expName, coluNames=coluNames)
+ 	meta <- list(expName=e$expName, coluNames=coluNames, filetype=filetype)
 	expMetaData <- list(expClasses = expClasses, postProc = postProc, meta = meta)
 	return(new("aquap_md", expMetaData))
 } # EOF

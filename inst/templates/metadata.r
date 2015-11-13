@@ -7,6 +7,8 @@
 	
 	expName <- "KCl-Dilutions"				## the name of the experiment
 
+	filetype <- "def"						## the filetype of the raw-data file. Leave at "def" to get the default from the settings (variable "imp_specFileType"). If a value other than "def" is provided in the argument "filetype" in "getFullData", this is overriding the value of "filetype" in the metadata file. Please refer to the help for "getFullData" for possible values.
+	
 	commonValue <- "def"					## provide a value that will be the same in all rows of the dataset, leave at 'def' to take the default from the settings
 
 	TimePoints <- FALSE						## how many points in time does the experiment cover? Provide a label for each time-point in the format c("T0", "T1", "T2", ...) or leave at 'FALSE' for no time-splitting

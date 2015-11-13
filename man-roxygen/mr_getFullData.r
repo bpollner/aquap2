@@ -29,7 +29,8 @@
 #' @param md List. The object with the metadat of the experiment. 
 #' The default is to get the metadata file via  \code{\link{getmd}}.
 #' @param filetype Character. The type of the spectral raw data file. 
-#' Possile values are:
+#' If a value other than "def" is provided, this is overriding the 
+#' value of "filetype" in the metadata file. Possile values are:
 #' \itemize{
 #' \item "def": Gets the default value from the setings.r file. 
 #'      (variable 'imp_specFileType')

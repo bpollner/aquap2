@@ -26,3 +26,5 @@ pv_modifyGenPlot<-c("pg.where", "pg.main", "pg.sub", "pg.fns")
 pv_tripleDotsMod <- c(pv_modifyUCL, pv_modifyDPT, pv_modifyPCA, pv_modifySIMCA, pv_modifyPLSR, pv_modifyAquagram, pv_modifyGenPlot)
 ##############
 
+## import, filetype etc.
+pv_filetypes <- c("vision_NSAS.da", "tabDelim.txt", "Pirouette.pir")
