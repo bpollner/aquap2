@@ -489,6 +489,7 @@ ap_checExistence_Defaults <- function(ap, dataset) {
 		}
 	} # EOIF
 	checkEx(ap$ucl$splitClasses, "variable split", cPref)
+	checkEx(ap$dpt$excludeOutliers$exOutVar, "exclude outliers (variable)", cPref)
 	checkEx(ap$pca$colorBy, "PCA", cPref)
 	el2c <- ap$pca$elcolorBy
 	if (!is.null(el2c)) {

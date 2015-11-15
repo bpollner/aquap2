@@ -13,6 +13,14 @@ available wavelengths will be used. Provide a character vector in the format
 "wlFrom-to-wlTo" (e.g. c("1000-to-2000", "1300-to-1600", ...)) 
 to use all previously defined splits in these wavelengths.}
 
+\item{spl.do.exOut}{Logical. If exclusion of outliers should be performed.}
+
+\item{spl.exOut.raw}{Logical. If, should exclusion of outliers be performed, 
+the raw original data should be used as well. Recommended value = TRUE.}
+
+\item{spl.exOut.var}{Character length one. The variable that should be used 
+for outlier detection.}
+
 \item{spl.do.smo}{Logical. If smoothing of the NIR data should be performed. The 
 values for the smoothing operation itself are defined in the settings.}
 

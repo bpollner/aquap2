@@ -300,7 +300,9 @@ getap_core_file <- function(fn="def") {
 	smoothing <- list(useSmooth=e$spl.do.smo, useRaw=e$spl.smo.raw)
 	if (e$spl.do.noise == FALSE) {e$spl.noise.raw <- TRUE} # just to be sure that one is true
 	noise <- list(useNoise=e$spl.do.noise, useRaw=e$spl.noise.raw)
-	dpt <- list(smoothing=smoothing, noise=noise)
+	if (e$spl.do.exOut == FALSE) {e$spl.exOut.raw <- TRUE} # just to be sure that one is true
+	exOut <- list(exOut=e$spl.do.exOut, exOutRaw=e$spl.exOut.raw, exOutVar=e$spl.exOut.var)
+	dpt <- list(smoothing=smoothing, noise=noise, excludeOutliers=exOut)
 	##
 	pca.elci <- 0.95						## the confidence interval for the ellipse to draw around groups in score plots; set to NULL for not drawing ellipses at all
 	pca.el2colorBy <- NULL					## which variables to use for plotting additional confidence intervall ellipses. Set to NULL for using the same as in pca.colorBy. Provide one variable (gets recycled) or a vector with equal length as pca.colorBy to have the additional ci-ellipses along these variables.
@@ -403,12 +405,13 @@ getap <- function(fn="def", ...) {
 	apMod$ucl <- modifyUCL(...)
 	###
 	DP <- ap$dpt
-	modifyDPT <- function(spl.do.smo=DP$smoothing$useSmooth, spl.smo.raw=DP$smoothing$useRaw, spl.do.noise=DP$noise$useNoise, spl.noise.raw=DP$noise$useRaw, ...) {
+	modifyDPT <- function(spl.do.smo=DP$smoothing$useSmooth, spl.smo.raw=DP$smoothing$useRaw, spl.do.noise=DP$noise$useNoise, spl.noise.raw=DP$noise$useRaw, spl.do.exOut=DP$excludeOutliers$exOut, spl.exOut.raw=DP$excludeOutliers$exOutRaw, spl.exOut.var=DP$excludeOutliers$exOutVar, ...) {
 		if (spl.do.smo == FALSE) {spl.smo.raw <- TRUE} # just to be sure that one is true
 		if (spl.do.noise == FALSE) {spl.noise.raw <- TRUE}
 		smoothing <- list(useSmooth=spl.do.smo, useRaw=spl.smo.raw)
 		noise <- list(useNoise=spl.do.noise, useRaw=spl.noise.raw)
-		return(list(smoothing=smoothing, noise=noise))
+		exOut <- list(exOut=spl.do.exOut, exOutRaw=spl.exOut.raw, exOutVar=spl.exOut.var)
+		return(list(smoothing=smoothing, noise=noise, excludeOutliers=exOut))
 	} # EOIF
 	apMod$dpt <- modifyDPT(...)
 	###

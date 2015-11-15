@@ -14,6 +14,10 @@
 #	spl.wl <- "1300-to-1600"
 #	spl.wl <- c("1000-to-2000", "1300-to-1600")
 	 
+	spl.do.exOut <- FALSE					## if exclusion of outliers should be performed
+	spl.exOut.raw <- TRUE					## if, should exclusion of outliers be performed, the raw original data should be used as well. Recommended value = TRUE.
+	spl.exOut.var <- "C_Group"				## the variable that should be used for outlier detection
+	
 	spl.do.smo <- FALSE						## if smoothing of dataset should be performed
 	spl.smo.raw <- TRUE						## if, should smoothing be performed, the raw unsmoothed data should be used as well
 
@@ -21,6 +25,9 @@
 	spl.noise.raw <- TRUE					## if, should the noise-test be performed, the raw original data should be used as well. Recommended value = TRUE
 	################################################################
 			
+
+
+
 
 
 
