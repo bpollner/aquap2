@@ -479,7 +479,8 @@ getap <- function(fn="def", ...) {
 	GP <- ap$genPlot
 	modifyGenPlot <- function(pg.where=GP$where, pg.main=GP$onMain, pg.sub=GP$onSub, pg.fns=GP$fns, ...) {
 		if (cnt == 0) {
-			return(NULL)
+		#	return(NULL) # why this?
+			return(list(where=pg.where, onMain=pg.main, onSub=pg.sub, fns=pg.fns)) # modify XXX, for being able to plot the spectra!
 		} else {
 			return(list(where=pg.where, onMain=pg.main, onSub=pg.sub, fns=pg.fns))
 		}	

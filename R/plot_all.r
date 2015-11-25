@@ -33,6 +33,10 @@ plot_cube <- function(x, what="all", ...) {
 #' 
 #' \code{plot_cube(cube, ...)}
 #' 
+#' \code{plot(dataset, ...)}
+#' 
+#' \code{plot_spectra(dataset, ...} 
+#'
 #' @template mr_details_allParams
 #' @template mr_pg_genParams
 #' @examples

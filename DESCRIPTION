@@ -55,6 +55,7 @@ Collate:
     'plot_pca.r'
     'plot_plsr.r'
     'plot_simca.r'
+    'plot_spectra.r'
     'prep_SampleList.r'
     'prep_importData.r'
     'prep_importData_specific.r'

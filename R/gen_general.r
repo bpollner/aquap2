@@ -471,3 +471,34 @@ makePchGroup <- function(PchToReFact, extra = FALSE) {
  	}
  	return(nicePch[unique(PchToReFact)])
 } # EOF
+
+getUniqLevelColor <- function(nrc) {
+	if (all(is.numeric(nrc))) {
+		return(as.numeric(levels(as.factor(nrc))))
+	}
+	if (all(is.character(nrc))) {
+		return(levels(as.factor(nrc)))
+	}
+} # EOF
+
+extractColorLegendValues <- function(dataset, groupBy) { # returns a 4 element list
+	colInd <- which(colnames(dataset$colRep) == groupBy)
+	color_data <- dataset$colRep[, colInd]
+	ind <- which(colnames(dataset$header) == groupBy)
+	grouping <- dataset$header[, ind]
+	legendText <- as.character(levels(grouping))
+	options(warn=-1)
+	nrs <- as.numeric(legendText)
+	options(warn=0)
+	if (any(is.na(nrs))) {
+		lto <- order(legendText) # should be straight from 1 to n, because "level" already gives out characters in alphabetical order
+	} else {
+		lto <- order(nrs) # so if the legend text is coming from all numbers *and* they are higher than 9 we get the real order to sort later
+	}		
+	partN <- sapply(levels(grouping), function(x, grAll) length(which(grAll==x)), grAll=grouping)
+	legendText <- legendText[lto]
+	legendTextExtended <- paste(legendText, "   N=", partN[lto], "", sep="") # have it in every line			
+	color_legend <- getUniqLevelColor(color_data)[lto] # here read out in levels !!!
+	return(list(color_data=color_data, color_legend=color_legend, txt=legendText, txtE=legendTextExtended))
+} # EOF
+

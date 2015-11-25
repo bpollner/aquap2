@@ -34,8 +34,8 @@ The width and height of the resulting pdf can be set in the settings.
 Other PCA documentation: \code{\link{calc_pca_args}},
   \code{\link{plot_pca_args}}
 
-Other Plot functions: \code{\link{plot_aqg}},
-  \code{\link{plot_pls}}, \code{\link{plot_sim}},
-  \code{\link{plot}}
+Other Plot functions: \code{\link{plot,aquap_data-method}},
+  \code{\link{plot_aqg}}, \code{\link{plot_pls}},
+  \code{\link{plot_sim}}, \code{\link{plot}}
 }
 

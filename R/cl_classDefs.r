@@ -87,6 +87,8 @@ setGeneric("plot", function(x, y, ...) standardGeneric("plot"))
 #' @rdname plot
 setMethod("plot", signature(x = "aquap_cube"), definition = plot_cube_M)
 
+#' @rdname plot_spectra
+setMethod("plot", signature(x = "aquap_data"), definition = plot_spectra_M)
 
 
 setGeneric("getNcpwl", function(object) standardGeneric("getNcpwl"))

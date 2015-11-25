@@ -25,6 +25,10 @@ examples.
 \code{plot(cube, ...)}
 
 \code{plot_cube(cube, ...)}
+
+\code{plot(dataset, ...)}
+
+\code{plot_spectra(dataset, ...}
 }
 \details{
 For a list of all parameters that can be used in the \code{...} 
