@@ -43,7 +43,10 @@ plot_cube_M <- function(x, ...) {
   plot_cube(x, ...)
 } # EOF
 
-plot_spectra_M <- function(x, ...) {
-	plot_spectra(x, ...)
+plot_spectra_Data_M <- function(x, colorBy=NULL, ...) {
+	plot_spectra_Data(x, colorBy, ...)
 } # EOF
 
+plot_spectra_Cube_M <- function(x, colorBy=NULL, ...) {
+	plot_spectra_Cube(x, colorBy, ...)
+} # EOF

@@ -502,3 +502,11 @@ extractColorLegendValues <- function(dataset, groupBy) { # returns a 4 element l
 	return(list(color_data=color_data, color_legend=color_legend, txt=legendText, txtE=legendTextExtended))
 } # EOF
 
+countDecimals <- function(x, nrDec=25) {
+	if (!all(is.numeric(x))) {stop()} 
+	xRounded <- lapply(x, function(g) round(g, 0:nrDec))
+	res <- mapply(function(xR,x) match(TRUE, xR==x), xRounded, x)
+	res <- res -1 # to account for the first element what has zero commas
+	res[is.na(res)] <- nrDec
+	return(res)
+} # EOF

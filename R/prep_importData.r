@@ -413,7 +413,7 @@ readTRHlogfile <- function(trhLog) {
 	return(TRHimp)	
 } # EOF
 
-alignTempRelHum <- function(timeDataset, TRHlog) {
+alignTempRelHum <- function(timeDataset, TRHlog) {	
 	narrowMinutes <-.ap2$stn$imp_narrowMinutes
 	secsNarrowPrecision <-.ap2$stn$imp_secsNarrowPrecision
 	mtp <-.ap2$stn$imp_minutesTotalPrecision
@@ -742,7 +742,9 @@ remakeTRHClasses_sys <- function(headerOnly, TDiv=.ap2$stn$imp_TClassesDiv, TRou
 #		TClInd  <- grep(Tpat, colnames(headerOnly), fixed=TRUE)					# find column-index that the temperatur already as class - the target
 		TClInd  <- which(colnames(headerOnly) == Tpat) 						# find column-index that the temperatur already as class - the target
 		numsTemp <- headerOnly[, TInd[1] ]										# extract the numbers
-		headerOnly[TClInd] <- factor(round((numsTemp/TDiv),TRound)*TDiv)		# insert the new classes
+		if (any(countDecimals(numsTemp) > 1)) {								# to avoid reducing the number of classes when there is only one comma value
+			headerOnly[TClInd] <- factor(round((numsTemp/TDiv),TRound)*TDiv)		# insert the new classes
+		}
 	}
 	##
 #	RHInd <- grep(.ap2$stn$p_RHCol, colnames(headerOnly), fixed=TRUE)		# find column-index that has the rel. hum.
@@ -751,7 +753,9 @@ remakeTRHClasses_sys <- function(headerOnly, TDiv=.ap2$stn$imp_TClassesDiv, TRou
 #		RHClInd  <- grep(RHpat, colnames(headerOnly), fixed=TRUE)				# find column-index that the re.hum. already as class - the target
 		RHClInd  <- which(colnames(headerOnly) == RHpat)
 		numsRH <- headerOnly[, RHInd[1] ]										# extract the numbers
-		headerOnly[RHClInd] <- factor(round((numsRH/RHDiv),RHRound)*RHDiv)		# insert the new classes
+		if (any(countDecimals(numsRH) > 1)) {
+			headerOnly[RHClInd] <- factor(round((numsRH/RHDiv),RHRound)*RHDiv)		# insert the new classes
+		}
 	}
 	options(warn=0)
 	return(headerOnly)

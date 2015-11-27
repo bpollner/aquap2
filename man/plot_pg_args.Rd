@@ -28,7 +28,9 @@ examples.
 
 \code{plot(dataset, ...)}
 
-\code{plot_spectra(dataset, ...}
+\code{plot_spectra(dataset, ...)}
+
+\code{plot_spectra(cube, ...)}
 }
 \details{
 For a list of all parameters that can be used in the \code{...} 
@@ -46,8 +48,8 @@ plot(cube, pg.main="Foo", pg.fns="_foo")
 }
 }
 \seealso{
-Other Plot arguments: \code{\link{plot_aqg_args}},
-  \code{\link{plot_pca_args}}, \code{\link{plot_pls_args}},
-  \code{\link{plot_sim_args}}
+Other Plot arguments: \code{\link{plot,aquap_data-method}},
+  \code{\link{plot_aqg_args}}, \code{\link{plot_pca_args}},
+  \code{\link{plot_pls_args}}, \code{\link{plot_sim_args}}
 }
 

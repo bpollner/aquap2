@@ -4,28 +4,33 @@
 \name{plot,aquap_data-method}
 \alias{plot,aquap_data-method}
 \alias{plot_spectra}
+\alias{plot_spectra,aquap_cube-method}
+\alias{plot_spectra,aquap_data-method}
 \title{Plot Raw Spectra}
 \usage{
-\S4method{plot}{aquap_data}(x, y, ...)
+\S4method{plot}{aquap_data}(x, colorBy = NULL, ...)
 
-plot_spectra(x, colorBy = NULL, ...)
+\S4method{plot_spectra}{aquap_data}(x, colorBy = NULL, ...)
+
+\S4method{plot_spectra}{aquap_cube}(x, colorBy = NULL, ...)
 }
 \arguments{
-\item{x}{The standard dataset as produced by \code{\link{gfd}}.}
-
-\item{y}{Ignored.}
-
-\item{...}{Optional general plotting options as defined in 
-\code{\link{plot_pg_args}}.}
+\item{x}{The standard dataset as produced by \code{\link{gfd}}, or a data-cube
+as produced by \code{\link{gdmm}}.}
 
 \item{colorBy}{Character vector, possible values are the class variables in 
 the dataset.}
+
+\item{...}{Optional general plotting options as defined in 
+\code{\link{plot_pg_args}}.}
 }
 \description{
-Plot the raw spectra contained in the dataset
+Plot the raw spectra contained in the dataset or in the cube.
 }
 \details{
-XXX
+If the provided object is of class \code{\link{aquap_cube}} and is 
+containing more than one dataset, a single graphic with raw-spectra is 
+produced for every dataset contained within the cube.
 }
 \examples{
 \dontrun{
@@ -36,10 +41,16 @@ plot_spectra(dataset, "C_Group")
 plot_spectra(dataset, c("C_Group", "C_Repl"))
 plot(dataset, pg.where="") # for plotting to graphic device
 plot_spectra(dataset, c("C_Group", "C_Repl"), pg.where="", pg.main="foo")
+cube <- gdmm(gfd())
+plot_spectra(cube)
 }
 }
 \seealso{
-plot
+\code{\link{plot}}
+
+Other Plot arguments: \code{\link{plot_aqg_args}},
+  \code{\link{plot_pca_args}}, \code{\link{plot_pg_args}},
+  \code{\link{plot_pls_args}}, \code{\link{plot_sim_args}}
 
 Other Plot functions: \code{\link{plot_aqg}},
   \code{\link{plot_pca}}, \code{\link{plot_pls}},

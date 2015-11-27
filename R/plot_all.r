@@ -35,7 +35,9 @@ plot_cube <- function(x, what="all", ...) {
 #' 
 #' \code{plot(dataset, ...)}
 #' 
-#' \code{plot_spectra(dataset, ...} 
+#' \code{plot_spectra(dataset, ...)}
+#'
+#' \code{plot_spectra(cube, ...)} 
 #'
 #' @template mr_details_allParams
 #' @template mr_pg_genParams
