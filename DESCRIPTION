@@ -31,7 +31,6 @@ Suggests:
     knitr
 VignetteBuilder: knitr
 Collate:
-    'an_pickPeaks.r'
     'aquap2.r'
     'calc_aqg.r'
     'cl_classFunctions.r'
@@ -49,7 +48,7 @@ Collate:
     'gen_parallel.r'
     'gen_possibleValues.r'
     'gen_roxygenHelpers.r'
-    'peaks_specWl.r'
+    'peaks_pick+plot.r'
     'plot_all.r'
     'plot_aqg.r'
     'plot_pca.r'

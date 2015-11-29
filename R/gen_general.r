@@ -301,13 +301,6 @@ instAquap2Examples <- function() {
 } # EOF
 
 
-getWavelengths <- function(dataset) {
-	a <- colnames(dataset$NIR)
-	ncpwl <- getNcpwl(dataset)
-	wls <- as.numeric(substr(a, 1+ncpwl, nchar(a)))
-	return(wls)	
-} # EOF
-
 #' @title Select Observations
 #' @description Create includes or excludes from the dataset by selecting 
 #' from any variable in any logical combination, using the available logical 
@@ -507,4 +500,9 @@ countDecimals <- function(x, nrDec=25) {
 	res <- res -1 # to account for the first element what has zero commas
 	res[is.na(res)] <- nrDec # as a precaution
 	return(res)
+} # EOF
+
+readInSpecAreas <- function() {
+	out <- as.data.frame(t(getOvertoneWls(.ap2$stn$aqg_OT)))  # getOvertoneWls() is in the file "calc_aqg.r"
+return(out)
 } # EOF

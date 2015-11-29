@@ -87,17 +87,29 @@ stn <- list(
 	sm_savGolayDeriv_m = 0, 				## 
 
 
+
+	### peak picking ###
+	pp_AutoSmooth = TRUE, 					## if set to TRUE, an automatic smoothing is applied to the data before the peak-picking process
+	pp_bandwidth = 25, 						## the default bandwidth in the peak picking process (the smaller the value, the more peaks will be detected)
+	pp_colPosPeaks = "red3", 				## the color of the text of positive peaks
+	pp_colNegPeaks = "blue3",				## the color of the text of negative peaks
+	pp_droppLwd = 0.3,						## the linewidth of the lines being drawn from each peak to zero
+
+
+
 	## noise
 	noi_noiseLevel = 1e-6, 					## the system-specific noise level XXX 
 
 
 	## PCA
 	pca_nrDigitsVariance = 3, 				## rounding for the display of explained variances in PCA plots
+	pca_loadings_discrim = TRUE,			## if it should be discriminated between true positive / negative peaks in the PCA loading plot
 	pca_CI_ellipse_level = 0.95, 			## the CI level to be calculated
 	pca_CI_ellipse_robust = TRUE,			## logical (TRUE or FALSE); if the CI-ellipse in PCA score plots should be calculated robust or not
 	pca_CI_ellipse_centerPch = "X",			## the character in the center of a cluster in PCA score plots
 	pca_CI_ellipse_lty = c(1,2),			## the linetypes (get recycled) of the CI-ellipses
 	pca_CI_ellipse_lwd = 1, 				## the line width of the CI-ellipse
+	pca_AdLines = TRUE, 					## if the additional lines should be added to the loading plot (see 'adLinesToVector' for details)	
 	
 	
 	## Aquagram 
@@ -120,13 +132,33 @@ stn <- list(
 	aqg_OT = "1st",							## what overtone (in development, leave at "1st")
 	aqq_nCoord = 12,	 					## only applies to the 1st overtone: how many coordinates to plot (can be 12 or 15)
 	
-	
+		
 	
 	## plotting PDFs
 	pdf_Height_ws = 5,						## when plotting to pdf, the settings for the format
 	pdf_Width_ws = 8.9,						## ws for widescreen (e.g. regressionvector, loading plots, raw)
 	pdf_Height_sq = 9,						## sq for square (e.g. scoreplots)
 	pdf_Width_sq = 9, 
+
+
+
+	## DelGiudice Areas, humidity, WAMACs
+	dga_dga1 = c(1340, 1440),				## corresponding to the "single" coherent domain
+	dga_dga2 = c(1444, 1493),				## corresponding to the gaseous phase in between domains (originally they meet at 1494)
+	dga_dga3 = c(1495, 1594),				## corresponding to the meta-domain consisting of coherent single domains	
+	dga_facDga = 0.006,						## a factor used to calculate the height of the DelGiudice Areas (the smaller the factor, the smaller the area gets)
+	dga_Coh_col = "skyblue2", 				## the color used for filling the coherent DelGiudice Areas
+	dga_Gas_col = "grey70", 				## the color used for filling the gaseous DelGiudice Area
+	#
+	hum_wls = c(1362, 1382), 				## the humidity peaks
+	hum_fact = 0.015, 						## factor controlling the size of the humidity wavelength markers
+	hum_lwd = 2,							## the line-width for the humidity wavelength markers
+	hum_color = "mediumblue",				## the color for the humidity wavelength markers
+	#	
+	wamac_factor = 0.015, 					## the vertical factor (the smaller, the smaller the lines get)	
+	wamac_col1 = "lightskyblue1",			## the first fill-color for the bars (alternating)
+	wamac_col2 = "lightskyblue2",			## the second fill-color for the bars (alternating)
+
 
 
 

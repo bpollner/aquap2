@@ -95,7 +95,7 @@ plot_spectra_Cube <- function(x, colorBy=NULL, ...) {
 	filename <- paste(path, "/", filename, fns, ".pdf", sep="")
 	onMain <- paste(expName, onMain, sep=" ")
 	if (where == "pdf") { pdf(file=filename, width, height, onefile=TRUE, family='Helvetica', pointsize=12) }
-	if (where != "pdf" & (Sys.getenv("RSTUDIO") != 1) & (!names(dev.cur()) == "quartz") ) {dev.new()}	
+	if (where != "pdf" & (Sys.getenv("RSTUDIO") != 1)) {dev.new(height=height, width=width)}	
 	for (i in 1: length(x)) {
 		dataset <- getDataset(x[[i]]) # the sets are in the list within the cube
 		if (!.ap2$stn$allSilent & (where == "pdf" )) {cat(paste("   working on #", i, " of ", length(x), "\n", sep=""))}

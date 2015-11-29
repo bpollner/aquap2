@@ -506,6 +506,7 @@ ap_checExistence_Defaults <- function(ap, dataset) {
 		}
 	}
 	wls <- getWavelengths(dataset)
+	wlsTolerance <- 10
 	splitWl <- ap$ucl$splitWl
 	for (i in 1: length(splitWl)) {
 		options(warn=-1)
@@ -514,10 +515,10 @@ ap_checExistence_Defaults <- function(ap, dataset) {
 		if (any(is.na(nums))) {
 			stop(paste("Please check the analysis procedure / your input at the wavelength-split; provide the wavelength split in the format like e.g. '1300-to-1600'."), call.=FALSE)
 		}
-		if (min(nums) < min(wls) | max(nums) > max(wls)) {
+		if (min(nums) < (min(wls)-wlsTolerance) | max(nums) > (max(wls)+wlsTolerance) ) {
 			stop(paste("Sorry, the specified wavelengths \"", splitWl[i], "\" are out of the available range.", sep=""), call.=FALSE)
 		}
-	}
+	} # end for i
 	####
 	ap <- ap_checkAquagramDefaults(ap, dataset$header)
 	ap <- ap_check_pca_defaults(ap, dataset$header)

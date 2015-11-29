@@ -99,7 +99,7 @@ plotPCA_Scores <- function(cube, ap, where="pdf", comps= c(1:5), pcs=c(1,2), onM
 	filename <- paste(path, "/", filename, fns, ".pdf", sep="")
 	onMain <- paste(expName, onMain, sep=" ")
 	if (where == "pdf") { pdf(file=filename, width, height, onefile=TRUE, family='Helvetica', pointsize=12) }
-	if (where != "pdf" & Sys.getenv("RSTUDIO") != 1) {dev.new()}	
+	if (where != "pdf" & Sys.getenv("RSTUDIO") != 1) {dev.new(height=height, width=width)}	
 	makePCAScorePlots(cube, ap, comps, pcs, onMain, onSub)
 	if (where == "pdf") {dev.off()}
 	if (!.ap2$stn$allSilent & (where == "pdf" )) {cat("ok\n") }
@@ -134,42 +134,77 @@ makePCALoadingPlots<- function(cube, ap, comps=c(1:5), onMain="", onSub="", wher
 } # EOF
 
 ## npcs defining the range of the loadings that we want to see
-makePCALoadingPlots2 <- function (cube, ap, npcs, onMain="", onSub="", where="") { ## nur provisorisch !!! XXX
+makePCALoadingPlots2 <- function (cube, ap, comps, onMain="", onSub="", where="", bandwidth=25, adLines=TRUE) { ## nur provisorisch !!! XXX
+	discrim <- .ap2$stn$pca_loadings_discrim
+	nrDigitsVariance <- .ap2$stn$pca_nrDigitsVariance
+	#
 	for (k in 1: length(cube)) {
 		set <- cube[[k]]
+		mainTxt <- paste(onMain, getIdString(set), sep=" ")
+		wavelengths <- getWavelengths(set) # the set contains the dataset
 		PCAObject <- getPCAObject(set)
-		wls <- getWavelengths(getDataset(set))
-		color <- npcs
-	#	color <- correctForColorsHigherThan8(color)
-		#par(mar=c(8, 4, 8, 2) + 0.1)
-		matplot(wls, PCAObject$loadings[,npcs], type="l", lwd=1, main=onMain, sub=onSub, col= color, xlab="Wavelength", ylab="Loadings")
-		abline(0,0, col="lightgray")
-		legend("topright", legend=paste("PC", npcs, col=color))
+		allVariancesPCs <- round((ChemometricsWithR::variances(PCAObject) / PCAObject$totalvar)*100, nrDigitsVariance)
+		ind99 <- which(cumsum(allVariancesPCs) > 99)[1]
+		selVariancesPCs <- allVariancesPCs[comps]
+		pcaVariances <- list(ind99=ind99, vars=selVariancesPCs)
+		#
+		pickResults <- pickPeaks(PCAObject, bandwidth, comps, discrim, wavelengths)
+		plotPeaks(pickResults, onMain=mainTxt, onSub, adLines, pcaVariances, customColor=NULL, ylim=NULL, wavelengths)		### !! here the plotting !!!
 	} # end for k
 } #EOF
 
-plotPCA_Loadings <- function(cube, ap, where="pdf", comps=c(1:5), onMain="", onSub="", fns="") {
+plotPCA_Loadings <- function(cube, ap, where="pdf", comps=c(1:5), onMain="", onSub="", fns="", bandwidth=25, adLines=TRUE) {
 	if (!.ap2$stn$allSilent & (where == "pdf" )) {cat("Plotting PCA loading plots... ")}
 	expName <- getExpName(cube)
 	height <-.ap2$stn$pdf_Height_ws
 	width <- .ap2$stn$pdf_Width_ws
 	path <- .ap2$stn$fn_results
 	suffix <- "pcaLoadings"
-	message <- "PCA Loadings"
 	filename <- paste(expName, suffix, sep="_")
 	filename <- paste(path, "/", filename, fns, ".pdf", sep="")
 	onMain <- paste(expName, onMain, sep=" ")
 	if (where == "pdf") { pdf(file=filename, width, height, onefile=TRUE, family='Helvetica', pointsize=12) }
-	if (where != "pdf" & Sys.getenv("RSTUDIO") != 1) {dev.new()}	
-	makePCALoadingPlots2(cube, ap, npcs=comps, onMain, onSub, where)
+	if (where != "pdf" & Sys.getenv("RSTUDIO") != 1) {dev.new(height=height, width=width)}	
+	makePCALoadingPlots2(cube, ap, comps, onMain, onSub, where, bandwidth, adLines)
 	if (where == "pdf") {dev.off()}
 	if (!.ap2$stn$allSilent & (where == "pdf" )) {cat("ok\n") }
+} # EOF
+
+plot_pca_checkDefaultsParams <- function(ld.bandwidth, ld.adLines) {
+	if (all(ld.bandwidth == "def")) {
+		ld.bandwidth <- .ap2$stn$pp_bandwidth
+	}
+	if (!all(is.numeric(ld.bandwidth)) | length(ld.bandwidth) != 1) {
+		stop("Please provide a numeric length one for the argument 'ld.bandwidth'.", call.=FALSE)
+	}
+	assign("ld.bandwidth", ld.bandwidth, pos=parent.frame(n=1))
+	##
+	aa <- ld.adLines
+	if (all(aa == "def")) {
+		aa <- .ap2$stn$pca_AdLines
+	}
+	if (!is.logical(aa)) {
+		if (!all(is.wholenumber(aa)) | (min(aa) < 2) | (max(aa) > 5)) {
+			stop("Please provide an integer vector ranging from 2..5 to the argument 'ld.adlines'.", call.=FALSE)
+		}
+	} # end not logical
+	assign("ld.adlines", aa, pos=parent.frame(n=1))
 } # EOF
 
 #' @title Plot PCA
 #' @description Plot PCA scoresplots and / or loadings.
 #' @details The width and height of the resulting pdf can be set in the settings.
 #' @param cube An object of class 'aquap_cube' as produced by \code{\link{gdmm}}.
+#' @param ld.bandwidth Character "def", or numeric length one. The bandwidth of 
+#' wavelengths used in the peak-picking process when plotting the loadings. If 
+#' left at the default "def", the value from the settings.r file 
+#' (parameter \code{pp_bandwidth}) is used.
+#' @param ld.adLines Logical, numeric or character 'def'. If set to \code{FALSE},
+#' no additional lines, if set to \code{TRUE} all the additional lines will be 
+#' plotted in the loading plot. If an integer vector [2..5] is provided, one or 
+#' more of the additional lines get plotted. See \code{\link{adLinesToVector}} 
+#' for details. If left at the default value 'def', the value from the 
+#' settings.r file (parameter \code{pca_AdLines}) is used.
 #' @param ... Optional pca plotting parameters to override the values in the 
 #'  analysis procedure stored in the 'cube' - for possible arguments see 
 #'  \code{\link{plot_pca_args}}.
@@ -184,7 +219,7 @@ plotPCA_Loadings <- function(cube, ap, where="pdf", comps=c(1:5), onMain="", onS
 #'  plot_pca(cube)
 #' }
 #'@export
-plot_pca <- function(cube, ...) {
+plot_pca <- function(cube, ld.bandwidth="def", ld.adLines="def", ...) {
 	autoUpS()
 #	ap <- getap(.lafw_fromWhere="cube", cube=cube, ...)			 # the ... are here used for additionally modifying (if matching arguments) the analysis procedure obtained from the cube
 	ap <- getap(...) # load from file, possibly modify via ...
@@ -192,6 +227,7 @@ plot_pca <- function(cube, ...) {
 	if (is.null(ap$pca)) {
 		return(cat("*** PCA model not available or not selected for plotting \n"))
 	}
+	plot_pca_checkDefaultsParams(ld.bandwidth, ld.adLines) # is assigning here !!
 	where <- ap$genPlot$where
 	onMain <- ap$genPlot$onMain
 	onSub <- ap$genPlot$onSub
@@ -203,10 +239,10 @@ plot_pca <- function(cube, ...) {
 	##
 	pv <- pv_pca_what 		# c("both", "scores", "loadings")
 	if (any(c(pv[1], pv[2]) %in% what)) { # scores
-		plotPCA_Scores(cube, ap, where, comps=pcSc, pcs, onMain, onSub, fns)	# ok
+		plotPCA_Scores(cube, ap, where, comps=pcSc, pcs, onMain, onSub, fns)
 	}
 	if (any(c(pv[1], pv[3]) %in% what)) { # loadings
-		plotPCA_Loadings(cube, ap, where, comps=pcLo, onMain, onSub, fns)	# XXX not ok!
+		plotPCA_Loadings(cube, ap, where, comps=pcLo, onMain, onSub, fns, bandwidth=ld.bandwidth, adLines=ld.adLines)	
 	}
 } # EOF
 

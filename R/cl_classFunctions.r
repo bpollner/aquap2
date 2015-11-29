@@ -50,3 +50,15 @@ plot_spectra_Data_M <- function(x, colorBy=NULL, ...) {
 plot_spectra_Cube_M <- function(x, colorBy=NULL, ...) {
 	plot_spectra_Cube(x, colorBy, ...)
 } # EOF
+
+getWavelengths_dataset <- function(object) { # object is a dataset
+	a <- colnames(object$NIR)
+	ncpwl <- getNcpwl(object)
+	wls <- as.numeric(substr(a, 1+ncpwl, nchar(a)))
+	return(wls)	
+} # EOF
+
+getWavelengths_set <- function(object) { # object is a set
+	dataset <- getDataset(object)
+	return(getWavelengths_dataset(dataset))
+} # EOF

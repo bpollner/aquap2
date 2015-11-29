@@ -132,3 +132,9 @@ setMethod("getClassVar", "aqg_calc", function(object) object@classVar)
 setGeneric("getItemIndex", function(object) standardGeneric("getItemIndex"))
 setMethod("getItemIndex", "aqg_calc", function(object) object@itemIndex)
 
+setGeneric("getWavelengths", function(object) standardGeneric("getWavelengths"))
+setMethod("getWavelengths", "aquap_data", definition=getWavelengths_dataset)
+setMethod("getWavelengths", "aquap_set", definition=getWavelengths_set)
+
+
+
