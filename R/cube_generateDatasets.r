@@ -701,6 +701,9 @@ checkForStats <- function(ap) {
 #' @export
 gdmm <- function(dataset, ap=getap(), md=getmd() ) {
 	autoUpS(); ap; md ;
+	if (class(dataset) != "aquap_data") {
+		stop("Please provide an object of class 'aquap_data' to the argument 'dataset'.", call.=FALSE)
+	}
 	ap <- ap_cleanZeroValuesCheckExistenceDefaults(ap, dataset)
 	a <- makeCompPattern(dataset$header, md, ap)
 	cp <- a$cp

@@ -450,13 +450,6 @@ makePchSingle<- function(PchToReFact, extra = FALSE) {  #PchToReFact: the factor
    		nicePch <- rep(nicePch,ceiling(nr/length(nicePch)))
  	}
  	return(nicePch[PchToReFact])
- 	##
- 	newPch <- rep(NA, length(PchToReFact))
- 	for (p in 1:nr){
-   		a <- which(PchToReFact==unique(PchToReFact)[p])
-   		newPch[a] <- nicePch[p]
- 	}
- 	return(newPch)
 } # EOF
 
 makePchGroup <- function(PchToReFact, extra = FALSE) {
@@ -481,6 +474,7 @@ getUniqLevelColor <- function(nrc) {
 	}
 } # EOF
 
+# color_data, color_unique, color_legend, txt, txtE, sumPart, dataGrouping, pch_data, pch_legend
 extractColorLegendValues <- function(dataset, groupBy) { # returns a 4 element list
 	colInd <- which(colnames(dataset$colRep) == groupBy)
 	color_data <- dataset$colRep[, colInd]
@@ -498,8 +492,12 @@ extractColorLegendValues <- function(dataset, groupBy) { # returns a 4 element l
 	partN <- sapply(levels(grouping), function(x, grAll) length(which(grAll==x)), grAll=grouping)
 	legendText <- legendText[lto]
 	legendTextExtended <- paste(legendText, "   N=", partN[lto], "", sep="") # have it in every line			
-	color_legend <- getUniqLevelColor(color_data)[lto] # here read out in levels !!!
-	return(list(color_data=color_data, color_legend=color_legend, txt=legendText, txtE=legendTextExtended))
+	color_unique <- getUniqLevelColor(color_data)  # here read out in levels !!!
+	color_legend <- color_unique[lto] 
+	pch_data <- makePchSingle(grouping)
+	pch_legend <- as.numeric(levels(as.factor(pch_data)))[lto]
+	#
+	return(list(color_data=color_data,  color_unique=color_unique, color_legend=color_legend, txt=legendText, txtE=legendTextExtended, sumPart=sum(partN), dataGrouping=grouping, pch_data=pch_data, pch_legend=pch_legend))
 } # EOF
 
 countDecimals <- function(x, nrDec=25) {
@@ -507,6 +505,6 @@ countDecimals <- function(x, nrDec=25) {
 	xRounded <- lapply(x, function(g) round(g, 0:nrDec))
 	res <- mapply(function(xR,x) match(TRUE, xR==x), xRounded, x)
 	res <- res -1 # to account for the first element what has zero commas
-	res[is.na(res)] <- nrDec
+	res[is.na(res)] <- nrDec # as a precaution
 	return(res)
 } # EOF
