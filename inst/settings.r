@@ -57,10 +57,11 @@ stn <- list(
 	imp_sampleListType = "csv", 			## the filetype of the sample list in the sampleLists/sl_in folder. Please refer to the help for "getFullData" for possible values.
 	imp_multiplyRows = TRUE,				## if all the rows in the sample list should be multiplied by the number of consecutive scans.
 	imp_autoCopyYvarsAsClass = TRUE, 		## if all available Y-Variables should be automatically copied as a class variable at the time of importing the data. Recommended value is TRUE.
+	imp_alwaysReduceTRHClasses = TRUE,		## if the T and rel. humidity classes should be always reduced, even if the values only contain a single decimal point. If set to FALSE, the T and rel. hum. classes will not be reduced if the values contain only a single decimal point.
 	imp_TClassesDiv = 5,					## the number by which the temperature values get divided, then rounded, then multiplied
-	imp_RHClassesDiv = 3,					## the number by which the rel. humidity values get divided, then rounded, then multiplied
+	imp_RHClassesDiv = 5,					## the number by which the rel. humidity values get divided, then rounded, then multiplied
 	imp_TRounding = 1,  					## digits precision for rounding when re-factoring the temperature
-	imp_RHRounding = 0, 					## digits precision for rounding when re-factoring the rel. humidity
+	imp_RHRounding = 1, 					## digits precision for rounding when re-factoring the rel. humidity
 	imp_makeExpNameColumn = FALSE, 			## if a column containing the name of the experiment in every row should be added to the dataset. This is useful if you plan to fuse datasets from several experiments.
 #	imp_makeNoSplitColumn = TRUE, 			## if a column containing the same value in every row should be added to the dataset. This can be useful to have in the operations for data splitting.
 	imp_makeTimeDistanceColumn = TRUE, 		## if, should a timestamp be available, a column with the time-distance from a user-defined point in time and an other with the chronological order (1:nrow enumeration) should be generated

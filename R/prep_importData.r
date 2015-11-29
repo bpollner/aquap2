@@ -735,6 +735,7 @@ remakeTRHClasses_sys <- function(headerOnly, TDiv=.ap2$stn$imp_TClassesDiv, TRou
 	YRH <- paste(yPref, .ap2$stn$p_RHCol, sep="")
 	Tpat <- paste(cPref, .ap2$stn$p_tempCol, sep="") 						# read in the prefix for class and temperature from settings
 	RHpat <- paste(cPref, .ap2$stn$p_RHCol, sep="")							# read in the prefix for class and rel. humidity from settings
+	alwaysReduceClasses <- .ap2$stn$imp_alwaysReduceTRHClasses												
 	
 #	TInd <- grep(.ap2$stn$p_tempCol, colnames(headerOnly), fixed=TRUE)		# find column-index that has the temperatur - the source
 	TInd <- which(colnames(headerOnly) == YTemp)			 				# find column-index that has the temperatur - the source
@@ -742,7 +743,7 @@ remakeTRHClasses_sys <- function(headerOnly, TDiv=.ap2$stn$imp_TClassesDiv, TRou
 #		TClInd  <- grep(Tpat, colnames(headerOnly), fixed=TRUE)					# find column-index that the temperatur already as class - the target
 		TClInd  <- which(colnames(headerOnly) == Tpat) 						# find column-index that the temperatur already as class - the target
 		numsTemp <- headerOnly[, TInd[1] ]										# extract the numbers
-		if (any(countDecimals(numsTemp) > 1)) {								# to avoid reducing the number of classes when there is only one comma value
+		if (any(countDecimals(numsTemp) > 1) | alwaysReduceClasses) {			# to avoid reducing the number of classes when there is only one comma value
 			headerOnly[TClInd] <- factor(round((numsTemp/TDiv),TRound)*TDiv)		# insert the new classes
 		}
 	}
@@ -753,7 +754,7 @@ remakeTRHClasses_sys <- function(headerOnly, TDiv=.ap2$stn$imp_TClassesDiv, TRou
 #		RHClInd  <- grep(RHpat, colnames(headerOnly), fixed=TRUE)				# find column-index that the re.hum. already as class - the target
 		RHClInd  <- which(colnames(headerOnly) == RHpat)
 		numsRH <- headerOnly[, RHInd[1] ]										# extract the numbers
-		if (any(countDecimals(numsRH) > 1)) {
+		if (any(countDecimals(numsRH) > 1) | alwaysReduceClasses) {
 			headerOnly[RHClInd] <- factor(round((numsRH/RHDiv),RHRound)*RHDiv)		# insert the new classes
 		}
 	}
