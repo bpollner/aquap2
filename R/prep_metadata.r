@@ -304,9 +304,6 @@ getap_core_file <- function(fn="def") {
 	exOut <- list(exOut=e$spl.do.exOut, exOutRaw=e$spl.exOut.raw, exOutVar=e$spl.exOut.var)
 	dpt <- list(smoothing=smoothing, noise=noise, excludeOutliers=exOut)
 	##
-	pca.elci <- 0.95						## the confidence interval for the ellipse to draw around groups in score plots; set to NULL for not drawing ellipses at all
-	pca.el2colorBy <- NULL					## which variables to use for plotting additional confidence intervall ellipses. Set to NULL for using the same as in pca.colorBy. Provide one variable (gets recycled) or a vector with equal length as pca.colorBy to have the additional ci-ellipses along these variables.
-
 	pca <- list(doPCA=e$do.pca, colorBy=e$pca.colorBy, elci=e$pca.elci, elcolorBy=e$pca.elcolorBy, what=e$pca.what, pcs=e$pca.sc, pcSc=e$pca.sc.pairs, pcLo=e$pca.lo)
 	simca <- list(doSIMCA=e$do.sim, simcOn=e$sim.vars, simcK=e$sim.K)
 	plsr <- list(doPLSR=e$do.pls, regressOn=e$pls.regOn, ncomp=e$pls.ncomp, valid=e$pls.valid, colorBy=e$pls.colorBy)	
