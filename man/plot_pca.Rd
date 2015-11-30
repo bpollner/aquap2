@@ -4,10 +4,22 @@
 \alias{plot_pca}
 \title{Plot PCA}
 \usage{
-plot_pca(cube, ...)
+plot_pca(cube, ld.bandwidth = "def", ld.adLines = "def", ...)
 }
 \arguments{
 \item{cube}{An object of class 'aquap_cube' as produced by \code{\link{gdmm}}.}
+
+\item{ld.bandwidth}{Character "def", or numeric length one. The bandwidth of 
+wavelengths used in the peak-picking process when plotting the loadings. If 
+left at the default "def", the value from the settings.r file 
+(parameter \code{pp_bandwidth}) is used.}
+
+\item{ld.adLines}{Logical, numeric or character 'def'. If set to \code{FALSE},
+no additional lines, if set to \code{TRUE} all the additional lines will be 
+plotted in the loading plot. If an integer vector [2..5] is provided, one or 
+more of the additional lines get plotted. See \code{\link{adLinesToVector}} 
+for details. If left at the default value 'def', the value from the 
+settings.r file (parameter \code{pca_AdLines}) is used.}
 
 \item{...}{Optional pca plotting parameters to override the values in the 
 analysis procedure stored in the 'cube' - for possible arguments see 
@@ -28,14 +40,18 @@ The width and height of the resulting pdf can be set in the settings.
  cube <- gdmm(dataset)
  plot(cube)
  plot_pca(cube)
+ plot_pca(cube, ld.bandwidth=12) # for detecting more peaks
+ plot_pca(cube, ld.adLines=FALSE) # no additional lines in the loading plot 
+ plot_pca(cube, ld.adLines=c(2, 4) # only vertical lines and WAMACs in the 
+ # loading plot
 }
 }
 \seealso{
 Other PCA documentation: \code{\link{calc_pca_args}},
   \code{\link{plot_pca_args}}
 
-Other Plot functions: \code{\link{plot_aqg}},
-  \code{\link{plot_pls}}, \code{\link{plot_sim}},
-  \code{\link{plot}}
+Other Plot functions: \code{\link{plot,aquap_data-method}},
+  \code{\link{plot_aqg}}, \code{\link{plot_pls}},
+  \code{\link{plot_sim}}, \code{\link{plot}}
 }
 

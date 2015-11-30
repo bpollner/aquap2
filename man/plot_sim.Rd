@@ -31,9 +31,9 @@ The width and height of the resulting pdf can be set in the settings.
 }
 }
 \seealso{
-Other Plot functions: \code{\link{plot_aqg}},
-  \code{\link{plot_pca}}, \code{\link{plot_pls}},
-  \code{\link{plot}}
+Other Plot functions: \code{\link{plot,aquap_data-method}},
+  \code{\link{plot_aqg}}, \code{\link{plot_pca}},
+  \code{\link{plot_pls}}, \code{\link{plot}}
 
 Other SIMCA documentation: \code{\link{calc_sim_args}},
   \code{\link{plot_sim_args}}

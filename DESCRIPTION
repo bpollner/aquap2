@@ -1,7 +1,7 @@
 Package: aquap2
 Type: Package
 Title: Aquaphotomics NIRS Analysis
-Version: 0.1.1
+Version: 0.1.2
 Date: 2015-02-17
 Author: Bernhard Pollner, Zoltan Kovacs
 Maintainer: Bernhard Pollner <bernhard.pollner@mac.com>
@@ -31,7 +31,6 @@ Suggests:
     knitr
 VignetteBuilder: knitr
 Collate:
-    'an_pickPeaks.r'
     'aquap2.r'
     'calc_aqg.r'
     'cl_classFunctions.r'
@@ -49,12 +48,13 @@ Collate:
     'gen_parallel.r'
     'gen_possibleValues.r'
     'gen_roxygenHelpers.r'
-    'peaks_specWl.r'
+    'peaks_pick+plot.r'
     'plot_all.r'
     'plot_aqg.r'
     'plot_pca.r'
     'plot_plsr.r'
     'plot_simca.r'
+    'plot_spectra.r'
     'prep_SampleList.r'
     'prep_importData.r'
     'prep_importData_specific.r'

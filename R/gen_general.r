@@ -183,7 +183,7 @@ genFolderStr <- function() {
 	fn_results <- .ap2$stn$fn_results 
 	fn_sampleLists <- .ap2$stn$fn_sampleLists
 	fn_sampleListOut <- .ap2$stn$fn_sampleListOut
-	f_sampleListIn <- .ap2$stn$f_sampleListIn
+	fn_sampleListIn <- .ap2$stn$f_sampleListIn
 	
 	fn_mDataDefFile <- .ap2$stn$fn_mDataDefFile
 	fn_anProcDefFile <- .ap2$stn$fn_anProcDefFile
@@ -192,16 +192,16 @@ genFolderStr <- function() {
 	for (p in pp) {
 		dirOk <- c(dirOk, dir.create(p))
 	}
-	slin <- paste(fn_sampleLists, f_sampleListIn, sep="/")
+	slin <- paste(fn_sampleLists, fn_sampleListIn, sep="/")
 	slout <- paste(fn_sampleLists, fn_sampleListOut, sep="/")
 	dirOk <- c(dirOk, dir.create(slin))
 	dirOk <- c(dirOk, dir.create(slout))
 	a <- path.package("aquap2")
 	pathFrom <- paste(a, "/templates/", sep="")
-	pathFromMeta <- paste(pathFrom, fn_mDataDefFile, sep="")
-	pathFromAnP <- paste(pathFrom, fn_anProcDefFile, sep="")
-	file.copy(pathFromMeta, fn_metadata)
-	file.copy(pathFromAnP, fn_metadata)
+	file.copy(paste(pathFrom, "metadata.r", sep=""), fn_metadata)
+	file.copy( paste(pathFrom, "anproc.r", sep=""), fn_metadata)
+	file.rename(paste(fn_metadata, "metadata.r", sep="/"), paste(fn_metadata, fn_mDataDefFile, sep="/"))
+	file.rename(paste(fn_metadata, "anproc.r", sep="/"), paste(fn_metadata, fn_anProcDefFile, sep="/"))
 	if (any(dirOk)) {
 		if (!.ap2$stn$allSilent) {	cat("Folder structure created.\n")}
 	} 
@@ -300,13 +300,6 @@ instAquap2Examples <- function() {
 	if (ok) {cat("Example folder copied\n")}
 } # EOF
 
-
-getWavelengths <- function(dataset) {
-	a <- colnames(dataset$NIR)
-	ncpwl <- getNcpwl(dataset)
-	wls <- as.numeric(substr(a, 1+ncpwl, nchar(a)))
-	return(wls)	
-} # EOF
 
 #' @title Select Observations
 #' @description Create includes or excludes from the dataset by selecting 
@@ -450,13 +443,6 @@ makePchSingle<- function(PchToReFact, extra = FALSE) {  #PchToReFact: the factor
    		nicePch <- rep(nicePch,ceiling(nr/length(nicePch)))
  	}
  	return(nicePch[PchToReFact])
- 	##
- 	newPch <- rep(NA, length(PchToReFact))
- 	for (p in 1:nr){
-   		a <- which(PchToReFact==unique(PchToReFact)[p])
-   		newPch[a] <- nicePch[p]
- 	}
- 	return(newPch)
 } # EOF
 
 makePchGroup <- function(PchToReFact, extra = FALSE) {
@@ -470,4 +456,53 @@ makePchGroup <- function(PchToReFact, extra = FALSE) {
    		nicePch <- rep(nicePch,ceiling(nr/length(nicePch)))
  	}
  	return(nicePch[unique(PchToReFact)])
+} # EOF
+
+getUniqLevelColor <- function(nrc) {
+	if (all(is.numeric(nrc))) {
+		return(as.numeric(levels(as.factor(nrc))))
+	}
+	if (all(is.character(nrc))) {
+		return(levels(as.factor(nrc)))
+	}
+} # EOF
+
+# color_data, color_unique, color_legend, txt, txtE, sumPart, dataGrouping, pch_data, pch_legend
+extractColorLegendValues <- function(dataset, groupBy) { # returns a 4 element list
+	colInd <- which(colnames(dataset$colRep) == groupBy)
+	color_data <- dataset$colRep[, colInd]
+	ind <- which(colnames(dataset$header) == groupBy)
+	grouping <- dataset$header[, ind]
+	legendText <- as.character(levels(grouping))
+	options(warn=-1)
+	nrs <- as.numeric(legendText)
+	options(warn=0)
+	if (any(is.na(nrs))) {
+		lto <- order(legendText) # should be straight from 1 to n, because "level" already gives out characters in alphabetical order
+	} else {
+		lto <- order(nrs) # so if the legend text is coming from all numbers *and* they are higher than 9 we get the real order to sort later
+	}		
+	partN <- sapply(levels(grouping), function(x, grAll) length(which(grAll==x)), grAll=grouping)
+	legendText <- legendText[lto]
+	legendTextExtended <- paste(legendText, "   N=", partN[lto], "", sep="") # have it in every line			
+	color_unique <- getUniqLevelColor(color_data)  # here read out in levels !!!
+	color_legend <- color_unique[lto] 
+	pch_data <- makePchSingle(grouping)
+	pch_legend <- as.numeric(levels(as.factor(pch_data)))[lto]
+	#
+	return(list(color_data=color_data,  color_unique=color_unique, color_legend=color_legend, txt=legendText, txtE=legendTextExtended, sumPart=sum(partN), dataGrouping=grouping, pch_data=pch_data, pch_legend=pch_legend))
+} # EOF
+
+countDecimals <- function(x, nrDec=25) {
+	if (!all(is.numeric(x))) {stop()} 
+	xRounded <- lapply(x, function(g) round(g, 0:nrDec))
+	res <- mapply(function(xR,x) match(TRUE, xR==x), xRounded, x)
+	res <- res -1 # to account for the first element what has zero commas
+	res[is.na(res)] <- nrDec # as a precaution
+	return(res)
+} # EOF
+
+readInSpecAreas <- function() {
+	out <- as.data.frame(t(getOvertoneWls(.ap2$stn$aqg_OT)))  # getOvertoneWls() is in the file "calc_aqg.r"
+return(out)
 } # EOF

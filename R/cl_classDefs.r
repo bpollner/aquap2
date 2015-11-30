@@ -32,7 +32,6 @@ setMethod("show", signature(object = "aquap_cube"), definition = showCube )
 #' @param i subsricpting indices for rows 
 #' @docType methods
 #' @rdname aquap_data-methods
-#' @aliases [,aquap_data-method
 #' @examples 
 #' \dontrun{
 #'  dataset <- gfd()
@@ -87,7 +86,16 @@ setGeneric("plot", function(x, y, ...) standardGeneric("plot"))
 #' @rdname plot
 setMethod("plot", signature(x = "aquap_cube"), definition = plot_cube_M)
 
+#' @rdname plot_spectra
+setMethod("plot", signature(x = "aquap_data"), definition = plot_spectra_Data_M)
 
+setGeneric("plot_spectra", function(x, colorBy=NULL, ...) standardGeneric("plot_spectra"))
+#' @rdname plot_spectra
+#' @export
+setMethod("plot_spectra", signature(x = "aquap_data"), definition = plot_spectra_Data_M)
+#' @rdname plot_spectra
+#' @export
+setMethod("plot_spectra", signature(x = "aquap_cube"), definition = plot_spectra_Cube_M)
 
 setGeneric("getNcpwl", function(object) standardGeneric("getNcpwl"))
 setMethod("getNcpwl", "aquap_data", function(object) object@ncpwl)
@@ -123,4 +131,10 @@ setMethod("getClassVar", "aqg_calc", function(object) object@classVar)
 
 setGeneric("getItemIndex", function(object) standardGeneric("getItemIndex"))
 setMethod("getItemIndex", "aqg_calc", function(object) object@itemIndex)
+
+setGeneric("getWavelengths", function(object) standardGeneric("getWavelengths"))
+setMethod("getWavelengths", "aquap_data", definition=getWavelengths_dataset)
+setMethod("getWavelengths", "aquap_set", definition=getWavelengths_set)
+
+
 

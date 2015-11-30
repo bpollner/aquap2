@@ -45,9 +45,9 @@ plot_sim(cube, pg.sub="bar", pg.fns="_bar") # adds '_bar' to the filename of
 \seealso{
 \code{\link{plot_sim}}
 
-Other Plot arguments: \code{\link{plot_aqg_args}},
-  \code{\link{plot_pca_args}}, \code{\link{plot_pg_args}},
-  \code{\link{plot_pls_args}}
+Other Plot arguments: \code{\link{plot,aquap_data-method}},
+  \code{\link{plot_aqg_args}}, \code{\link{plot_pca_args}},
+  \code{\link{plot_pg_args}}, \code{\link{plot_pls_args}}
 
 Other SIMCA documentation: \code{\link{calc_sim_args}},
   \code{\link{plot_sim}}

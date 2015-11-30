@@ -489,6 +489,7 @@ ap_checExistence_Defaults <- function(ap, dataset) {
 		}
 	} # EOIF
 	checkEx(ap$ucl$splitClasses, "variable split", cPref)
+	checkEx(ap$dpt$excludeOutliers$exOutVar, "exclude outliers (variable)", cPref)
 	checkEx(ap$pca$colorBy, "PCA", cPref)
 	el2c <- ap$pca$elcolorBy
 	if (!is.null(el2c)) {
@@ -505,6 +506,7 @@ ap_checExistence_Defaults <- function(ap, dataset) {
 		}
 	}
 	wls <- getWavelengths(dataset)
+	wlsTolerance <- 10
 	splitWl <- ap$ucl$splitWl
 	for (i in 1: length(splitWl)) {
 		options(warn=-1)
@@ -513,10 +515,10 @@ ap_checExistence_Defaults <- function(ap, dataset) {
 		if (any(is.na(nums))) {
 			stop(paste("Please check the analysis procedure / your input at the wavelength-split; provide the wavelength split in the format like e.g. '1300-to-1600'."), call.=FALSE)
 		}
-		if (min(nums) < min(wls) | max(nums) > max(wls)) {
+		if (min(nums) < (min(wls)-wlsTolerance) | max(nums) > (max(wls)+wlsTolerance) ) {
 			stop(paste("Sorry, the specified wavelengths \"", splitWl[i], "\" are out of the available range.", sep=""), call.=FALSE)
 		}
-	}
+	} # end for i
 	####
 	ap <- ap_checkAquagramDefaults(ap, dataset$header)
 	ap <- ap_check_pca_defaults(ap, dataset$header)
@@ -700,6 +702,9 @@ checkForStats <- function(ap) {
 #' @export
 gdmm <- function(dataset, ap=getap(), md=getmd() ) {
 	autoUpS(); ap; md ;
+	if (class(dataset) != "aquap_data") {
+		stop("Please provide an object of class 'aquap_data' to the argument 'dataset'.", call.=FALSE)
+	}
 	ap <- ap_cleanZeroValuesCheckExistenceDefaults(ap, dataset)
 	a <- makeCompPattern(dataset$header, md, ap)
 	cp <- a$cp

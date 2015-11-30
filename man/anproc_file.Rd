@@ -13,6 +13,14 @@ available wavelengths will be used. Provide a character vector in the format
 "wlFrom-to-wlTo" (e.g. c("1000-to-2000", "1300-to-1600", ...)) 
 to use all previously defined splits in these wavelengths.}
 
+\item{spl.do.exOut}{Logical. If exclusion of outliers should be performed.}
+
+\item{spl.exOut.raw}{Logical. If, should exclusion of outliers be performed, 
+the raw original data should be used as well. Recommended value = TRUE.}
+
+\item{spl.exOut.var}{Character length one. The variable that should be used 
+for outlier detection.}
+
 \item{spl.do.smo}{Logical. If smoothing of the NIR data should be performed. The 
 values for the smoothing operation itself are defined in the settings.}
 
@@ -232,10 +240,10 @@ additional plot with picked peaks should be added. If left at the default value
 
 \item{aqg.plines}{Logical, numeric or character 'def'. If set to \code{FALSE},
 no additional lines, if set to \code{TRUE} all the additional lines will be 
-plotted. If a numerical vector (containing no "1") is provided, one or more of 
+plotted. If an integer vector [2..5] is provided, one or more of 
 the additional lines get plotted. See \code{\link{adLinesToVector}} for details.
-If left at the default value 'def', the default from the settings.r file is 
-used.}
+If left at the default value 'def', the default from the settings.r file 
+(parameter \code{aqg_AdLines}) is used.}
 
 \item{aqg.discr}{Logical or character 'def'. If set to TRUE, negative (resp. 
 positive) peaks can be only found in peak-heights below (resp. above) zero.}

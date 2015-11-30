@@ -19,18 +19,19 @@
 #' }
 #' @export
 plot_sim <- function(cube, ...) {
-  autoUpS()
-  ap <- getap(.lafw_fromWhere="cube", cube=cube, ...)			 # the ... are here used for additionally modifying (if matching arguments) the analysis procedure obtained from the cube
-  ap <- ap_cleanZeroValuesCheckExistenceDefaults(ap, dataset=getDataset(cube[[1]])) # just take the first dataset, as we mainly need the header (and the wavelengths are already checked.. )
-  if (is.null(ap$simca)) {
-    return(cat("*** SIMCA model not available or not selected for plotting \n"))
-  }
-  where <- ap$genPlot$where
-  onMain <- ap$genPlot$onMain
-  onSub <- ap$genPlot$onSub
-  fns <- ap$genPlot$fns
-  #
-  print("Plotting Simca here soon hahaha...")
+	autoUpS()
+#	ap <- getap(.lafw_fromWhere="cube", cube=cube, ...)			 # the ... are here used for additionally modifying (if matching arguments) the analysis procedure obtained from the cube
+	ap <- getap(...) # load from file, possibly modify via ...
+	ap <- ap_cleanZeroValuesCheckExistenceDefaults(ap, dataset=getDataset(cube[[1]])) # just take the first dataset, as we mainly need the header (and the wavelengths are already checked.. )
+	if (is.null(ap$simca)) {
+		return(cat("*** SIMCA model not available or not selected for plotting \n"))
+	}
+	where <- ap$genPlot$where
+	onMain <- ap$genPlot$onMain
+	onSub <- ap$genPlot$onSub
+	fns <- ap$genPlot$fns
+	#
+	print("Plotting Simca here soon hahaha...")
 } # EOF
 
 
