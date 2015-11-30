@@ -10,7 +10,7 @@ plot_pls(cube, ...)
 \item{cube}{An object of class 'aquap_cube' as produced by \code{\link{gdmm}}.}
 
 \item{...}{Optional 'pls' plotting parameters to override the values in the 
-analysis procedure stored in the 'cube' - for possible arguments see 
+analysis procedure - for possible arguments see 
 \code{\link{plot_pls_args}}.}
 }
 \value{

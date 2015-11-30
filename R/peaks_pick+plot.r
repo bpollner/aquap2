@@ -121,16 +121,33 @@ pickPeaks <- function(ObjectToPickPeaks, bandwidth=25, comps=1:4, discrim=FALSE,
 } # EOF
 
 ## needs the pick results object created by pickPeaks as input; contains the vector that was used for picking !
-plotPickResults <- function (pickResults, onMain="", onSub="", pcaVariances=NULL, customColor=NULL, ylim=NULL, wavelengths) { 		#### here the matplot is called
+plotPickResults <- function (pickResults, onMain="", onSub="", pcaVariances=NULL, customColor=NULL, ylim=NULL, wavelengths, clty=NULL) { 
 	if (length(pickResults$rawVector) < 1) {
-		stop("An Error at plotPickResults occured.", call.=FALSE)
+		stop("An Error at plotPickResults occured. Sorry, really.", call.=FALSE)
 	}
+#	save(pickResults, file="se.r")
 	res <- pickResults$picks$pickResult
 	colPos <- .ap2$stn$pp_colPosPeaks
 	colNeg <-  .ap2$stn$pp_colNegPeaks
+	NrSize <- .ap2$stn$pp_NrSize
+	nrVertical <- .ap2$stn$pp_NrVertical 
+	dynamicNrColor <- .ap2$stn$pp_dynamicNrColor
+	Multi <- 10 	# this should be graphics related XXX
+	#
 	positionTable <-res[1: (nrow(res)/2) ,]
 	heigthTable <-res[((nrow(res)/2)+1):nrow(res) , ]
-	Yrange <- range(pickResults$rawVector)[2] - range(pickResults$rawVector)[1]
+	sgYrange <- range(pickResults$rawVector)[2] - range(pickResults$rawVector)[1]
+	Yrange <- range(t(pickResults$rawVector)) 				
+	if (nrVertical) {
+		adjustY <- diff(Yrange)/Multi
+	} else {
+		adjustY <- 0
+	}
+	if (is.null(ylim)) {
+		ylim <- c(Yrange[1] - adjustY, Yrange[2] + adjustY)	
+	} else {
+		ylim <- c(ylim[1] - adjustY, ylim[2] + adjustY)
+	} # end ylim adjustment
 	if (onSub=="") {
 		osFill <- ""
 	} else {
@@ -151,34 +168,54 @@ plotPickResults <- function (pickResults, onMain="", onSub="", pcaVariances=NULL
 		legendText <- rownames(pickResults$rawVector)
 		onSubText <- onSub
 	}
+	leng <- nrow(pickResults$rawVector)
 	if (is.null(customColor)) {
-		ColorYea <- 1:nrow(pickResults$rawVector)
-	} else {
+		ColorYea <- 1:leng
+	} else { # so we have a custom color
+		if (length(customColor) < leng) {
+			customColor <- rep(customColor, ceiling(leng/length(customColor)))
+			customColor <- customColor[1:leng] # cut down to original size
+		}
 		ColorYea <- customColor
 	}
-	clt <- 1:nrow(pickResults$rawVector)
+	if (is.null(clty)) {
+		clt <- 1:nrow(pickResults$rawVector)
+	} else {
+		clt <- clty
+	}
+	#
 	matplot(wavelengths, t(pickResults$rawVector), type="l", ylab="Coefficient", main=onMain, sub=onSubText, col=ColorYea, ylim=ylim, lty=clt) #### here the matplot
 	abline(0,0, col="gray")
 	legend("topright", legend=legendText, lty=clt, col=ColorYea, lwd=2.5) 	#### XXX legend problem here
-		
+	#
+#	colPosDynamic <- colNegDynamic <- vector("integer", (nrow(positionTable)/2))
 	for (i in 1: nrow(positionTable)) {
 		if (i <= (nrow(positionTable)/2)) {
 			if (!all(is.na(positionTable[i,]))) {
 				peakPosition <- positionTable[i, -(which(is.na(positionTable[i,])))]
 				peakHeight <- heigthTable[i, -(which(is.na(heigthTable[i,])))]
-			#	cat("peak Position:", peakPosition, "\n");  cat("peak Height", peakHeight, "\n"); wait()
-				text(peakPosition, peakHeight + Yrange/49.6, labels=round(peakPosition, 0), col=colPos, cex=0.8)
+				if (dynamicNrColor) {colorText <- ColorYea[i]} else {colorText <- colPos}
+				if (nrVertical) {
+					text(peakPosition, peakHeight, srt = 90, adj = c(-0.1, 0.5), labels = round(peakPosition, 0), col = colorText, cex = NrSize)
+				} else {
+					text(peakPosition, peakHeight + sgYrange/49.6, labels=round(peakPosition, 0), col=colorText, cex=NrSize)				
+				}
 			} # end if all na check
 		} else {
 			if (!all(is.na(positionTable[i,]))) {	
 				peakPosition <- positionTable[i, -(which(is.na(positionTable[i,])))]
 				peakHeight <- heigthTable[i, -(which(is.na(heigthTable[i,])))]
-			#	cat("peak Position:", peakPosition, "\n");  cat("peak Height", peakHeight, "\n"); wait()
-			#	labelsCont <- round(peakPosition, 0); print(labelsCont); wait()
-				text(peakPosition, peakHeight -Yrange/49.6, labels=round(peakPosition,0), col=colNeg, cex=0.8)
+				aa <- i-(nrow(positionTable)/2)
+				if (dynamicNrColor) {colorText <- ColorYea[aa]} else {colorText <- colNeg}
+				if (nrVertical) {
+					text(peakPosition, peakHeight, srt = 90, adj = c(1.1, 0.5), labels = round(peakPosition, 0), col = colorText, cex = NrSize)
+				} else {
+					text(peakPosition, peakHeight -sgYrange/49.6, labels=round(peakPosition,0), col=colorText, cex=NrSize)					
+				}
 			} # end if all na check
 		} # end else
 	} # end for i
+	return(list(customColor=ColorYea))
 }# EOF
 
 plotVerticalLinesFromPeaks <- function(pickResults, customColor=NULL) {
@@ -262,8 +299,8 @@ plotDelGiudiceAreas <- function(pickResults) {
 } # EOF
 
 # Master
-plotPeaks <- function(pickPeaksResult, onMain="", onSub="", adLines=TRUE, pcaVariances=NULL, customColor=NULL, ylim=NULL, wavelengths) {
-	plotPickResults(pickPeaksResult, onMain, onSub, pcaVariances, customColor, ylim, wavelengths)
+plotPeaks <- function(pickPeaksResult, onMain="", onSub="", adLines=TRUE, pcaVariances=NULL, customColor=NULL, ylim=NULL, wavelengths, clty=NULL) {
+	aa <- plotPickResults(pickPeaksResult, onMain, onSub, pcaVariances, customColor, ylim, wavelengths, clty)
 	if (any(adLines==3) | any(adLines==TRUE)){
 		plotDelGiudiceAreas(pickPeaksResult)
 	}
@@ -271,7 +308,7 @@ plotPeaks <- function(pickPeaksResult, onMain="", onSub="", adLines=TRUE, pcaVar
 		plotSpecialWlsLines(pickPeaksResult)
 	}
 	if (any(adLines==2) | any(adLines==TRUE)){
-		plotVerticalLinesFromPeaks(pickPeaksResult, customColor)
+		plotVerticalLinesFromPeaks(pickPeaksResult, aa$customColor)
 	}
 	if (any(adLines==5) | any(adLines==TRUE)){
 		plotHumidityWlsLines(pickPeaksResult)

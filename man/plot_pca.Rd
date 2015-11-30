@@ -4,7 +4,8 @@
 \alias{plot_pca}
 \title{Plot PCA}
 \usage{
-plot_pca(cube, ld.bandwidth = "def", ld.adLines = "def", ...)
+plot_pca(cube, ld.bandwidth = "def", ld.adLines = "def", ld.col = "def",
+  ld.lty = "def", ...)
 }
 \arguments{
 \item{cube}{An object of class 'aquap_cube' as produced by \code{\link{gdmm}}.}
@@ -21,8 +22,18 @@ more of the additional lines get plotted. See \code{\link{adLinesToVector}}
 for details. If left at the default value 'def', the value from the 
 settings.r file (parameter \code{pca_AdLines}) is used.}
 
+\item{ld.col}{Character "def" or a valid color vector. A possible custom color 
+for coloring the loadings in the loading plot. When left at the default "def" 
+the value fromt the settings.r file is read in (parameter 
+\code{pca_ld_customColor}). Provide a color-vector to use these colors for 
+coloring the loading plot.}
+
+\item{ld.lty}{Character "def" or a positive integer vector indicating the 
+desired line types. When left at the default "def" the value from the 
+settings.r file is read in (parameter \code{pca_ld_customLinetype}).}
+
 \item{...}{Optional pca plotting parameters to override the values in the 
-analysis procedure stored in the 'cube' - for possible arguments see 
+analysis procedure - for possible arguments see 
 \code{\link{plot_pca_args}}.}
 }
 \value{
@@ -44,6 +55,8 @@ The width and height of the resulting pdf can be set in the settings.
  plot_pca(cube, ld.adLines=FALSE) # no additional lines in the loading plot 
  plot_pca(cube, ld.adLines=c(2, 4) # only vertical lines and WAMACs in the 
  # loading plot
+plot_pca(cube, ld.col=c("red", "blue", "green"))
+plot_pca(cube, ld.lty=c(1,2))
 }
 }
 \seealso{

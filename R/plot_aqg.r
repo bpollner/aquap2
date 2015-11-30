@@ -353,7 +353,7 @@ plotAquagram_single <- function(aquCalc, classVarRanges, where, onSub, onMain, c
 #' @details The width and height of the resulting pdf can be set in the settings.
 #' @param cube An object of class 'aquap_cube' as produced by \code{\link{gdmm}}.
 #' @param ... Optional 'aqg' plotting parameters to override the values in the 
-#'  analysis procedure stored in the 'cube' - for possible arguments see 
+#'  analysis procedure - for possible arguments see 
 #'  \code{\link{plot_aqg_args}}.
 #' @return A pdf or graphic device.
 #' @family Plot functions

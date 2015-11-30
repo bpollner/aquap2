@@ -91,10 +91,12 @@ stn <- list(
 	### peak picking ###
 	pp_AutoSmooth = TRUE, 					## if set to TRUE, an automatic smoothing is applied to the data before the peak-picking process
 	pp_bandwidth = 25, 						## the default bandwidth in the peak picking process (the smaller the value, the more peaks will be detected)
-	pp_colPosPeaks = "red3", 				## the color of the text of positive peaks
-	pp_colNegPeaks = "blue3",				## the color of the text of negative peaks
+	pp_dynamicNrColor = TRUE, 				## if the color of the text of a peak should be the same as the color of the respective element in the legend; if set to FALSE the 2 colors below apply
+	pp_colPosPeaks = "red3", 				## the color of the text of positive peaks, only relevant if pp_dynamicNrColor above is set to FALSE
+	pp_colNegPeaks = "blue3",				## the color of the text of negative peaks, only relevant if pp_dynamicNrColor above is set to FALSE
 	pp_droppLwd = 0.3,						## the linewidth of the lines being drawn from each peak to zero
-
+	pp_NrSize = 0.8, 						## the character expansion of the numbers indicating the detected peaks
+	pp_NrVertical = TRUE, 					## if TRUE, the numbers will be displayed vertically, if FALSE they will be displayed horizontally
 
 
 	## noise
@@ -110,10 +112,12 @@ stn <- list(
 	pca_CI_ellipse_lty = c(1,2),			## the linetypes (get recycled) of the CI-ellipses
 	pca_CI_ellipse_lwd = 1, 				## the line width of the CI-ellipse
 	pca_AdLines = TRUE, 					## Logical or integer vector [2..5]; if the additional lines should be added to the loading plot (see '?adLinesToVector' for details)	
+	pca_ld_customColor = NULL, 				## the custom color for coloring the loadings in the loading plot. Set to NULL for not using custom colors. Provide a color vector (gets recycled) for using it to color the loadings.
+	pca_ld_customLinetype = NULL,			## the custom linetype for plotting the loadings. Set to NULL for automatically generating linetypes. Provide an integer vector to use it as linetypes in the loadings.
 	
 	
 	## Aquagram 
-	aqg_defaultMod = "aucs.dce", 		## the default mode for the Aquagram
+	aqg_defaultMod = "aucs.dce", 			## the default mode for the Aquagram
 	aqg_wlsAquagram = c(1342, 1364, 1374, 1384, 1412, 1426, 1440, 1452, 1462, 1476, 1488, 1512), 	## the wavelengths for the classic aquagram (argument aqg.selWls)
 	aqg_nrDigitsAquagram = 2,				## the number of digits displayed in the standard aquagram
 	aqg_linetypes = c(1,2,3),				## the default vector for the line-types to be used in the aquagram. Gets recycled.
