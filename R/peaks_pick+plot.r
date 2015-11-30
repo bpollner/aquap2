@@ -1,5 +1,4 @@
-#############################################
-### from / after Ron Wehrens
+##### from / after Ron Wehrens ------
 pickPeaksPos_RW <- function(x, span) {
 	x <- signal::sgolayfilt(x, p=2, n=21, m=0)
 	span.width <- span *2+1
@@ -24,7 +23,7 @@ pickPeaks_RW <- function(x, span) {
 	loc.max <- span.width +1 - apply(embed(x, span.width), 1, which.max)
 	loc.max[loc.max == 1 | loc.max == span.width] <- NA
 	pks <- loc.max + 0:(length(loc.max)-1)
-	maxima <- unique(pks[!is.na(pks)]) ############
+	maxima <- unique(pks[!is.na(pks)])
 	locmin <- span.width +1 - apply(embed(x, span.width), 1, which.min)
 	locmin[locmin == 1 | locmin == span.width] <- NA
 	pks <- locmin + 0:(length(locmin)-1)
@@ -33,7 +32,9 @@ pickPeaks_RW <- function(x, span) {
 } #EOF
 #peaks <- pickPeaks_RW(kcl.sel.pca$loadings[,1], 40) 
 #abline(v=wls[peaks], col="gray")
-#############################################
+
+
+#### Picking and Plotting -----
 
 ##### dataset with wavelengths in the rows !!, the value-to-pick-peaks in  the column, so Factors in the column for PCA / PLSR
 ## ! provide only the loadings data as data frame! wavelengths have to be in the row!
@@ -263,12 +264,6 @@ plotDelGiudiceAreas <- function(pickResults) {
 # Master
 plotPeaks <- function(pickPeaksResult, onMain="", onSub="", adLines=TRUE, pcaVariances=NULL, customColor=NULL, ylim=NULL, wavelengths) {
 	plotPickResults(pickPeaksResult, onMain, onSub, pcaVariances, customColor, ylim, wavelengths)
-#	if (any(adLines==1)) { # so it is TRUE or 1, plot all additional lines
-#		plotDelGiudiceAreas(pickPeaksResult)
-#		plotSpecialWlsLines(pickPeaksResult)
-#		plotVerticalLinesFromPeaks(pickPeaksResult, customColor)
-#		plotHumidityWlsLines(pickPeaksResult)
-#	}
 	if (any(adLines==3) | any(adLines==TRUE)){
 		plotDelGiudiceAreas(pickPeaksResult)
 	}
@@ -286,9 +281,57 @@ plotPeaks <- function(pickPeaksResult, onMain="", onSub="", adLines=TRUE, pcaVar
 
 
 #' @title Ad Lines to a Vector Plot
-#' @description Ad various lines, i.e. graphical elements, to the plot of a 
+#' @description Ad various lines / graphical elements to the plot of a 
 #' vector like loading or regression vector.
-#' @details XXX
+#' @details Leave at the default "def" to read in the respective value from the 
+#' settings.r file. By providing \code{TRUE} or \code{FALSE}, all or none of the 
+#' additional graphical elements are drawn on the vector plot. By providing 
+#' an integer vector in the range [2..5], you can specify which one of the 
+#' graphical elements should be produced:
+#' \itemize{
+#' \item{
+#'  \code{2} Vertical thin lines dropped from a peak to the x-axis. These can 
+#'  help to see in which WAMAC a peak is falling. (See also below at \code{4}.)
+#' }
+#' \item{
+#'  \code{3} The "DelGiudice-areas", three wavelength-ranges in the first overtone 
+#'  corresponding to different water structures / properties. The explicit 
+#'  wavelength ranges are defined in the settings.r file in the parameters 
+#'  \code{dga_dga1} to \code{dga_dga3}, while the other parameters starting with 
+#'  \code{dga_} are governing size and color. The first area is corresponding to 
+#'  the "single" coherent domain, the second to the gaseous phase in between 
+#'  domains, and the third to the meta-domain consisting of coherent single 
+#'  domains. Please note that this is based upon personal communication with 
+#'  Emilio Del Giudice and can not (yet) be referenced or backed by literature 
+#'  or even experimental findings. So, for now these three wavelength ranges are 
+#'  purely hypothecial.If selected for plotting, the three wavelength-ranges will 
+#'  be indicated by slim lines slightly below the x-axis.
+#' }
+#' \item{
+#'  \code{4} The WAMACs, i.e. the so called "water matrix coordinates". If 
+#'  selected for plotting, the location of the WAMACs in the first overtone will 
+#'  be indicated by small, slim boxes in alternating colors directly on the 
+#'  x-axis. The colors themselves and the width in the y-axis of the boxes can be 
+#'  specified in the settings.r file in the parameters starting with \code{wamac_}.
+#' }
+#' \item{
+#'  \code{5} Two single markers indicating the wavelengths for humidity will be 
+#'  plotted on the vector plot. The wavelengths, color, size and line-width are 
+#'  specified in the settings.r file in the parameters starting with 
+#'  \code{hum_}.
+#' }
+#' }
+#' @return Additional graphical elements on a vector plot
+#' @seealso \code{\link{plot_pca}}, \code{\link{plot_aqg_args}}
+#' @examples
+#'  \dontrun{
+#'  fd <- gfd()
+#'  cube <- gdmm(fd)
+#'  plot_pca(cube, ld.adLines=FALSE) # no additional lines in the loading plot 
+#'  plot_pca(cube, ld.adLines=c(2, 4) # only vertical lines and WAMACs in the 
+#'  # loading plot
+#' }
+
 #' @name adLinesToVector
 NULL
 

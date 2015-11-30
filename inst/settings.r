@@ -109,7 +109,7 @@ stn <- list(
 	pca_CI_ellipse_centerPch = "X",			## the character in the center of a cluster in PCA score plots
 	pca_CI_ellipse_lty = c(1,2),			## the linetypes (get recycled) of the CI-ellipses
 	pca_CI_ellipse_lwd = 1, 				## the line width of the CI-ellipse
-	pca_AdLines = TRUE, 					## if the additional lines should be added to the loading plot (see 'adLinesToVector' for details)	
+	pca_AdLines = TRUE, 					## Logical or integer vector [2..5]; if the additional lines should be added to the loading plot (see '?adLinesToVector' for details)	
 	
 	
 	## Aquagram 

@@ -105,7 +105,8 @@ plotPCA_Scores <- function(cube, ap, where="pdf", comps= c(1:5), pcs=c(1,2), onM
 	if (!.ap2$stn$allSilent & (where == "pdf" )) {cat("ok\n") }
 } # EOF
 
-makePCALoadingPlots<- function(cube, ap, comps=c(1:5), onMain="", onSub="", where="pdf") {	# not in use; the template from demar
+# not in use; the template from demar
+makePCALoadingPlots<- function(cube, ap, comps=c(1:5), onMain="", onSub="", where="pdf") {	
 	for (k in 1:  length(cube)) {
 		set <- cube[[k]]
 		PCAObject <- getPCAObject(set)
@@ -134,7 +135,7 @@ makePCALoadingPlots<- function(cube, ap, comps=c(1:5), onMain="", onSub="", wher
 } # EOF
 
 ## npcs defining the range of the loadings that we want to see
-makePCALoadingPlots2 <- function (cube, ap, comps, onMain="", onSub="", where="", bandwidth=25, adLines=TRUE) { ## nur provisorisch !!! XXX
+makePCALoadingPlots2 <- function (cube, ap, comps, onMain="", onSub="", where="", bandwidth=25, adLines=TRUE) { 
 	discrim <- .ap2$stn$pca_loadings_discrim
 	nrDigitsVariance <- .ap2$stn$pca_nrDigitsVariance
 	#
@@ -188,7 +189,7 @@ plot_pca_checkDefaultsParams <- function(ld.bandwidth, ld.adLines) {
 			stop("Please provide an integer vector ranging from 2..5 to the argument 'ld.adlines'.", call.=FALSE)
 		}
 	} # end not logical
-	assign("ld.adlines", aa, pos=parent.frame(n=1))
+	assign("ld.adLines", aa, pos=parent.frame(n=1))
 } # EOF
 
 #' @title Plot PCA
@@ -217,6 +218,10 @@ plot_pca_checkDefaultsParams <- function(ld.bandwidth, ld.adLines) {
 #'  cube <- gdmm(dataset)
 #'  plot(cube)
 #'  plot_pca(cube)
+#'  plot_pca(cube, ld.bandwidth=12) # for detecting more peaks
+#'  plot_pca(cube, ld.adLines=FALSE) # no additional lines in the loading plot 
+#'  plot_pca(cube, ld.adLines=c(2, 4) # only vertical lines and WAMACs in the 
+#'  # loading plot
 #' }
 #'@export
 plot_pca <- function(cube, ld.bandwidth="def", ld.adLines="def", ...) {

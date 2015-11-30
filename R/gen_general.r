@@ -183,7 +183,7 @@ genFolderStr <- function() {
 	fn_results <- .ap2$stn$fn_results 
 	fn_sampleLists <- .ap2$stn$fn_sampleLists
 	fn_sampleListOut <- .ap2$stn$fn_sampleListOut
-	f_sampleListIn <- .ap2$stn$f_sampleListIn
+	fn_sampleListIn <- .ap2$stn$f_sampleListIn
 	
 	fn_mDataDefFile <- .ap2$stn$fn_mDataDefFile
 	fn_anProcDefFile <- .ap2$stn$fn_anProcDefFile
@@ -192,16 +192,16 @@ genFolderStr <- function() {
 	for (p in pp) {
 		dirOk <- c(dirOk, dir.create(p))
 	}
-	slin <- paste(fn_sampleLists, f_sampleListIn, sep="/")
+	slin <- paste(fn_sampleLists, fn_sampleListIn, sep="/")
 	slout <- paste(fn_sampleLists, fn_sampleListOut, sep="/")
 	dirOk <- c(dirOk, dir.create(slin))
 	dirOk <- c(dirOk, dir.create(slout))
 	a <- path.package("aquap2")
 	pathFrom <- paste(a, "/templates/", sep="")
-	pathFromMeta <- paste(pathFrom, fn_mDataDefFile, sep="")
-	pathFromAnP <- paste(pathFrom, fn_anProcDefFile, sep="")
-	file.copy(pathFromMeta, fn_metadata)
-	file.copy(pathFromAnP, fn_metadata)
+	file.copy(paste(pathFrom, "metadata.r", sep=""), fn_metadata)
+	file.copy( paste(pathFrom, "anproc.r", sep=""), fn_metadata)
+	file.rename(paste(fn_metadata, "metadata.r", sep="/"), paste(fn_metadata, fn_mDataDefFile, sep="/"))
+	file.rename(paste(fn_metadata, "anproc.r", sep="/"), paste(fn_metadata, fn_anProcDefFile, sep="/"))
 	if (any(dirOk)) {
 		if (!.ap2$stn$allSilent) {	cat("Folder structure created.\n")}
 	} 

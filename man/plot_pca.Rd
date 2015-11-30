@@ -40,6 +40,10 @@ The width and height of the resulting pdf can be set in the settings.
  cube <- gdmm(dataset)
  plot(cube)
  plot_pca(cube)
+ plot_pca(cube, ld.bandwidth=12) # for detecting more peaks
+ plot_pca(cube, ld.adLines=FALSE) # no additional lines in the loading plot 
+ plot_pca(cube, ld.adLines=c(2, 4) # only vertical lines and WAMACs in the 
+ # loading plot
 }
 }
 \seealso{
