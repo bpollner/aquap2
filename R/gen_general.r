@@ -24,6 +24,108 @@ copySettingsFile <- function(fromPath, toPath) {
 	if (ok) { cat("A fresh version of the settings.r file has been copied from the package.\n")}			
 } # EOF
 
+stn_expandFillInLocalTxt <- function(missTxt, missInd, ftLocal) {
+	
+} # EOF
+
+getParamName <- function(rowString) {
+	check <- grep("=", rowString)
+	if (length(check) == 0) {
+	#	message("Warning no good name (no equal)")
+		return(NULL)
+	}
+	a <- strsplit(rowString, "=")[[1]][1] # get everything before the "="
+	b <- strsplit(a, "\t")[[1]] # split by eventual tabs
+	b <- b[length(b)] # get the last element
+	return(trimws(b))
+} # EOF
+	
+getMissingNameIndex <- function(char, txt) {
+	ind <- grep(char, txt)
+	if (length(ind) == 0) {return(NULL)}
+	if (length(ind) == 1) {return(ind)}
+	for (i in 1:length(ind)) {
+		paramName <- getParamName(txt[ind[i]])			
+		if (paramName == char) {
+			return(ind[i])
+		} else {
+			stop("Uiui problem here...")
+		}
+	} # end for i
+} # EOF
+	
+lookForParamNameInLocalFile <- function(paramName, ftLoc) {
+	if (is.null(paramName)) {
+		return(NULL)
+	}
+	ind <- getMissingNameIndex(paramName, ftLoc)
+	if (length(ind) == 0) {
+		return(NULL)
+	} else {
+		return(ind)
+	}
+} # EOF
+
+modifyIndexFrame <- function(indF) {
+	lookBack <- NULL # for satisfying the check
+	indF <- indF[order(indF[,1]),] # sort the data frame
+	rownames(indF) <- 1:nrow(indF)
+	vals <- rle(indF[,3])$lengths # count how many values in each "group" there are in the third column
+	if (length(vals) > 1) {
+		corec <- c(0, (vals[1:(length(vals)-1)])) # start with a zero and cut away the lates value
+	} else {
+		corec <- 0 # because in only one group / single element the correction is only zero
+	}
+	corec <- cumsum(corec)
+	corecVec <- rep(corec, vals)
+	out <- cbind(indF, data.frame(correction=corecVec)) # the correction is due to the frameshift that gets introduced whenever a previous insertion is being made
+	minCheck <- plyr::ddply(out, "nextLocalInd", plyr::summarise, minLook=min(lookBack)) # get the minimum value of looking back in each group of next local indices
+	if (max(minCheck$minLook) > 1) { # that means we have a parameter that is starting a new block!
+		return(NULL)
+	}
+	return(out)
+} # EOF
+
+stn_expandFillInLocalTxt <- function(ftPack, ftLocal, missNames) {	
+	if (!is.null(missNames)) {
+	mi <- NULL # the missIndex, indexing the whole row
+	for (i in 1: length(missNames)) {
+		ind <- getMissingNameIndex(missNames[i], ftPack) # the index of the missing item in the package-txt
+		mi <- c(mi, ind) # collect them all
+	} # end for i		
+	# get the anchor, that is the first lower indexed existing name in ftLocal and pair it with ..
+	indF <- as.data.frame(matrix(NA, ncol=3, nrow=length(mi))) # for collecting the results
+	colnames(indF) <- c("MissInd", "lookBack", "nextLocalInd")
+	for (i in 1: length(mi)) {
+		found <- FALSE
+		lookBack <- 1
+		while(!found) {
+			si <- mi[i] - lookBack # si: search index
+			a <- getParamName(ftPack[si])
+			locInd <- lookForParamNameInLocalFile(a, ftLocal)
+			if (is.null(locInd)) {
+				lookBack <- lookBack+1
+			} else {
+				indF[i,] <- c(mi[i], lookBack, locInd)
+				found <- TRUE
+			}
+		} # end while
+	} # end for i
+	indF <- modifyIndexFrame(indF) # sorting and adapting following to previous inserts, i.e. adding the correction vector
+	if (is.null(indF)) { # gets returned NULL if one parameter is at the start of a new block !
+		return(NULL)
+	}
+	newTxt <- rep(TRUE, (length(ftLocal)+length(missNames)))
+	newValInd <- apply(indF[,-1, drop=FALSE], 1, sum) # gives the position in the expanded file where the new values will be placed
+	newTxt[newValInd] <- FALSE
+	newTxt[newTxt==TRUE] <- ftLocal  # fill in the user´s local text in the expanded vector
+	newTxt[newValInd] <- ftPack[indF[,1]] # get the rows from the package text
+	} else { # so we have nothing to add
+		newTxt <- ftLocal
+	}
+	return(newTxt)
+} # EOF
+
 checkSettings <- function() {
 	pspath <- paste(path.package("aquap2"), "/settings.r", sep="")
 	pathSH <- Sys.getenv("AQUAP2SH")
@@ -62,36 +164,73 @@ checkSettings <- function() {
 			pac <- pspath
 			fenv <- new.env()
 			source(loc, local=fenv)
-			locNames <- names(fenv$stn)
+			locNames <- sort(names(fenv$stn))
 			source(pac, local=fenv)
-			pacNames <- names(fenv$stn)
+			pacNames <- sort(names(fenv$stn))
 			if (!identical(locNames, pacNames)) {
 				okInd <- which(pacNames %in% locNames)
 				miss <- pacNames[-okInd]
 				delInd <- which(locNames %in% pacNames)
 				del <- locNames[-delInd]
+				if (length(miss) == 0) {miss <- NULL}
+				if (length(del) == 0) {del <- NULL}
 				msgNew <- "The new variables are:"
 				msgDel <- "The following variables have been deleted:"
 				#
-				message("There appears to be a newer version of the settings.r file in the package \"aquap2\".")
-				if (length(miss) != 0 & length(del) == 0) {
-					message(msgNew) ;   message(paste(miss, collapse=", "))
+				fconPack <- file(pac, open="r")
+				ftPack <- readLines(fconPack) # the full settings.r text from the package
+				close(fconPack)
+				fconLocal <- file(loc, open="r")
+				ftLocal <- readLines(fconLocal) # the full settings.r text fromt the local file
+				close(fconLocal)
+				## add the missing parameters
+				newTxt <- try(stn_expandFillInLocalTxt(ftPack, ftLocal, missNames=miss), silent=TRUE) # returns the unchanged local text if there is nothing to add
+				if(class(newTxt) == "try-error") { 
+					newTxt <- NULL
+				}
+				## now delete the obsolete parameters
+				if (!is.null(del) & (!is.null(newTxt))) {
+					delInd <- NULL
+					for (i in 1: length(del)) {
+						ind <- getMissingNameIndex(del[i], newTxt) # the index of the items to be deleted
+						delInd <- c(delInd, ind) # collect them all
+					} # end for i
+					newTxt <- newTxt[-delInd]
+				}
+				#
+				if (!is.null(newTxt)) { # so we maybe had to add something (what went well), and we maybe also had to delete some parameters
+					fconLocal <- file(loc, open="w")
+					writeLines(newTxt, fconLocal) # write the new file to settings.r in pathSH
+					close(fconLocal)
+					msg <- paste("Your settings.r file in\n", pathSH, "\nhas been updated.\n***Everything is ok.***", sep="")
+					doCopyMove <- FALSE
 				} else {
-					if (length(miss) == 0 & length(del) != 0) {
-						message(msgDel); 	message(paste(del, collapse=", "))
+					msg <- "There appears to be a newer version of the settings.r file in the package \"aquap2\"."
+					doCopyMove <- TRUE
+				}
+				message(msg) # actually display here a message !!
+				if ((!is.null(miss)) & is.null(del)) {
+					message(msgNew) ;   message(paste(miss, collapse=", ")) # "The new variables are:"
+				} else {
+					if (is.null(miss) & (!is.null(del)) ) {
+						message(msgDel); 	message(paste(del, collapse=", "))  #"The following variables have been deleted:"
 					} else {
 						message(msgNew) ;   message(paste(miss, collapse=", "))
 						message(msgDel); 	message(paste(del, collapse=", "))
 					}
 				}
-				message(paste("Do you want to copy it now into \n\"", pathSH, "\" ? \nThe existing file will remain in place but will be renamed to 'settings_OLD.r' \n( y / n )", sep=""))
-				a <- readLines(n=1)
-				if (a != "y" & a != "Y") {
-					message("Please be aware that the package will not work properly if your settings.r file is not up to date.")
-					return(FALSE)
-				} else {
-					copySettingsFile(pspath, pathSH)
-					return(TRUE)
+				if (doCopyMove) {
+					message(paste("Do you want to copy it now into \n\"", pathSH, "\" ? \nThe existing file will remain in place but will be renamed to 'settings_OLD.r' \n( y / n )", sep=""))
+					a <- readLines(n=1)
+					if (a != "y" & a != "Y") {
+						message("Please be aware that the package will not work properly if your settings.r file is not up to date.")
+						return(FALSE)
+					} else {
+						copySettingsFile(pspath, pathSH)
+						return(TRUE)
+					}	
+				} else { ## if (doCopyMove) == FALSE
+					return(TRUE) # so we successfully copied / deleted the parameter(s) and wrote the new file via writeLines; no copying of the file.
 				}
 			} else { 	# so the variable names in the two settings files are identical
 				return(TRUE)

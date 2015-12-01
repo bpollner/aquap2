@@ -5,7 +5,6 @@
 stn <- list(
 	# tag = value, # with a comma !!
 	
-	
 	## Folder Management
 	fn_analysisData = "anData",				## the folder name for storing any analysis data
 	fn_exports = "exports", 				## the folder name for any exported file
@@ -63,7 +62,6 @@ stn <- list(
 	imp_TRounding = 1,  					## digits precision for rounding when re-factoring the temperature
 	imp_RHRounding = 1, 					## digits precision for rounding when re-factoring the rel. humidity
 	imp_makeExpNameColumn = FALSE, 			## if a column containing the name of the experiment in every row should be added to the dataset. This is useful if you plan to fuse datasets from several experiments.
-#	imp_makeNoSplitColumn = TRUE, 			## if a column containing the same value in every row should be added to the dataset. This can be useful to have in the operations for data splitting.
 	imp_makeTimeDistanceColumn = TRUE, 		## if, should a timestamp be available, a column with the time-distance from a user-defined point in time and an other with the chronological order (1:nrow enumeration) should be generated
 	imp_use_TRH_logfile = FALSE, 			## if and how values for temperature and relative humidity should be imported from an external logfile. See the help for 'getFullData' for information on possible values
 	imp_TRH_logfile_name = "TRHlog", 		## the name of the logfile for temperatur and rel.humidity in the rawdata folder.
@@ -80,12 +78,12 @@ stn <- list(
 	col_RampForTRH = c("blue", "red", "yellow2"), 	## used for color-coding any column that contains the characters defined as names for the temperature and rel. humidity column. Provide at least two colors.
 	col_userDefinedRamps = list(c("green", "red"), c("blue", "yellow2")), 	## used for coloring the in "p_userDefinedSpecialColnames" defined special column names.   XXX make nicer colors here
 
+
 	### smoothing ###
 	## settings for the Sav. Golay filter at the smoothing process
 	sm_savGolayOrder_p = 2, 				## 
 	sm_savGolayLength_n = 25,				## 
 	sm_savGolayDeriv_m = 0, 				## 
-
 
 
 	### peak picking ###
@@ -136,14 +134,12 @@ stn <- list(
 	aqg_OT = "1st",							## what overtone (in development, leave at "1st")
 	aqq_nCoord = 12,	 					## only applies to the 1st overtone: how many coordinates to plot (can be 12 or 15)
 	
-		
-	
+
 	## plotting PDFs
 	pdf_Height_ws = 5,						## when plotting to pdf, the settings for the format
 	pdf_Width_ws = 8.9,						## ws for widescreen (e.g. regressionvector, loading plots, raw)
 	pdf_Height_sq = 9,						## sq for square (e.g. scoreplots)
 	pdf_Width_sq = 9, 
-
 
 
 	## DelGiudice Areas, humidity, WAMACs
@@ -162,8 +158,6 @@ stn <- list(
 	wamac_factor = 0.015, 					## the vertical factor (the smaller, the smaller the lines get)	
 	wamac_col1 = "lightskyblue1",			## the first fill-color for the bars (alternating)
 	wamac_col2 = "lightskyblue2",			## the second fill-color for the bars (alternating)
-
-
 
 
 	### Misc: Values for time-estimates etc. 
