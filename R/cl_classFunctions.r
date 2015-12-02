@@ -59,6 +59,36 @@ getWavelengths_dataset <- function(object) { # object is a dataset
 } # EOF
 
 getWavelengths_set <- function(object) { # object is a set
-	dataset <- getDataset(object)
-	return(getWavelengths_dataset(dataset))
+	return(getWavelengths_dataset(getDataset(object)))
 } # EOF
+
+getNIR_df_dataset <- function(object) { # object is a dataset
+	NIR <- as.data.frame(matrix(object$NIR, ncol=ncol(object$NIR)))
+	colnames(NIR) <- colnames(object$NIR)
+	rownames(NIR) <- rownames(object$NIR)
+	return(NIR)
+} # EOF
+
+getNIR_df_set <- function(object) { # object is a set
+	return(getNIR_df_dataset(getDataset(object)))
+} # EOF
+
+getHeader_dataset <- function(object) { # object is a dataset
+	hd <- object$header
+	class(hd) <- "data.frame" # to get rid of the "AsIs" component
+	return(hd)
+} # EOF
+
+getHeader_set <- function(object) { # object is a set
+	return(getHeader(getDataset(object)))
+} # EOF
+
+getColRep_data <- function(object) { # object is a dataset
+	cr <- object$colRep
+	class(cr) <- "data.frame" # to get rid of the "AsIs" component
+	return(cr)
+}# EOF
+
+getColRep_set <- function(object) { # object is a set
+	return(getColRep(getDataset(object)))
+}# EOF

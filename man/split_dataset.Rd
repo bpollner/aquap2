@@ -21,11 +21,12 @@ the raw original data should be used as well. Recommended value = TRUE.}
 \item{spl.exOut.var}{Character length one. The variable that should be used 
 for outlier detection.}
 
-\item{spl.do.smo}{Logical. If smoothing of the NIR data should be performed. The 
-values for the smoothing operation itself are defined in the settings.}
+\item{spl.do.csAvg}{Logical. If all the consecutive scans of a single sample 
+should be reduced, i.e. averaged into a single spectrum.}
 
-\item{spl.smo.raw}{Logical. If, should smoothing be performed, the raw 
-unsmoothed data will be used as well in addition to the smoothed data.}
+\item{spl.csAvg.raw}{Logical. If, should the consecutive scans of a single 
+sample be reduced, an other dataset containing every single consecutive scan 
+should be kept as well as well.}
 
 \item{spl.do.noise}{Logical. If artifical noise should be added to the dataset.}
 

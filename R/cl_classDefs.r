@@ -9,8 +9,8 @@ setClassUnion(name="numChar", members =c("numeric", "character"))
 ##	
 setClass("aquap_md", contains="list")
 setClass("aquap_ap", contains="list")
-setClass("aquap_data", slots=c(ncpwl="numeric"), contains="data.frame")
-setClass("aquap_cpt", slots=c(splitVars="list", wlSplit="list", smoothing="logical", noise="logical", len="numeric"))
+setClass("aquap_data", slots=c(metadata="list", ncpwl="numeric"), contains="data.frame")
+setClass("aquap_cpt", slots=c(splitVars="list", wlSplit="list", csAvg="logical", noise="logical", len="numeric"))
 setClass("aqg_calc", slots = c(ID="character", classVar="character", itemIndex="numeric", avg="matrix", colRep="numChar", possN="numeric", selInds="numeric", bootRes="matNull", rawSpec="dfNull", avgSpec="dfNull", subtrSpec="dfNull"))
 #setClass("aqg_cr", slots = c(res="list", ran="listNull"))
 #setClassUnion(name="aqgCrNull", members =c("aqg_cr", "NULL"))
@@ -47,7 +47,7 @@ setMethod("[", signature(x = "aquap_data"), definition = function(x, i) {
 			rownames(NIR) <- rownames(x$NIR)[i]
 			colnames(NIR) <- colnames(x$NIR)
 			fd <- reFactor(data.frame(I(header), I(colRep), I(NIR)))
-			return(new("aquap_data", fd, ncpwl=x@ncpwl))
+			return(new("aquap_data", fd, ncpwl=x@ncpwl, metadata=x@metadata))
 		} )
 
 
@@ -111,10 +111,12 @@ setGeneric("getPCAClassList", function(object) standardGeneric("getPCAClassList"
 setMethod("getPCAClassList", "aquap_ap", function(object) object$pca$colorBy)
 
 setGeneric("getColRep", function(object) standardGeneric("getColRep"))
-setMethod("getColRep", "aquap_set", function(object) object@dataset$colRep)
+setMethod("getColRep", "aquap_data", definition=getColRep_data)
+setMethod("getColRep", "aquap_set",  definition=getColRep_set)
 
 setGeneric("getHeader", function(object) standardGeneric("getHeader"))
-setMethod("getHeader", "aquap_set", function(object) object@dataset$header)
+setMethod("getHeader", "aquap_data", definition=getHeader_dataset)
+setMethod("getHeader", "aquap_set", definition=getHeader_set)
 
 setGeneric("getIdString", function(object) standardGeneric("getIdString"))
 setMethod("getIdString", "aquap_set", function(object) object@idString)
@@ -136,5 +138,10 @@ setGeneric("getWavelengths", function(object) standardGeneric("getWavelengths"))
 setMethod("getWavelengths", "aquap_data", definition=getWavelengths_dataset)
 setMethod("getWavelengths", "aquap_set", definition=getWavelengths_set)
 
+setGeneric("getNIR", function(object) standardGeneric("getNIR"))
+setMethod("getNIR", "aquap_data", definition=getNIR_df_dataset)
+setMethod("getNIR", "aquap_set", definition=getNIR_df_set)
 
+setGeneric("getMdDs", function(object) standardGeneric("getMdDs"))
+setMethod("getMdDs", "aquap_data", function(object) object@metadata)
 

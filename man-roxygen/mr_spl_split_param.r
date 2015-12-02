@@ -10,10 +10,11 @@
 #' the raw original data should be used as well. Recommended value = TRUE. 
 #' @param spl.exOut.var Character length one. The variable that should be used 
 #' for outlier detection.
-#' @param spl.do.smo Logical. If smoothing of the NIR data should be performed. The 
-#'  values for the smoothing operation itself are defined in the settings.
-#' @param spl.smo.raw Logical. If, should smoothing be performed, the raw 
-#'  unsmoothed data will be used as well in addition to the smoothed data.
+#' @param spl.do.csAvg Logical. If all the consecutive scans of a single sample 
+#' should be reduced, i.e. averaged into a single spectrum.
+#' @param spl.csAvg.raw Logical. If, should the consecutive scans of a single 
+#' sample be reduced, an other dataset containing every single consecutive scan 
+#' should be kept as well as well.
 #' @param spl.do.noise Logical. If artifical noise should be added to the dataset.
 #' @param spl.noise.raw  If, should the noise-test be performed, the raw data 
 #'  will be used as well in addition to the noise-data.

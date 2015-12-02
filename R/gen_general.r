@@ -490,7 +490,7 @@ instAquap2Examples <- function() {
 ssc <- function(dataset, criteria, include=TRUE, keepEC=FALSE) {
 	cPref <- .ap2$stn$p_ClassVarPref
 	ecrmCol <- .ap2$stn$p_ECRMCol
-	ecLabel <- .ap2$stn$p_envControlLabel
+	ecLabel <- getMdDs(dataset)$postProc$ECRMLabel[1]
 	string <- deparse(substitute(criteria))
 	cns <- colnames(dataset$header)
 	cnsPres <- cns[which(lapply(cns, function(x) grep(x, string)) > 0)] # gives back only those column names that appear in the string
@@ -518,7 +518,7 @@ ssc_s <- function(dataset, variable, value, keepEC=FALSE) {
 	# variable and value are always data frames with one row and 1 or *more* columns
 	cPref <- .ap2$stn$p_ClassVarPref
 	ecrmCol <- .ap2$stn$p_ECRMCol
-	ecLabel <- .ap2$stn$p_envControlLabel
+	ecLabel <- getMdDs(dataset)$postProc$ECRMLabel[1]
 	noSplitCol <- paste(cPref, .ap2$stn$p_commonNoSplitCol, sep="")
 	indEC <- which(colnames(dataset$header) == paste(cPref, ecrmCol, sep=""))
 	selIndOut <-  NULL
@@ -555,7 +555,6 @@ ssc_s <- function(dataset, variable, value, keepEC=FALSE) {
 	return(dataset[c(selIndOut, selIndEC),])
 } # EOF
 
-
 reFactor <- function(dataset) {
 	for (i in 1: ncol(dataset$header)) {
 		if (is.factor(dataset$header[,i])) {
@@ -565,11 +564,9 @@ reFactor <- function(dataset) {
 	return(dataset)
 } # EOF
 
-
 is.wholenumber <- function(x, tol = .Machine$double.eps^0.5) {
 	 return(abs(x - round(x)) < tol)
 } # EOF
-
 
 makePchSingle<- function(PchToReFact, extra = FALSE) {  #PchToReFact: the factor what you want to display with different pch, extra: additional not nice pch
 	nr <- length(unique(PchToReFact))

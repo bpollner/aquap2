@@ -88,7 +88,7 @@ multiplyByBinary <- function(frame, useRaw, useApplied, colname) {
 				multFrame <- frame			
 			} else {
 				if (useRaw==FALSE & useApplied==FALSE) {
-					stop("Check settings for smoothing please. One has to be TRUE.", call.=FALSE)
+					stop("Check settings for the logical input in the spl.x please. One has to be TRUE.", call.=FALSE)
 				}
 			}
 		}
@@ -112,7 +112,7 @@ makeCPT <- function(patt) {
 	aquapCPT@splitVars <- list(classes=classes, values=values)
 	a <- as.character(patt[, which(colnames(patt) == "wlSplits")])
 	aquapCPT@wlSplit <- lapply(strsplit(a, "-to-"), as.numeric) 
-	aquapCPT@smoothing <- patt[, which(colnames(patt) == "SmoothingLogic")]	
+	aquapCPT@csAvg <- patt[, which(colnames(patt) == "csAvgLogic")]	
 	aquapCPT@noise <- patt[, which(colnames(patt) == "NoiseLogic")]
 	aquapCPT@len <- nrow(patt)
 	return(aquapCPT)
@@ -130,9 +130,9 @@ makeCompPattern <- function(header, md, ap) {
 	#
 	patt <- multiplyByWlSplits(patt, ap)
 	#
-	useRaw  <- ap$dpt$smoothing$useRaw
-	useSmooth <- ap$dpt$smoothing$useSmooth
-	patt <- multiplyByBinary(patt, useRaw, useSmooth, "Smoothing")
+	useRaw  <- ap$dpt$csAvg$useRaw
+	useConSAvg <- ap$dpt$csAvg$doAvg
+	patt <- multiplyByBinary(patt, useRaw, useConSAvg, "csAvg")
 	#
 	useRaw  <- ap$dpt$noise$useRaw
 	useNoise <- ap$dpt$noise$useNoise
@@ -506,7 +506,7 @@ ap_checExistence_Defaults <- function(ap, dataset) {
 		}
 	}
 	wls <- getWavelengths(dataset)
-	wlsTolerance <- 10
+	wlsTolerance <- 10  # XXX improve this !!
 	splitWl <- ap$ucl$splitWl
 	for (i in 1: length(splitWl)) {
 		options(warn=-1)
@@ -556,17 +556,60 @@ selectWls <- function(dataset, from, to) {
 	return(dataset)
 } # EOF
 
-performSmoothing <- function(dataset, siSmooth) {
-	if (siSmooth) {
+performSmoothing_old <- function(dataset, siCsAvg) { # not in use
+	if (siCsAvg) {
 		sgp <- .ap2$stn$sm_savGolayOrder_p
 		sgn <- .ap2$stn$sm_savGolayLength_n
 		sgm <- .ap2$stn$sm_savGolayDeriv_m 
-		if (!.ap2$stn$allSilent) {cat("      smoothing...")}
+		if (!.ap2$stn$allSilent) {cat("      averaging consecutive scans...")}
 		dataset$NIR <- t(apply(dataset$NIR, 1, signal::sgolayfilt, p=sgp, n=sgn, m=sgm))
 		if (!.ap2$stn$allSilent) {cat(" ok\n")}
 	}
 	return(dataset)
 } # EOF
+
+performConSAvg <- function(dataset, siCsAvg, numbers=NULL) {
+	if (siCsAvg) {
+		yVarPref <- .ap2$stn$p_yVarPref
+		classVarPref <- .ap2$stn$p_ClassVarPref
+		usePar <- .ap2$stn$gen_useParallel
+		md <- getMdDs(dataset)
+		if (!.ap2$stn$allSilent) {cat("      averaging consecutive scans...")}
+		if (is.null(numbers)) {
+			numbers <- seq(1: md$postProc$nrConScans) # this is selecting *all* the consecutive scans
+		}
+		header <- getHeader(dataset)
+		NIR <- getNIR(dataset)
+		originalNIRColnames <- colnames(NIR)
+		colnames(NIR) <- paste("NIRwlx.", seq(1,ncol(NIR)), sep="")
+		datasetTX <- cbind(header, NIR)
+		csName <- paste(yVarPref, .ap2$stn$p_conSNrCol, sep="")
+		snName <- paste(yVarPref, .ap2$stn$p_sampleNrCol, sep="")		
+		#
+		dfSelector <- data.frame(numbers) 	## XXX numbers could be user defined in a future version
+		colnames(dfSelector) <- csName		## so first get only those cons. scans of interest in ALL the sample numbers, then via plyr::ddply grouped by sample number calculate their mean
+		datasetTXSelection <- plyr::match_df(datasetTX, dfSelector, on=csName) 	## isolate only those observations that have our numbers in consec scans
+		#
+		ind <- which(colnames(dataset$header) == csName) # the index of the column with the consecutive scans
+		datasetRed <- dataset[which(dataset$header[,ind] == 1)]	 # keeps only the first of the consecutive scans in the dataset; we only want one row for each sample in the header file, as averaging over the cons. scans gives us just one row
+		#
+		ind1 <- which(colnames(datasetTXSelection) == snName)
+		ind2 <- which(colnames(datasetTXSelection) == csName)
+		nirInd <- grep("NIRwlx.", colnames(datasetTXSelection))
+		NIRtemp <- datasetTXSelection[, c(ind1, ind2, nirInd)]
+		if (usePar) {
+			registerParallelBackend()
+		}
+		NIR <- plyr::ddply(NIRtemp, snName, plyr::colwise(mean), .parallel=usePar)[, -(1:2)]	# Perform averaging grouped by sample Number, then leave out the first two columns
+		NIR <- as.matrix(NIR)
+		colnames(NIR) <- originalNIRColnames
+		rownames(NIR) <- rownames(datasetRed)
+		datasetRed$NIR <- NIR
+		dataset <- reFactor(datasetRed)		## to adjust for the changed factor-level situation in the class for the cons scans
+		if (!.ap2$stn$allSilent) {cat(" ok\n")}
+	} # end if (siCsAvg) 
+	return(dataset)
+}# EOF
 
 performNoise <- function(dataset, siNoise) {
 	if (siNoise) {
@@ -581,7 +624,7 @@ performNoise <- function(dataset, siNoise) {
 	return(dataset)
 } # EOF
 
-makeIdString <- function(siClass, siValue, siWlSplit, siSmooth, siNoise) {
+makeIdString <- function(siClass, siValue, siWlSplit, siCsAvg, siNoise) {
 	# siClass and siValue come in as dataframes with one row and one or more columns
 	varString <- NULL
 	for (i in 1: ncol(siClass)) {
@@ -591,11 +634,11 @@ makeIdString <- function(siClass, siValue, siWlSplit, siSmooth, siNoise) {
 	varString <- substr(varString, 1, (nchar(varString)-2)) # to get rid of the last ","
 	varString <- paste(varString, " ", sep="")
 	more <- FALSE
-	if (siSmooth) {
+	if (siCsAvg) {
 		more <- TRUE
-		smoothing <- "smo. "
+		csAvg <- "csAvg. "
 	} else {
-		smoothing <- ""
+		csAvg <- ""
 	}
 	if (siNoise) {
 		more <- TRUE
@@ -608,20 +651,20 @@ makeIdString <- function(siClass, siValue, siWlSplit, siSmooth, siNoise) {
 	} else {
 		moreAdd <- ""
 	}
-	easy <- paste(varString, "@", siWlSplit[1], "-to-", siWlSplit[2], moreAdd, smoothing, noise, sep="")
+	easy <- paste(varString, "@", siWlSplit[1], "-to-", siWlSplit[2], moreAdd, csAvg, noise, sep="")
 	return(easy)
 } # EOF
 
-processSingleRow_CPT <- function(dataset, siClass, siValue, siWlSplit, siSmooth, siNoise) { # si for single
+processSingleRow_CPT <- function(dataset, siClass, siValue, siWlSplit, siCsAvg, siNoise, md) { # si for single
 	keepEC <- .ap2$stn$gd_keepECs
 	newDataset <- ssc_s(dataset, siClass, siValue, keepEC) 
 	if (is.null(newDataset)) { # NULL is returned if a variable combination yields no data
 		return(NULL)
 	}
 	newDataset <- selectWls(newDataset, siWlSplit[1], siWlSplit[2])
-	newDataset <- performSmoothing(newDataset, siSmooth)
+	newDataset <- performConSAvg(newDataset, siCsAvg)
 	newDataset <- performNoise(newDataset, siNoise)
-	idString <- makeIdString(siClass, siValue, siWlSplit, siSmooth, siNoise)
+	idString <- makeIdString(siClass, siValue, siWlSplit, siCsAvg, siNoise)
 	out <- new("aquap_set", dataset=newDataset, idString=idString)
 	return(out)
 } # EOF
@@ -678,7 +721,6 @@ checkForStats <- function(ap) {
 #' It is recommended to first  make the analysis procedure file as complete and 
 #' accurate as possible, and then to override only a few parameters if necessary.
 #' @param dataset An object of class 'aquap_data' as generated by \code{\link{gfd}}
-#' @param md The metadata, an object of class 'aquap_md'
 #' @param ap The analysis procedure, an object of class 'aquap_ap'
 #' @return An object of class \code{\link{aquap_cube}} containing all the 
 #' statistical models / calculations that were performed on the split-variations 
@@ -700,12 +742,13 @@ checkForStats <- function(ap) {
 #' }
 #' @family Core functions
 #' @export
-gdmm <- function(dataset, ap=getap(), md=getmd() ) {
-	autoUpS(); ap; md ;
+gdmm <- function(dataset, ap=getap()) {
+	autoUpS(); ap;
 	if (class(dataset) != "aquap_data") {
 		stop("Please provide an object of class 'aquap_data' to the argument 'dataset'.", call.=FALSE)
 	}
 	ap <- ap_cleanZeroValuesCheckExistenceDefaults(ap, dataset)
+	md <- getMdDs(dataset)
 	a <- makeCompPattern(dataset$header, md, ap)
 	cp <- a$cp
 	cpt <- a$cpt
@@ -716,14 +759,14 @@ gdmm <- function(dataset, ap=getap(), md=getmd() ) {
 	classes <- cpt@splitVars$classes # ! is a data frame
 	values <- cpt@splitVars$values # !is a data frame
 	wlSplit <- cpt@wlSplit # ! is a list
-	smoothing <- cpt@smoothing # is a vector
+	csAvg <- cpt@csAvg # is a vector
 	noise <- cpt@noise # is a vector
 	
 	### generate datasets
 	if (!.ap2$stn$allSilent) {cat("Generating Datasets...\n")}
 	for (i in 1:len) {
 		if (!.ap2$stn$allSilent) {cat(paste("   Working on #", i, " of ", len, "\n", sep=""))}
-		cubeList[[i]] <- processSingleRow_CPT(dataset, as.data.frame(classes[i,]), as.data.frame(values[i,]), wlSplit[[i]], smoothing[i], noise[i]) # the "as.data.frame" is necessary if we only have one column
+		cubeList[[i]] <- processSingleRow_CPT(dataset, as.data.frame(classes[i,]), as.data.frame(values[i,]), wlSplit[[i]], csAvg[i], noise[i]) # the "as.data.frame" is necessary if we only have one column
 	} # end for i
 	if (!.ap2$stn$allSilent) {cat("Done.\n")}
 	###
