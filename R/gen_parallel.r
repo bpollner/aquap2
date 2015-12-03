@@ -1,7 +1,13 @@
+checkHaveParallel <- function() {
+	if (is.null(getDoParName()) ) { return(FALSE) }
+	if (getDoParName() == "doSEQ") { return(FALSE) }
+	return(TRUE)
+} # EOF
+
 registerParallelBackend <- function() {
 	nrWorkers <- .ap2$stn$gen_numberOfCPUs
-	havePar <- getDoParRegistered()
-	if (!havePar) {
+	haveParallel <- checkHaveParallel()
+	if (!haveParallel) {
 		if (is.na(nrWorkers)) {
 			registerDoParallel()
 		} else {

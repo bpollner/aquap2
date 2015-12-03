@@ -642,3 +642,13 @@ readInSpecAreas <- function() {
 	out <- as.data.frame(t(getOvertoneWls(.ap2$stn$aqg_OT)))  # getOvertoneWls() is in the file "calc_aqg.r"
 return(out)
 } # EOF
+
+makeFlatDataFrame <- function(dataset, groupBy) {
+	colInd <- which(colnames(dataset$header) == groupBy)
+	grouping <- dataset$header[, colInd]
+	NIR <- as.data.frame(matrix(dataset$NIR, nrow=(nrow(dataset$NIR))))
+	out <- cbind(grouping, NIR)
+	colnames(out) <- c("grouping", colnames(dataset$NIR))
+	rownames(out) <- rownames(dataset)
+	return(out)
+} # EOF

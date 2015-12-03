@@ -26,7 +26,8 @@ Imports:
     boot,
     fmsb,
     lattice,
-    latticeExtra
+    latticeExtra,
+    rrcovHD
 Suggests:
     knitr
 VignetteBuilder: knitr

@@ -145,3 +145,9 @@ setMethod("getNIR", "aquap_set", definition=getNIR_df_set)
 setGeneric("getMdDs", function(object) standardGeneric("getMdDs"))
 setMethod("getMdDs", "aquap_data", function(object) object@metadata)
 
+
+## SIMCA
+setGeneric("getSIMCAClassList", function(object) standardGeneric("getSIMCAClassList"))
+setMethod("getSIMCAClassList", "aquap_ap", function(object) object$simca$simcOn)
+
+
