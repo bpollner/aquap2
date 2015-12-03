@@ -33,7 +33,7 @@ stn <- list(
 	p_expNameCol = "ExpName",				## the name of the column holding the experiment name 
 	p_commonNoSplitCol = "all", 			## the name of the column containing the common "no-split" value
 	p_commonNoSplit = "all", 				## a common value for all the rows in the dataset in the "noSplit" column
-	p_envControlLabel = "MQ", 				## the default label for the environmental control
+	p_envControlLabel = "EC", 				## the default label for the environmental control
 	p_realMeasurementLabel = "RM", 			## the default label for the "real measurement", for all the samples of your experiment
 	p_replicatePrefix = "R", 				## the prefix for the value indicating the number of the replicate of a measurement, so e.g. with the default 'R' you will have your replicates named "R1", "R2", "R3", ...
 	p_replicateCol = "Repl", 				## the name of the column containing the replicates
@@ -46,6 +46,7 @@ stn <- list(
 	## General behaviour & settings
 	allSilent = FALSE,						## if false, "status" messages will be displayed
 	autoUpdateSettings = TRUE, 				## if the settings should be automatically updated when calling a function from package 'aquap2'. Recommended value is TRUE.
+	gen_useParallel = FALSE, 				## if parallel computing should be used where applicable and implemented
 	gen_numberOfCPUs = NA, 					## the number of CPUs used for parallel computing; leave at 'NA' for automatically using the system defaults
 	gen_showData_NIR = FALSE, 				## if the first rows of the NIR data should be printed as well wenn printing an object of class 'aquap_data' to the screen.
 
