@@ -18,8 +18,8 @@
 	spl.exOut.raw <- TRUE					## if, should exclusion of outliers be performed, the raw original data should be used as well. Recommended value = TRUE.
 	spl.exOut.var <- "C_Group"				## the variable that should be used for outlier detection
 	
-	spl.do.smo <- FALSE						## if smoothing of dataset should be performed
-	spl.smo.raw <- TRUE						## if, should smoothing be performed, the raw unsmoothed data should be used as well
+	spl.do.csAvg <- FALSE					## if all the consecutive scans of a single sample should be reduced, i.e. averaged into a single spectrum
+	spl.csAvg.raw <- TRUE					## if, should the consecutive scans of a single sample be reduced, an other dataset containing every single consecutive scan should be kept as well
 
 	spl.do.noise <- FALSE					## if artificial noise should be added to the dataset
 	spl.noise.raw <- TRUE					## if, should the noise-test be performed, the raw original data should be used as well. Recommended value = TRUE

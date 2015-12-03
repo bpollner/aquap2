@@ -592,6 +592,7 @@ getFullData <- function(md=getmd(), filetype="def", naString="NA", slType="def",
 #	fullData@header <- headerFusion
 #	fullData@colRep <- colRep
 #	fullData@NIR <- NIR
+	fullData@metadata <- md
 	fullData@ncpwl <- si$info$nCharPrevWl
 	if (stf) {
 		saveAQdata(fullData, md, verbose=TRUE)

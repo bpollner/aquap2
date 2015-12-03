@@ -46,7 +46,7 @@ do_scale <- function(dataset) {
 } # EOF
 
 
-do_scale_fc <- function(dataset, calibAvgTable) {
+do_scale_fc <- function(dataset, calibAvgTable) { # used in aquagram norm foreign center
 	avg <- apply(calibAvgTable, 2, mean)
 	NIR <- scale(as.matrix(dataset$NIR), center=avg, scale=TRUE)
 	colnames(NIR) <- colnames(dataset$NIR)

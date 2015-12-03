@@ -17,7 +17,7 @@ pv_fsa_fss <- c("both", "only")
 ############
 ## complete possible values for modifying via ...
 pv_modifyUCL <- c("spl.var", "spl.wl")
-pv_modifyDPT <- c("spl.do.smo", "spl.smo.raw", "spl.do.noise", "spl.noise.raw", "spl.do.exOut", "spl.exOut.raw", "spl.exOut.var")
+pv_modifyDPT <- c("spl.do.csAvg", "spl.csAvg.raw", "spl.do.noise", "spl.noise.raw", "spl.do.exOut", "spl.exOut.raw", "spl.exOut.var")
 pv_modifyPCA<-c("do.pca", "pca.colorBy", "pca.elci", "pca.elcolorBy", "pca.what", "pca.sc", "pca.sc.pairs", "pca.lo")
 pv_modifySIMCA<-c("do.sim", "sim.vars", "sim.K")
 pv_modifyPLSR<-c("do.pls", "pls.regOn", "pls.ncomp", "pls.valid", "pls.colorBy")
