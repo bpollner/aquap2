@@ -2,24 +2,24 @@ makeSimcaModel_inner <- function(dataset, groupBy, k=0, version, stnLoc) {
 	tol <- stnLoc$simca_tolerance
 	kmax <- stnLoc$simca_kMax
 	flatDf <- makeFlatDataFrame(dataset, groupBy)
-#	X <- flatDf[,-1] # all the NIR data
-#	grp <- flatDf[,1] # only the grouping
+	X <- flatDf[,-1] # all the NIR data
+	grp <- flatDf[,1] # only the grouping
 	if (version == "classic") {
 		if (k == 0) {
-			simcaMod <- rrcovHD::CSimca(grouping ~ ., data=flatDf, kmax=kmax, tol=tol) ## k=0 does not work, kmax does not work
+			simcaMod <- rrcovHD::CSimca.formula(grouping ~ ., data=flatDf, kmax=kmax, tol=tol) ## k=0 does not work, kmax does not work
 #			simcaMod <- rrcovHD::CSimca(X, grp, kmax=kmax, tol=tol)  ## k=0 does not work, kmax does not work
 		} else {
-			simcaMod <- rrcovHD::CSimca(grouping ~ ., data=flatDf, k=k, kmax=kmax, tol=tol)
+			simcaMod <- rrcovHD::CSimca.formula(grouping ~ ., data=flatDf, k=k, kmax=kmax, tol=tol)
 #			simcaMod <- rrcovHD::CSimca(X, grp, k=k, kmax=kmax, tol=tol) 		
 		}
 	} else {
 		if (version == "robust") {
 			if (k == 0) {	
-				simcaMod <- rrcovHD::RSimca(grouping ~ ., data=flatDf, kmax=kmax, tol=tol)  ## k=0 does not work, but still calculating k
+				simcaMod <- rrcovHD::RSimca.formula(grouping ~ ., data=flatDf, kmax=kmax, tol=tol)  ## k=0 does not work, but still calculating k
 #				simcaMod <- rrcovHD::RSimca(X, grp, kmax=kmax, tol=tol)   ## k=0 does not work, but still calculating k
 
 			} else {
-				simcaMod <- rrcovHD::RSimca(grouping ~ ., data=flatDf, k=k, kmax=kmax, tol=tol)
+				simcaMod <- rrcovHD::RSimca.formula(grouping ~ ., data=flatDf, k=k, kmax=kmax, tol=tol)
 #				simcaMod <- rrcovHD::RSimca(X, grp, k=k, kmax=kmax, tol=tol)  			
 			}
 		} else {
@@ -54,9 +54,10 @@ makeSimcaModels <- function(dataset, groupingVector, k=0, version, inCV=FALSE) {
 #	} # end foreach i
 	#
 	for (i in 1: leng) {
+	#	mod <- makeSimcaModel_inner(dataset, groupingVector[i], k, version, stnLoc)
 		a <- try(makeSimcaModel_inner(dataset, groupingVector[i], k, version, stnLoc), silent=TRUE)
 		if (class(a) == "try-error") {
-			.ap2$.gs <- "*error*:"
+			.ap2$.gs <- "\n         ***error***:"
 			if (inCV) {aa <- "cv."} else {aa <- ""}
 			add <- paste(aa, groupingVector[i], sep="")
 			.ap2$.charCollect <- paste(.ap2$.charCollect, add, sep=", ")
@@ -64,6 +65,7 @@ makeSimcaModels <- function(dataset, groupingVector, k=0, version, inCV=FALSE) {
 		} else {
 			modelList <- c(modelList, list(a))
 		}
+	#	modelList <- c(modelList, list(mod))
 	} # end for i
 	#
 	return(modelList)
@@ -71,9 +73,9 @@ makeSimcaModels <- function(dataset, groupingVector, k=0, version, inCV=FALSE) {
 
 makeSimcaPrediction_inner <- function(SimcaModel, newFlatData, newCorrectGrouping) {
 	if (is.null(newFlatData)) {
-		pred <- predict(SimcaModel, method=2)
+		pred <- rrcov::predict(SimcaModel, method=2)
 	} else {
-		pred <- predict(SimcaModel, newFlatData, method=2)
+		pred <- rrcov::predict(SimcaModel, newFlatData, method=2)
 #		print(pred); print(str(pred)); print(length(pred)); wait()
 #		print(newCorrectGrouping); print(length(newCorrectGrouping)); wait()
 		predTable <- rrcov::mtxconfusion(newCorrectGrouping, pred@classification, prior = NULL, printit=FALSE)

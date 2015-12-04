@@ -84,11 +84,9 @@ setMethod("[", signature(x = "aquap_data"), definition = function(x, i) {
 setGeneric("plot", function(x, y, ...) standardGeneric("plot"))
 
 #' @rdname plot
-#' @export
 setMethod("plot", signature(x = "aquap_cube"), definition = plot_cube_M)
 
 #' @rdname plot_spectra
-#' @export
 setMethod("plot", signature(x = "aquap_data"), definition = plot_spectra_Data_M)
 
 setGeneric("plot_spectra", function(x, colorBy=NULL, ...) standardGeneric("plot_spectra"))
