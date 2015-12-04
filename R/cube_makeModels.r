@@ -23,12 +23,15 @@ calculateSIMCA <- function(dataset, md, ap) { # is working on a single set. i.e.
 	if (is.null(ap$simca)) {
 		return(NULL)
 	}
+	mods_cv <- preds_cv <- NULL
 	simcaVersion <- .ap2$stn$simca_version
-	simcaClasses <- ap$simca$simcOn # comes in already checked, so it is a character vector of at least length one
+#	simcaClasses <- ap$simca$simcOn # comes in already checked, so it is a character vector of at least length one
+	simcaClasses <- correctSimcaGroupingForDataset(dataset, groupingVector=ap$simca$simcOn)
+	print(simcaClasses) ; wait(); return(NULL)
 	simca_k <- ap$simca$simcK
-	SC <- paste(simcaClasses, collapse=", ") # not in use
-	if (!.ap2$stn$allSilent) {cat(paste("      calc. SIMCA (", length(simcaClasses), " groups)...", sep=""))}
-	
+#	SC <- paste(simcaClasses, collapse=", ") # not in use
+	if (!.ap2$stn$allSilent) {cat(paste("      calc. SIMCA (", length(simcaClasses), " groups): ", sep=""))}
+	#
 	mods <-  makeSimcaModels(dataset, groupingVector=simcaClasses, k=simca_k, simcaVersion) # returns a list with one model for each grouping
 	preds <-  makeSimcaPredictions(SimcaModelList=mods, newFlatData=NULL, newCorrectGrouping=NULL)
 	icDist <- calculateInterclassDistances(mods)
@@ -59,18 +62,6 @@ calculateSIMCA <- function(dataset, md, ap) { # is working on a single set. i.e.
 		#
 	if (!.ap2$stn$allSilent) {cat(" ok\n")}
 	return(list(mods=mods, preds=preds, mods_cv=mods_cv, preds_cv=preds_cv, groupingVector <- simcaClasses))
-
-#######  # from Aquaphotomics
-		SimcaModel <- makeSimcaModel(dataset, simcaOn, simcaK, simcaVersion)
-		SimcaPrediction <- makeSimcaPrediction(SimcaModel, newFlatData=NULL, NULL)
-		##
-		SimcaModel_CV <- makeSimcaModel(dataset[indTrain,], simcaOn, simcaK, simcaVersion)
-		allFlatDf <- makeFlatDataFrame(dataset, simcaOn)
-		newCorrectGrouping <- allFlatDf[indNew,1]
-		newFlatDf <- makeFlatDataFrame(dataset[indNew,], simcaOn)[,-1]   ## leave out the first column with grouping
-		SimcaPrediction_CV <- makeSimcaPrediction(SimcaModel_CV, newFlatDf, newCorrectGrouping)
-		##
-		sdrcObject@models@SIMCA <- list(mod=SimcaModel, pred=SimcaPrediction, mod_cv=SimcaModel_CV, pred_cv=SimcaPrediction_CV)
 } # EOF
 
 calculateAquagram <- function(dataset, md, ap, idString) {

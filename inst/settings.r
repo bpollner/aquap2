@@ -116,11 +116,11 @@ stn <- list(
 	
 	
 	## SIMCA
-	simca_version = "robust", 				## possible values are: 'classic' for using the classic SimcaPCA, and 'robust' for using the robust version
+	simca_version = "classic", 				## possible values are: 'classic' for using the classic SimcaPCA, and 'robust' for using the robust version
 	simca_tolerance = 1.0e-4, 				## XXX package rrcovHD
 	simca_kMax = 10,						## The maximum number of components to be used. Seems to be ignored in version classic simca. (package rrcovHD)
 	simca_nrDigitsRoundDist = 2, 			## the number of digits the interclass-distance displayed in the graphics should be rounded to
-	simca_tablesToTxt = TRUE,				## if classification table should be exported to text
+	simca_tablesToTxt = FALSE,				## if classification table should be exported to text
 	simca_percNewData_CV = 50, 				## the percentage of the original data to be used as new data (the other part is used for making the model)
 	simca_sampling = "interleaved",  		## either "random" or "interleaved"  -- only taken into account when the above percentage is 50. Under development.
 	simca_maxBarsPerGraph = 7, 				## the maximum number of bars on one graphic for the class-distance barplots

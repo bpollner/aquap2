@@ -788,7 +788,7 @@ gdmm <- function(dataset, ap=getap()) {
 	if (!.ap2$stn$allSilent & (stat$cnt != 0)) {cat("\nCalculating models...\n")}
 	for (i in 1: cpt@len) {
 		if (!.ap2$stn$allSilent & (stat$cnt != 0)) {cat(paste("   Working on dataset #", i, " of ", cpt@len, " (", getIdString(cubeList[[i]]), ") \n", sep=""))}
-		cubeList[[i]] <- makeAllModels(cubeList[[i]], md, ap)
+		cubeList[[i]] <- makeAllModels(cubeList[[i]], md, ap) ###### CORE #########  CORE ############ CORE ##############
 	} # end for i
 	# collect the ranges for aquagram (if any)
 	rangesColl <- NULL

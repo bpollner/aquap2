@@ -27,6 +27,7 @@ Imports:
     fmsb,
     lattice,
     latticeExtra,
+    rrcov,
     rrcovHD
 Suggests:
     knitr
@@ -34,6 +35,7 @@ VignetteBuilder: knitr
 Collate:
     'aquap2.r'
     'calc_aqg.r'
+    'calc_simca.r'
     'cl_classFunctions.r'
     'cl_classDefs.r'
     'cube_generateDatasets.r'

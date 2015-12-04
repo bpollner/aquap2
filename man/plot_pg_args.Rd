@@ -48,7 +48,7 @@ plot(cube, pg.main="Foo", pg.fns="_foo")
 }
 }
 \seealso{
-Other Plot arguments: \code{\link{plot,aquap_data-method}},
+Other Plot arguments: \code{\link{plot,aquap_data,ANY-method}},
   \code{\link{plot_aqg_args}}, \code{\link{plot_pca_args}},
   \code{\link{plot_pls_args}}, \code{\link{plot_sim_args}}
 }

@@ -3,13 +3,13 @@
 \docType{methods}
 \name{plot}
 \alias{plot}
-\alias{plot,aquap_cube-method}
+\alias{plot,aquap_cube,ANY-method}
 \alias{plot_cube}
 \title{*** Plot All Available Models ***}
 \usage{
 plot(x, y, ...)
 
-\S4method{plot}{aquap_cube}(x, y, ...)
+\S4method{plot}{aquap_cube,ANY}(x, y, ...)
 
 plot_cube(x, what = "all", ...)
 }
@@ -54,7 +54,7 @@ arguments.
 Other Core functions: \code{\link{exportSampleList}},
   \code{\link{gdmm}}, \code{\link{getFullData}}
 
-Other Plot functions: \code{\link{plot,aquap_data-method}},
+Other Plot functions: \code{\link{plot,aquap_data,ANY-method}},
   \code{\link{plot_aqg}}, \code{\link{plot_pca}},
   \code{\link{plot_pls}}, \code{\link{plot_sim}}
 }

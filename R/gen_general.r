@@ -646,6 +646,7 @@ return(out)
 makeFlatDataFrame <- function(dataset, groupBy) {
 	colInd <- which(colnames(dataset$header) == groupBy)
 	grouping <- dataset$header[, colInd]
+	class(grouping) <- "factor" # to get rid of the "AsIs" that, strangely, got smuggled in..
 	NIR <- as.data.frame(matrix(dataset$NIR, nrow=(nrow(dataset$NIR))))
 	out <- cbind(grouping, NIR)
 	colnames(out) <- c("grouping", colnames(dataset$NIR))
