@@ -514,7 +514,7 @@ ssc <- function(dataset, criteria, include=TRUE, keepEC=FALSE) {
 } # EOF
 
 # to be called from the system
-ssc_s <- function(dataset, variable, value, keepEC=FALSE) {
+ssc_s <- function(dataset, variable, value, keepEC=TRUE) {
 	# variable and value are always data frames with one row and 1 or *more* columns
 	cPref <- .ap2$stn$p_ClassVarPref
 	ecrmCol <- .ap2$stn$p_ECRMCol
@@ -523,14 +523,14 @@ ssc_s <- function(dataset, variable, value, keepEC=FALSE) {
 	indEC <- which(colnames(dataset$header) == paste(cPref, ecrmCol, sep=""))
 	selIndOut <-  NULL
 	#
-	getECInd <- function(variable) { # because we must not add the ec´s if they are already present in the case of the no-split column
-		nsc <- any(noSplitCol %in% variable)
-		if (keepEC & !nsc) {
-			return(which(dataset$header[,indEC] == ecLabel))
-		} else {
-			return(NULL)
-		}
-	} # EOIF
+#	getECInd <- function(variable) { # because we must not add the ec´s if they are already present in the case of the no-split column
+#		nsc <- any(noSplitCol %in% variable)
+#		if (keepEC & !nsc) {
+#			return(which(dataset$header[,indEC] == ecLabel))
+#		} else {
+#			return(NULL)
+#		}
+#	} # EOIF
 	###
 	if (class(variable) == "data.frame") {
 		for (i in 1: ncol(variable)) { # both variable and value have the same number of columns
@@ -540,19 +540,25 @@ ssc_s <- function(dataset, variable, value, keepEC=FALSE) {
 			if (length(selInd) == 0) {
 				return(NULL)	
 			}
-			selIndOut <- c(selInd, selIndOut)
+			dataset <- dataset[selInd] # !!! gives back the dataset in the loop, i.e. an logical "&" !!!
+#			selIndOut <- c(selInd, selIndOut)
 		} # end for i
-		selIndEC <- getECInd(variable[1,])
 	} else {
 		ind <- which(colnames(dataset$header) == variable)
 		val <- as.character(value)
-		selIndOut <-  which(dataset$header[,ind] == val)
-		if (length(selIndOut) == 0) {
+		selInd <-  which(dataset$header[,ind] == val)
+		if (length(selInd) == 0) {
 			return(NULL)	
 		}
-		selIndEC <- getECInd(variable)	
-	}	
-	return(dataset[c(selIndOut, selIndEC),])
+		dataset <- dataset[selInd]
+	}
+	# now the dataset still has possibly the environmental controls in it
+	if (!keepEC) {
+		ind <- which(colnames(dataset$header) == paste(cPref, ecrmCol, sep="")) # where is the EC-column
+		ECInds <- which(dataset$header[,ind] == ecLabel)
+		dataset <- dataset[-(ECInds)]
+	}
+	return(dataset) # re-factoring is already included in the "[" operation
 } # EOF
 
 reFactor <- function(dataset) {

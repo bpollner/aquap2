@@ -49,6 +49,7 @@ stn <- list(
 	gen_useParallel = FALSE, 				## if parallel computing should be used where applicable and implemented
 	gen_numberOfCPUs = NA, 					## the number of CPUs used for parallel computing; leave at 'NA' for automatically using the system defaults
 	gen_showData_NIR = FALSE, 				## if the first rows of the NIR data should be printed as well wenn printing an object of class 'aquap_data' to the screen.
+	gen_versionCheckDataset = TRUE,			## if it should be checked if the dataset was created with an older version of package aquap2. Recommended value is TRUE.
 
 
 	## Import Data
@@ -119,12 +120,13 @@ stn <- list(
 	simca_version = "classic", 				## possible values are: 'classic' for using the classic SimcaPCA, and 'robust' for using the robust version
 	simca_tolerance = 1.0e-4, 				## XXX package rrcovHD
 	simca_kMax = 10,						## The maximum number of components to be used. Seems to be ignored in version classic simca. (package rrcovHD)
+	simca_minSpectraEachGroup = 3, 			## the minimum amount of spectra in each group that are required to even calculate a simca model
 	simca_nrDigitsRoundDist = 2, 			## the number of digits the interclass-distance displayed in the graphics should be rounded to
 	simca_tablesToTxt = FALSE,				## if classification table should be exported to text
 	simca_percNewData_CV = 50, 				## the percentage of the original data to be used as new data (the other part is used for making the model)
 	simca_sampling = "interleaved",  		## either "random" or "interleaved"  -- only taken into account when the above percentage is 50. Under development.
 	simca_maxBarsPerGraph = 7, 				## the maximum number of bars on one graphic for the class-distance barplots
-
+	
 
 	## Aquagram 
 	aqg_defaultMod = "aucs.dce", 			## the default mode for the Aquagram

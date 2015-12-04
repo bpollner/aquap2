@@ -38,9 +38,18 @@ makeSimcaModels <- function(dataset, groupingVector, k=0, version) {
 	if ( checkHaveParallel() ) { parFill <- " (parallel)" }
 	if (!.ap2$stn$allSilent) {cat(paste(" models", parFill, "... ", sep="")) }
 	stnLoc <- .ap2$stn
-	modelList <- foreach(i = 1:leng) %dopar% {
-		feout <- makeSimcaModel_inner(dataset, groupingVector[i], k, version, stnLoc)
-	} # end foreach i
+#	modelList <- foreach(i = 1:leng) %dopar% {
+#		feout <- makeSimcaModel_inner(dataset, groupingVector[i], k, version, stnLoc)
+#	} # end foreach i
+	for (i in 1: leng) {
+		a <- try(makeSimcaModel_inner(dataset, groupingVector[i], k, version, stnLoc), silent=TRUE)
+		if (class(a) == "try-error") {
+			print(paste("Nix geht at ", groupingVector[i]))
+		} else {
+			modelList <- c(modelList, list(a))
+		}
+	} # end for i
+	
 	return(modelList)
 } # EOF
 
@@ -153,12 +162,17 @@ calculateInterclassDistances <- function(modelList) {
 
 correctSimcaGroupingForDataset <- function(dataset, groupingVector) {
 	# we have to find at least 2 groups of data when using each element of the grouping vector on the dataset
+	# within these groups, there must be at least the minium amount of spectra as defined int he settings available.
 	# those elements of the grouping vector that do not meet these requirements will be excluded
 	goodGrps <- NULL
+	minSpec <- .ap2$stn$simca_minSpectraEachGroup
 	for (i in 1: length(groupingVector)) {
 		ind <- which(colnames(dataset$header) == groupingVector[i])
 		nrLevels <- nlevels(dataset$header[,ind])
-		if (nrLevels > 1) {
+		if (nrLevels > 1) { # so we have at least two groups in the dataset
+			# now check for the number of spectra in each single group
+		
+		
 			goodGrps <- c(goodGrps, groupingVector[i])
 		}
 	} # end for i

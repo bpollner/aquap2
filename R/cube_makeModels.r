@@ -27,7 +27,6 @@ calculateSIMCA <- function(dataset, md, ap) { # is working on a single set. i.e.
 	simcaVersion <- .ap2$stn$simca_version
 #	simcaClasses <- ap$simca$simcOn # comes in already checked, so it is a character vector of at least length one
 	simcaClasses <- correctSimcaGroupingForDataset(dataset, groupingVector=ap$simca$simcOn)
-	print(simcaClasses) ; wait(); return(NULL)
 	simca_k <- ap$simca$simcK
 #	SC <- paste(simcaClasses, collapse=", ") # not in use
 	if (!.ap2$stn$allSilent) {cat(paste("      calc. SIMCA (", length(simcaClasses), " groups): ", sep=""))}

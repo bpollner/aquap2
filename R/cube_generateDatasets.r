@@ -658,8 +658,8 @@ makeIdString <- function(siClass, siValue, siWlSplit, siCsAvg, siNoise) {
 processSingleRow_CPT <- function(dataset, siClass, siValue, siWlSplit, siCsAvg, siNoise, md) { # si for single
 	keepEC <- .ap2$stn$gd_keepECs
 	newDataset <- ssc_s(dataset, siClass, siValue, keepEC) 
-	if (is.null(newDataset)) { # NULL is returned if a variable combination yields no data
-		return(NULL)
+	if (is.null(newDataset)) { # character "nixnox" is returned if a variable combination yields no data. That is because returning NULL introduced a bug if it was on the end of the list... probably...
+		return("nixnox")
 	}
 	newDataset <- selectWls(newDataset, siWlSplit[1], siWlSplit[2])
 	newDataset <- performConSAvg(newDataset, siCsAvg)
@@ -671,10 +671,18 @@ processSingleRow_CPT <- function(dataset, siClass, siValue, siWlSplit, siCsAvg, 
 
 correct_cpt <- function(cpt, nullInd) {
 	n <- nullInd
-	cpt@splitVars$classes <- cpt@splitVars$classes[-n,]
+	#
+	classes <- cpt@splitVars$classes[-n,] 
+	rownames(classes) <- 1:nrow(classes)
+	cpt@splitVars$classes <- classes
+	#
+	values <- cpt@splitVars$values[-n,] 
+	rownames(values) <- 1:nrow(values)
+	cpt@splitVars$values <- values
+	#
 	cpt@splitVars$values <- cpt@splitVars$values[-n,]
 	cpt@wlSplit <- cpt@wlSplit[-n]
-	cpt@smoothing <- cpt@smoothing[-n]
+	cpt@csAvg <- cpt@csAvg[-n]
 	cpt@noise <- cpt@noise[-n]
 	cpt@len <- length(cpt@noise)
 	return(cpt)
@@ -771,15 +779,15 @@ gdmm <- function(dataset, ap=getap()) {
 	if (!.ap2$stn$allSilent) {cat("Done.\n")}
 	###
 	
-	
 	### clean out the NULL-datasets
-	nullInd <- which(unlist(lapply(cubeList, is.null))) # which one of the split by variable resulted in zero rows (has been returned as NULL in ssc_s)
+#	nullInd <- which(unlist(lapply(cubeList, is.null))) # which one of the split by variable resulted in zero rows (has been returned as NULL in ssc_s)
+	nullInd <- which(cubeList == "nixnox")
 	if (length(nullInd) > 0) {
 		cubeList <- cubeList[-nullInd]
 		cp <- cp[-nullInd,]
 		rownames(cp) <- 1:nrow(cp)
 		cpt <- correct_cpt(cpt, nullInd)
-		message(paste(length(nullInd), " of the split-by-variable combinations resulted in no data. Those datasets have been omitted.", sep=""))
+		message(paste("  *", length(nullInd), "* of the split-by-variable combinations resulted in no data. Those datasets have been omitted.", sep=""))
 	}
 	###
 	
