@@ -117,10 +117,10 @@ stn <- list(
 	
 	
 	## SIMCA
-	simca_version = "classic", 				## possible values are: 'classic' for using the classic SimcaPCA, and 'robust' for using the robust version
+	simca_version = "robust", 				## possible values are: 'classic' for using the classic SimcaPCA, and 'robust' for using the robust version
 	simca_tolerance = 1.0e-4, 				## XXX package rrcovHD
 	simca_kMax = 10,						## The maximum number of components to be used. Seems to be ignored in version classic simca. (package rrcovHD)
-	simca_minSpectraEachGroup = 3, 			## the minimum amount of spectra in each group that are required to even calculate a simca model
+	simca_minSpectraEachGroup = 3, 			## the minimum amount of spectra in each group that are required to even calculate a simca model. Can not be lower than 3. Higher numbers (from 4 or 5 upwards) help reducing errors when in robust mode.
 	simca_nrDigitsRoundDist = 2, 			## the number of digits the interclass-distance displayed in the graphics should be rounded to
 	simca_tablesToTxt = FALSE,				## if classification table should be exported to text
 	simca_percNewData_CV = 50, 				## the percentage of the original data to be used as new data (the other part is used for making the model)

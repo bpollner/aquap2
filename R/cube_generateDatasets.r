@@ -629,7 +629,7 @@ makeIdString <- function(siClass, siValue, siWlSplit, siCsAvg, siNoise) {
 	varString <- NULL
 	for (i in 1: ncol(siClass)) {
 #		varString <- paste(varString, siClass[1,i], ":", siValue[1,i], ", ", sep="")
-		varString <- paste(siValue[1,i], ", ", sep="")
+		varString <- paste(varString, siValue[1,i], ", ", sep="")
 	}
 	varString <- substr(varString, 1, (nchar(varString)-2)) # to get rid of the last ","
 	varString <- paste(varString, " ", sep="")
@@ -716,6 +716,32 @@ checkForStats <- function(ap) {
 	return(list(cnt=cnt, char=char))
 } # EOF
 
+checkCubeForRealStats <- function(cube) {
+	cle <- function(sName, obj=cube) { # cle: check list element
+		return(any(unlist(lapply(obj, function(x) !is.null(slot(x, sName)))))) # returns TRUE if at last one model of kind "sName" is available
+	} # EOIF
+	cnt <- 0
+	char <- NULL
+	if (cle("pca")) { 
+		cnt <- cnt + 1 
+		char <- c(char, "pca")
+	}
+	if (cle("simca")) { 
+		cnt <- cnt + 1
+		char <- c(char, "simca")
+	}
+	if (cle("plsr")) { 
+		cnt <- cnt + 1
+		char <- c(char, "plsr")
+	}
+	if (cle("aquagr")) {
+		cnt <- cnt + 1
+		char <- c(char, "Aquagram")
+	}
+	return(list(cnt=cnt, char=char))
+#	return(checkForStats(cube@anproc))
+} # EOF
+
 #' @title *** Generate Datasets and make Models *** 
 #' @description Generate several datasets by splitting up the original dataset 
 #' according to the variables and values as specified in the analysis procedure 
@@ -774,7 +800,7 @@ gdmm <- function(dataset, ap=getap()) {
 	if (!.ap2$stn$allSilent) {cat("Generating Datasets...\n")}
 	for (i in 1:len) {
 		if (!.ap2$stn$allSilent) {cat(paste("   Working on #", i, " of ", len, "\n", sep=""))}
-		cubeList[[i]] <- processSingleRow_CPT(dataset, as.data.frame(classes[i,]), as.data.frame(values[i,]), wlSplit[[i]], csAvg[i], noise[i]) # the "as.data.frame" is necessary if we only have one column
+		cubeList[[i]] <- processSingleRow_CPT(dataset, as.data.frame(classes[i,,drop=F]), as.data.frame(values[i,,drop=F]), wlSplit[[i]], csAvg[i], noise[i]) # the "as.data.frame" is necessary if we only have one column
 	} # end for i
 	if (!.ap2$stn$allSilent) {cat("Done.\n")}
 	###

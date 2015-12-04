@@ -23,13 +23,18 @@ calculateSIMCA <- function(dataset, md, ap) { # is working on a single set. i.e.
 	if (is.null(ap$simca)) {
 		return(NULL)
 	}
-	mods_cv <- preds_cv <- NULL
+	.ap2$.gs <- " ok";  .ap2$.charCollect <- NULL;  mods_cv <- preds_cv <- NULL
 	simcaVersion <- .ap2$stn$simca_version
 #	simcaClasses <- ap$simca$simcOn # comes in already checked, so it is a character vector of at least length one
-	simcaClasses <- correctSimcaGroupingForDataset(dataset, groupingVector=ap$simca$simcOn)
+	simcaClasses <- correctSimcaGroupingForDataset(dataset, groupingVector=ap$simca$simcOn) # will return NULL if there is no appropriate grouping / nr. of spectra; see below
+	if (is.null(simcaClasses)) {
+		return(NULL) 	# because it is possible that with some split-data sets we find no grouping variable that gives us at least two groups with at least the minimum number of spectra in each group
+	}
 	simca_k <- ap$simca$simcK
-#	SC <- paste(simcaClasses, collapse=", ") # not in use
-	if (!.ap2$stn$allSilent) {cat(paste("      calc. SIMCA (", length(simcaClasses), " groups): ", sep=""))}
+	SC <- paste(simcaClasses, collapse=", ")
+	SC <- gsub(.ap2$stn$p_ClassVarPref, "", SC) # delete all the "C_" to save space
+	le <- length(simcaClasses)
+	if (!.ap2$stn$allSilent) {cat(paste("      calc. ", le, " SIMCA (", SC, "): ", sep=""))}
 	#
 	mods <-  makeSimcaModels(dataset, groupingVector=simcaClasses, k=simca_k, simcaVersion) # returns a list with one model for each grouping
 	preds <-  makeSimcaPredictions(SimcaModelList=mods, newFlatData=NULL, newCorrectGrouping=NULL)
@@ -49,18 +54,22 @@ calculateSIMCA <- function(dataset, md, ap) { # is working on a single set. i.e.
 		}
 	#	if (!.ap2$stn$allSilent) {cat(paste("    --- ", percNew, "% new data - CV Models: \n", sep="") )}
 		trainingData <- dataset[indTrain]
-		modsTry <- try(makeSimcaModels(trainingData, groupingVector=simcaClasses, k=simca_k, simcaVersion))
+		modsTry <- try(makeSimcaModels(trainingData, groupingVector=simcaClasses, k=simca_k, simcaVersion, inCV=TRUE))
 		if (is.character(modsTry)) {
 			mods_cv <- NULL
 			preds_cv <- NULL
 		} else {
 			mods_cv <- modsTry
-			preds_cv <- makeSimcaPredictions(SimcaModelList=mods_cv, newFlatData=dataset, newCorrectGrouping=simcaClasses, indNew) #see one level below !		
+			preds_cv <- makeSimcaPredictions(SimcaModelList=mods_cv, newFlatData=dataset, newCorrectGrouping=simcaClasses, indNew, inCV=TRUE) #see one level below !		
 		}
 	} # end if tables to text
-		#
-	if (!.ap2$stn$allSilent) {cat(" ok\n")}
-	return(list(mods=mods, preds=preds, mods_cv=mods_cv, preds_cv=preds_cv, groupingVector <- simcaClasses))
+	#
+	whatErr <- gsub(.ap2$stn$p_ClassVarPref, "", .ap2$.charCollect)
+	whatErr <- substr(whatErr, 2, nchar(whatErr)) # to cut away the first comma
+	if (!.ap2$stn$allSilent) {cat(paste(.ap2$.gs, whatErr, "\n", sep="")) }
+	.ap2$.charCollect <- NULL
+	.ap2$.gs <- " ok"
+	return(list(mods=mods, preds=preds, mods_cv=mods_cv, preds_cv=preds_cv, groupingVector=simcaClasses))
 } # EOF
 
 calculateAquagram <- function(dataset, md, ap, idString) {

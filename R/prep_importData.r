@@ -551,8 +551,8 @@ getFullData <- function(md=getmd(), filetype="def", naString="NA", slType="def",
 	}
 	if(!is.null(dataset)) { # so the path existed and it could be loaded
 		if (.ap2$stn$gen_versionCheckDataset) {
-			if (dataset@version != packageVersion("aquap2")) {
-				stop("The loaded dataset was made with a previous version of package 'aquap2'.\nPlease re-import the raw-data.", call.=FALSE)
+			if (dataset@version != as.character(packageVersion("aquap2"))) {
+				stop(paste("The dataset '", md$meta$expName, "' was made with a previous version of package 'aquap2'.\nPlease re-import the raw-data.", sep=""), call.=FALSE)
 			}
 		}
 		if(!.ap2$stn$allSilent) {cat(paste("Dataset \"", md$meta$expName, "\" was loaded.\n", sep="")) }
@@ -597,7 +597,7 @@ getFullData <- function(md=getmd(), filetype="def", naString="NA", slType="def",
 #	fullData@header <- headerFusion
 #	fullData@colRep <- colRep
 #	fullData@NIR <- NIR
-	fullData@version <- packageVersion("aquap2")
+	fullData@version <- as.character(packageVersion("aquap2"))
 	fullData@metadata <- md
 	fullData@ncpwl <- si$info$nCharPrevWl
 	if (stf) {

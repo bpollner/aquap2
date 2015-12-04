@@ -45,6 +45,7 @@ Collate:
     'doc_customImport.r'
     'doc_customTRH.r'
     'doc_metadata.r'
+    'doc_methods.r'
     'doc_settings.r'
     'gen_coreDataManip.r'
     'gen_general.r'
@@ -64,4 +65,4 @@ Collate:
     'prep_metadata.r'
     'prep_writeMfiles.r'
     'zzz.r'
-RoxygenNote: 5.0.0
+RoxygenNote: 5.0.1

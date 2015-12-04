@@ -21,7 +21,7 @@ show_aquap_data <- function(object) {
 } # EOF
 
 showCube <- function(object) {
-	stats <- checkForStats(object@anproc)  ## list(cnt=cnt, char=char)
+	stats <- checkCubeForRealStats(object)  ## list(cnt=cnt, char=char)
 	if (stats$cnt == 0) {
 		add <- "and no models."
 	} else {
@@ -32,7 +32,7 @@ showCube <- function(object) {
 			specTxt <- "+spectra"
 		}
 		txt <- sub("Aquagram", paste("Aquagram", specTxt," [", object@anproc$aquagr$mod, "]", sep=""), ModNames)
-		add <- paste("and ", stats$cnt, " models (", txt, ") in each set.", sep="")
+		add <- paste("and ", stats$cnt, " models (", txt, ") in each [or some] sets.", sep="")
 	}
 	cat(paste("Formal class 'aquap_cube', containing ", object@cpt@len, " datasets in total ", add, "\n", sep=""))
 	cat("\n")

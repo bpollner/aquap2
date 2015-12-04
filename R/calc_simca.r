@@ -29,27 +29,43 @@ makeSimcaModel_inner <- function(dataset, groupBy, k=0, version, stnLoc) {
 	return(simcaMod)
 } # EOF
 
-makeSimcaModels <- function(dataset, groupingVector, k=0, version) {
+makeSimcaModels <- function(dataset, groupingVector, k=0, version, inCV=FALSE) {
 	i <- NULL; 	modelList <- list()
-	parFill <- ""
-	doPar <- .ap2$stn$gen_useParallel
 	leng <- length(groupingVector)
-	if (doPar) { registerParallelBackend() } else { registerDoSEQ() }
-	if ( checkHaveParallel() ) { parFill <- " (parallel)" }
-	if (!.ap2$stn$allSilent) {cat(paste(" models", parFill, "... ", sep="")) }
 	stnLoc <- .ap2$stn
+	modMsg <- " mod"
+	if (inCV) {
+		modMsg <- " CV"
+	}
+	if (!.ap2$stn$allSilent) {cat(paste(modMsg, "...", sep="")) }
+#	doPar <- .ap2$stn$gen_useParallel
+#	if (doPar) { registerParallelBackend() } else { registerDoSEQ() }
+#	if ( checkHaveParallel() ) { parFill <- ".par" }
 #	modelList <- foreach(i = 1:leng) %dopar% {
-#		feout <- makeSimcaModel_inner(dataset, groupingVector[i], k, version, stnLoc)
+#		a <- try(makeSimcaModel_inner(dataset, groupingVector[i], k, version, stnLoc), silent=TRUE)
+#		if (class(a) == "try-error") {
+#			.ap2$.gs <- "*error*"
+#			.ap2$.charCollect <- c(.ap2$.charCollect, groupingVector[i])
+#			out <- NULL
+#		} else {
+#			out <- a
+#		}
+#		out # that gets returned
 #	} # end foreach i
+	#
 	for (i in 1: leng) {
 		a <- try(makeSimcaModel_inner(dataset, groupingVector[i], k, version, stnLoc), silent=TRUE)
 		if (class(a) == "try-error") {
-			print(paste("Nix geht at ", groupingVector[i]))
+			.ap2$.gs <- "*error*:"
+			if (inCV) {aa <- "cv."} else {aa <- ""}
+			add <- paste(aa, groupingVector[i], sep="")
+			.ap2$.charCollect <- paste(.ap2$.charCollect, add, sep=", ")
+			modelList <- c(modelList, list(NULL))			
 		} else {
 			modelList <- c(modelList, list(a))
 		}
 	} # end for i
-	
+	#
 	return(modelList)
 } # EOF
 
@@ -66,7 +82,7 @@ makeSimcaPrediction_inner <- function(SimcaModel, newFlatData, newCorrectGroupin
 	return(pred)
 } # EOF
 
-makeSimcaPredictions <- function(SimcaModelList, newFlatData=NULL, newCorrectGrouping=NULL, indNew=NULL) {
+makeSimcaPredictions <- function(SimcaModelList, newFlatData=NULL, newCorrectGrouping=NULL, indNew=NULL, inCV=FALSE) {
 	predictionsList <- list()
 	leng <- length(SimcaModelList)
 	msg <- "predictions"
@@ -76,15 +92,19 @@ makeSimcaPredictions <- function(SimcaModelList, newFlatData=NULL, newCorrectGro
 		dataset <- newFlatData 	
 		simcClasses <- newCorrectGrouping
 	}
-	if (!.ap2$stn$allSilent) {cat(paste(" predictions...", sep="") )}
+	if (!.ap2$stn$allSilent & !inCV) {cat(paste(" pred...", sep="") )}
 	for (i in 1: leng) {
 		if (class(dataset) == "aquap_data") { 
 			a <- makeFlatDataFrame(dataset, simcClasses[i])
 			newCorrectGrouping <- a[indNew,1]  # the grouping is in the first column  # otherwise they both stay at "NULL"
 			newFlatData <- a[indNew,-1] # the NIR is in everything except the first column
 		}
-		pred <- makeSimcaPrediction_inner(SimcaModelList[[i]], newFlatData, newCorrectGrouping)
-		predictionsList <- c(predictionsList, list(pred))
+		if (is.null(SimcaModelList[[i]])) {
+			predictionsList <- c(predictionsList, list(NULL))		
+		} else {
+			pred <- makeSimcaPrediction_inner(SimcaModelList[[i]], newFlatData, newCorrectGrouping)
+			predictionsList <- c(predictionsList, list(pred))
+		}
 	} # end for i
 	return(predictionsList)
 } # EOF
@@ -149,13 +169,17 @@ calc_interclassDist <- function(XSimcaObject) {
 	out <- calc_interclassDist_mat(resids)
 } # EOF
 ####
-calculateInterclassDistances <- function(modelList) {
+calculateInterclassDistances <- function(modelList, inCV=FALSE) {
 	distList <- list()
 	leng <- length(modelList)
-	if (!.ap2$stn$allSilent) {cat(paste(" IC-dist...", sep="") )}
+	if (!.ap2$stn$allSilent & !inCV) {cat(paste(" dist...", sep="") )}
 	for (i in 1: leng) {
-		x <- calc_interclassDist(modelList[[i]])
-		distList <- c(distList, list(x))	
+		if (is.null(modelList[[i]])) {
+			distList <- c(distList, list(NULL))
+		} else {
+			x <- calc_interclassDist(modelList[[i]])
+			distList <- c(distList, list(x))	
+		}
 	} # end for i
 	return(distList)
 } # EOF
@@ -166,15 +190,22 @@ correctSimcaGroupingForDataset <- function(dataset, groupingVector) {
 	# those elements of the grouping vector that do not meet these requirements will be excluded
 	goodGrps <- NULL
 	minSpec <- .ap2$stn$simca_minSpectraEachGroup
+	if (minSpec < 3) {
+		minSpec <- 3
+	}
 	for (i in 1: length(groupingVector)) {
 		ind <- which(colnames(dataset$header) == groupingVector[i])
-		nrLevels <- nlevels(dataset$header[,ind])
+		values <- dataset$header[,ind]
+		nrLevels <- nlevels(values)
 		if (nrLevels > 1) { # so we have at least two groups in the dataset
 			# now check for the number of spectra in each single group
-		
-		
-			goodGrps <- c(goodGrps, groupingVector[i])
+			RLE <- rle(as.character(sort(values))) # counts the number of occurence of every unique value
+			lengths <- RLE$lengths
+	#		print(groupingVector[i]); print(RLE); wait()
+			if (min(lengths) >= minSpec) {	
+				goodGrps <- c(goodGrps, groupingVector[i])
+			}
 		}
 	} # end for i
-	return(goodGrps)
+	return(goodGrps) # will return NULL if nothing fits the requirements
 } # EOF

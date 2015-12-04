@@ -84,9 +84,11 @@ setMethod("[", signature(x = "aquap_data"), definition = function(x, i) {
 setGeneric("plot", function(x, y, ...) standardGeneric("plot"))
 
 #' @rdname plot
+#' @export
 setMethod("plot", signature(x = "aquap_cube"), definition = plot_cube_M)
 
 #' @rdname plot_spectra
+#' @export
 setMethod("plot", signature(x = "aquap_data"), definition = plot_spectra_Data_M)
 
 setGeneric("plot_spectra", function(x, colorBy=NULL, ...) standardGeneric("plot_spectra"))
@@ -114,8 +116,13 @@ setGeneric("getColRep", function(object) standardGeneric("getColRep"))
 setMethod("getColRep", "aquap_data", definition=getColRep_data)
 setMethod("getColRep", "aquap_set",  definition=getColRep_set)
 
+#' @rdname Extract_Elements
 setGeneric("getHeader", function(object) standardGeneric("getHeader"))
+#' @rdname Extract_Elements
+#' @export
 setMethod("getHeader", "aquap_data", definition=getHeader_dataset)
+#' @rdname Extract_Elements
+#' @export
 setMethod("getHeader", "aquap_set", definition=getHeader_set)
 
 setGeneric("getIdString", function(object) standardGeneric("getIdString"))
