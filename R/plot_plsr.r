@@ -13,8 +13,8 @@
 #'  plot(cube)
 #'  plot_pls(cube)
 #'  }
-#' @family Plot functions
 #' @family PLSR documentation
+#' @family Plot functions
 #' @export
 plot_pls <- function(cube, ...) {
 	autoUpS()
@@ -55,8 +55,8 @@ plot_pls <- function(cube, ...) {
 #' plot(cube, pls.colorBy="C_Temp")
 #' plot_pls(cube, pls.colorBy="C_Temp")
 #' }
-#' @family Plot arguments
 #' @family PLSR documentation
+#' @family Plot arguments
 #' @name plot_pls_args
 NULL
 
