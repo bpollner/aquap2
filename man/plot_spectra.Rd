@@ -55,5 +55,9 @@ Other Plot arguments: \code{\link{plot_aqg_args}},
 Other Plot functions: \code{\link{plot_aqg}},
   \code{\link{plot_pca}}, \code{\link{plot_pls}},
   \code{\link{plot_sim}}, \code{\link{plot}}
+
+Other Plot functions: \code{\link{plot_aqg}},
+  \code{\link{plot_pca}}, \code{\link{plot_pls}},
+  \code{\link{plot_sim}}, \code{\link{plot}}
 }
 

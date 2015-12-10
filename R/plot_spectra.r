@@ -132,5 +132,6 @@ plot_spectra_Cube <- function(x, colorBy=NULL, ...) {
 #' }
 #' @docType methods
 #' @family Plot arguments
+#' @family Plot functions
 #' @name plot_spectra
 NULL
