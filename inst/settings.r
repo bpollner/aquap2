@@ -41,7 +41,7 @@ stn <- list(
 	p_deleteCol = "DELETE", 				## the character indicating that this column should be omitted at the time of creating the sample list, usually needed for L2-columns that are identical to their L1-columns
 	p_noTimePointsLabel = "NT", 			## the value assigned to every observation when there is no splitting into time points
 	p_sampleListExportFormat = "txt", 		## the format for the generated sample list, possible values are "txt" for a tab-delimited text file and "xls" for an Excel-file.
-
+	p_allOutlierCol = "outlier_all", 		## the name of the column containing the flags showing the outliers in the scope of the complete dataset
 
 	## General behaviour & settings
 	allSilent = FALSE,						## if false, "status" messages will be displayed
@@ -70,6 +70,7 @@ stn <- list(
 	imp_narrowMinutes = 3, 					## how many minutes ahead should be looked for matching log-data before going through the whole log file?
 	imp_secsNarrowPrecision = 10, 			## precision in seconds that log-data have to be within spectral acquisition time in the first, the narrowed-down search step (there is no precision step in the second search through the whole log file)
 	imp_minutesTotalPrecision = 3, 			## the final precision in minutes that the log-data have to meet; if only for one spectrum under this value importing will be aborted
+	imp_flagOutliers = TRUE, 				## if, right after importing the data, outliers in the *complete* dataset should be flagged and these flags then stored in the dataset
 
 
 	## generate Datasets

@@ -538,10 +538,47 @@ gfd_check_trhLog_defaults <- function(trhLog) {
 	assign("trhLog", trhLog, pos=parent.frame(n=1))
 } # EOF
 
+flagOutliers_allScope <- function(NIR, detectOutliers) {
+	# first check the content of detectOutliers
+	if (all(detectOutliers == "def") & !is.null(detectOutliers)) {
+		detectOutliers <- .ap2$stn$imp_flagOutliers
+	}
+	if (!all(is.logical(detectOutliers)) | length(detectOutliers) > 1) {
+		stop("Please provide either TRUE or FALSE (or 'def') to the argument 'dol'.", call.=FALSE)
+	} # so now we are sure to have either TRUE or FALSE in detectOutliers
+	##
+	if (!detectOutliers) {
+		return(data.frame(DELETE = rep(NA, nrow(NIR))))
+	} else {
+		cPref <- .ap2$stn$p_ClassVarPref
+		cnOtl <- .ap2$stn$p_allOutlierCol
+		tol <- .ap2$stn$simca_tolerance
+		kmax <- .ap2$stn$simca_kMax
+		flatDf <- data.frame(grouping=rep("x", nrow(NIR)))
+		flatDf <- cbind(flatDf, as.data.frame(NIR))
+		kmax <- 10
+		if (!.ap2$stn$allSilent) {cat("   Detecting Outliers... ")}
+		simcaMod <- rrcovHD::RSimca.formula(grouping ~ ., data=flatDf, kmax=kmax, tol=tol)  ## k=0 does not work ??, but still calculating k
+		flags <- as.factor(!simcaMod@flag) # to invert them and tranform to factor, having TRUE for the outliers
+		nrOutliers <- length(which(flags == TRUE))
+		usedK <- simcaMod@k
+		if (nrOutliers == 0) {
+			msg <- "none found. "
+		} else {
+			msg <- paste("found *", nrOutliers, "*. [Using ", usedK, " components.] ", sep="")
+		}
+		if (!.ap2$stn$allSilent) {cat(paste(msg, "\n", sep=""))}
+#		print(str(simcaMod))
+		outlierFlags <- data.frame(flags)
+		colnames(outlierFlags) <- paste(cPref, cnOtl, sep="")
+		return(outlierFlags)
+	} # end else
+} # EOF
+
 # get full data ---------------------------------------------------------------
 #' @template mr_getFullData
 #' @export
-getFullData <- function(md=getmd(), filetype="def", naString="NA", slType="def", trhLog="def", multiplyRows="def", ttl=TRUE, stf=TRUE) {
+getFullData <- function(md=getmd(), filetype="def", naString="NA", slType="def", trhLog="def", multiplyRows="def", ttl=TRUE, stf=TRUE, dol="def") {
 	autoUpS()
 	gfd_checkLoadSaveLogic(ttl, stf)
 	gfd_checkMetadata(md)
@@ -575,7 +612,9 @@ getFullData <- function(md=getmd(), filetype="def", naString="NA", slType="def",
 	}
 	expName <- noSplit <- NULL # gets assigned below in gfd_getExpNameNoSplit()
 	gfd_getExpNameNoSplit(metadata=md, nRows=nr)
-	headerFusion <- cbind(expName, noSplit, header, si$sampleNr, si$conSNr, si$timePoints, si$ecrm, si$repl, si$group, si$C_cols, si$Y_cols,  si$temp, si$relHum, si$timestamp)
+	NIR <- si$NIR
+	outliers <- flagOutliers_allScope(NIR, detectOutliers=dol) # the value of dol is checked / changeed inside this function
+	headerFusion <- cbind(expName, noSplit, header, si$sampleNr, si$conSNr, si$timePoints, si$ecrm, si$repl, si$group, si$C_cols, si$Y_cols, outliers, si$temp, si$relHum, si$timestamp)
 	headerFusion <- headerFusion[, -(which(colnames(headerFusion) == "DELETE"))] 
 	check_conScanColumn(headerFusion, headerFilePath, spectraFilePath, slType, filetype) 
 	# ? check for existence of sample number column as well ?
@@ -586,7 +625,6 @@ getFullData <- function(md=getmd(), filetype="def", naString="NA", slType="def",
 	}
 	headerFusion <- remakeTRHClasses_sys(headerFusion)
 	colRep <- extractClassesForColRep(headerFusion)		## the color representation of the factors
-	NIR <- si$NIR
 	rownames(NIR) <- make.unique(rownames(NIR)) # just to be sure
 	rownames(headerFusion) <- rownames(colRep) <- rownames(NIR)
 	#
@@ -610,8 +648,8 @@ getFullData <- function(md=getmd(), filetype="def", naString="NA", slType="def",
 
 #' @rdname getFullData
 #' @export
-gfd <- function(md=getmd(), filetype="def", naString="NA", slType="def", trhLog="def", multiplyRows="def", ttl=TRUE, stf=TRUE) {
-	return(getFullData(md, filetype, naString, slType, trhLog, multiplyRows, ttl, stf))
+gfd <- function(md=getmd(), filetype="def", naString="NA", slType="def", trhLog="def", multiplyRows="def", ttl=TRUE, stf=TRUE, dol="def") {
+	return(getFullData(md, filetype, naString, slType, trhLog, multiplyRows, ttl, stf, dol))
 } # EOF
 
 

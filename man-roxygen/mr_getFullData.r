@@ -30,7 +30,7 @@
 #' The default is to get the metadata file via  \code{\link{getmd}}.
 #' @param filetype Character. The type of the spectral raw data file. 
 #' If a value other than "def" is provided, this is overriding the 
-#' value of "filetype" in the metadata file. Possile values are:
+#' value of "filetype" in the metadata file. Possible values are:
 #' \itemize{
 #' \item "def": Gets the default value from the setings.r file. 
 #'      (variable 'imp_specFileType')
@@ -104,6 +104,11 @@
 #' from the raw-data.
 #' @param stf Logical, 'save to file'. If the final dataset should be saved to 
 #' the 'R-data' folder after import from the raw-data file. Defaults to 'TRUE'.
+#' @param dol Detect outliers. If outliers should be detected using the flags 
+#' provided by \code{\link[rrcovHD]{RSimca}}. If left at the default "def", the 
+#' value from the settings.r file will be used (parameter \code{imp_flagOutliers}.
+#' If \code{dol} evaluates to TRUE, an additional column flagging the outliers 
+#' as detected in the scope of the complete dataset will be added to the dataset.
 #' @seealso \code{\link{readSpectra}}, \code{\link{readHeader}}
 #' @return An object of class 'aquap_data' containing a data frame and one slot:
 #' \itemize{

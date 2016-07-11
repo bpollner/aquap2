@@ -14,7 +14,7 @@
 	TimePoints <- FALSE						## how many points in time does the experiment cover? Provide a label for each time-point in the format c("T0", "T1", "T2", ...) or leave at 'FALSE' for no time-splitting
 #	TimePoints <- c("T0", "T1", "T2")
 	
-	nrConScans <- 3							## how many consecutive scans for every spectrum?
+	nrConScans <- 3							## how many consecutive scans for every sample?
 
 	spacing <- 5							## the space between environmental control samples
 
