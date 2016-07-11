@@ -41,7 +41,8 @@ stn <- list(
 	p_deleteCol = "DELETE", 				## the character indicating that this column should be omitted at the time of creating the sample list, usually needed for L2-columns that are identical to their L1-columns
 	p_noTimePointsLabel = "NT", 			## the value assigned to every observation when there is no splitting into time points
 	p_sampleListExportFormat = "txt", 		## the format for the generated sample list, possible values are "txt" for a tab-delimited text file and "xls" for an Excel-file.
-	p_allOutlierCol = "outlier_all", 		## the name of the column containing the flags showing the outliers in the scope of the complete dataset
+	p_outlierCol = "outlier", 				## the name of any column containing the flags showing outliers
+	p_outlierCol_allSuffix = "all", 		## the suffix being added to the outlier column containing the flags for outliers based on the whole dataset.
 
 	## General behaviour & settings
 	allSilent = FALSE,						## if false, "status" messages will be displayed

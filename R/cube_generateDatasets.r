@@ -88,7 +88,14 @@ multiplyByBinary <- function(frame, useRaw, useApplied, colname) {
 				multFrame <- frame			
 			} else {
 				if (useRaw==FALSE & useApplied==FALSE) {
-					stop("Check settings for the logical input in the spl.x please. One has to be TRUE.", call.=FALSE)
+					if (colname != "exOut") { # because this is an exception
+						stop("Check settings for the logical input in the spl.x please. One has to be TRUE.", call.=FALSE)
+					}
+					if (colname == "exOut") {
+						chars <- rep("no", nrow(frame))
+						logic <- rep(FALSE, nrow(frame))
+						multFrame <- frame
+					}
 				}
 			}
 		}
@@ -98,7 +105,7 @@ multiplyByBinary <- function(frame, useRaw, useApplied, colname) {
 	dfLogic <- data.frame(X=logic)
 	colnames(dfLogic) <- paste(colname, "Logic", sep="")
 	out <- cbind(multFrame, dfChars, dfLogic)
-out
+	return(out)
 } # EOF
 
 makeCPT <- function(patt) {
@@ -114,6 +121,7 @@ makeCPT <- function(patt) {
 	aquapCPT@wlSplit <- lapply(strsplit(a, "-to-"), as.numeric) 
 	aquapCPT@csAvg <- patt[, which(colnames(patt) == "csAvgLogic")]	
 	aquapCPT@noise <- patt[, which(colnames(patt) == "NoiseLogic")]
+	aquapCPT@exOut <- patt[, which(colnames(patt) == "exOutLogic")]
 	aquapCPT@len <- nrow(patt)
 	return(aquapCPT)
 } # EOF
@@ -138,6 +146,10 @@ makeCompPattern <- function(header, md, ap) {
 	useNoise <- ap$dpt$noise$useNoise
 	patt <- multiplyByBinary(patt, useRaw, useNoise, "Noise")
 	#
+	excludeOutliers <- ap$dpt$excludeOutliers$exOut
+	useRaw <- ap$dpt$excludeOutliers$exOutRaw
+	patt <- multiplyByBinary(patt, useRaw, excludeOutliers, "exOut")
+	##
 	cpt <- makeCPT(patt)
 	cp <- cleanCPPattern(patt)
 	return(list(cp=cp, cpt=cpt))
@@ -624,7 +636,56 @@ performNoise <- function(dataset, siNoise) {
 	return(dataset)
 } # EOF
 
-makeIdString <- function(siClass, siValue, siWlSplit, siCsAvg, siNoise) {
+performExcludeOutliers <- function(dataset, siExOut, ap) {
+	eov <- ap$dpt$excludeOutliers$exOutVar # the grouping variables from the analysis procedure by which grouping the outliers should be detected
+	keepRaw <- ap$dpt$excludeOutliers$exOutRaw
+	cnOutlier <- .ap2$stn$p_outlierCol
+	cPref <- .ap2$stn$p_ClassVarPref
+	eovTitleChar <- paste(unlist(lapply(strsplit(eov, cPref), function(x) x[2])), collapse=".")
+	if (keepRaw | siExOut) {
+		kmax <- .ap2$stn$simca_kMax
+		tol <- .ap2$stn$simca_tolerance
+		header <- getHeader(dataset)
+		indOut <- NULL
+		for (i in 1:length(eov)) {
+			ind <- which(colnames(header) == eov[i])
+			indOut <- c(indOut, ind)
+		} # end for i
+		fusionFac <- as.factor(apply(header[indOut], 1, function(x) paste(x, collapse="_"))) # extract the selected columns from the header and paste each row together
+		flatDf <- makeFlatDataFrame(dataset, fusionGroupBy=fusionFac)
+		if (!.ap2$stn$allSilent) {cat("      detecting outliers... ")}
+		simcaMod <- rrcovHD::RSimca.formula(grouping ~ ., data=flatDf, kmax=kmax, tol=tol)  ## k=0 does not work ??, but still calculating k
+#		flags <- as.factor(!simcaMod@flag) # to invert them and tranform to factor, having TRUE for the outliers
+		flags <- as.logical(simcaMod@flag) #  having FALSE for outliers
+		nrOutliers <- length(which(flags == FALSE))
+		usedK <- simcaMod@k
+		if (nrOutliers == 0) {
+			msg <- "none. "
+		} else {
+			msg <- paste("found *", nrOutliers, "*. [", usedK, " comp.] ", sep="")
+		}
+		if (siExOut) {crMsg <- ""} else {crMsg <- "\n"}
+		if (!.ap2$stn$allSilent) {cat(paste(msg, crMsg, sep=""))}
+		## now flagg the outliers
+		flagsFacDf <- data.frame(as.factor(!flags)) # having TRUE for outlier
+		colnames(flagsFacDf) <- paste(cPref, cnOutlier, "_", eovTitleChar, sep="")
+		ind <- max(grep(cnOutlier, colnames(header)))
+		headerPre <- header[, 1:ind]
+		headerPost <- header[, (ind+1):ncol(header)]
+		headerNew <- cbind(headerPre, flagsFacDf, headerPost)
+		colRepNew <- extractClassesForColRep(headerNew)		## the color representation of the factors
+		rownames(headerNew) <- rownames(colRepNew) <- rownames(header) # just to be sure
+		dataset$header <- headerNew
+		dataset$colRep <- colRepNew
+	} # end if keepRaw
+	if (siExOut) {
+		if (!.ap2$stn$allSilent) {cat("Removing outliers.\n")}
+		dataset <- dataset[flags] # as the outliers are FALSE, we are so removing the outliers
+	}
+	return(dataset)
+} # EOF
+
+makeIdString <- function(siClass, siValue, siWlSplit, siCsAvg, siNoise, siExOut) {
 	# siClass and siValue come in as dataframes with one row and one or more columns
 	varString <- NULL
 	for (i in 1: ncol(siClass)) {
@@ -646,16 +707,22 @@ makeIdString <- function(siClass, siValue, siWlSplit, siCsAvg, siNoise) {
 	} else {
 		noise <- ""
 	}
+	if (siExOut) {
+		more <- TRUE
+		exOut <- "exOut "
+	} else {
+		exOut <- ""
+	}
 	if (more) {
 		moreAdd <- ", "
 	} else {
 		moreAdd <- ""
 	}
-	easy <- paste(varString, "@", siWlSplit[1], "-to-", siWlSplit[2], moreAdd, csAvg, noise, sep="")
+	easy <- paste(varString, "@", siWlSplit[1], "-to-", siWlSplit[2], moreAdd, csAvg, noise, exOut, sep="")
 	return(easy)
 } # EOF
 
-processSingleRow_CPT <- function(dataset, siClass, siValue, siWlSplit, siCsAvg, siNoise, md) { # si for single
+processSingleRow_CPT <- function(dataset, siClass, siValue, siWlSplit, siCsAvg, siNoise, siExOut, ap) { # si for single
 	keepEC <- .ap2$stn$gd_keepECs
 	newDataset <- ssc_s(dataset, siClass, siValue, keepEC) 
 	if (is.null(newDataset)) { # character "nixnox" is returned if a variable combination yields no data. That is because returning NULL introduced a bug if it was on the end of the list... probably...
@@ -664,7 +731,8 @@ processSingleRow_CPT <- function(dataset, siClass, siValue, siWlSplit, siCsAvg, 
 	newDataset <- selectWls(newDataset, siWlSplit[1], siWlSplit[2])
 	newDataset <- performConSAvg(newDataset, siCsAvg)
 	newDataset <- performNoise(newDataset, siNoise)
-	idString <- makeIdString(siClass, siValue, siWlSplit, siCsAvg, siNoise)
+	newDataset <- performExcludeOutliers(newDataset, siExOut, ap)
+	idString <- makeIdString(siClass, siValue, siWlSplit, siCsAvg, siNoise, siExOut)
 	out <- new("aquap_set", dataset=newDataset, idString=idString)
 	return(out)
 } # EOF
@@ -795,12 +863,13 @@ gdmm <- function(dataset, ap=getap()) {
 	wlSplit <- cpt@wlSplit # ! is a list
 	csAvg <- cpt@csAvg # is a vector
 	noise <- cpt@noise # is a vector
+	exOut <- cpt@exOut # is a vector
 	
 	### generate datasets
 	if (!.ap2$stn$allSilent) {cat("Generating Datasets...\n")}
 	for (i in 1:len) {
 		if (!.ap2$stn$allSilent) {cat(paste("   Working on #", i, " of ", len, "\n", sep=""))}
-		cubeList[[i]] <- processSingleRow_CPT(dataset, as.data.frame(classes[i,,drop=F]), as.data.frame(values[i,,drop=F]), wlSplit[[i]], csAvg[i], noise[i]) # the "as.data.frame" is necessary if we only have one column
+		cubeList[[i]] <- processSingleRow_CPT(dataset, as.data.frame(classes[i,,drop=F]), as.data.frame(values[i,,drop=F]), wlSplit[[i]], csAvg[i], noise[i], exOut[i], ap) # the "as.data.frame" is necessary if we only have one column
 	} # end for i
 	if (!.ap2$stn$allSilent) {cat("Done.\n")}
 	###
