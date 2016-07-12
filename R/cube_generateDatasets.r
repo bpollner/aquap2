@@ -88,7 +88,14 @@ multiplyByBinary <- function(frame, useRaw, useApplied, colname) {
 				multFrame <- frame			
 			} else {
 				if (useRaw==FALSE & useApplied==FALSE) {
-					stop("Check settings for the logical input in the spl.x please. One has to be TRUE.", call.=FALSE)
+					if (colname != "exOut") { # because this is an exception
+						stop("Check settings for the logical input in the spl.x please. One has to be TRUE.", call.=FALSE)
+					}
+					if (colname == "exOut") {
+						chars <- rep("no", nrow(frame))
+						logic <- rep(FALSE, nrow(frame))
+						multFrame <- frame
+					}
 				}
 			}
 		}
@@ -98,7 +105,7 @@ multiplyByBinary <- function(frame, useRaw, useApplied, colname) {
 	dfLogic <- data.frame(X=logic)
 	colnames(dfLogic) <- paste(colname, "Logic", sep="")
 	out <- cbind(multFrame, dfChars, dfLogic)
-out
+	return(out)
 } # EOF
 
 makeCPT <- function(patt) {
@@ -114,6 +121,7 @@ makeCPT <- function(patt) {
 	aquapCPT@wlSplit <- lapply(strsplit(a, "-to-"), as.numeric) 
 	aquapCPT@csAvg <- patt[, which(colnames(patt) == "csAvgLogic")]	
 	aquapCPT@noise <- patt[, which(colnames(patt) == "NoiseLogic")]
+	aquapCPT@exOut <- patt[, which(colnames(patt) == "exOutLogic")]
 	aquapCPT@len <- nrow(patt)
 	return(aquapCPT)
 } # EOF
@@ -138,6 +146,10 @@ makeCompPattern <- function(header, md, ap) {
 	useNoise <- ap$dpt$noise$useNoise
 	patt <- multiplyByBinary(patt, useRaw, useNoise, "Noise")
 	#
+	excludeOutliers <- ap$dpt$excludeOutliers$exOut
+	useRaw <- ap$dpt$excludeOutliers$exOutRaw
+	patt <- multiplyByBinary(patt, useRaw, excludeOutliers, "exOut")
+	##
 	cpt <- makeCPT(patt)
 	cp <- cleanCPPattern(patt)
 	return(list(cp=cp, cpt=cpt))
@@ -624,12 +636,92 @@ performNoise <- function(dataset, siNoise) {
 	return(dataset)
 } # EOF
 
-makeIdString <- function(siClass, siValue, siWlSplit, siCsAvg, siNoise) {
+performExcludeOutliers <- function(dataset, siExOut, ap) {
+	eov <- ap$dpt$excludeOutliers$exOutVar # the grouping variables from the analysis procedure by which grouping the outliers should be detected
+	doExOut <- ap$dpt$excludeOutliers$exOut
+	keepRaw <- ap$dpt$excludeOutliers$exOutRaw
+	if (doExOut & keepRaw) {oneBlock <- FALSE; twoBlocks <- TRUE} else {oneBlock <- TRUE; twoBlocks <- FALSE}
+	cnOutlier <- .ap2$stn$p_outlierCol
+	cPref <- .ap2$stn$p_ClassVarPref
+	eovTitleChar <- paste(unlist(lapply(strsplit(eov, cPref), function(x) x[2])), collapse=".")
+	if (keepRaw | siExOut) {
+		kmax <- .ap2$stn$simca_kMax
+		tol <- .ap2$stn$simca_tolerance
+		header <- getHeader(dataset)
+		indOut <- NULL
+		if ((twoBlocks & !siExOut) | oneBlock) {
+			for (i in 1:length(eov)) {
+				ind <- which(colnames(header) == eov[i])
+				indOut <- c(indOut, ind)
+			} # end for i
+			fusionFac <- as.factor(apply(header[indOut], 1, function(x) paste(x, collapse="_"))) # extract the selected columns from the header and paste each row together
+			flatDf <- makeFlatDataFrame(dataset, fusionGroupBy=fusionFac)
+			if (!.ap2$stn$allSilent) {cat("      detecting & flagging outliers... ")}
+			simcaMod <- rrcovHD::RSimca.formula(grouping ~ ., data=flatDf, kmax=kmax, tol=tol)  ## k=0 does not work ??, but still calculating k
+			singleFlags <- paste(unlist(lapply(simcaMod@pcaobj, function(x) length(which(x@flag == FALSE)))), collapse="|")
+			flags <- as.logical(simcaMod@flag) #  having FALSE for outliers
+			nrOutliers <- length(which(flags == FALSE)) 
+			usedK <- paste(simcaMod@k, collapse="|")
+			finderMsg <- "found"
+		} else { # end if ((twoBlocks & siExOut) | oneBlock)
+			if (!.ap2$stn$allSilent) {cat("      flagging outliers:")}
+			finderMsg <- ""
+		}
+		if (twoBlocks & siExOut) {
+			flags <- .ap2$.outlierFlags$allFlags[[.ap2$.ocnt]] # use the counter established in function createOutlierFlaglist in gdmm to subscript the list containing all the flag-data
+			nrOutliers <- .ap2$.outlierFlags$nrOutliers[[.ap2$.ocnt]]
+			singleFlags <- .ap2$.outlierFlags$singleFlagCounter[[.ap2$.ocnt]]
+			usedK <- .ap2$.outlierFlags$usedK[[.ap2$.ocnt]]
+			if(is.null(nrOutliers) | is.null(singleFlags) | is.null(usedK)) {stop("This should not be NULL!!!")}
+			.ap2$.ocnt <- .ap2$.ocnt +1
+		}
+		if (nrOutliers == 0) {
+			msg <- "none. "
+			remMsg <- "\n"
+		} else {
+			msg <- paste(finderMsg," *", singleFlags, "*. [", usedK, " comp.]", sep="")
+			if (twoBlocks & siExOut) {
+				remMsg <- ", removing outliers. \n"} 
+			else  {
+				if (oneBlock & siExOut) {remMsg <- ""} else {remMsg <- "\n"}
+			}
+		}
+#		if (siExOut) {crMsg <- ""} else {crMsg <- "\n"}
+		if (!.ap2$stn$allSilent) {cat(paste(msg, remMsg, sep=""))}
+		if (twoBlocks & !siExOut) {
+			.ap2$.outlierFlags$allFlags <- c(.ap2$.outlierFlags$allFlags, list(flags))
+			.ap2$.outlierFlags$nrOutliers <- c(.ap2$.outlierFlags$nrOutliers, list(nrOutliers))
+			.ap2$.outlierFlags$singleFlagCounter <- c(.ap2$.outlierFlags$singleFlagCounter, list(singleFlags))
+			.ap2$.outlierFlags$usedK <- c(.ap2$.outlierFlags$usedK, list(usedK))
+		}
+		## now flag the outliers
+		flagsFacDf <- data.frame(as.factor(!flags)) # having TRUE for outlier
+		colnames(flagsFacDf) <- paste(cPref, cnOutlier, "_", eovTitleChar, sep="")
+		ind <- max(grep(cnOutlier, colnames(header)))
+		if (length(ind) == 0) { # XXX possible bug 
+			ind <- ncol(header)-1
+		}
+		headerPre <- header[, 1:ind]
+		headerPost <- header[, (ind+1):ncol(header)]
+		headerNew <- cbind(headerPre, flagsFacDf, headerPost)
+		colRepNew <- extractClassesForColRep(headerNew)		## the color representation of the factors
+		rownames(headerNew) <- rownames(colRepNew) <- rownames(header) # just to be sure
+		dataset$header <- headerNew
+		dataset$colRep <- colRepNew
+	} # end if keepRaw | siExOut
+	if (siExOut) {
+		if (!.ap2$stn$allSilent & oneBlock) {cat(", removing outliers.\n")}
+		dataset <- dataset[flags] # as the outliers are FALSE, we are so removing the outliers
+	}
+	return(dataset)
+} # EOF
+
+makeIdString <- function(siClass, siValue, siWlSplit, siCsAvg, siNoise, siExOut) {
 	# siClass and siValue come in as dataframes with one row and one or more columns
 	varString <- NULL
 	for (i in 1: ncol(siClass)) {
 #		varString <- paste(varString, siClass[1,i], ":", siValue[1,i], ", ", sep="")
-		varString <- paste(siValue[1,i], ", ", sep="")
+		varString <- paste(varString, siValue[1,i], ", ", sep="")
 	}
 	varString <- substr(varString, 1, (nchar(varString)-2)) # to get rid of the last ","
 	varString <- paste(varString, " ", sep="")
@@ -646,35 +738,50 @@ makeIdString <- function(siClass, siValue, siWlSplit, siCsAvg, siNoise) {
 	} else {
 		noise <- ""
 	}
+	if (siExOut) {
+		more <- TRUE
+		exOut <- "exOut "
+	} else {
+		exOut <- ""
+	}
 	if (more) {
 		moreAdd <- ", "
 	} else {
 		moreAdd <- ""
 	}
-	easy <- paste(varString, "@", siWlSplit[1], "-to-", siWlSplit[2], moreAdd, csAvg, noise, sep="")
+	easy <- paste(varString, "@", siWlSplit[1], "-to-", siWlSplit[2], moreAdd, csAvg, noise, exOut, sep="")
 	return(easy)
 } # EOF
 
-processSingleRow_CPT <- function(dataset, siClass, siValue, siWlSplit, siCsAvg, siNoise, md) { # si for single
+processSingleRow_CPT <- function(dataset, siClass, siValue, siWlSplit, siCsAvg, siNoise, siExOut, ap) { # si for single
 	keepEC <- .ap2$stn$gd_keepECs
 	newDataset <- ssc_s(dataset, siClass, siValue, keepEC) 
-	if (is.null(newDataset)) { # NULL is returned if a variable combination yields no data
-		return(NULL)
+	if (is.null(newDataset)) { # character "nixnox" is returned if a variable combination yields no data. That is because returning NULL introduced a bug if it was on the end of the list... probably...
+		return("nixnox")
 	}
 	newDataset <- selectWls(newDataset, siWlSplit[1], siWlSplit[2])
 	newDataset <- performConSAvg(newDataset, siCsAvg)
 	newDataset <- performNoise(newDataset, siNoise)
-	idString <- makeIdString(siClass, siValue, siWlSplit, siCsAvg, siNoise)
+	newDataset <- performExcludeOutliers(newDataset, siExOut, ap)
+	idString <- makeIdString(siClass, siValue, siWlSplit, siCsAvg, siNoise, siExOut)
 	out <- new("aquap_set", dataset=newDataset, idString=idString)
 	return(out)
 } # EOF
 
 correct_cpt <- function(cpt, nullInd) {
 	n <- nullInd
-	cpt@splitVars$classes <- cpt@splitVars$classes[-n,]
+	#
+	classes <- cpt@splitVars$classes[-n,] 
+	rownames(classes) <- 1:nrow(classes)
+	cpt@splitVars$classes <- classes
+	#
+	values <- cpt@splitVars$values[-n,] 
+	rownames(values) <- 1:nrow(values)
+	cpt@splitVars$values <- values
+	#
 	cpt@splitVars$values <- cpt@splitVars$values[-n,]
 	cpt@wlSplit <- cpt@wlSplit[-n]
-	cpt@smoothing <- cpt@smoothing[-n]
+	cpt@csAvg <- cpt@csAvg[-n]
 	cpt@noise <- cpt@noise[-n]
 	cpt@len <- length(cpt@noise)
 	return(cpt)
@@ -706,6 +813,41 @@ checkForStats <- function(ap) {
 		char <- c(char, "Aquagram")
 	}
 	return(list(cnt=cnt, char=char))
+} # EOF
+
+checkCubeForRealStats <- function(cube) {
+	cle <- function(sName, obj=cube) { # cle: check list element
+		return(any(unlist(lapply(obj, function(x) !is.null(slot(x, sName)))))) # returns TRUE if at last one model of kind "sName" is available
+	} # EOIF
+	cnt <- 0
+	char <- NULL
+	if (cle("pca")) { 
+		cnt <- cnt + 1 
+		char <- c(char, "pca")
+	}
+	if (cle("simca")) { 
+		cnt <- cnt + 1
+		char <- c(char, "simca")
+	}
+	if (cle("plsr")) { 
+		cnt <- cnt + 1
+		char <- c(char, "plsr")
+	}
+	if (cle("aquagr")) {
+		cnt <- cnt + 1
+		char <- c(char, "Aquagram")
+	}
+	return(list(cnt=cnt, char=char))
+#	return(checkForStats(cube@anproc))
+} # EOF
+
+createOutlierFlagList <- function() {
+	.ap2$.ocnt <- 1 # a counter
+	.ap2$.outlierFlags <- list()
+		.ap2$.outlierFlags$allFlags <- list()
+		.ap2$.outlierFlags$nrOutliers <- list()
+		.ap2$.outlierFlags$singleFlagCounter <- list()
+		.ap2$.outlierFlags$usedK <- list()
 } # EOF
 
 #' @title *** Generate Datasets and make Models *** 
@@ -747,6 +889,7 @@ gdmm <- function(dataset, ap=getap()) {
 	if (class(dataset) != "aquap_data") {
 		stop("Please provide an object of class 'aquap_data' to the argument 'dataset'.", call.=FALSE)
 	}
+	createOutlierFlagList() # needed to collect the flags and flag-data from the first block to the second
 	ap <- ap_cleanZeroValuesCheckExistenceDefaults(ap, dataset)
 	md <- getMdDs(dataset)
 	a <- makeCompPattern(dataset$header, md, ap)
@@ -761,25 +904,26 @@ gdmm <- function(dataset, ap=getap()) {
 	wlSplit <- cpt@wlSplit # ! is a list
 	csAvg <- cpt@csAvg # is a vector
 	noise <- cpt@noise # is a vector
+	exOut <- cpt@exOut # is a vector
 	
 	### generate datasets
 	if (!.ap2$stn$allSilent) {cat("Generating Datasets...\n")}
 	for (i in 1:len) {
 		if (!.ap2$stn$allSilent) {cat(paste("   Working on #", i, " of ", len, "\n", sep=""))}
-		cubeList[[i]] <- processSingleRow_CPT(dataset, as.data.frame(classes[i,]), as.data.frame(values[i,]), wlSplit[[i]], csAvg[i], noise[i]) # the "as.data.frame" is necessary if we only have one column
+		cubeList[[i]] <- processSingleRow_CPT(dataset, as.data.frame(classes[i,,drop=F]), as.data.frame(values[i,,drop=F]), wlSplit[[i]], csAvg[i], noise[i], exOut[i], ap) # the "as.data.frame" is necessary if we only have one column
 	} # end for i
 	if (!.ap2$stn$allSilent) {cat("Done.\n")}
 	###
 	
-	
 	### clean out the NULL-datasets
-	nullInd <- which(unlist(lapply(cubeList, is.null))) # which one of the split by variable resulted in zero rows (has been returned as NULL in ssc_s)
+#	nullInd <- which(unlist(lapply(cubeList, is.null))) # which one of the split by variable resulted in zero rows (has been returned as NULL in ssc_s)
+	nullInd <- which(cubeList == "nixnox")
 	if (length(nullInd) > 0) {
 		cubeList <- cubeList[-nullInd]
 		cp <- cp[-nullInd,]
 		rownames(cp) <- 1:nrow(cp)
 		cpt <- correct_cpt(cpt, nullInd)
-		message(paste(length(nullInd), " of the split-by-variable combinations resulted in no data. Those datasets have been omitted.", sep=""))
+		message(paste("  *", length(nullInd), "* of the split-by-variable combinations resulted in no data. Those datasets have been omitted.", sep=""))
 	}
 	###
 	
@@ -788,7 +932,7 @@ gdmm <- function(dataset, ap=getap()) {
 	if (!.ap2$stn$allSilent & (stat$cnt != 0)) {cat("\nCalculating models...\n")}
 	for (i in 1: cpt@len) {
 		if (!.ap2$stn$allSilent & (stat$cnt != 0)) {cat(paste("   Working on dataset #", i, " of ", cpt@len, " (", getIdString(cubeList[[i]]), ") \n", sep=""))}
-		cubeList[[i]] <- makeAllModels(cubeList[[i]], md, ap)
+		cubeList[[i]] <- makeAllModels(cubeList[[i]], md, ap) ###### CORE #########  CORE ############ CORE ##############
 	} # end for i
 	# collect the ranges for aquagram (if any)
 	rangesColl <- NULL

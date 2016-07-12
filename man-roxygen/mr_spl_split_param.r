@@ -7,9 +7,10 @@
 #'  to use all previously defined splits in these wavelengths.
 #' @param spl.do.exOut Logical. If exclusion of outliers should be performed.
 #' @param spl.exOut.raw Logical. If, should exclusion of outliers be performed, 
-#' the raw original data should be used as well. Recommended value = TRUE. 
-#' @param spl.exOut.var Character length one. The variable that should be used 
-#' for outlier detection.
+#' the raw original data should be used as well; if set to TRUE, outliers will 
+#' be flagged in the dataset in any case.
+#' @param spl.exOut.var Character vector. The variables that should be used 
+#' for the grouping defining the scope for outlier detection.
 #' @param spl.do.csAvg Logical. If all the consecutive scans of a single sample 
 #' should be reduced, i.e. averaged into a single spectrum.
 #' @param spl.csAvg.raw Logical. If, should the consecutive scans of a single 

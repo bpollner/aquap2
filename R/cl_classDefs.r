@@ -9,8 +9,8 @@ setClassUnion(name="numChar", members =c("numeric", "character"))
 ##	
 setClass("aquap_md", contains="list")
 setClass("aquap_ap", contains="list")
-setClass("aquap_data", slots=c(metadata="list", ncpwl="numeric"), contains="data.frame")
-setClass("aquap_cpt", slots=c(splitVars="list", wlSplit="list", csAvg="logical", noise="logical", len="numeric"))
+setClass("aquap_data", slots=c(metadata="list", ncpwl="numeric", version="character"), contains="data.frame")
+setClass("aquap_cpt", slots=c(splitVars="list", wlSplit="list", csAvg="logical", noise="logical", exOut="logical", len="numeric"))
 setClass("aqg_calc", slots = c(ID="character", classVar="character", itemIndex="numeric", avg="matrix", colRep="numChar", possN="numeric", selInds="numeric", bootRes="matNull", rawSpec="dfNull", avgSpec="dfNull", subtrSpec="dfNull"))
 #setClass("aqg_cr", slots = c(res="list", ran="listNull"))
 #setClassUnion(name="aqgCrNull", members =c("aqg_cr", "NULL"))
@@ -114,8 +114,13 @@ setGeneric("getColRep", function(object) standardGeneric("getColRep"))
 setMethod("getColRep", "aquap_data", definition=getColRep_data)
 setMethod("getColRep", "aquap_set",  definition=getColRep_set)
 
+#' @rdname Extract_Elements
 setGeneric("getHeader", function(object) standardGeneric("getHeader"))
+#' @rdname Extract_Elements
+#' @export
 setMethod("getHeader", "aquap_data", definition=getHeader_dataset)
+#' @rdname Extract_Elements
+#' @export
 setMethod("getHeader", "aquap_set", definition=getHeader_set)
 
 setGeneric("getIdString", function(object) standardGeneric("getIdString"))
@@ -144,4 +149,10 @@ setMethod("getNIR", "aquap_set", definition=getNIR_df_set)
 
 setGeneric("getMdDs", function(object) standardGeneric("getMdDs"))
 setMethod("getMdDs", "aquap_data", function(object) object@metadata)
+
+
+## SIMCA
+setGeneric("getSIMCAClassList", function(object) standardGeneric("getSIMCAClassList"))
+setMethod("getSIMCAClassList", "aquap_ap", function(object) object$simca$simcOn)
+
 

@@ -26,13 +26,16 @@ Imports:
     boot,
     fmsb,
     lattice,
-    latticeExtra
+    latticeExtra,
+    rrcov,
+    rrcovHD
 Suggests:
     knitr
 VignetteBuilder: knitr
 Collate:
     'aquap2.r'
     'calc_aqg.r'
+    'calc_simca.r'
     'cl_classFunctions.r'
     'cl_classDefs.r'
     'cube_generateDatasets.r'
@@ -42,6 +45,7 @@ Collate:
     'doc_customImport.r'
     'doc_customTRH.r'
     'doc_metadata.r'
+    'doc_methods.r'
     'doc_settings.r'
     'gen_coreDataManip.r'
     'gen_general.r'

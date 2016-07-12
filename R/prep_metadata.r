@@ -300,7 +300,7 @@ getap_core_file <- function(fn="def") {
 	csAvg <- list(doAvg=e$spl.do.csAvg, useRaw=e$spl.csAvg.raw)
 	if (e$spl.do.noise == FALSE) {e$spl.noise.raw <- TRUE} # just to be sure that one is true
 	noise <- list(useNoise=e$spl.do.noise, useRaw=e$spl.noise.raw)
-	if (e$spl.do.exOut == FALSE) {e$spl.exOut.raw <- TRUE} # just to be sure that one is true
+#	if (e$spl.do.exOut == FALSE) {e$spl.exOut.raw <- TRUE} # just to be sure that one is true
 	exOut <- list(exOut=e$spl.do.exOut, exOutRaw=e$spl.exOut.raw, exOutVar=e$spl.exOut.var)
 	dpt <- list(csAvg=csAvg, noise=noise, excludeOutliers=exOut)
 	## 

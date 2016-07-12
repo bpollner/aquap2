@@ -11,6 +11,10 @@ pv_what_subPlots <- c("all", "pca", "sim", "pls", "aqg")
 pv_pca_what <- c("both", "scores", "loadings")
 
 
+## SIMCA calculation
+pv_simca_calc_sampling <- c("random", "interleaved")
+
+
 ## Aquagram plotting
 pv_fsa_fss <- c("both", "only")
 

@@ -50,7 +50,14 @@ plot_pls(cube, pls.colorBy="C_Temp")
 \seealso{
 \code{\link{plot_pls}}
 
+<<<<<<< HEAD
 Other Plot arguments: \code{\link{plot,aquap_data-method}},
+=======
+Other PLSR documentation: \code{\link{calc_pls_args}},
+  \code{\link{plot_pls}}
+
+Other Plot arguments: \code{\link{plot,aquap_data,ANY-method}},
+>>>>>>> go_simca
   \code{\link{plot_aqg_args}}, \code{\link{plot_pca_args}},
   \code{\link{plot_pg_args}}, \code{\link{plot_sim_args}}
 

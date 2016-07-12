@@ -41,7 +41,8 @@ stn <- list(
 	p_deleteCol = "DELETE", 				## the character indicating that this column should be omitted at the time of creating the sample list, usually needed for L2-columns that are identical to their L1-columns
 	p_noTimePointsLabel = "NT", 			## the value assigned to every observation when there is no splitting into time points
 	p_sampleListExportFormat = "txt", 		## the format for the generated sample list, possible values are "txt" for a tab-delimited text file and "xls" for an Excel-file.
-
+	p_outlierCol = "outlier", 				## the name of any column containing the flags showing outliers
+	p_outlierCol_allSuffix = "all", 		## the suffix being added to the outlier column containing the flags for outliers based on the whole dataset.
 
 	## General behaviour & settings
 	allSilent = FALSE,						## if false, "status" messages will be displayed
@@ -49,6 +50,7 @@ stn <- list(
 	gen_useParallel = FALSE, 				## if parallel computing should be used where applicable and implemented
 	gen_numberOfCPUs = NA, 					## the number of CPUs used for parallel computing; leave at 'NA' for automatically using the system defaults
 	gen_showData_NIR = FALSE, 				## if the first rows of the NIR data should be printed as well wenn printing an object of class 'aquap_data' to the screen.
+	gen_versionCheckDataset = TRUE,			## if it should be checked if the dataset was created with an older version of package aquap2. Recommended value is TRUE.
 
 
 	## Import Data
@@ -69,6 +71,7 @@ stn <- list(
 	imp_narrowMinutes = 3, 					## how many minutes ahead should be looked for matching log-data before going through the whole log file?
 	imp_secsNarrowPrecision = 10, 			## precision in seconds that log-data have to be within spectral acquisition time in the first, the narrowed-down search step (there is no precision step in the second search through the whole log file)
 	imp_minutesTotalPrecision = 3, 			## the final precision in minutes that the log-data have to meet; if only for one spectrum under this value importing will be aborted
+	imp_flagOutliers = TRUE, 				## if, right after importing the data, outliers in the *complete* dataset should be flagged and these flags then stored in the dataset
 
 
 	## generate Datasets
@@ -115,6 +118,18 @@ stn <- list(
 	pca_ld_customLinetype = NULL,			## the custom linetype for plotting the loadings. Set to NULL for automatically generating linetypes. Provide an integer vector to use it as linetypes in the loadings.
 	
 	
+	## SIMCA
+	simca_version = "robust", 				## possible values are: 'classic' for using the classic SimcaPCA, and 'robust' for using the robust version
+	simca_tolerance = 1.0e-4, 				## XXX package rrcovHD
+	simca_kMax = 10,						## The maximum number of components to be used. Seems to be ignored in version classic simca. (package rrcovHD)
+	simca_minSpectraEachGroup = 3, 			## the minimum amount of spectra in each group that are required to even calculate a simca model. Can not be lower than 3. Higher numbers (from 4 or 5 upwards) help reducing errors when in robust mode.
+	simca_nrDigitsRoundDist = 2, 			## the number of digits the interclass-distance displayed in the graphics should be rounded to
+	simca_tablesToTxt = FALSE,				## if classification table should be exported to text
+	simca_percNewData_CV = 50, 				## the percentage of the original data to be used as new data (the other part is used for making the model)
+	simca_sampling = "interleaved",  		## either "random" or "interleaved"  -- only taken into account when the above percentage is 50. Under development.
+	simca_maxBarsPerGraph = 7, 				## the maximum number of bars on one graphic for the class-distance barplots
+	
+
 	## Aquagram 
 	aqg_defaultMod = "aucs.dce", 			## the default mode for the Aquagram
 	aqg_wlsAquagram = c(1342, 1364, 1374, 1384, 1412, 1426, 1440, 1452, 1462, 1476, 1488, 1512), 	## the wavelengths for the classic aquagram (argument aqg.selWls)

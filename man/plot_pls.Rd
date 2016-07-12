@@ -31,7 +31,14 @@ The width and height of the resulting pdf can be set in the settings.
  }
 }
 \seealso{
+<<<<<<< HEAD
 Other Plot functions: \code{\link{plot,aquap_data-method}},
+=======
+Other PLSR documentation: \code{\link{calc_pls_args}},
+  \code{\link{plot_pls_args}}
+
+Other Plot functions: \code{\link{plot,aquap_data,ANY-method}},
+>>>>>>> go_simca
   \code{\link{plot_aqg}}, \code{\link{plot_pca}},
   \code{\link{plot_sim}}, \code{\link{plot}}
 
