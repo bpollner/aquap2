@@ -16,7 +16,7 @@
 	 
 	spl.do.exOut <- FALSE					## if exclusion of outliers should be performed
 	spl.exOut.raw <- TRUE					## if, should exclusion of outliers be performed, the raw original data should be used as well; if set to TRUE, outliers will be flagged in the dataset in any case.
-	spl.exOut.var <- c("C_Group", "C_Water")## the variables (one or more) that should be used for outlier detection.
+	spl.exOut.var <- c("C_Group", "C_Water")## the variables (one or more) to be used for the grouping defining the scope for outlier detection.
 	
 	spl.do.csAvg <- FALSE					## if all the consecutive scans of a single sample should be reduced, i.e. averaged into a single spectrum
 	spl.csAvg.raw <- TRUE					## if, should the consecutive scans of a single sample be reduced, an other dataset containing every single consecutive scan should be kept as well

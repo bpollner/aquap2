@@ -638,7 +638,9 @@ performNoise <- function(dataset, siNoise) {
 
 performExcludeOutliers <- function(dataset, siExOut, ap) {
 	eov <- ap$dpt$excludeOutliers$exOutVar # the grouping variables from the analysis procedure by which grouping the outliers should be detected
+	doExOut <- ap$dpt$excludeOutliers$exOut
 	keepRaw <- ap$dpt$excludeOutliers$exOutRaw
+	if (doExOut & keepRaw) {oneBlock <- FALSE; twoBlocks <- TRUE} else {oneBlock <- TRUE; twoBlocks <- FALSE}
 	cnOutlier <- .ap2$stn$p_outlierCol
 	cPref <- .ap2$stn$p_ClassVarPref
 	eovTitleChar <- paste(unlist(lapply(strsplit(eov, cPref), function(x) x[2])), collapse=".")
@@ -647,29 +649,58 @@ performExcludeOutliers <- function(dataset, siExOut, ap) {
 		tol <- .ap2$stn$simca_tolerance
 		header <- getHeader(dataset)
 		indOut <- NULL
-		for (i in 1:length(eov)) {
-			ind <- which(colnames(header) == eov[i])
-			indOut <- c(indOut, ind)
-		} # end for i
-		fusionFac <- as.factor(apply(header[indOut], 1, function(x) paste(x, collapse="_"))) # extract the selected columns from the header and paste each row together
-		flatDf <- makeFlatDataFrame(dataset, fusionGroupBy=fusionFac)
-		if (!.ap2$stn$allSilent) {cat("      detecting outliers... ")}
-		simcaMod <- rrcovHD::RSimca.formula(grouping ~ ., data=flatDf, kmax=kmax, tol=tol)  ## k=0 does not work ??, but still calculating k
-#		flags <- as.factor(!simcaMod@flag) # to invert them and tranform to factor, having TRUE for the outliers
-		flags <- as.logical(simcaMod@flag) #  having FALSE for outliers
-		nrOutliers <- length(which(flags == FALSE))
-		usedK <- simcaMod@k
+		if ((twoBlocks & !siExOut) | oneBlock) {
+			for (i in 1:length(eov)) {
+				ind <- which(colnames(header) == eov[i])
+				indOut <- c(indOut, ind)
+			} # end for i
+			fusionFac <- as.factor(apply(header[indOut], 1, function(x) paste(x, collapse="_"))) # extract the selected columns from the header and paste each row together
+			flatDf <- makeFlatDataFrame(dataset, fusionGroupBy=fusionFac)
+			if (!.ap2$stn$allSilent) {cat("      detecting & flagging outliers... ")}
+			simcaMod <- rrcovHD::RSimca.formula(grouping ~ ., data=flatDf, kmax=kmax, tol=tol)  ## k=0 does not work ??, but still calculating k
+			singleFlags <- paste(unlist(lapply(simcaMod@pcaobj, function(x) length(which(x@flag == FALSE)))), collapse="|")
+			flags <- as.logical(simcaMod@flag) #  having FALSE for outliers
+			nrOutliers <- length(which(flags == FALSE)) 
+			usedK <- paste(simcaMod@k, collapse="|")
+			finderMsg <- "found"
+		} else { # end if ((twoBlocks & siExOut) | oneBlock)
+			if (!.ap2$stn$allSilent) {cat("      flagging outliers:")}
+			finderMsg <- ""
+		}
+		if (twoBlocks & siExOut) {
+			flags <- .ap2$.outlierFlags$allFlags[[.ap2$.ocnt]] # use the counter established in function createOutlierFlaglist in gdmm to subscript the list containing all the flag-data
+			nrOutliers <- .ap2$.outlierFlags$nrOutliers[[.ap2$.ocnt]]
+			singleFlags <- .ap2$.outlierFlags$singleFlagCounter[[.ap2$.ocnt]]
+			usedK <- .ap2$.outlierFlags$usedK[[.ap2$.ocnt]]
+			if(is.null(nrOutliers) | is.null(singleFlags) | is.null(usedK)) {stop("This should not be NULL!!!")}
+			.ap2$.ocnt <- .ap2$.ocnt +1
+		}
 		if (nrOutliers == 0) {
 			msg <- "none. "
+			remMsg <- "\n"
 		} else {
-			msg <- paste("found *", nrOutliers, "*. [", usedK, " comp.] ", sep="")
+			msg <- paste(finderMsg," *", singleFlags, "*. [", usedK, " comp.]", sep="")
+			if (twoBlocks & siExOut) {
+				remMsg <- ", removing outliers. \n"} 
+			else  {
+				if (oneBlock & siExOut) {remMsg <- ""} else {remMsg <- "\n"}
+			}
 		}
-		if (siExOut) {crMsg <- ""} else {crMsg <- "\n"}
-		if (!.ap2$stn$allSilent) {cat(paste(msg, crMsg, sep=""))}
-		## now flagg the outliers
+#		if (siExOut) {crMsg <- ""} else {crMsg <- "\n"}
+		if (!.ap2$stn$allSilent) {cat(paste(msg, remMsg, sep=""))}
+		if (twoBlocks & !siExOut) {
+			.ap2$.outlierFlags$allFlags <- c(.ap2$.outlierFlags$allFlags, list(flags))
+			.ap2$.outlierFlags$nrOutliers <- c(.ap2$.outlierFlags$nrOutliers, list(nrOutliers))
+			.ap2$.outlierFlags$singleFlagCounter <- c(.ap2$.outlierFlags$singleFlagCounter, list(singleFlags))
+			.ap2$.outlierFlags$usedK <- c(.ap2$.outlierFlags$usedK, list(usedK))
+		}
+		## now flag the outliers
 		flagsFacDf <- data.frame(as.factor(!flags)) # having TRUE for outlier
 		colnames(flagsFacDf) <- paste(cPref, cnOutlier, "_", eovTitleChar, sep="")
 		ind <- max(grep(cnOutlier, colnames(header)))
+		if (length(ind) == 0) { # XXX possible bug 
+			ind <- ncol(header)-1
+		}
 		headerPre <- header[, 1:ind]
 		headerPost <- header[, (ind+1):ncol(header)]
 		headerNew <- cbind(headerPre, flagsFacDf, headerPost)
@@ -677,9 +708,9 @@ performExcludeOutliers <- function(dataset, siExOut, ap) {
 		rownames(headerNew) <- rownames(colRepNew) <- rownames(header) # just to be sure
 		dataset$header <- headerNew
 		dataset$colRep <- colRepNew
-	} # end if keepRaw
+	} # end if keepRaw | siExOut
 	if (siExOut) {
-		if (!.ap2$stn$allSilent) {cat("Removing outliers.\n")}
+		if (!.ap2$stn$allSilent & oneBlock) {cat(", removing outliers.\n")}
 		dataset <- dataset[flags] # as the outliers are FALSE, we are so removing the outliers
 	}
 	return(dataset)
@@ -810,6 +841,15 @@ checkCubeForRealStats <- function(cube) {
 #	return(checkForStats(cube@anproc))
 } # EOF
 
+createOutlierFlagList <- function() {
+	.ap2$.ocnt <- 1 # a counter
+	.ap2$.outlierFlags <- list()
+		.ap2$.outlierFlags$allFlags <- list()
+		.ap2$.outlierFlags$nrOutliers <- list()
+		.ap2$.outlierFlags$singleFlagCounter <- list()
+		.ap2$.outlierFlags$usedK <- list()
+} # EOF
+
 #' @title *** Generate Datasets and make Models *** 
 #' @description Generate several datasets by splitting up the original dataset 
 #' according to the variables and values as specified in the analysis procedure 
@@ -849,6 +889,7 @@ gdmm <- function(dataset, ap=getap()) {
 	if (class(dataset) != "aquap_data") {
 		stop("Please provide an object of class 'aquap_data' to the argument 'dataset'.", call.=FALSE)
 	}
+	createOutlierFlagList() # needed to collect the flags and flag-data from the first block to the second
 	ap <- ap_cleanZeroValuesCheckExistenceDefaults(ap, dataset)
 	md <- getMdDs(dataset)
 	a <- makeCompPattern(dataset$header, md, ap)
