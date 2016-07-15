@@ -488,9 +488,19 @@ ap_check_gp_generalPlottingDefaults <- function(ap) {
 ap_checExistence_Defaults <- function(ap, dataset) {
 	cPref <- .ap2$stn$p_ClassVarPref
 	yPref <- .ap2$stn$p_yVarPref
+	outlierChar <- .ap2$stn$p_outlierCol # we have to define an exception for the checking the existence
 	cns <- colnames(dataset$header)
-	checkEx <- function(charVec, where, what) {
-		a <- which(!charVec %in% cns)
+	checkEx <- function(charVec, where, what, exc=outlierChar) {
+		a <- which(!charVec %in% cns) # gives back the indices of the charVec that is not in the colnames
+		if (!is.null(exc)) { # so if we want to allow an exception
+			allNotHere <- charVec[a]
+			excOK <- all(grepl(exc, allNotHere))
+			if (excOK) { # 
+				a <- vector("numeric", length=0)
+			} else {
+				a <- vector("numeric", length=1)
+			}
+		}
 		if (length(a) != 0) {
 			vars <- paste(charVec[a], collapse=", ")
 			stop(paste("Sorry, the variable \"", vars, "\" appears not to exist in your dataset. \nPlease check the ", where, " part of the analysis procedure / your input.", sep=""), call.=FALSE)
