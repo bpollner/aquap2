@@ -81,7 +81,7 @@ stn <- list(
 	## Colors
 	col_RampForTRH = c("blue", "red", "yellow2"), 	## used for color-coding any column that contains the characters defined as names for the temperature and rel. humidity column. Provide at least two colors.
 	col_userDefinedRamps = list(c("green", "red"), c("blue", "yellow2")), 	## used for coloring the in "p_userDefinedSpecialColnames" defined special column names.   XXX make nicer colors here
-
+	col_alphaForLegends = 220, 				## the value of the alpha channel to be used for the background of most legend boxes. Values can range from 1 to 255, with 1 being completely transparent, and 255 resulting in a completely intransparent white.
 
 	### smoothing ###
 	## settings for the Sav. Golay filter at the smoothing process

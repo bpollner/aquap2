@@ -13,6 +13,41 @@
 #' header1 <- getHeader(cube[[1]]) # gets the header from the first dataset in 
 #' # the cube.
 #' }
-#' @docType methods
+#' @family Extract Elements
 #' @name Extract_Elements
+NULL
+
+
+
+#' @title aquap_data methods
+#' @description Available methods for objects of class 'aquap_data', used for
+#' subtractions, subscripting etc. of datasets.
+#' @details \describe{
+#' \item{Subscripting via '[]'}{For subscripting via \code{'[]'}, only values 
+#' for rownumbers are accepted.}
+#' \item{Subtractions via '-'}{Use the subtraction via \code{'-'} to subtract the 
+#' NIR-data in datasets that have the same structure, i.e. the same header, and 
+#' the same wavelengths in the NIR. You can either subtract two equally long 
+#' datasets, i.e. two datasets having the exactly same number of rows, or you can
+#' subtract a dataset having exactly one row from a full dataset. The latter can
+#' be useful for e.g. subtracting the averaged spectra of a single class from the
+#' complete dataset - see examples.}
+#' }
+#' @note \code{drop} is always set to \code{FALSE} for substrictping via 
+#' \code{'[]'}.
+#' @param x An object of class 'aquap_data'
+#' @param i subsricpting indices for rows 
+#' @param e1 Object of class 'aquap_data'
+#' @param e2 Object of class 'aquap_data'
+#' @examples 
+#' \dontrun{
+#'  dataset <- gfd()
+#'  ds <- dataset[1:5,]
+#'  ds <- dataset[1:5] # the same as above
+#' 	dSub <- dataset - do_sgolay(dataset, n=71) # apply smoothing and subtract
+#'  plot(dSub, pg.where="", pg.main=" | smoothed subtracted")
+#' }
+#' @family Data pre-treatment functions
+#' @aliases aquap_data-methods
+#' @name aquap_data-methods
 NULL

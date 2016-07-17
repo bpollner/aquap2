@@ -52,8 +52,8 @@ Other Plot arguments: \code{\link{plot_aqg_args}},
   \code{\link{plot_pca_args}}, \code{\link{plot_pg_args}},
   \code{\link{plot_pls_args}}, \code{\link{plot_sim_args}}
 
-Other Plot functions: \code{\link{plot_aqg}},
-  \code{\link{plot_pca}}, \code{\link{plot_pls}},
-  \code{\link{plot_sim}}, \code{\link{plot}}
+Other Plot functions: \code{\link{plot,aquap_cube,ANY-method}},
+  \code{\link{plot_aqg}}, \code{\link{plot_pca}},
+  \code{\link{plot_pls}}, \code{\link{plot_sim}}
 }
 

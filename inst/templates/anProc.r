@@ -13,19 +13,22 @@
 	spl.wl <- NULL							## which wavelengths to use? leave empty c() or set to NULL for using all available wavelengths
 #	spl.wl <- "1300-to-1600"
 #	spl.wl <- c("1000-to-2000", "1300-to-1600")
-	 
-	spl.do.exOut <- FALSE					## if exclusion of outliers should be performed
-	spl.exOut.raw <- TRUE					## if, should exclusion of outliers be performed, the raw original data should be used as well; if set to TRUE, outliers will be flagged in the dataset in any case.
-	spl.exOut.var <- c("C_Group", "C_Water")## the variables (one or more) to be used for the grouping defining the scope for outlier detection.
-	
+	#######
+	dpt.pre <- NULL							## Character vector, which of the available modules of data pre-treatments to apply. Leave at NULL for no additional data pre-treatment. For possible values see XXX.
+	#######
 	spl.do.csAvg <- FALSE					## if all the consecutive scans of a single sample should be reduced, i.e. averaged into a single spectrum
 	spl.csAvg.raw <- TRUE					## if, should the consecutive scans of a single sample be reduced, an other dataset containing every single consecutive scan should be kept as well
 
 	spl.do.noise <- FALSE					## if artificial noise should be added to the dataset
 	spl.noise.raw <- TRUE					## if, should the noise-test be performed, the raw original data should be used as well. Recommended value = TRUE
+
+	spl.do.exOut <- FALSE					## if exclusion of outliers should be performed
+	spl.exOut.raw <- TRUE					## if, should exclusion of outliers be performed, the raw original data should be used as well; if set to TRUE, outliers will be flagged in the dataset in any case.
+	spl.exOut.var <- c("C_Group", "C_Water")## the variables (one or more) to be used for the grouping defining the scope for outlier detection.
+	#######
+	dpt.post <- NULL						## Character vector, which of the available modules of data pre-treatments to apply.  Leave at NULL for no additional data pre-treatment. For possible values see XXX.
 	################################################################
 			
-
 
 
 

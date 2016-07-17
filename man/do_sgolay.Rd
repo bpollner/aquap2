@@ -2,32 +2,44 @@
 % Please edit documentation in R/gen_coreDataManip.r
 \name{do_sgolay}
 \alias{do_sgolay}
-\title{Perform Smoothing or m-th Derivative}
+\title{Perform Smoothing and / or m-th Derivative}
 \usage{
 do_sgolay(dataset, p = 2, n = 21, m = 0)
 }
 \arguments{
-\item{dataset}{An object of class 'aquap_data'}
+\item{dataset}{An object of class 'aquap_data" as produced by 
+\code{\link{gfd}} or as can be extracted from a 'cube' via 
+\code{\link{getCubeDataset}}.}
 
-\item{p}{Numeric length 1, the order of the filter.}
+\item{p}{Numeric length one, the order of the filter.}
 
-\item{n}{Numeric length 1, the filter length, must be odd.}
+\item{n}{Numeric length one, the filter length, must be odd.}
 
-\item{m}{Numeric length 1, the m-th derivative.}
+\item{m}{Numeric length one, Return the m-th derivative of the filter 
+coefficients.}
 }
 \value{
 Returns the dataset with the NIR-data smoothed or transformed.
 }
 \description{
-Performs a smoothing and / or the calculation of the 
-m-th derivative.
-on the given dataset using the Savitzky-Golay filter.
+Performs a smoothing and / or the calculation of the m-th 
+derivative on the given dataset using the Savitzky-Golay filter.
 }
 \details{
 The underlying function is \code{\link[signal]{sgolayfilt}}.
 }
+\examples{
+\dontrun{
+fd <- gfd() # get the full dataset
+fd <- selectWls(fd, 1100, 1800)
+fd_avg <- do_avg(fd, n=71) # apply strong smoothing
+plot(fd - fd_avg, pg.where="", pg.main="| smoothed subtracted")
+}
+}
 \seealso{
-Other Data pre-treatment functions: \code{\link{do_msc}},
-  \code{\link{selectWls}}, \code{\link{ssc}}
+Other Data pre-treatment functions: \code{\link{[,aquap_data-method}},
+  \code{\link{do_avg}}, \code{\link{do_emsc}},
+  \code{\link{do_msc}}, \code{\link{selectWls}},
+  \code{\link{ssc}}
 }
 

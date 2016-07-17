@@ -7,10 +7,11 @@
 \usage{
 getFullData(md = getmd(), filetype = "def", naString = "NA",
   slType = "def", trhLog = "def", multiplyRows = "def", ttl = TRUE,
-  stf = TRUE)
+  stf = TRUE, dol = "def")
 
 gfd(md = getmd(), filetype = "def", naString = "NA", slType = "def",
-  trhLog = "def", multiplyRows = "def", ttl = TRUE, stf = TRUE)
+  trhLog = "def", multiplyRows = "def", ttl = TRUE, stf = TRUE,
+  dol = "def")
 }
 \arguments{
 \item{md}{List. The object with the metadat of the experiment. 
@@ -18,7 +19,7 @@ The default is to get the metadata file via  \code{\link{getmd}}.}
 
 \item{filetype}{Character. The type of the spectral raw data file. 
 If a value other than "def" is provided, this is overriding the 
-value of "filetype" in the metadata file. Possile values are:
+value of "filetype" in the metadata file. Possible values are:
 \itemize{
 \item "def": Gets the default value from the setings.r file. 
      (variable 'imp_specFileType')
@@ -98,6 +99,12 @@ from the raw-data.}
 
 \item{stf}{Logical, 'save to file'. If the final dataset should be saved to 
 the 'R-data' folder after import from the raw-data file. Defaults to 'TRUE'.}
+
+\item{dol}{Detect outliers. If outliers should be detected using the flags 
+provided by \code{\link[rrcovHD]{RSimca}}. If left at the default "def", the 
+value from the settings.r file will be used (parameter \code{imp_flagOutliers}.
+If \code{dol} evaluates to TRUE, an additional column flagging the outliers 
+as detected in the scope of the complete dataset will be added to the dataset.}
 }
 \value{
 An object of class 'aquap_data' containing a data frame and one slot:
@@ -158,9 +165,11 @@ strict and conscious handling of the files.
 }
 }
 \seealso{
-\code{\link{readSpectra}}, \code{\link{readHeader}}
+\code{\link{readSpectra}}, \code{\link{readHeader}}, 
+\code{\link{aquap_data-methods}}
 
 Other Core functions: \code{\link{exportSampleList}},
-  \code{\link{gdmm}}, \code{\link{plot}}
+  \code{\link{gdmm}},
+  \code{\link{plot,aquap_cube,ANY-method}}
 }
 

@@ -92,3 +92,43 @@ getColRep_data <- function(object) { # object is a dataset
 getColRep_set <- function(object) { # object is a set
 	return(getColRep(getDataset(object)))
 }# EOF
+
+subtract_two_aquap_data_M <- function(e1, e2) { # e1 and e1 being each an object of class aquap_data
+	if (nrow(e1) != 1 & nrow(e2) != 1) {
+		if (nrow(e1) != nrow(e2)) {
+			stop("The provided datasets do not have the same number of rows.\nFor successful subtraction via '-', both datasets have to have the same number of rows, or one dataset has to have exactly one (1) row.", call.=FALSE)
+		}
+		if (ncol(e1$NIR) != ncol(e2$NIR)) {
+			stop("The provided datasets do not have the same number of wavelengths.\nFor successful subtraction via '-', both datasets have to have the same number of wavelengths, i.e. the same number of columns in their NIR data.", call.=FALSE)
+		}
+		if (!identical(colnames(e1$NIR), colnames(e2$NIR))) {
+			stop("The provided datasets do not have the same wavelengths.\nFor successful subtraction via '-', in both datasets there have to be the same wavelengths present.", call.=FALSE)
+		}
+		if (!identical(e1$header, e2$header)) {
+			stop("The provided datasets have a different structure. \nFor successful subraction via '-', both datasets must have the same structure, i.e. the same header.", call.=FALSE)
+		}
+		e1$NIR <- e1$NIR - e2$NIR #### CORE ######
+		return(e1)
+	} # end if both more than one row
+	if (nrow(e1) == 1 | nrow(e2) == 1) {
+		if (nrow(e1) == 1 & nrow(e2) == 1) {
+			stop("One of the provided datasets must have more than one row for subtraction of a single spectrum from a full dataset.", call.=FALSE)
+		} # stop if both are nrow==1
+		if (nrow(e1) == 1) {
+			nirSingle <- e1$NIR
+			nirFull <- e2$NIR
+			allFull <- e2
+		} # end if nrow(e1)==1
+		if (nrow(e2) == 1) {
+			nirSingle <- e2$NIR
+			nirFull <- e1$NIR
+			allFull <- e1
+		} # end if nrow(e2)==1
+		NIR <- sweep(nirFull, 2, nirSingle) 		#### CORE ##### subtraction is the default in sweep !
+		colnames(NIR) <- colnames(nirFull)
+		rownames(NIR) <- rownames(nirFull)
+		allFull$NIR <- NIR
+		return(allFull)
+	} # end one has only one (1) row
+	stop("An error has occured at the subtraction of datasets, sorry.", call.=FALSE)
+} # EOF

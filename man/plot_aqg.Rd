@@ -34,8 +34,9 @@ The width and height of the resulting pdf can be set in the settings.
 Other Aquagram documentation: \code{\link{calc_aqg_args}},
   \code{\link{plot_aqg_args}}
 
-Other Plot functions: \code{\link{plot,aquap_data,ANY-method}},
+Other Plot functions: \code{\link{plot,aquap_cube,ANY-method}},
+  \code{\link{plot,aquap_data,ANY-method}},
   \code{\link{plot_pca}}, \code{\link{plot_pls}},
-  \code{\link{plot_sim}}, \code{\link{plot}}
+  \code{\link{plot_sim}}
 }
 

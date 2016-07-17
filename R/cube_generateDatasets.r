@@ -485,6 +485,17 @@ ap_check_gp_generalPlottingDefaults <- function(ap) {
 	return(ap)
 } # EOF
 
+ap_check_dptModules <- function(ap) {
+	a <- ap$dpt$dptModules
+	prePost <- c(a$dptPre, a$dptPost)
+	pv <- pv_dptModules
+	a <- which(!prePost %in% pv) # gives back the indices of the elements of dptMods that are NOT within the possible values
+	if (length(a) != 0) { 
+		vars <- paste(prePost[a], collapse=", ")
+		stop(paste("Sorry, the dpt module \"", vars, "\" can not be recognized. Please check the 'dpt.pre' and 'dpt.post' parts of the analysis procedure / your input.", sep=""), call.=FALSE)
+	}
+} # EOF
+
 ap_checExistence_Defaults <- function(ap, dataset) {
 	cPref <- .ap2$stn$p_ClassVarPref
 	yPref <- .ap2$stn$p_yVarPref
@@ -545,6 +556,7 @@ ap_checExistence_Defaults <- function(ap, dataset) {
 	ap <- ap_checkAquagramDefaults(ap, dataset$header)
 	ap <- ap_check_pca_defaults(ap, dataset$header)
 	ap <- ap_check_gp_generalPlottingDefaults(ap)
+	ap_check_dptModules(ap)
 	# add more default checking for other statistics here
 	return(ap)
 } # EOF
@@ -575,6 +587,14 @@ selectWls <- function(dataset, from, to) {
 	highInd <- max(which(wls <= to))
 	NIRsel <- dataset$NIR[,lowInd:highInd]
 	dataset$NIR <- NIRsel
+	minWls <- min(wls)
+	maxWls <- max(wls)
+	if (from < minWls) {
+		message(paste("The wavelength ", from, "nm is not available in the provided dataset.\nThe next highest available wavelength, ", minWls, "nm has been selected.", sep=""))
+	}
+	if (to > maxWls) {
+		message(paste("The wavelength ", to, "nm is not available in the provided dataset.\nThe next lowest available wavelength, ", maxWls, "nm has been selected.", sep=""))		
+	}
 	return(dataset)
 } # EOF
 
@@ -726,6 +746,35 @@ performExcludeOutliers <- function(dataset, siExOut, ap) {
 	return(dataset)
 } # EOF
 
+performDpt_Pre <- function(dataset, ap) {
+#	pv_dptModules <- c("smo", "snv", "msc", "osc", "1der", "2der", "deTr")
+	dptPre <- ap$dptModules$dptPre
+	pvMod <- pv_dptModules
+	if (!is.null(dptPre)) {
+		for (i in 1: length(dptPre)) {
+			if (dptPre[i] == pvMod[1]) { # smoothing
+				dataset <- do_sgolay(dataset)
+			} # end smoothing
+			##
+			if (dptPre[i] == pvMod[2]) { # snv
+				
+			} # end snv
+			##
+			
+			
+			
+			
+		} # end for i
+	} # end if
+	return(dataset)
+} # EOF
+
+performDpt_Post <- function(dataset, ap) {
+	
+	
+	return(dataset)
+} # EOF
+
 makeIdString <- function(siClass, siValue, siWlSplit, siCsAvg, siNoise, siExOut) {
 	# siClass and siValue come in as dataframes with one row and one or more columns
 	varString <- NULL
@@ -770,9 +819,12 @@ processSingleRow_CPT <- function(dataset, siClass, siValue, siWlSplit, siCsAvg, 
 		return("nixnox")
 	}
 	newDataset <- selectWls(newDataset, siWlSplit[1], siWlSplit[2])
+	newDataset <- performDpt_Pre(newDataset, ap)
 	newDataset <- performConSAvg(newDataset, siCsAvg)
 	newDataset <- performNoise(newDataset, siNoise)
 	newDataset <- performExcludeOutliers(newDataset, siExOut, ap)
+	newDataset <- performDpt_Post(newDataset, ap)
+	##
 	idString <- makeIdString(siClass, siValue, siWlSplit, siCsAvg, siNoise, siExOut)
 	out <- new("aquap_set", dataset=newDataset, idString=idString)
 	return(out)

@@ -31,9 +31,10 @@ The width and height of the resulting pdf can be set in the settings.
 }
 }
 \seealso{
-Other Plot functions: \code{\link{plot,aquap_data,ANY-method}},
+Other Plot functions: \code{\link{plot,aquap_cube,ANY-method}},
+  \code{\link{plot,aquap_data,ANY-method}},
   \code{\link{plot_aqg}}, \code{\link{plot_pca}},
-  \code{\link{plot_pls}}, \code{\link{plot}}
+  \code{\link{plot_pls}}
 
 Other SIMCA documentation: \code{\link{calc_sim_args}},
   \code{\link{plot_sim_args}}

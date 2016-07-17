@@ -302,7 +302,8 @@ getap_core_file <- function(fn="def") {
 	noise <- list(useNoise=e$spl.do.noise, useRaw=e$spl.noise.raw)
 #	if (e$spl.do.exOut == FALSE) {e$spl.exOut.raw <- TRUE} # just to be sure that one is true
 	exOut <- list(exOut=e$spl.do.exOut, exOutRaw=e$spl.exOut.raw, exOutVar=e$spl.exOut.var)
-	dpt <- list(csAvg=csAvg, noise=noise, excludeOutliers=exOut)
+	dptModules <- list(dptPre=e$dpt.pre, dptPost=e$dpt.post)
+	dpt <- list(csAvg=csAvg, noise=noise, excludeOutliers=exOut, dptModules=dptModules)
 	## 
 	pca <- list(doPCA=e$do.pca, colorBy=e$pca.colorBy, elci=e$pca.elci, elcolorBy=e$pca.elcolorBy, what=e$pca.what, pcs=e$pca.sc, pcSc=e$pca.sc.pairs, pcLo=e$pca.lo)
 	simca <- list(doSIMCA=e$do.sim, simcOn=e$sim.vars, simcK=e$sim.K)
@@ -403,13 +404,14 @@ getap <- function(fn="def", ...) {
 	###
 	# 	csAvg <- list(doAvg=e$spl.do.csAvg, useRaw=e$spl.csAvg.raw)
 	DP <- ap$dpt
-	modifyDPT <- function(spl.do.csAvg=DP$csAvg$doAvg, spl.csAvg.raw=DP$csAvg$useRaw, spl.do.noise=DP$noise$useNoise, spl.noise.raw=DP$noise$useRaw, spl.do.exOut=DP$excludeOutliers$exOut, spl.exOut.raw=DP$excludeOutliers$exOutRaw, spl.exOut.var=DP$excludeOutliers$exOutVar, ...) {
+	modifyDPT <- function(spl.do.csAvg=DP$csAvg$doAvg, spl.csAvg.raw=DP$csAvg$useRaw, spl.do.noise=DP$noise$useNoise, spl.noise.raw=DP$noise$useRaw, spl.do.exOut=DP$excludeOutliers$exOut, spl.exOut.raw=DP$excludeOutliers$exOutRaw, spl.exOut.var=DP$excludeOutliers$exOutVar, dpt.pre=DP$dptModules$dptPre, dpt.post=DP$dptModules$dptPost, ...) {
 		if (spl.do.csAvg == FALSE) {spl.csAvg.raw <- TRUE} # just to be sure that one is true
 		if (spl.do.noise == FALSE) {spl.noise.raw <- TRUE}
 		csAvg <- list(doAvg=spl.do.csAvg, useRaw=spl.csAvg.raw)
 		noise <- list(useNoise=spl.do.noise, useRaw=spl.noise.raw)
 		exOut <- list(exOut=spl.do.exOut, exOutRaw=spl.exOut.raw, exOutVar=spl.exOut.var)
-		return(list(csAvg=csAvg, noise=noise, excludeOutliers=exOut))
+		dptModules <- list(dptPre=dpt.pre , dptPost=dpt.post )
+		return(list(csAvg=csAvg, noise=noise, excludeOutliers=exOut, dptModules=dptModules))
 	} # EOIF
 	apMod$dpt <- modifyDPT(...)
 	###
@@ -485,5 +487,7 @@ getap <- function(fn="def", ...) {
 	} # EOIF
 	apMod$genPlot <- modifyGenPlot(...)
 	###	
+	ap_check_dptModules(apMod)
+	###
 	return(apMod)
 } # EOF

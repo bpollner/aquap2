@@ -5,6 +5,10 @@
 #'  available wavelengths will be used. Provide a character vector in the format 
 #'  "wlFrom-to-wlTo" (e.g. c("1000-to-2000", "1300-to-1600", ...)) 
 #'  to use all previously defined splits in these wavelengths.
+#' @param dpt.pre Character vector, which of the available modules of data 
+#' pre-treatments to apply. Leave at NULL for no additional data pre-treatment.
+#' Possible values are <%=r_listize(pv_dptModules)%>. For further information see
+#' \code{\link{dpt_modules}}.
 #' @param spl.do.exOut Logical. If exclusion of outliers should be performed.
 #' @param spl.exOut.raw Logical. If, should exclusion of outliers be performed, 
 #' the raw original data should be used as well; if set to TRUE, outliers will 
@@ -19,3 +23,7 @@
 #' @param spl.do.noise Logical. If artifical noise should be added to the dataset.
 #' @param spl.noise.raw  If, should the noise-test be performed, the raw data 
 #'  will be used as well in addition to the noise-data.
+#' @param dpt.post Character vector, which of the available modules of data 
+#' pre-treatments to apply. Leave at NULL for no additional data pre-treatment.
+#' Possible values are <%=r_listize(pv_dptModules)%>. For further information see
+#' \code{\link{dpt_modules}}.

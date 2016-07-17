@@ -22,7 +22,8 @@ You can change the defaults for the folder names in the settings file.
 \seealso{
 \code{\link{settings_file}}
 
-Other Helper Functions: \code{\link{instAquap2Examples}},
+Other Helper Functions: \code{\link{getCubeDataset}},
+  \code{\link{instAquap2Examples}},
   \code{\link{printStdColnames}}, \code{\link{saveAQdata}},
   \code{\link{updateAquap}}, \code{\link{updateSettings}}
 }

@@ -45,7 +45,8 @@ plotSpectra_inner <- function(dataset, singleColorBy, onMain, onSub) {
 	matplot(wls, t(dataset$NIR), type="l", xlab="Wavelengths", ylab="Absorbance", main=onMain, sub=onSub, col=color)
 	abline(h=0, col="gray")
 	if (makeLegend) {
-		legend("topright", legend=legendTextExtended, col=legendCol[lto], lty=lty)
+		legBgCol <- rgb(255,255,255, alpha=.ap2$stn$col_alphaForLegends, maxColorValue=255) # is a white with alpha to be determined in the settings
+		legend("topright", legend=legendTextExtended, col=legendCol[lto], lty=lty, bg=legBgCol)
 	}
 } # EOF
 
@@ -129,7 +130,6 @@ plot_spectra_Cube <- function(x, colorBy=NULL, ...) {
 #' cube <- gdmm(gfd())
 #' plot_spectra(cube)
 #' }
-#' @docType methods
 #' @family Plot functions
 #' @family Plot arguments
 #' @name plot_spectra

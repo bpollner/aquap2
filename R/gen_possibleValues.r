@@ -3,9 +3,9 @@ pv_AquagramModes <- c("classic", "classic-diff", "sfc", "sfc-diff", "aucs", "auc
 
 
 
-## plotting the cube
+## regarding cube
 pv_what_subPlots <- c("all", "pca", "sim", "pls", "aqg")
-
+pv_what_models <- c("pca", "sim", "pls") # what possible values for arguments when retrieving the models using getCubeModel
 
 ## PCA plotting
 pv_pca_what <- c("both", "scores", "loadings")
@@ -21,7 +21,7 @@ pv_fsa_fss <- c("both", "only")
 ############
 ## complete possible values for modifying via ...
 pv_modifyUCL <- c("spl.var", "spl.wl")
-pv_modifyDPT <- c("spl.do.csAvg", "spl.csAvg.raw", "spl.do.noise", "spl.noise.raw", "spl.do.exOut", "spl.exOut.raw", "spl.exOut.var")
+pv_modifyDPT <- c("spl.do.csAvg", "spl.csAvg.raw", "spl.do.noise", "spl.noise.raw", "spl.do.exOut", "spl.exOut.raw", "spl.exOut.var", "dpt.pre", "dpt.post")
 pv_modifyPCA<-c("do.pca", "pca.colorBy", "pca.elci", "pca.elcolorBy", "pca.what", "pca.sc", "pca.sc.pairs", "pca.lo")
 pv_modifySIMCA<-c("do.sim", "sim.vars", "sim.K")
 pv_modifyPLSR<-c("do.pls", "pls.regOn", "pls.ncomp", "pls.valid", "pls.colorBy")
@@ -32,3 +32,7 @@ pv_tripleDotsMod <- c(pv_modifyUCL, pv_modifyDPT, pv_modifyPCA, pv_modifySIMCA, 
 
 ## import, filetype etc.
 pv_filetypes <- c("vision_NSAS.da", "tabDelim.txt", "Pirouette.pir")
+
+
+## Data pre-treatment moduls
+pv_dptModules <- c("smo", "snv", "msc", "osc", "1der", "2der", "deTr")

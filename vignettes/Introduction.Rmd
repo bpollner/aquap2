@@ -105,6 +105,9 @@ will then import the spectral data, import the class- and numerical variables fr
 
 See the help for `?gfd` and [here](importing_data.html) for more information and some examples on data import.
 
+### Data pre-treatment functions
+There are several data pre-treatment functions available. XXX
+
 
 ### Generate Dataset and Make Models
 The previously obtained dataset now can be split up / grouped as specified in the analysis procedure, and several statistical models can be calculated on each of the split-versions of the dataset.

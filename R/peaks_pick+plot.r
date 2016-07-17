@@ -186,7 +186,8 @@ plotPickResults <- function (pickResults, onMain="", onSub="", pcaVariances=NULL
 	#
 	matplot(wavelengths, t(pickResults$rawVector), type="l", ylab="Coefficient", main=onMain, sub=onSubText, col=ColorYea, ylim=ylim, lty=clt) #### here the matplot
 	abline(0,0, col="gray")
-	legend("topright", legend=legendText, lty=clt, col=ColorYea, lwd=2.5) 	#### XXX legend problem here
+	legBgCol <- rgb(255,255,255, alpha=.ap2$stn$col_alphaForLegends, maxColorValue=255) # is a white with alpha to be determined in the settings
+	legend("topright", legend=legendText, lty=clt, col=ColorYea, lwd=2.5, bg=legBgCol) 	#### XXX legend problem here
 	#
 #	colPosDynamic <- colNegDynamic <- vector("integer", (nrow(positionTable)/2))
 	for (i in 1: nrow(positionTable)) {

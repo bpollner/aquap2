@@ -16,6 +16,7 @@ in the .Renviron file. (see \code{\link{updateSettings}})
 }
 \seealso{
 Other Helper Functions: \code{\link{genFolderStr}},
+  \code{\link{getCubeDataset}},
   \code{\link{printStdColnames}}, \code{\link{saveAQdata}},
   \code{\link{updateAquap}}, \code{\link{updateSettings}}
 }

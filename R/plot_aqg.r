@@ -215,7 +215,8 @@ plotAvgSpectra <- function(avgSpectra, onSub, onMain, nrCorr, possNrPartic, ncpw
 	} 
 	matplot(wls, t(avgSpectra$NIR), type="l", lty=1, col=Color, xlab="Wavelength", ylab="avg Absorbance", sub=onSub, main=onMain)
 	abline(h=0, col="gray")
-	legend("topright", legend=rownames(avgSpectra), col=Color, lwd=2.5, lty=1)
+	legBgCol <- rgb(255,255,255, alpha=.ap2$stn$col_alphaForLegends, maxColorValue=255) # is a white with alpha to be determined in the settings
+	legend("topright", legend=rownames(avgSpectra), col=Color, lwd=2.5, lty=1, bg=legBgCol)
 	mtext(mText, 4)
 } # EOF
 
@@ -251,8 +252,9 @@ plotSubtrAvgSpectra <- function(subtrSpectra, onSub, onMain, nrCorr, possNrParti
 	legendText <- paste("Minus:", minus)
 	matplot(wls, t(subtrSpectra$NIR), type="l", lty=1, col=Color, xlab="Wavelength", ylab="delta avg Absorbance", sub=onSub, main=onMain, ylim=ranSubtrSpec)
 	abline(h=0, col="gray")
-	legend("topright", legend=rownames(subtrSpectra), col=Color, lwd=2.5, lty=1)
-	legend("bottomleft", legend=legendText)
+	legBgCol <- rgb(255,255,255, alpha=.ap2$stn$col_alphaForLegends, maxColorValue=255) # is a white with alpha to be determined in the settings
+	legend("topright", legend=rownames(subtrSpectra), col=Color, lwd=2.5, lty=1, bg=legBgCol)
+	legend("bottomleft", legend=legendText, bg=legBgCol)
 	mtext(mText, 4)
 	if (adPeakPlot) {
 		NIRnice <- as.data.frame(matrix(subtrSpectra$NIR, nrow=nrow(subtrSpectra$NIR)))

@@ -4,24 +4,53 @@
 \alias{do_msc}
 \title{Perform MSC}
 \usage{
-do_msc(dataset, reference = NULL)
+do_msc(dataset, ref = NULL)
 }
 \arguments{
-\item{dataset}{An object of class 'aquap_data'}
+\item{dataset}{An object of class 'aquap_data" as produced by 
+\code{\link{gfd}} or as can be extracted from a 'cube' via 
+\code{\link{getCubeDataset}}.}
 
-\item{reference}{XXX}
+\item{ref}{An object of class 'aquap_data' containing a single spectrum,
+i.e. a single row (as e.g. produced by \code{\link{do_avg}}, or by 
+subscripting via '[]'). If no reference is provided, the average of all spectra 
+of the provided dataset is used as a reference for the baseline correction.}
 }
 \value{
-Returns the transformed dataset
+Returns the dataset with the transformed NIR data.
 }
 \description{
-Performs MSC on the provided data
+Performs MSC (multiplicative scatter correction) on the 
+provided dataset.
 }
 \details{
-The underlying function is \code{\link[pls]{msc}}.
+If no reference is provided, the average of all spectra of the provided
+dataset is used as a reference for the baseline correction. Provide a dataset 
+with a single spectrum (as e.g. produced by \code{\link{do_avg}}) to use this 
+as a reference for baseline correction.
+}
+\examples{
+\dontrun{
+fd <- gfd() # get the full dataset
+fd <- selectWls(fd, 1100, 1800)
+fd_msc <- do_msc(fd)
+plot(fd - fd_msc, pg.where="", pg.main="| msc subtracted")
+fd_msc_ref <- do_msc(fd, ref=fd[4]) # use the 4th row of fd as a reference
+plot(fd - fd_msc_ref, pg.where="", pg.main="| 4th row as reference")
+fd_msc_mq <- do_msc(fd, ref=do_avg(ssc(fd, C_Group=="MQ"))) # is assuming the 
+# existence of a column name "C_Group" and one or more of its values being "MQ"
+plot(fd - fd_msc_mq, pg.where="", pg.main="| average of MQ as reference")
+}
 }
 \seealso{
-Other Data pre-treatment functions: \code{\link{do_sgolay}},
-  \code{\link{selectWls}}, \code{\link{ssc}}
+\code{\link{ssc}} for sub-selecting in a datset using a specific 
+criterion.
+
+\code{\link{getCubeDataset}}
+
+Other Data pre-treatment functions: \code{\link{[,aquap_data-method}},
+  \code{\link{do_avg}}, \code{\link{do_emsc}},
+  \code{\link{do_sgolay}}, \code{\link{selectWls}},
+  \code{\link{ssc}}
 }
 

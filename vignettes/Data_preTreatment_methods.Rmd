@@ -1,0 +1,23 @@
+---
+title: "Data pre-treatment and methods"
+author: ""
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Data_preTreatment_methods}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}  
+---
+
+```{r, echo = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+[(back to introduction)](introduction.html)
+
+## Data pre-treatment
+XXX Explain here the possibilities for data pre-treatment
+
+## Methods for class 'aquap_data'
+XXX Exlain here the specially adapted methods like the [] and the '-' for subtracting datasets
+XXX Can also be used within the gdmm via the analysis procedure file -- explain this!

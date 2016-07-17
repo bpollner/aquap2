@@ -63,7 +63,9 @@ characters the values have to be enclosed in quotation marks - see examples.
  }
 }
 \seealso{
-Other Data pre-treatment functions: \code{\link{do_msc}},
-  \code{\link{do_sgolay}}, \code{\link{selectWls}}
+Other Data pre-treatment functions: \code{\link{[,aquap_data-method}},
+  \code{\link{do_avg}}, \code{\link{do_emsc}},
+  \code{\link{do_msc}}, \code{\link{do_sgolay}},
+  \code{\link{selectWls}}
 }
 

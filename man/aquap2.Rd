@@ -21,11 +21,11 @@ vignettes: \code{browseVignettes(package = "aquap2")}
 
 \section{Important Functions}{
  \code{\link{esl}}, \code{\link{gfd}} 
-\code{\link{gdmm}}
+\code{\link{gdmm}}, \code{\link{plot_cube}}
 }
 \examples{
 \dontrun{
-dataset <- gfd() # will load or import data
+ dataset <- gfd() # will load or import data
 cube <- gdmm(dataset) # split up the dataset and make models
 }
 
