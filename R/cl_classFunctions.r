@@ -39,12 +39,12 @@ showCube <- function(object) {
 	print(object@cp)
 } # EOF
 
-plot_cube_M <- function(x, ...) {
+plot_cube_M <- function(x, y, ...) {
   plot_cube(x, ...)
 } # EOF
 
-plot_spectra_Data_M <- function(x, colorBy=NULL, ...) {
-	plot_spectra_Data(x, colorBy, ...)
+plot_spectra_Data_M <- function(x, ...) {
+	plot_spectra_Data(x, ...)
 } # EOF
 
 plot_spectra_Cube_M <- function(x, colorBy=NULL, ...) {

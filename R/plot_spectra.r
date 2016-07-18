@@ -113,6 +113,7 @@ plot_spectra_Cube <- function(x, colorBy=NULL, ...) {
 #' produced for every dataset contained within the cube.
 #' @param x The standard dataset as produced by \code{\link{gfd}}, or a data-cube
 #' as produced by \code{\link{gdmm}}.
+#' @param y Will be ignored.
 #' @param colorBy Character vector, possible values are the class variables in 
 #' the dataset.
 #' @param ... Optional general plotting options as defined in 

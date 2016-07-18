@@ -8,7 +8,7 @@
 \alias{plot_spectra,aquap_data-method}
 \title{Plot Raw Spectra}
 \usage{
-\S4method{plot}{aquap_data,ANY}(x, colorBy = NULL, ...)
+\S4method{plot}{aquap_data,ANY}(x, y, ...)
 
 \S4method{plot_spectra}{aquap_data}(x, colorBy = NULL, ...)
 
@@ -18,11 +18,13 @@
 \item{x}{The standard dataset as produced by \code{\link{gfd}}, or a data-cube
 as produced by \code{\link{gdmm}}.}
 
-\item{colorBy}{Character vector, possible values are the class variables in 
-the dataset.}
+\item{y}{Will be ignored.}
 
 \item{...}{Optional general plotting options as defined in 
 \code{\link{plot_pg_args}}.}
+
+\item{colorBy}{Character vector, possible values are the class variables in 
+the dataset.}
 }
 \description{
 Plot the raw spectra contained in the dataset or in the cube.
@@ -52,7 +54,7 @@ Other Plot arguments: \code{\link{plot_aqg_args}},
   \code{\link{plot_pca_args}}, \code{\link{plot_pg_args}},
   \code{\link{plot_pls_args}}, \code{\link{plot_sim_args}}
 
-Other Plot functions: \code{\link{plot,aquap_cube,ANY-method}},
+Other Plot functions: \code{\link{plot,aquap_cube,raw-method}},
   \code{\link{plot_aqg}},
   \code{\link{plot_pca,aquap_cube-method}},
   \code{\link{plot_pls}}, \code{\link{plot_sim}}
