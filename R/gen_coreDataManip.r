@@ -20,6 +20,7 @@
 #' @family Data pre-treatment functions 
 #' @export
 do_sgolay <- function(dataset, p=2, n=21, m=0) {
+	autoUpS()
  	cns <- colnames(dataset$NIR)
 	rns <- rownames(dataset$NIR)
 	dataset$NIR <- t(apply(dataset$NIR, 1, signal::sgolayfilt, p=p, n=n, m=m))
@@ -45,6 +46,7 @@ do_sgolay <- function(dataset, p=2, n=21, m=0) {
 #' @family Data pre-treatment function
 #' @export
 do_snv <- function(dataset) {
+	autoUpS()
 	NIR <- t(scale(t(dataset$NIR),center=TRUE,scale=TRUE))
 	colnames(NIR) <- colnames(dataset$NIR)
 	rownames(NIR) <- rownames(dataset$NIR)
@@ -83,6 +85,7 @@ do_snv <- function(dataset) {
 #' @family Data pre-treatment functions 
 #' @export
 do_msc <- function(dataset, ref=NULL) {
+	autoUpS()
 	if (!is.null(ref)) {
 		if (class(ref) != "aquap_data") {
 			stop("Please provide an object of class 'aquap_data' to the argument 'ref'.", call.=FALSE)
@@ -121,6 +124,7 @@ do_msc <- function(dataset, ref=NULL) {
 #' @seealso \code{\link{getCubeDataset}}
 #' @export
 do_avg <- function(dataset) {
+	autoUpS()
 	NIR <- matrix(apply(dataset$NIR, 2, mean), nrow=1)
 	colnames(NIR) <- colnames(dataset$NIR)
 	dsNew <- dataset[1,]
@@ -129,12 +133,13 @@ do_avg <- function(dataset) {
 } # EOF
 
 ### input is a data frame with one or 2 loading vectors or one regression vector
-calc_emsc <- function(dataset, vecLoad) { ## this one possibly used "external"
-	input <- vecLoad
-	a <- colnames(dataset$NIR)
+calc_emsc <- function(dataset, input) { ## this one possibly used "external"
+	autoUpS()
+	cnsWls <- colnames(dataset$NIR)
+	rns <- rownames(dataset$NIR)
 	NIRdata <- dataset$NIR
+	class(NIRdata) <- "matrix"
 	wls <- getWavelengths(dataset)
-#	wls <- substr(a, get("stngs")$nrCharPrevWL+1, nchar(a))		## to get rid of the "w" in front of the numbers
 	ColMeansNIR <- colMeans(NIRdata)
 	if (ncol(input) == 1) {
 		Xcal1 <- cbind(rep(1, ncol(NIRdata)), ColMeansNIR, input[1])
@@ -158,7 +163,8 @@ calc_emsc <- function(dataset, vecLoad) { ## this one possibly used "external"
 		} # end for i
 		 Ycor2 <- out <- Ycor2_tmp[-1,]
     } # all is done
-	colnames(Ycor2) <- paste("w", wls, sep="")
+	colnames(Ycor2) <- cnsWls
+	rownames(Ycor2) <- rns
 	out <- as.data.frame(Ycor2)
 	return(out)
 } # EOF
@@ -179,6 +185,7 @@ calc_emsc <- function(dataset, vecLoad) { ## this one possibly used "external"
 #' @family Data pre-treatment functions 
 #' @export
 do_emsc <- function(dataset, vecLoad=NULL) {
+	autoUpS()
 	input <- as.data.frame(vecLoad)
 	if (ncol(input) > 2) {
 		stop("At the moment, not more than 2 effects can be removed from the data. Please be a bit more content.", call.=FALSE)
@@ -186,10 +193,10 @@ do_emsc <- function(dataset, vecLoad=NULL) {
 	if (is.null(vecLoad)) {
 		stop("Please provide a data frame with one or two loading vectors or one regression vector to the argument 'vecLoad'", call.=FALSE)
 	}
-	NIR <- as.matrix(calc_emsc(dataset, vecLoad))
+	NIR <- as.matrix(calc_emsc(dataset, input))
 	rownames(NIR) <- rownames(dataset)
 	colnames(NIR) <- colnames(dataset$NIR)
-	dataset$NIR <- NIR
+	dataset$NIR <- I(NIR)
 	return(dataset)	
 } #EOF
 

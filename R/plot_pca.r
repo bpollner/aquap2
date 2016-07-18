@@ -259,7 +259,7 @@ plot_pca <- function(cube, ld.bandwidth="def", ld.adLines="def", ld.col="def", l
 	autoUpS()
 #	ap <- getap(.lafw_fromWhere="cube", cube=cube, ...)			 # the ... are here used for additionally modifying (if matching arguments) the analysis procedure obtained from the cube
 	ap <- getap(...) # load from file, possibly modify via ...
-	ap <- ap_cleanZeroValuesCheckExistenceDefaults(ap, dataset=getDataset(cube[[1]])) # just take the first dataset, as we mainly need the header (and the wavelengths are already checked.. )
+	ap <- ap_cleanZeroValuesCheckExistenceDefaults(ap, dataset=getDataset(cube[[1]]), haveExc=FALSE) # just take the first dataset, as we mainly need the header (and the wavelengths are already checked.. )
 	if (is.null(ap$pca)) {
 		return(cat("*** PCA model not available or not selected for plotting \n"))
 	}
@@ -280,6 +280,32 @@ plot_pca <- function(cube, ld.bandwidth="def", ld.adLines="def", ld.col="def", l
 	if (any(c(pv[1], pv[3]) %in% what)) { # loadings
 		plotPCA_Loadings(cube, ap, where, comps=pcLo, onMain, onSub, fns, bandwidth=ld.bandwidth, adLines=ld.adLines, ccol=ld.col, clty=ld.lty)	
 	}
+} # EOF
+
+setAllSplitVarsToNull <- function(ap) {
+	ucl <- list(splitClasses=NULL, splitWl=NULL)
+	ap$ucl=ucl
+	ap$dpt$csAvg$doAvg <- FALSE
+	ap$dpt$csAvg$useRaw <- TRUE
+	ap$dpt$noise$useNoise <- FALSE
+	ap$dpt$noise$useRaw <- TRUE
+	ap$dpt$excludeOutliers$exOut <- FALSE
+	ap$dpt$excludeOutliers$exOutRaw <- FALSE
+	ap$dpt$excludeOutliers$exOutVar <- NULL
+	dptModules <- list(dptPre=NULL, dptPost=NULL)
+	ap$dpt$dptModules=dptModules
+	return(ap)	
+} # EOF
+
+
+calc_plot_pca_dataset <- function(dataset, ap=getap(), ...) {
+	autoUpS()
+	ap <- setAllSplitVarsToNull(ap)
+	prev <- .ap2$stn$allSilent
+	.ap2$stn$allSilent <<- TRUE
+	cube <- gdmm(dataset, ap=ap)
+	.ap2$stn$allSilent <<- prev
+	plot_pca(cube, ...)
 } # EOF
 
 

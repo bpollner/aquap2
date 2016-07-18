@@ -496,34 +496,45 @@ ap_check_dptModules <- function(ap) {
 	}
 } # EOF
 
-ap_checExistence_Defaults <- function(ap, dataset) {
+ap_checExistence_Defaults <- function(ap, dataset, haveExc) {
 	cPref <- .ap2$stn$p_ClassVarPref
 	yPref <- .ap2$stn$p_yVarPref
-	outlierChar <- .ap2$stn$p_outlierCol # we have to define an exception for the checking the existence
+	if (haveExc) {	
+		outlierChar <- .ap2$stn$p_outlierCol # we have to define an exception for the checking the existence
+	} else {
+		outlierChar <- NULL
+	}
 	cns <- colnames(dataset$header)
+	#
 	checkEx <- function(charVec, where, what, exc=outlierChar) {
-		a <- which(!charVec %in% cns) # gives back the indices of the charVec that is not in the colnames
+		aa <- which(!charVec %in% cns) # gives back the indices of the charVec that is not in the colnames
 		if (!is.null(exc)) { # so if we want to allow an exception
-			allNotHere <- charVec[a]
-			excOK <- all(grepl(exc, allNotHere))
-			if (excOK) { # 
-				a <- vector("numeric", length=0)
+			allNotHere <- charVec[aa]
+			onlyExceptions <- allNotHere[grep(exc, allNotHere)] # now isolate the exceptions from all not here
+			if (length(onlyExceptions) == 0) {
+				excOK <- FALSE
 			} else {
-				a <- vector("numeric", length=1)
+				excOK <- all(grepl(exc, onlyExceptions)) # exc has length 1 !!
 			}
-		}
-		if (length(a) != 0) {
-			vars <- paste(charVec[a], collapse=", ")
+			if (excOK) { # 
+				remainingChar <- setdiff(allNotHere, onlyExceptions)
+			} else {
+				remainingChar <- allNotHere
+			}
+			aa <- which(charVec %in% remainingChar)
+		} # end !is.null(exc)
+		if (length(aa) != 0) {
+			vars <- paste(charVec[aa], collapse=", ")
 			stop(paste("Sorry, the variable \"", vars, "\" appears not to exist in your dataset. \nPlease check the ", where, " part of the analysis procedure / your input.", sep=""), call.=FALSE)
 		}
 		a <- substr(charVec, 1, nchar(what))
-		if (any(a != what)) {
+		if (any(aa != what)) {
 			stop(paste("Not all of the provided variables are of the the required type \"", what, "\".\nPlease check the ", where, " part of the analysis procedure / your input.", sep=""), call.=FALSE)
 		}
 	} # EOIF
 	checkEx(ap$ucl$splitClasses, "variable split", cPref)
 	checkEx(ap$dpt$excludeOutliers$exOutVar, "exclude outliers (variable)", cPref)
-	checkEx(ap$pca$colorBy, "PCA", cPref)
+	checkEx(ap$pca$colorBy, "PCA (colorBy)", cPref)
 	el2c <- ap$pca$elcolorBy
 	if (!is.null(el2c)) {
 		checkEx(el2c, "PCA (elcolorBy)", cPref)	
@@ -561,9 +572,9 @@ ap_checExistence_Defaults <- function(ap, dataset) {
 	return(ap)
 } # EOF
 
-ap_cleanZeroValuesCheckExistenceDefaults <- function(ap, dataset) {
+ap_cleanZeroValuesCheckExistenceDefaults <- function(ap, dataset, haveExc) {
 	ap <- ap_cleanOutZeroValues(ap, dataset)
-	ap <- ap_checExistence_Defaults(ap, dataset)
+	ap <- ap_checExistence_Defaults(ap, dataset, haveExc)
 	return(ap)
 } # EOF
 
@@ -673,7 +684,9 @@ performExcludeOutliers <- function(dataset, siExOut, ap) {
 	if (doExOut & keepRaw) {oneBlock <- FALSE; twoBlocks <- TRUE} else {oneBlock <- TRUE; twoBlocks <- FALSE}
 	cnOutlier <- .ap2$stn$p_outlierCol
 	cPref <- .ap2$stn$p_ClassVarPref
-	eovTitleChar <- paste(unlist(lapply(strsplit(eov, cPref), function(x) x[2])), collapse=".")
+	if (!is.null(eov)) { 
+		eovTitleChar <- paste(unlist(lapply(strsplit(eov, cPref), function(x) x[2])), collapse=".")
+	}
 	if (keepRaw | siExOut) {
 		kmax <- .ap2$stn$simca_kMax
 		tol <- .ap2$stn$simca_tolerance
@@ -952,7 +965,7 @@ gdmm <- function(dataset, ap=getap()) {
 		stop("Please provide an object of class 'aquap_data' to the argument 'dataset'.", call.=FALSE)
 	}
 	createOutlierFlagList() # needed to collect the flags and flag-data from the first block to the second
-	ap <- ap_cleanZeroValuesCheckExistenceDefaults(ap, dataset)
+	ap <- ap_cleanZeroValuesCheckExistenceDefaults(ap, dataset, haveExc=TRUE)
 	md <- getMdDs(dataset)
 	a <- makeCompPattern(dataset$header, md, ap)
 	cp <- a$cp

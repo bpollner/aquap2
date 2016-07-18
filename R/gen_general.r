@@ -481,6 +481,7 @@ instAquap2Examples <- function() {
 #' @family Data pre-treatment functions
 #' @export
 ssc <- function(dataset, criteria, include=TRUE, keepEC=FALSE) {
+	autoUpS()
 	cPref <- .ap2$stn$p_ClassVarPref
 	ecrmCol <- .ap2$stn$p_ECRMCol
 	ecLabel <- getMdDs(dataset)$postProc$ECRMLabel[1]
