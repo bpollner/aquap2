@@ -117,7 +117,7 @@ plot_spectra_Cube <- function(x, colorBy=NULL, ...) {
 #' the dataset.
 #' @param ... Optional general plotting options as defined in 
 #' \code{\link{plot_pg_args}}.
-#' @seealso \code{\link{plot}}
+#' @seealso \code{\link{plot_all_modells}}
 #' @examples
 #' \dontrun{
 #' plot_spectra(dataset)

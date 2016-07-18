@@ -2,8 +2,8 @@
 % Please edit documentation in R/cl_classDefs.r, R/plot_all.r
 \docType{methods}
 \name{plot,aquap_cube,ANY-method}
-\alias{plot}
 \alias{plot,aquap_cube,ANY-method}
+\alias{plot_all_modells}
 \alias{plot_cube}
 \title{*** Plot All Available Models ***}
 \usage{
@@ -49,6 +49,8 @@ arguments.
 }
 }
 \seealso{
+\code{\link{plot_spectra}}
+
 Other Core functions: \code{\link{exportSampleList}},
   \code{\link{gdmm}}, \code{\link{getFullData}}
 

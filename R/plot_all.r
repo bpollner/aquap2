@@ -1,4 +1,4 @@
-#' @rdname plot
+#' @rdname plot_all_modells
 #' @template mr_whatPlotSubtypes
 #' @export
 plot_cube <- function(x, what="all", ...) {
@@ -79,8 +79,8 @@ NULL
 #'  plot(cube, what="all") # the same as above
 #'  plot(cube, what="pca")
 #' }
+#' @seealso \code{\link{plot_spectra}}
 #' @family Core functions
 #' @family Plot functions
-#' @name plot
+#' @name plot_all_modells
 NULL
-

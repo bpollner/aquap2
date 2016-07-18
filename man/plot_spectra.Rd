@@ -46,7 +46,7 @@ plot_spectra(cube)
 }
 }
 \seealso{
-\code{\link{plot}}
+\code{\link{plot_all_modells}}
 
 Other Plot arguments: \code{\link{plot_aqg_args}},
   \code{\link{plot_pca_args}}, \code{\link{plot_pg_args}},
