@@ -18,15 +18,6 @@ pre-treatments to apply. Leave at NULL for no additional data pre-treatment.
 Possible values are 'smo', 'snv', 'msc', 'osc', '1der', '2der', 'deTr'. For further information see
 \code{\link{dpt_modules}}.}
 
-\item{spl.do.exOut}{Logical. If exclusion of outliers should be performed.}
-
-\item{spl.exOut.raw}{Logical. If, should exclusion of outliers be performed, 
-the raw original data should be used as well; if set to TRUE, outliers will 
-be flagged in the dataset in any case.}
-
-\item{spl.exOut.var}{Character vector. The variables that should be used 
-for the grouping defining the scope for outlier detection.}
-
 \item{spl.do.csAvg}{Logical. If all the consecutive scans of a single sample 
 should be reduced, i.e. averaged into a single spectrum.}
 
@@ -38,6 +29,15 @@ should be kept as well as well.}
 
 \item{spl.noise.raw}{If, should the noise-test be performed, the raw data 
 will be used as well in addition to the noise-data.}
+
+\item{spl.do.exOut}{Logical. If exclusion of outliers should be performed.}
+
+\item{spl.exOut.raw}{Logical. If, should exclusion of outliers be performed, 
+the raw original data should be used as well; if set to TRUE, outliers will 
+be flagged in the dataset in any case.}
+
+\item{spl.exOut.var}{Character vector. The variables that should be used 
+for the grouping defining the scope for outlier detection.}
 
 \item{dpt.post}{Character vector, which of the available modules of data 
 pre-treatments to apply. Leave at NULL for no additional data pre-treatment.

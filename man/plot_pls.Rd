@@ -36,7 +36,8 @@ Other PLSR documentation: \code{\link{calc_pls_args}},
 
 Other Plot functions: \code{\link{plot,aquap_cube,ANY-method}},
   \code{\link{plot,aquap_data,ANY-method}},
-  \code{\link{plot_aqg}}, \code{\link{plot_pca}},
+  \code{\link{plot_aqg}},
+  \code{\link{plot_pca,aquap_cube-method}},
   \code{\link{plot_sim}}
 }
 

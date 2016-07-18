@@ -213,52 +213,38 @@ plot_pca_checkDefaultsParams <- function(ld.bandwidth, ld.adLines, ld.col, ld.lt
 	##	
 } # EOF
 
-#' @title Plot PCA
-#' @description Plot PCA scoresplots and / or loadings.
-#' @details The width and height of the resulting pdf can be set in the settings.
-#' @param cube An object of class 'aquap_cube' as produced by \code{\link{gdmm}}.
-#' @param ld.bandwidth Character "def", or numeric length one. The bandwidth of 
-#' wavelengths used in the peak-picking process when plotting the loadings. If 
-#' left at the default "def", the value from the settings.r file 
-#' (parameter \code{pp_bandwidth}) is used.
-#' @param ld.adLines Logical, numeric or character 'def'. If set to \code{FALSE},
-#' no additional lines, if set to \code{TRUE} all the additional lines will be 
-#' plotted in the loading plot. If an integer vector [2..5] is provided, one or 
-#' more of the additional lines get plotted. See \code{\link{adLinesToVector}} 
-#' for details. If left at the default value 'def', the value from the 
-#' settings.r file (parameter \code{pca_AdLines}) is used.
-#' @param ld.col Character "def" or a valid color vector. A possible custom color 
-#' for coloring the loadings in the loading plot. When left at the default "def" 
-#' the value fromt the settings.r file is read in (parameter 
-#' \code{pca_ld_customColor}). Provide a color-vector to use these colors for 
-#' coloring the loading plot.
-#' @param ld.lty Character "def" or a positive integer vector indicating the 
-#' desired line types. When left at the default "def" the value from the 
-#' settings.r file is read in (parameter \code{pca_ld_customLinetype}).
-#' @param ... Optional pca plotting parameters to override the values in the 
-#'  analysis procedure - for possible arguments see 
-#'  \code{\link{plot_pca_args}}.
-#' @return A pdf or graphic device.
-#' @family Plot functions
-#' @family PCA documentation
-#' @examples
-#'  \dontrun{
-#'  dataset <- gfd()
-#'  cube <- gdmm(dataset)
-#'  plot(cube)
-#'  plot_pca(cube)
-#'  plot_pca(cube, ld.bandwidth=12) # for detecting more peaks
-#'  plot_pca(cube, ld.adLines=FALSE) # no additional lines in the loading plot 
-#'  plot_pca(cube, ld.adLines=c(2, 4) # only vertical lines and WAMACs in the 
-#'  # loading plot
-#'	plot_pca(cube, ld.col=c("red", "blue", "green"))
-#'	plot_pca(cube, ld.lty=c(1,2))
-#' }
-#'@export
-plot_pca <- function(cube, ld.bandwidth="def", ld.adLines="def", ld.col="def", ld.lty="def", ...) {
+checkApsChar <- function(aps) {
+	path <- .ap2$stn$fn_metadata
+	if (all(aps == "def")) {
+		aps <- .ap2$stn$gen_plot_anprocSource
+	}
+	if (!all(is.character(aps)) | length(aps) != 1) {
+		stop("Please provide a length one character to the argument 'aps' resp. the corresponding variable (gen_plot_anprocSource) in 'settings.r', thank you.", call.=FALSE)
+	}
+	if (aps == "cube") {
+		return(aps)
+	}
+	if (aps == "defFile") {
+		fn <- .ap2$stn$fn_anProcDefFile
+		ok <- file.exists(paste(path, fn, sep="/"))
+		if (!ok) {
+			stop(paste("The analysis procedure file \"", fn, "\" does not seem to exist. Please check your input.", sep=""), call.=FALSE)
+		}
+		return(fn)
+	}
+	return(aps) # so the only left option is a custom filename, that will be checked later	
+} # EOF
+
+#### CORE ###
+plot_pca_cube <- function(cube, aps="def", ld.bandwidth="def", ld.adLines="def", ld.col="def", ld.lty="def", ...) {
 	autoUpS()
-#	ap <- getap(.lafw_fromWhere="cube", cube=cube, ...)			 # the ... are here used for additionally modifying (if matching arguments) the analysis procedure obtained from the cube
-	ap <- getap(...) # load from file, possibly modify via ...
+	aps <- checkApsChar(aps)
+	if (aps == "cube") {
+		ap <- getap(.lafw_fromWhere="cube", cube=cube, ...)			 # the ... are here used for additionally modifying (if matching arguments) the analysis procedure obtained from the cube
+	} else {
+		check_apDefaults(fn=aps)
+		ap <- getap(fn=aps, ...) # load from file, possibly modify via ...
+	}
 	ap <- ap_cleanZeroValuesCheckExistenceDefaults(ap, dataset=getDataset(cube[[1]]), haveExc=FALSE) # just take the first dataset, as we mainly need the header (and the wavelengths are already checked.. )
 	if (is.null(ap$pca)) {
 		return(cat("*** PCA model not available or not selected for plotting \n"))
@@ -297,16 +283,98 @@ setAllSplitVarsToNull <- function(ap) {
 	return(ap)	
 } # EOF
 
-
-calc_plot_pca_dataset <- function(dataset, ap=getap(), ...) {
+## core for dataset ##
+plot_pca_data <- function(dataset, aps="def", ...) {
 	autoUpS()
+	aps <- checkApsChar(aps)
+	if (aps=="cube") {
+		message("'aps=cube' is not meaningful in this context, aps switched to be 'def', meaning the default anproc filename will be used.\nAll is good.")
+		aps <- "def"
+	}
+	check_apDefaults(fn=aps)
+	ap <- getap(fn=aps, ...)
 	ap <- setAllSplitVarsToNull(ap)
-	prev <- .ap2$stn$allSilent
-	.ap2$stn$allSilent <<- TRUE
+		prev <- .ap2$stn$allSilent
+		.ap2$stn$allSilent <<- TRUE
 	cube <- gdmm(dataset, ap=ap)
-	.ap2$stn$allSilent <<- prev
-	plot_pca(cube, ...)
+		.ap2$stn$allSilent <<- prev
+	plot_pca_cube(cube, aps="cube", ...)
 } # EOF
+
+
+#' @title Plot PCA
+#' @description Plot PCA scoresplots and / or loadings.
+#' @details By providing either an object of class "aquap_cube" or of class 
+#' "aqua_data" to the argument \code{object}, you can plot either the pca-modells 
+#' of the complete cube, or calculate and plot the pca-modell of a single dataset.
+#' By providing one or more of the \code{...} arguments you can override the 
+#' plotting values in the selected analysis procedure, see below.
+#' The width and height of the resulting pdf can be set in the settings.
+#' @param object An object of class "aquap_cube" (as produced by 
+#' \code{\link{gdmm}}) or of class "aqua_data" (as produced by 
+#' \code{\link{gfd}}, see also \code{\link{getCubeDataset}}).
+#' @param ... Optional pca plotting parameters to override the values in the 
+#'  analysis procedure - for possible arguments see 
+#'  \code{\link{plot_pca_args}} and here below:
+#'  \describe{
+#'  \item{aps}{Character length one. The default way to obtain the analysis 
+#'  procedure. Defaults to "def". Possible values are:
+#'  \describe{
+#'  \item{"def"}{The default from the settings.r file is taken. (Argument 
+#'  \code{gen_plot_anprocSource})}
+#'  \item{"cube"}{Take the analysis procedure from within the cube, i.e. the 
+#'  analysis procedure that was used when creating the cube via \code{\link{gdmm}}
+#'  is used.}
+#'  \item{"defFile"}{Use the analysis procedure with the default filename as 
+#'  specified in the settings.r file in \code{fn_anProcDefFile}.}
+#'  \item{Custom filename}{Provide any valid filename for an analysis procedure to 
+#'  use as input for specifying the plotting options.}
+#'  }}
+#'  \item{ld.bandwidth}{Character "def", or numeric length one. The bandwidth of 
+#' wavelengths used in the peak-picking process when plotting the loadings. If 
+#' left at the default "def", the value from the settings.r file 
+#' (parameter \code{pp_bandwidth}) is used.}
+#'  \item{ld.adLine}{Logical, numeric or character 'def'. If set to \code{FALSE},
+#' no additional lines, if set to \code{TRUE} all the additional lines will be 
+#' plotted in the loading plot. If an integer vector [2..5] is provided, one or 
+#' more of the additional lines get plotted. See \code{\link{adLinesToVector}} 
+#' for details. If left at the default value 'def', the value from the 
+#' settings.r file (parameter \code{pca_AdLines}) is used.}
+#'  \item{ld.col}{ Character "def" or a valid color vector. A possible custom color 
+#' for coloring the loadings in the loading plot. When left at the default "def" 
+#' the value fromt the settings.r file is read in (parameter 
+#' \code{pca_ld_customColor}). Provide a color-vector to use these colors for 
+#' coloring the loading plot.}
+#'  \item{ld.lty}{Character "def" or a positive integer vector indicating the 
+#' desired line types. When left at the default "def" the value from the 
+#' settings.r file is read in (parameter \code{pca_ld_customLinetype}).}
+#'  }
+#' @return A pdf or graphic device.
+#' @family Plot functions
+#' @family PCA documentation
+#' @seealso \code{\link{getCubeDataset}}
+#' @examples
+#'  \dontrun{
+#'  dataset <- gfd()
+#'  cube <- gdmm(dataset)
+#'  plot(cube)
+#'  plot_pca(cube)
+#'  plot_pca(cube, ld.bandwidth=12) # for detecting more peaks
+#'  plot_pca(cube, ld.adLines=FALSE) # no additional lines in the loading plot 
+#'  plot_pca(cube, ld.adLines=c(2, 4) # only vertical lines and WAMACs in the 
+#'  # loading plot
+#'	plot_pca(cube, ld.col=c("red", "blue", "green"))
+#'	plot_pca(cube, ld.lty=c(1,2))
+#'	###
+#'	plot_pca(cube, aps="cube") # to take the analysis procedure from the cube
+#'	plot_pca(cube, aps="myAnproc.r") # take a custom analysis procedure file
+#'	###
+#'	fd <- gfd()
+#'	plot_pca(fd, pg.where="")
+#'	plot_pca(fd, pg.where="", pca.colorBy="C_Group") # assumes existence of "C_Group"
+#' }
+#'@name plot_pca
+NULL
 
 
 #' @title Plot PCA - Arguments
@@ -318,6 +386,8 @@ calc_plot_pca_dataset <- function(dataset, ap=getap(), ...) {
 #' \code{plot(cube, ...)}
 #' 
 #' \code{plot_pca(cube, ...)}
+#' 
+#' \code{plot_pca(dataset, ...)}
 #' 
 #' @template mr_details_allParams
 #' @template mr_pca_plot_param

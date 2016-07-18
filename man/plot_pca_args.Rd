@@ -56,6 +56,8 @@ loading plots - see examples.
 \code{plot(cube, ...)}
 
 \code{plot_pca(cube, ...)}
+
+\code{plot_pca(dataset, ...)}
 }
 \details{
 For a list of all parameters that can be used in the \code{...} 
@@ -77,7 +79,7 @@ plot_pca(cube, pca.what="scores")
 \code{\link{plot_pca}}
 
 Other PCA documentation: \code{\link{calc_pca_args}},
-  \code{\link{plot_pca}}
+  \code{\link{plot_pca,aquap_cube-method}}
 
 Other Plot arguments: \code{\link{plot,aquap_data,ANY-method}},
   \code{\link{plot_aqg_args}}, \code{\link{plot_pg_args}},

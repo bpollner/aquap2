@@ -132,3 +132,11 @@ subtract_two_aquap_data_M <- function(e1, e2) { # e1 and e1 being each an object
 	} # end one has only one (1) row
 	stop("An error has occured at the subtraction of datasets, sorry.", call.=FALSE)
 } # EOF
+
+plot_pca_cube_M <- function(object, ...) {
+	plot_pca_cube(cube=object, ...)
+} # EOF
+
+plot_pca_data_M <- function(object, ...) {
+	plot_pca_data(dataset=object, ...)
+} # EOF

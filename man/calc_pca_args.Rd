@@ -39,7 +39,7 @@ Other Calc. arguments: \code{\link{calc_aqg_args}},
   \code{\link{calc_pls_args}}, \code{\link{calc_sim_args}},
   \code{\link{split_dataset}}
 
-Other PCA documentation: \code{\link{plot_pca_args}},
-  \code{\link{plot_pca}}
+Other PCA documentation: \code{\link{plot_pca,aquap_cube-method}},
+  \code{\link{plot_pca_args}}
 }
 
