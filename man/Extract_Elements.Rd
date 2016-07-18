@@ -36,7 +36,7 @@ header1 <- getHeader(cube[[1]]) # gets the header from the first dataset in
 }
 }
 \seealso{
-Other Extract Elements: \code{\link{getCubeDataset}},
-  \code{\link{getCubeModel}}
+Other Extract Elements: \code{\link{getcd}},
+  \code{\link{getcm}}
 }
 

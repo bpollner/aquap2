@@ -3,6 +3,42 @@
 \name{dpt_modules}
 \alias{dpt_modules}
 \title{Data pre-treatment modules}
+\arguments{
+\item{sgol}{Transform the dataset using the Savitzy-Golay 
+filter \code{\link[signal]{sgolay}}. Use a string in the format 
+"sgol@p-n-m", with p,n,m being integers to modify the 
+behaviour of \code{\link{do_sgolay}}, what is called internally.
+\describe{
+\item{p}{The filter order. Defaults to 2.}
+\item{n}{The filter length, must be odd. Defaults to 21.}
+\item{m}{Return the m-th derivative of the filter coefficients. Defaults to 0.}
+}}
+
+\item{snv}{Transform the dataset using standard normal 
+variation 'snv' by calling internally the function \code{\link{do_snv}}. No 
+additional arguments can be provided here.}
+
+\item{msc}{Transform the datset using multiplicative scatter 
+correction 'msc' \code{\link{do_msc}}. If no reference is provided, the average 
+of all spectra of a dataset is used as a reference for the baseline correction. 
+Provide a dataset with a single spectrum in the format 
+"msc@x" with "x" being a character length one naming an 
+existing object in your workspace containing an oject of class 
+\code{aquap_data} containing only one row, (as e.g. produced by 
+\code{\link{do_avg}}) to use this as a reference for baseline correction.
+\describe{
+\item{x}{Format: "msc@x", with 'x' being a character length 
+one naming an existing object in your workspace containing an oject of class 
+\code{aquap_data} with only one row. See also \code{\link{do_avg}}.}
+}}
+
+\item{emsc}{Transform the datset using 'emsc' 
+\code{\link{do_emsc}}. XXX}
+
+\item{osc}{XXX}
+
+\item{deTr}{XXX}
+}
 \description{
 Apply one or more data pre-treatment modules to the dataset.
 The data pre-treatment can either happen right after the wavelength-split and
@@ -11,7 +47,31 @@ after the generation of the datasets via \code{\link{gdmm}} (\code{dpt.post}).
 }
 \details{
 Via the ... argument in the function \code{\link{getap}}, the values
-of both \code{dpt.pre} and \code{dpt.post} can be overridden. Possible values
-are 'smo', 'snv', 'msc', 'osc', '1der', '2der', 'deTr'.
+of both \code{dpt.pre} and \code{dpt.post} can be overridden. Via the 
+separator '@', additional values can be appended to some of the single modules. 
+Possible values are 'sgol', 'snv', 'msc', 'emsc', 'osc', 'deTr'.
+}
+\section{Important}{
+
+Please see \code{\link{split_dataset}} to understand \strong{when} in the 
+data-processing procedure the respective data treatment modules are applied!
+}
+\examples{
+\dontrun{
+## the argument 'dpt.pre' resp. 'dpt.post' in the analysis procedure could look 
+## like this:
+dpt.pre <- c("sgol@2-51-0")
+dpt.post <- c("sgol@2-51-0", "snv")
+dpt.post <- "msc"
+dpt.post <- "msc@myDS" # with 'myDS' being the name of a standard dataset 
+## containing 1 row
+}
+}
+\seealso{
+\code{\link{split_dataset}}, \code{\link{anproc_file}}
+
+Other dpt modules documentation: \code{\link{do_emsc}},
+  \code{\link{do_msc}}, \code{\link{do_sgolay}},
+  \code{\link{do_snv}}
 }
 

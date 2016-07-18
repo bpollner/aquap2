@@ -9,7 +9,7 @@ do_avg(dataset)
 \arguments{
 \item{dataset}{An object of class 'aquap_data" as produced by 
 \code{\link{gfd}} or as can be extracted from a 'cube' via 
-\code{\link{getCubeDataset}}.}
+\code{\link{getcd}}.}
 }
 \value{
 A standard dataset with a single row.
@@ -33,7 +33,7 @@ plot(fd - fd_avg, pg.where="", pg.main="| avg subtracted")
 }
 }
 \seealso{
-\code{\link{getCubeDataset}}
+\code{\link{getcd}}
 
 Other Data pre-treatment functions: \code{\link{[,aquap_data-method}},
   \code{\link{do_emsc}}, \code{\link{do_msc}},

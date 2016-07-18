@@ -312,7 +312,7 @@ plot_pca_data <- function(dataset, aps="def", ...) {
 #' The width and height of the resulting pdf can be set in the settings.
 #' @param object An object of class "aquap_cube" (as produced by 
 #' \code{\link{gdmm}}) or of class "aqua_data" (as produced by 
-#' \code{\link{gfd}}, see also \code{\link{getCubeDataset}}).
+#' \code{\link{gfd}}, see also \code{\link{getcd}}).
 #' @param ... Optional pca plotting parameters to override the values in the 
 #'  analysis procedure - for possible arguments see 
 #'  \code{\link{plot_pca_args}} and here below:
@@ -352,7 +352,7 @@ plot_pca_data <- function(dataset, aps="def", ...) {
 #' @return A pdf or graphic device.
 #' @family Plot functions
 #' @family PCA documentation
-#' @seealso \code{\link{getCubeDataset}}
+#' @seealso \code{\link{getcd}}
 #' @examples
 #'  \dontrun{
 #'  dataset <- gfd()

@@ -9,7 +9,7 @@ do_snv(dataset)
 \arguments{
 \item{dataset}{An object of class 'aquap_data" as produced by 
 \code{\link{gfd}} or as can be extracted from a 'cube' via 
-\code{\link{getCubeDataset}}.}
+\code{\link{getcd}}.}
 }
 \value{
 Returns the dataset with the transformed NIR data.
@@ -25,5 +25,10 @@ fd <- selectWls(fd, 1100, 1800)
 fd_snv <- do_snv(fd)
 plot(fd - fd_snv, pg.where="", pg.main="| snv subtracted")
 }
+}
+\seealso{
+Other dpt modules documentation: \code{\link{do_emsc}},
+  \code{\link{do_msc}}, \code{\link{do_sgolay}},
+  \code{\link{dpt_modules}}
 }
 

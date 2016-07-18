@@ -1,4 +1,4 @@
-### pv_what_models <- c("pca", "sim", "pls") # what possible values for arguments when retrieving the models using getCubeModel
+### pv_what_models <- c("pca", "sim", "pls") # what possible values for arguments when retrieving the models using getcm
 #' @details The default for \code{what} is "pca. Provide any of 
 #' <%=r_listize(pv_what_models)%> to obtain its corresponding model. Possible 
 #' values for \code{what} are:

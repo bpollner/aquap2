@@ -9,14 +9,14 @@ do_sgolay(dataset, p = 2, n = 21, m = 0)
 \arguments{
 \item{dataset}{An object of class 'aquap_data" as produced by 
 \code{\link{gfd}} or as can be extracted from a 'cube' via 
-\code{\link{getCubeDataset}}.}
+\code{\link{getcd}}.}
 
-\item{p}{Numeric length one, the order of the filter.}
+\item{p}{Numeric length one, the order of the filter. Default = 2.}
 
-\item{n}{Numeric length one, the filter length, must be odd.}
+\item{n}{Numeric length one, the filter length, must be odd. Default = 21.}
 
 \item{m}{Numeric length one, Return the m-th derivative of the filter 
-coefficients.}
+coefficients. Default = 0.}
 }
 \value{
 Returns the dataset with the NIR-data smoothed or transformed.
@@ -41,5 +41,9 @@ Other Data pre-treatment functions: \code{\link{[,aquap_data-method}},
   \code{\link{do_avg}}, \code{\link{do_emsc}},
   \code{\link{do_msc}}, \code{\link{selectWls}},
   \code{\link{ssc}}
+
+Other dpt modules documentation: \code{\link{do_emsc}},
+  \code{\link{do_msc}}, \code{\link{do_snv}},
+  \code{\link{dpt_modules}}
 }
 

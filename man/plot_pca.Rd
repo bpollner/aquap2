@@ -14,7 +14,7 @@
 \arguments{
 \item{object}{An object of class "aquap_cube" (as produced by 
 \code{\link{gdmm}}) or of class "aqua_data" (as produced by 
-\code{\link{gfd}}, see also \code{\link{getCubeDataset}}).}
+\code{\link{gfd}}, see also \code{\link{getcd}}).}
 
 \item{...}{Optional pca plotting parameters to override the values in the 
  analysis procedure - for possible arguments see 
@@ -89,12 +89,12 @@ plot_pca(fd, pg.where="", pca.colorBy="C_Group") # assumes existence of "C_Group
 }
 }
 \seealso{
-\code{\link{getCubeDataset}}
+\code{\link{getcd}}
 
 Other PCA documentation: \code{\link{calc_pca_args}},
   \code{\link{plot_pca_args}}
 
-Other Plot functions: \code{\link{plot,aquap_cube,raw-method}},
+Other Plot functions: \code{\link{plot,aquap_cube,ANY-method}},
   \code{\link{plot,aquap_data,ANY-method}},
   \code{\link{plot_aqg}}, \code{\link{plot_pls}},
   \code{\link{plot_sim}}

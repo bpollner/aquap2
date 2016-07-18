@@ -4,11 +4,11 @@
 #' @details The underlying function is \code{\link[signal]{sgolayfilt}}.
 #' @param dataset An object of class 'aquap_data" as produced by 
 #' \code{\link{gfd}} or as can be extracted from a 'cube' via 
-#' \code{\link{getCubeDataset}}.
-#' @param p Numeric length one, the order of the filter.
-#' @param n Numeric length one, the filter length, must be odd.
+#' \code{\link{getcd}}.
+#' @param p Numeric length one, the order of the filter. Default = 2.
+#' @param n Numeric length one, the filter length, must be odd. Default = 21.
 #' @param m Numeric length one, Return the m-th derivative of the filter 
-#' coefficients.
+#' coefficients. Default = 0.
 #' @return Returns the dataset with the NIR-data smoothed or transformed.
 #' @examples
 #' \dontrun{
@@ -18,6 +18,7 @@
 #' plot(fd - fd_avg, pg.where="", pg.main="| smoothed subtracted")
 #' }
 #' @family Data pre-treatment functions 
+#' @family dpt modules documentation
 #' @export
 do_sgolay <- function(dataset, p=2, n=21, m=0) {
 	autoUpS()
@@ -44,6 +45,7 @@ do_sgolay <- function(dataset, p=2, n=21, m=0) {
 #' plot(fd - fd_snv, pg.where="", pg.main="| snv subtracted")
 #' }
 #' @family Data pre-treatment function
+#' @family dpt modules documentation
 #' @export
 do_snv <- function(dataset) {
 	autoUpS()
@@ -60,7 +62,8 @@ do_snv <- function(dataset) {
 #' @details If no reference is provided, the average of all spectra of the provided
 #' dataset is used as a reference for the baseline correction. Provide a dataset 
 #' with a single spectrum (as e.g. produced by \code{\link{do_avg}}) to use this 
-#' as a reference for baseline correction.
+#' as a reference for baseline correction. Internally, the function 
+#' \code{\link[pls]{msc}} is used.
 #' @inheritParams do_sgolay
 #' @param ref An object of class 'aquap_data' containing a single spectrum,
 #' i.e. a single row (as e.g. produced by \code{\link{do_avg}}, or by 
@@ -81,8 +84,9 @@ do_snv <- function(dataset) {
 #' # existence of a column name "C_Group" and one or more of its values being "MQ"
 #' plot(fd - fd_msc_mq, pg.where="", pg.main="| average of MQ as reference")
 #' }
-#' @seealso \code{\link{getCubeDataset}}
+#' @seealso \code{\link{getcd}}
 #' @family Data pre-treatment functions 
+#' @family dpt modules documentation
 #' @export
 do_msc <- function(dataset, ref=NULL) {
 	autoUpS()
@@ -92,6 +96,9 @@ do_msc <- function(dataset, ref=NULL) {
 		}
 		if (nrow(ref) != 1) {
 			stop("Please provide a dataset with only one single row, i.e. only one single spectrum, to the argument 'ref'.", call.=FALSE)
+		}
+		if (ncol(ref$NIR) != ncol(dataset$NIR)) {
+			stop("Please provide a dataset containing the same number of wavelenghts to the argument 'ref'", call.=FALSE)
 		}
 		refInput <- as.numeric(ref$NIR)
 	} else {
@@ -121,7 +128,7 @@ do_msc <- function(dataset, ref=NULL) {
 #' plot(fd - fd_avg, pg.where="", pg.main="| avg subtracted")
 #' }
 #' @family Data pre-treatment functions 
-#' @seealso \code{\link{getCubeDataset}}
+#' @seealso \code{\link{getcd}}
 #' @export
 do_avg <- function(dataset) {
 	autoUpS()
@@ -180,9 +187,10 @@ calc_emsc <- function(dataset, input) { ## this one possibly used "external"
 #' @param vecLoad  A data frame x (\code{ncol(x) <= 2}) with one or two loading 
 #' vectors or one regression vector.
 #' @return Returns the dataset with the transformed NIR data.
-#' @seealso \code{\link{getCubeModel}} for easy extraction of single models where 
+#' @seealso \code{\link{getcm}} for easy extraction of single models where 
 #' loading vectors or a regression vector can be obtained.
 #' @family Data pre-treatment functions 
+#' @family dpt modules documentation
 #' @export
 do_emsc <- function(dataset, vecLoad=NULL) {
 	autoUpS()

@@ -53,6 +53,7 @@ stn <- list(
 	gen_versionCheckDataset = TRUE,			## if it should be checked if the dataset was created with an older version of package aquap2. Recommended value is TRUE.
 	gen_plot_anprocSource = "defFile", 		## the default way to obtain the analysis procedure when *PLOTTING*. Possible values are "cube" to take the analysis procedure from within the cube, "defFile" to load instead the default filename of the analysis procedure file, or provide a custom analysis procedure filename. (Ending in ".r")
 
+
 	## Import Data
 	imp_specFileType = "vision_NSAS.da",	## the filetype of the spectral data. Refer to the help for 'getFullData'  for possible values
 	imp_startDate = "2014-06-01 00:00:00",	## the start-date used to calculate the absolute number of minutes since then
@@ -84,7 +85,7 @@ stn <- list(
 	col_alphaForLegends = 220, 				## the value of the alpha channel to be used for the background of most legend boxes. Values can range from 1 to 255, with 1 being completely transparent, and 255 resulting in a completely intransparent white.
 
 	### smoothing ###
-	## settings for the Sav. Golay filter at the smoothing process
+	## settings for the Sav. Golay filter at the smoothing process for picking + plotting peaks
 	sm_savGolayOrder_p = 2, 				## 
 	sm_savGolayLength_n = 25,				## 
 	sm_savGolayDeriv_m = 0, 				## 

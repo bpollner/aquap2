@@ -39,7 +39,7 @@ showCube <- function(object) {
 	print(object@cp)
 } # EOF
 
-plot_cube_M <- function(x, y, ...) {
+plot_cube_M <- function(x, ...) {
   plot_cube(x, ...)
 } # EOF
 

@@ -9,7 +9,7 @@ do_emsc(dataset, vecLoad = NULL)
 \arguments{
 \item{dataset}{An object of class 'aquap_data" as produced by 
 \code{\link{gfd}} or as can be extracted from a 'cube' via 
-\code{\link{getCubeDataset}}.}
+\code{\link{getcd}}.}
 
 \item{vecLoad}{A data frame x (\code{ncol(x) <= 2}) with one or two loading 
 vectors or one regression vector.}
@@ -27,12 +27,16 @@ said loadings / regr. vector. For example, from a pca-model the first and
 second loading vector can be extracted with \code{pcaModel$loadings[, c(1,2)]}.
 }
 \seealso{
-\code{\link{getCubeModel}} for easy extraction of single models where 
+\code{\link{getcm}} for easy extraction of single models where 
 loading vectors or a regression vector can be obtained.
 
 Other Data pre-treatment functions: \code{\link{[,aquap_data-method}},
   \code{\link{do_avg}}, \code{\link{do_msc}},
   \code{\link{do_sgolay}}, \code{\link{selectWls}},
   \code{\link{ssc}}
+
+Other dpt modules documentation: \code{\link{do_msc}},
+  \code{\link{do_sgolay}}, \code{\link{do_snv}},
+  \code{\link{dpt_modules}}
 }
 

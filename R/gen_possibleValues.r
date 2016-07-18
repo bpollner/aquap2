@@ -5,7 +5,7 @@ pv_AquagramModes <- c("classic", "classic-diff", "sfc", "sfc-diff", "aucs", "auc
 
 ## regarding cube
 pv_what_subPlots <- c("all", "pca", "sim", "pls", "aqg")
-pv_what_models <- c("pca", "sim", "pls") # what possible values for arguments when retrieving the models using getCubeModel
+pv_what_models <- c("pca", "sim", "pls") # what possible values for arguments when retrieving the models using getcm
 
 ## PCA plotting
 pv_pca_what <- c("both", "scores", "loadings")
@@ -35,4 +35,4 @@ pv_filetypes <- c("vision_NSAS.da", "tabDelim.txt", "Pirouette.pir")
 
 
 ## Data pre-treatment moduls
-pv_dptModules <- c("smo", "snv", "msc", "osc", "1der", "2der", "deTr")
+pv_dptModules <- c("sgol", "snv", "msc", "emsc", "osc", "deTr")

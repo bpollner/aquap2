@@ -9,7 +9,7 @@ do_msc(dataset, ref = NULL)
 \arguments{
 \item{dataset}{An object of class 'aquap_data" as produced by 
 \code{\link{gfd}} or as can be extracted from a 'cube' via 
-\code{\link{getCubeDataset}}.}
+\code{\link{getcd}}.}
 
 \item{ref}{An object of class 'aquap_data' containing a single spectrum,
 i.e. a single row (as e.g. produced by \code{\link{do_avg}}, or by 
@@ -27,7 +27,8 @@ provided dataset.
 If no reference is provided, the average of all spectra of the provided
 dataset is used as a reference for the baseline correction. Provide a dataset 
 with a single spectrum (as e.g. produced by \code{\link{do_avg}}) to use this 
-as a reference for baseline correction.
+as a reference for baseline correction. Internally, the function 
+\code{\link[pls]{msc}} is used.
 }
 \examples{
 \dontrun{
@@ -46,11 +47,15 @@ plot(fd - fd_msc_mq, pg.where="", pg.main="| average of MQ as reference")
 \code{\link{ssc}} for sub-selecting in a datset using a specific 
 criterion.
 
-\code{\link{getCubeDataset}}
+\code{\link{getcd}}
 
 Other Data pre-treatment functions: \code{\link{[,aquap_data-method}},
   \code{\link{do_avg}}, \code{\link{do_emsc}},
   \code{\link{do_sgolay}}, \code{\link{selectWls}},
   \code{\link{ssc}}
+
+Other dpt modules documentation: \code{\link{do_emsc}},
+  \code{\link{do_sgolay}}, \code{\link{do_snv}},
+  \code{\link{dpt_modules}}
 }
 

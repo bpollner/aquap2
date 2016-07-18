@@ -489,7 +489,12 @@ ap_check_dptModules <- function(ap) {
 	a <- ap$dpt$dptModules
 	prePost <- c(a$dptPre, a$dptPost)
 	pv <- pv_dptModules
-	a <- which(!prePost %in% pv) # gives back the indices of the elements of dptMods that are NOT within the possible values
+	if (!is.null(prePost)) {
+		prePostFirst <- unlist(lapply(strsplit(prePost, "@"), function(x) x[1])) # get only the characters before an eventual '@'
+	} else {
+		prePostFirst <- NULL
+	}
+	a <- which(!prePostFirst %in% pv) # gives back the indices of the elements of dptMods that are NOT within the possible values
 	if (length(a) != 0) { 
 		vars <- paste(prePost[a], collapse=", ")
 		stop(paste("Sorry, the dpt module \"", vars, "\" can not be recognized. Please check the 'dpt.pre' and 'dpt.post' parts of the analysis procedure / your input.", sep=""), call.=FALSE)
@@ -759,36 +764,88 @@ performExcludeOutliers <- function(dataset, siExOut, ap) {
 	return(dataset)
 } # EOF
 
-performDpt_Pre <- function(dataset, ap) {
-#	pv_dptModules <- c("smo", "snv", "msc", "osc", "1der", "2der", "deTr")
-	dptPre <- ap$dptModules$dptPre
-	pvMod <- pv_dptModules
-	if (!is.null(dptPre)) {
-		for (i in 1: length(dptPre)) {
-			if (dptPre[i] == pvMod[1]) { # smoothing
-				dataset <- do_sgolay(dataset)
-			} # end smoothing
-			##
-			if (dptPre[i] == pvMod[2]) { # snv
-				
+performDPT_Core <- function(dataset, dptSeq) {
+# dptSeq is the pre or post charcter string coming from ap$dpt$dptModules
+#pv_dptModules <- c("sgol", "snv", "msc", "emsc", "osc", "deTr")
+# the modules itself are already checked
+#print(dptSeq); 
+	pvMod <- pv_dptModules	
+	if (!is.null(dptSeq)) {
+	first <- unlist(lapply(strsplit(dptSeq, "@"), function(x) x[1])) # get only the characters before an eventual '@'
+		if (!.ap2$stn$allSilent) {
+			cat(paste("      Data treatment: ", paste(dptSeq, collapse=", "), "\n", sep=""))
+		}
+		for (i in 1: length(first)) {
+			###
+			if (first[i] == pvMod[1]) { # sgolay
+				if (!grepl("@", dptSeq[i])) {
+					stop("You must have the parameters of the Savitzky-Golay operation defined via the character 'sgol@p-n-m', with p, n, m being integers; n has to be odd.\nDefault values could be e.g. 2-21-0 for a mild smoothing. Please check the analysis procedure / your input.", call.=FALSE)
+				}
+				infoChar <- strsplit(dptSeq[i], "@")[[1]][[2]] # get only the second part of the module containing the numbers (still as character!)
+				options(warn=-1)
+				nums <- as.numeric(unlist(strsplit(infoChar, "-")))
+				options(warn=0)
+				if (any(is.na(nums))) {
+					stop("Please provide only integers as arguments to the Savitzky-Golay operation, e.g. sgol@2-51-0.\n Please check the analysis procedure / your input.", call.=FALSE)
+				}
+				if (length(nums) > 3) {
+					stop("Please provide only three integers as arguments to the Savitzky-Golay operation, e.g. sgol@2-51-0. \n Please check the analysis procedure / your input.", call.=FALSE)
+				}
+				dataset <- do_sgolay(dataset, p=nums[1], n=nums[2], m=nums[3])  # arguments: p=2, n=21, m=0)
+			} # end sgolay
+			####
+			if (first[i] == pvMod[2]) { # snv
+				dataset <- do_snv(dataset)  # no additional arguments here
 			} # end snv
-			##
-			
-			
-			
-			
+			if (first[i] == pvMod[3]) { # msc
+				vec <- NULL
+				if (grepl("@", dptSeq[i])) {
+					ords <- unlist(strsplit(dptSeq[i], "@"))[2] # 'one row dataset', get only the element after the '@', what should be an existing object in the workspace with a dataset containing only one row.
+					if (!exists(ords)) {
+						stop(paste("Sorry, the object with the name \"", ords, "\" does not seem to exist.\nPlease check the analysis procedure / your input (part data pre / post treatment)", sep=""), call.=FALSE)
+					}
+					if (class(eval(parse(text=ords))) != "aquap_data") {
+						stop(paste("Please make sure that the specified object \"", ords, "\" is of class 'aquap_data'", sep=""), call.=FALSE)
+					}
+					if (nrow(eval(parse(text=ords))) != 1) {
+						stop(paste("For successful ", pvMod[3], ", the provided dataset has to have only one row, while the dataset in object \"", ords, "\" is containing ", nrow(ords), " rows. \nPlease check the analysis procedure / your input (part data pre / post treatment)", sep=""), call.=FALSE)
+					}
+					vec <- eval(parse(text=ords)) # now get the provided object from workspace into 'vec'
+				} # end if grepl @ element			
+				dataset <- do_msc(dataset, vec) # one reference (a one-lined dataset)
+			} # end msc
+			####
+			if (first[i] == pvMod[4]) { # emsc
+				dataset <- do_emsc(dataset) # a data frame with max 2 columns (loadings or a regression vector
+			} # end emsc
+			if (first[i] == pvMod[5]) { # osc
+					## have osc here soon 				
+			} # end osc
+			if (first[i] == pvMod[6]) { # deTr
+					## have deTrend here soon 	
+			} # end deTrend
 		} # end for i
 	} # end if
+	return(dataset)	
+} # EOF
+
+performDpt_Pre <- function(dataset, ap) {
+	dptPre <- ap$dpt$dptModules$dptPre
+	dataset <- performDPT_Core(dataset, dptPre)
 	return(dataset)
 } # EOF
 
 performDpt_Post <- function(dataset, ap) {
-	
-	
+	dptPost <- ap$dpt$dptModules$dptPost
+	dataset <- performDPT_Core(dataset, dptPost)	
 	return(dataset)
 } # EOF
 
-makeIdString <- function(siClass, siValue, siWlSplit, siCsAvg, siNoise, siExOut) {
+makeIdString <- function(siClass, siValue, siWlSplit, siCsAvg, siNoise, siExOut, ap) {
+	dpt <- ap$dpt$dptModules
+	pre <- dpt$dptPre
+	pos <- dpt$dptPost
+	if (is.null(pre) & is.null(pos)) { dpt <- NULL } else { dpt <- 1 }
 	# siClass and siValue come in as dataframes with one row and one or more columns
 	varString <- NULL
 	for (i in 1: ncol(siClass)) {
@@ -816,12 +873,18 @@ makeIdString <- function(siClass, siValue, siWlSplit, siCsAvg, siNoise, siExOut)
 	} else {
 		exOut <- ""
 	}
+	if (!is.null(dpt)) {
+		more <- TRUE
+		dptOut <- "dpt "
+	} else {
+		dptOut <- ""
+	}
 	if (more) {
 		moreAdd <- ", "
 	} else {
 		moreAdd <- ""
 	}
-	easy <- paste(varString, "@", siWlSplit[1], "-to-", siWlSplit[2], moreAdd, csAvg, noise, exOut, sep="")
+	easy <- paste(varString, "@", siWlSplit[1], "-to-", siWlSplit[2], moreAdd, csAvg, noise, exOut, dptOut, sep="")
 	return(easy)
 } # EOF
 
@@ -838,7 +901,7 @@ processSingleRow_CPT <- function(dataset, siClass, siValue, siWlSplit, siCsAvg, 
 	newDataset <- performExcludeOutliers(newDataset, siExOut, ap)
 	newDataset <- performDpt_Post(newDataset, ap)
 	##
-	idString <- makeIdString(siClass, siValue, siWlSplit, siCsAvg, siNoise, siExOut)
+	idString <- makeIdString(siClass, siValue, siWlSplit, siCsAvg, siNoise, siExOut, ap)
 	out <- new("aquap_set", dataset=newDataset, idString=idString)
 	return(out)
 } # EOF
