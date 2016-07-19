@@ -588,8 +588,8 @@ getFullData <- function(md=getmd(), filetype="def", naString="NA", slType="def",
 	}
 	if(!is.null(dataset)) { # so the path existed and it could be loaded
 		if (.ap2$stn$gen_versionCheckDataset) {
-			if (dataset@version != as.character(packageVersion("aquap2"))) {
-				stop(paste("The dataset '", md$meta$expName, "' was made with a previous version of package 'aquap2'.\nPlease re-import the raw-data.", sep=""), call.=FALSE)
+			if (dataset@version != pv_versionDataset) {
+				stop(paste("The dataset '", md$meta$expName, "' was made with a different version of package 'aquap2' and so has a different structure than what is required now.\nPlease re-import the raw-data.\n(You can switch off the checking of the dataset-version in the settings-file at the parameter 'gen_versionCheckDataset'.)", sep=""), call.=FALSE)
 			}
 		}
 		if(!.ap2$stn$allSilent) {cat(paste("Dataset \"", md$meta$expName, "\" was loaded.\n", sep="")) }
@@ -631,11 +631,14 @@ getFullData <- function(md=getmd(), filetype="def", naString="NA", slType="def",
 	header <- headerFusion
 	fd <- data.frame(I(header), I(colRep), I(NIR))
 	fullData <- new("aquap_data", fd)
+
 #	fullData <- new("aquap_data")
 #	fullData@header <- headerFusion
 #	fullData@colRep <- colRep
 #	fullData@NIR <- NIR
-	fullData@version <- as.character(packageVersion("aquap2"))
+
+#	fullData@version <- as.character(packageVersion("aquap2")) # do not do this -- only change the info manualy here if really the structure of the dataset is different.
+	fullData@version <- pv_versionDataset # get from the constants -- change at the constants only if the structure of the dataset has changed !!! XXX
 	fullData@metadata <- md
 	fullData@ncpwl <- si$info$nCharPrevWl
 	if (stf) {

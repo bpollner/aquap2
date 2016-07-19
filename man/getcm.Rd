@@ -32,6 +32,12 @@ dataset from the cube}
  dataset from the cube}
 }
 }
+\section{Extracting Vectors}{
+
+To extract e.g. two loading vectors from a pca-model, you could use a code like 
+\code{loadingVectors <- pcaModel$loadings$[, c(1,2)]} to extract the first two 
+loading vectors from the model - see examples.
+}
 \examples{
 \dontrun{
 fd <- gfd()
@@ -39,6 +45,8 @@ cube <- gdmm(fd)
 # assumes that in the analysis procedure we have a split variable defined.
 fd_3_pca <- getcm(cube, 3)
 str(fd_3_pca)
+ld12 <- fd_3_pca$loadings[, c(1,2)] # extract the first two loadings
+ld24 <- fd_3_pca$loadings[, c(2,4)] # extract loadings 2 and 4
 fd_2_pls <- getcm(cube, 2, "pls")
 str(fd_2_pls)
 }

@@ -14,11 +14,11 @@ available wavelengths will be used. Provide a character vector in the format
 to use all previously defined splits in these wavelengths.}
 
 \item{dpt.pre}{Character vector, which of the available modules of data 
-pre-treatments to apply \strong{AFTER} the split by variable \code{spl.var} 
-and wavelength \code{spl.w.}, and \strong{BEFORE} splitting the datasets 
-according to the provided split-variables below (csAvg, noise, exOut). Leave 
-at NULL for no data pre-treatment. Possible values are 
-'sgol', 'snv', 'msc', 'emsc', 'osc', 'deTr'. Add additional parameters to \emph{some} of 
+pre-treatments to apply \strong{AFTER} a (possible) split by variable 
+\code{spl.var} and wavelength \code{spl.w.}, and \strong{BEFORE} a (possible) 
+splitting of the dataset according to the provided split-variables below 
+(csAvg, noise, exOut). Leave at NULL for no data pre-treatment. Possible values 
+are 'sgol', 'snv', 'msc', 'emsc', 'osc', 'deTr'. Add additional parameters to \emph{some} of 
 the single strings via the separator '@'. For further information and examples 
 see \code{\link{dpt_modules}}.}
 
@@ -44,10 +44,10 @@ be flagged in the dataset in any case.}
 for the grouping defining the scope for outlier detection.}
 
 \item{dpt.post}{Character vector, which of the available modules of data 
-pre-treatments to apply \strong{AFTER} splitting the dataset. Leave at NULL 
-for no additional data treatment. Possible values are 
+pre-treatments to apply \strong{AFTER} (possibly) splitting the dataset. Leave 
+at NULL for no additional data treatment. Possible values are 
 'sgol', 'snv', 'msc', 'emsc', 'osc', 'deTr'. Add additional parameters to some of the single 
-string via the separator '@'. For examples and further information see
+strings via the separator '@'. For examples and further information see
 \code{\link{dpt_modules}}.}
 }
 \description{
@@ -76,6 +76,8 @@ cube <- gdmm(dataset, getap(spl.wl="1300-to-1600")) # override 'spl.wl' in the
 }
 }
 \seealso{
+\code{\link{dpt_modules}}
+
 Other Calc. arguments: \code{\link{calc_aqg_args}},
   \code{\link{calc_pca_args}}, \code{\link{calc_pls_args}},
   \code{\link{calc_sim_args}}

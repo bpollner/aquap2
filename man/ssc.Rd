@@ -66,6 +66,6 @@ characters the values have to be enclosed in quotation marks - see examples.
 Other Data pre-treatment functions: \code{\link{[,aquap_data-method}},
   \code{\link{do_avg}}, \code{\link{do_emsc}},
   \code{\link{do_msc}}, \code{\link{do_sgolay}},
-  \code{\link{selectWls}}
+  \code{\link{dpt_modules}}, \code{\link{selectWls}}
 }
 

@@ -62,8 +62,10 @@ If left at the default value 'def', the default from the settings.r file
 \item{aqg.discr}{Logical or character 'def'. If set to TRUE, negative (resp. 
 positive) peaks can be only found in peak-heights below (resp. above) zero.}
 
-\item{pg.where}{Character length one. For plotting PDFs provide "pdf", for 
-plotting to graphics device provide anything but "pdf".}
+\item{pg.where}{Character length one. If left at the default 'def', the value 
+from the settings.r file is read in (parameter \code{gen_plot_pgWhereDefault}). 
+For plotting to PDFs provide "pdf", for plotting to graphics device provide 
+anything but "pdf".}
 
 \item{pg.main}{Character length one. The additional text on the title of each 
 single plot.}

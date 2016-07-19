@@ -199,7 +199,7 @@ do_emsc <- function(dataset, vecLoad=NULL) {
 		stop("At the moment, not more than 2 effects can be removed from the data. Please be a bit more content.", call.=FALSE)
 	}
 	if (is.null(vecLoad)) {
-		stop("Please provide a data frame with one or two loading vectors or one regression vector to the argument 'vecLoad'", call.=FALSE)
+		stop("Please provide a data frame with one or two loading vectors or one regression vector to the argument 'vecLoad' (do_emsc).", call.=FALSE)
 	}
 	NIR <- as.matrix(calc_emsc(dataset, input))
 	rownames(NIR) <- rownames(dataset)

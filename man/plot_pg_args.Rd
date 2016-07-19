@@ -4,8 +4,10 @@
 \alias{plot_pg_args}
 \title{Plot - General Plotting  Arguments}
 \arguments{
-\item{pg.where}{Character length one. For plotting PDFs provide "pdf", for 
-plotting to graphics device provide anything but "pdf".}
+\item{pg.where}{Character length one. If left at the default 'def', the value 
+from the settings.r file is read in (parameter \code{gen_plot_pgWhereDefault}). 
+For plotting to PDFs provide "pdf", for plotting to graphics device provide 
+anything but "pdf".}
 
 \item{pg.main}{Character length one. The additional text on the title of each 
 single plot.}

@@ -37,7 +37,7 @@ plot(fd - fd_avg, pg.where="", pg.main="| avg subtracted")
 
 Other Data pre-treatment functions: \code{\link{[,aquap_data-method}},
   \code{\link{do_emsc}}, \code{\link{do_msc}},
-  \code{\link{do_sgolay}}, \code{\link{selectWls}},
-  \code{\link{ssc}}
+  \code{\link{do_sgolay}}, \code{\link{dpt_modules}},
+  \code{\link{selectWls}}, \code{\link{ssc}}
 }
 

@@ -478,6 +478,15 @@ ap_check_gp_generalPlottingDefaults <- function(ap) {
 		} # EOIF
 		###
 		checkForLengthOneChar(pg$where, "pg.where")
+		if (pg$where == "def") {
+			aa <- .ap2$stn$gen_plot_pgWhereDefault
+		} else {
+			aa <- pg$where
+		}
+		if (aa == "pdf" | aa == "PDF") {
+			aa <- "pdf"
+		} # now we should either have 'pdf' or anything else one character
+		ap$genPlot$where <- aa
 		checkForLengthOneChar(pg$onMain, "pg.main")
 		checkForLengthOneChar(pg$onSub, "pg.sub")
 		checkForLengthOneChar(pg$fns, "pg.fns")
@@ -802,7 +811,7 @@ performDPT_Core <- function(dataset, dptSeq) {
 				if (grepl("@", dptSeq[i])) {
 					ords <- unlist(strsplit(dptSeq[i], "@"))[2] # 'one row dataset', get only the element after the '@', what should be an existing object in the workspace with a dataset containing only one row.
 					if (!exists(ords)) {
-						stop(paste("Sorry, the object with the name \"", ords, "\" does not seem to exist.\nPlease check the analysis procedure / your input (part data pre / post treatment)", sep=""), call.=FALSE)
+						stop(paste(pvMod[3], "@", ords, ":Sorry, the object with the name \"", ords, "\" does not seem to exist.\nPlease check the analysis procedure / your input (part data pre / post treatment)", sep=""), call.=FALSE)
 					}
 					if (class(eval(parse(text=ords))) != "aquap_data") {
 						stop(paste("Please make sure that the specified object \"", ords, "\" is of class 'aquap_data'", sep=""), call.=FALSE)
@@ -816,13 +825,34 @@ performDPT_Core <- function(dataset, dptSeq) {
 			} # end msc
 			####
 			if (first[i] == pvMod[4]) { # emsc
-				dataset <- do_emsc(dataset) # a data frame with max 2 columns (loadings or a regression vector
+				lvObj <- NULL
+				if (!grepl("@", dptSeq[i])) {
+					stop(paste("Sorry, you have to provide the name of an object containing a data frame with one or two loadings or with one regression vector for successful '", pvMod[4], "'.\nDo this in the format \"", pvMod[4], "@myObj\", with 'myObj' being the name of an existing data frame with max. 2 columns containing two loadings or one regression vector.\nPlease see ?dpt_modules for further details.", sep=""), call.=FALSE) 
+				}
+				loadvecObjChar <- unlist(strsplit(dptSeq[i], "@"))[2] # the object containing the data frame with max 2 rows (up to two loading vectors or one regression vector).
+				if (!exists(loadvecObjChar)) {
+						stop(paste(pvMod[4], "@", loadvecObjChar, ": Sorry, the object with the name \"", loadvecObjChar, "\" does not seem to exist.\nPlease check the analysis procedure / your input (part data pre / post treatment); see ?dpt_modules for further details.", sep=""), call.=FALSE)					
+				} 
+				lvObj <- eval(parse(text=loadvecObjChar)) # here get from the character only the real object
+				if (class(lvObj) != "matrix" & class(lvObj) != "data.frame" ) {
+					stop(paste(pvMod[4], "@", loadvecObjChar, ": Please make sure that the specified object \"", loadvecObjChar, "\" is of class 'matrix' or 'data.frame'.\nPlease see ?dpt_modules for further details", sep=""), call.=FALSE)
+				}		
+				if (ncol(lvObj) > 2) {
+					stop(paste("For successful ", pvMod[4], "@", loadvecObjChar, ", the provided dataframe/matrix can have max. 2 columns. \nPlease see ?dpt_modules for further details.", sep=""), call.=FALSE)
+				}
+				if (nrow(lvObj) != ncol(dataset$NIR) ) {
+					stop(paste(pvMod[4], "@", loadvecObjChar, ":The length (nrow) of the provided dataframe/matrix is ", nrow(lvObj), ", while the current dataset has ", ncol(dataset$NIR), " wavelengths.\nThe length of the loading/regression vector and the number of wavelengths in the NIR-data must be the same.\nPlease provide a loading / regression vector with the right length fitting *all* the datasets in your 'cube', or re-think your (possible) data-splitting procedure when generating the 'cube' object. \nPlease see ?dpt_modules and ?do_emsc for further details.", sep=""), call.=FALSE)
+				}				
+				dataset <- do_emsc(dataset, vecLoad = lvObj) # a data frame with max 2 columns (loadings or a regression vector)
 			} # end emsc
+			####
 			if (first[i] == pvMod[5]) { # osc
-					## have osc here soon 				
+					## have osc here soon 
+					message("Sorry, no osc yet!")
 			} # end osc
 			if (first[i] == pvMod[6]) { # deTr
 					## have deTrend here soon 	
+					message("Sorry, no de-Trend yet")
 			} # end deTrend
 		} # end for i
 	} # end if
@@ -1151,6 +1181,7 @@ collectRanges <- function(cubeList, lengthClasses) {
 #' cube <- gdmm(dataset, getap(spl.wl="1300-to-1600")) # override 'spl.wl' in the 
 #' # analysis procedure 
 #' }
+#' @seealso \code{\link{dpt_modules}}
 #' @family Calc. arguments
 #' @name split_dataset
 NULL

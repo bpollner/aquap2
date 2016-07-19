@@ -36,7 +36,18 @@ showCube <- function(object) {
 	}
 	cat(paste("Formal class 'aquap_cube', containing ", object@cpt@len, " datasets in total ", add, "\n", sep=""))
 	cat("\n")
-	print(object@cp)
+	cp <- getCP(object) # is a method
+	out <- cp
+	if (.ap2$stn$gen_showExtendedCube) {
+		a <- getCubeNrs(object)
+		nrRows <- a$nrRows
+		nrWls <- a$nrWls
+		extend <- data.frame(nrRows, nrWls)
+		colnames(extend) <- c("  #spectra", " #wavelengths")
+		out <- cbind(cp, extend)
+	} # end if extend
+	print(out)
+#	return(invisible(out)
 } # EOF
 
 plot_cube_M <- function(x, ...) {
@@ -104,8 +115,10 @@ subtract_two_aquap_data_M <- function(e1, e2) { # e1 and e1 being each an object
 		if (!identical(colnames(e1$NIR), colnames(e2$NIR))) {
 			stop("The provided datasets do not have the same wavelengths.\nFor successful subtraction via '-', in both datasets there have to be the same wavelengths present.", call.=FALSE)
 		}
-		if (!identical(e1$header, e2$header)) {
-			stop("The provided datasets have a different structure. \nFor successful subraction via '-', both datasets must have the same structure, i.e. the same header.", call.=FALSE)
+		if (!.ap2$stn$gen_calc_allowSubtrDiffHead) {	 # if the subtraction of datasets having a different header structure should be allowed.
+			if (!identical(e1$header, e2$header)) {
+ 				stop("The provided datasets have a different structure. \nFor successful subraction via '-', both datasets must have the same structure, i.e. the same header.\nYou can change this behaviour in the setting.r file at the parameter 'gen_calc_allowSubtrDiffHead'.", call.=FALSE)
+			}
 		}
 		e1$NIR <- e1$NIR - e2$NIR #### CORE ######
 		return(e1)

@@ -116,7 +116,7 @@
 	################################################################
 	################ general plotting options ######################
 	################################################################
-	pg.where <- "pdf"						## for plotting PDFs provide "pdf", for plotting to graphics device provide anything but "pdf"
+	pg.where <- "def"						## If left at the default 'def', the value from the settings.r file is read in (parameter gen_plot_pgWhereDefault). For plotting PDFs provide "pdf", for plotting to graphics device provide anything but "pdf".
 	pg.main <- ""							## the additional text on the title of each single plot
 	pg.sub <- ""							## the additional text on the subtitle of each single plot
 	pg.fns <- ""							## 'filename suffix', the additional text in the filename of the pdf.

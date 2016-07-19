@@ -71,6 +71,9 @@ setMethod("plot_pca", signature(object = "aquap_data"), definition = plot_pca_da
 setGeneric("getNcpwl", function(object) standardGeneric("getNcpwl"))
 setMethod("getNcpwl", "aquap_data", function(object) object@ncpwl)
 
+setGeneric("getCP", function(object) standardGeneric("getCP"))
+setMethod("getCP", "aquap_cube", function(object) object@cp)
+
 setGeneric("getExpName", function(object) standardGeneric("getExpName"))
 setMethod("getExpName", "aquap_md", function(object) object$meta$expName)
 setMethod("getExpName", "aquap_cube", function(object) object@metadata$meta$expName)
