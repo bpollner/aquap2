@@ -27,11 +27,18 @@ NULL
 #' for rownumbers are accepted.}
 #' \item{Subtractions via '-'}{Use the subtraction via \code{'-'} to subtract the 
 #' NIR-data in datasets that have the same structure, i.e. the same header, and 
-#' the same wavelengths in the NIR. You can either subtract two equally long 
+#' possibly same wavelengths in the NIR. You can either subtract two equally long 
 #' datasets, i.e. two datasets having the exactly same number of rows, or you can
 #' subtract a dataset having exactly one row from a full dataset. The latter can
 #' be useful for e.g. subtracting the averaged spectra of a single class from the
-#' complete dataset - see examples.}
+#' complete dataset - see examples. If parameter 
+#' \code{gen_calc_allowSubtrDiffWavels}} in the settings.r file is set to TRUE, it 
+#' is also possible to subtract two datasets that do \strong{not} have the same 
+#' number of wavelengths. This can e.g. happen ater the usage of 
+#' \code{\link{do_gapDer}}. In this case, the bigger dataset, i.e. the dataset 
+#' having more wavelengths, is cut down to match exactly the wavelength-range of 
+#' the smaller dataset. In other words, the return in this case is a dataset having 
+#' only the number of wavelengths as 'dictated' by the smaller dataset.
 #' }
 #' @note \code{drop} is always set to \code{FALSE} for substrictping via 
 #' \code{'[]'}.

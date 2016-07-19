@@ -57,7 +57,7 @@ stn <- list(
 	gen_plot_pgWhereDefault = "", 			## the default setting for the general plotting parameter 'pg.where'. If set to 'pdf', all graphics will be saved as a pdf. If anything but a pdf is provided, the graphics will be plotted to the graphics device.
 	gen_plot_maxNrDptInfoOnMain = 4, 		## the maximum number of dpt-info elements in the main of a title
 	gen_calc_allowSubtrDiffHead = FALSE, 	## if subtractions of datasets having a different header structure should be allowed.
-	
+	gen_calc_allowSubtrDiffWavels = TRUE,	## if subtractions of datasets having different sets of wavelengths should be allowed. If TRUE, this is only successful if the smaller set of wavelengths is completely within the bigger set of wavelengths. In this case, the bigger set is virtually cut down to the size of the smaller set. This can be necessary when function do_gapDer was used.
 
 	## Import Data
 	imp_specFileType = "vision_NSAS.da",	## the filetype of the spectral data. Refer to the help for 'getFullData'  for possible values

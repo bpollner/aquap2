@@ -2,6 +2,7 @@
 
 export(do_avg)
 export(do_emsc)
+export(do_gapDer)
 export(do_msc)
 export(do_sgolay)
 export(do_snv)

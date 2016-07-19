@@ -24,9 +24,10 @@ do_sgolay <- function(dataset, p=2, n=21, m=0) {
 	autoUpS()
  	cns <- colnames(dataset$NIR)
 	rns <- rownames(dataset$NIR)
-	dataset$NIR <- t(apply(dataset$NIR, 1, signal::sgolayfilt, p=p, n=n, m=m))
-	colnames(dataset$NIR) <- cns
-	rownames(dataset$NIR) <- rns
+	NIR <- t(apply(dataset$NIR, 1, signal::sgolayfilt, p=p, n=n, m=m))
+	colnames(NIR) <- cns
+	rownames(NIR) <- rns
+	dataset$NIR <- I(NIR)
 	return(dataset)
 } # EOF
 
@@ -52,7 +53,7 @@ do_snv <- function(dataset) {
 	NIR <- t(scale(t(dataset$NIR),center=TRUE,scale=TRUE))
 	colnames(NIR) <- colnames(dataset$NIR)
 	rownames(NIR) <- rownames(dataset$NIR)
-	dataset$NIR <- NIR
+	dataset$NIR <- I(NIR)
 	return(dataset)
 } # EOF
  
@@ -107,7 +108,7 @@ do_msc <- function(dataset, ref=NULL) {
  	NIR <- pls::msc(dataset$NIR, refInput)
 	colnames(NIR) <- colnames(dataset$NIR)
 	rownames(NIR) <- rownames(dataset$NIR)
-	dataset$NIR <- NIR
+	dataset$NIR <- I(NIR)
 	return(dataset)
 } # EOF
 
@@ -135,7 +136,7 @@ do_avg <- function(dataset) {
 	NIR <- matrix(apply(dataset$NIR, 2, mean), nrow=1)
 	colnames(NIR) <- colnames(dataset$NIR)
 	dsNew <- dataset[1,]
-	dsNew$NIR <- NIR
+	dsNew$NIR <- I(NIR)
 	return(dsNew)	
 } # EOF
 
@@ -221,6 +222,50 @@ do_scale_fc <- function(dataset, calibAvgTable) { # used in aquagram norm foreig
 	NIR <- scale(as.matrix(dataset$NIR), center=avg, scale=TRUE)
 	colnames(NIR) <- colnames(dataset$NIR)
 	rownames(NIR) <- rownames(dataset$NIR)
-	dataset$NIR <- NIR
+	dataset$NIR <- I(NIR)
+	return(dataset)
+} # EOF
+
+#' @title Perform gap-segment derivatives
+#' @description Performs gap-segment derivatives on the provided dataset. The 
+#' behaviour of the filter can be modified via its arguments, please see also 
+#' the documentation for \code{\link[prospectr]{gapDer}}.
+#' @details The first column of the wavelengths and the last one get doubled in 
+#' order to have the same number of wavelengths in the resulting dataset as in 
+#' the original dataset. The underlying function is \code{\link[prospectr]{gapDer}}.
+#' @inheritParams do_sgolay
+#' @param m The order of the derivative, can be between 1 and 4. Default is 1.
+#' @param w The filter length (should be odd), ie. the spacing between points 
+#' over which the derivative is computed. Default is 1.
+#' @param s The segment size, i.e. the range over which the points are averaged.
+#' Default is 1.
+#' @param deltaW The sampling interval / band spacing.
+#' @section Note:
+#' The documentation for the parameters was taken from 
+#' \code{\link[prospectr]{gapDer}} by Antoine Stevens.
+#' @seealso \code{\link[prospectr]{gapDer}}
+#' @family Data pre-treatment functions 
+#' @family dpt modules documentation
+#' @export
+do_gapDer <- function(dataset, m=1, w=1, s=1, deltaW) {
+	nir <- getNIR(dataset)
+	NIR <- prospectr::gapDer(nir, m=m, w=w, s=s, delta.wav=deltaW) # gives back a matrix with one columne less at the beginning and end, so in total two wavelengths missing !!
+#	NIR <- as.matrix(NIR)
+#	wlsGap <- as.numeric(gsub("w", "", colnames(NIR)))
+#	wlsD <- getWavelengths(dataset)
+#	indLow <- which(wlsD == min(wlsGap))
+#	indHigh <- which(wlsD == max(wlsGap))
+#	nrLostLow <- length(1:indLow)
+#	nrLostHigh <- length(indHigh: length(wlsD))
+#	cat(paste("Low wls lost:", nrLostLow, "\n"))
+#	cat(paste("High wls lost:", nrLostHigh, "\n"))	
+#	return(NIR)	
+#	first <- as.data.frame(NIR[,1])
+#	last <- as.data.frame(NIR[, ncol(NIR)])
+#	NIR <- cbind(first, NIR, last)
+#	colnames(NIR) <- colnames(dataset$NIR)
+#	rownames(NIR) <- rownames(dataset$NIR)
+#	NIR <- as.matrix(NIR) # because otherwise the "AsIs" is behaving strange
+	dataset$NIR <- I(NIR)
 	return(dataset)
 } # EOF

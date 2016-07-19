@@ -127,8 +127,28 @@ subtract_two_aquap_data_M <- function(e1, e2) { # e1 and e1 being each an object
 			stop("The provided datasets do not have the same number of rows.\nFor successful subtraction via '-', both datasets have to have the same number of rows, or one dataset has to have exactly one (1) row.", call.=FALSE)
 		}
 		if (ncol(e1$NIR) != ncol(e2$NIR)) {
-			stop("The provided datasets do not have the same number of wavelengths.\nFor successful subtraction via '-', both datasets have to have the same number of wavelengths, i.e. the same number of columns in their NIR data.", call.=FALSE)
-		}
+			if (!.ap2$stn$gen_calc_allowSubtrDiffWavels) {
+				stop("The provided datasets do not have the same number of wavelengths.\nFor successful subtraction via '-', both datasets have to have the same number of wavelengths, i.e. the same number of columns in their NIR data.", call.=FALSE)
+			} else { # so we do want to allow the subtractions between datasets that have possibly been touched by do_gapDer
+				cns1 <- colnames(e1$NIR)
+				cns2 <- colnames(e2$NIR)
+				if (length(cns1) > length(cns2)) {
+					longer <- cns1
+					shorter <- cns2
+					oneIsLonger <- TRUE
+				} else {
+					longer <- cns2
+					shorter <- cns1
+					oneIsLonger <- FALSE
+				}
+				ind <- which(longer %in% shorter) # retrieve the indices of those wavelengths that are in both the datasets
+				if (oneIsLonger) {
+					e1$NIR <- e1$NIR[, ind]
+				} else {
+					e2$NIR <- e2$NIR[, ind]
+				}
+			} # end else allow for subtraction of different number of wavelengths
+		} # end check the same nr of columns in the NIR
 		if (!identical(colnames(e1$NIR), colnames(e2$NIR))) {
 			stop("The provided datasets do not have the same wavelengths.\nFor successful subtraction via '-', in both datasets there have to be the same wavelengths present.", call.=FALSE)
 		}
@@ -157,7 +177,7 @@ subtract_two_aquap_data_M <- function(e1, e2) { # e1 and e1 being each an object
 		NIR <- sweep(nirFull, 2, nirSingle) 		#### CORE ##### subtraction is the default in sweep !
 		colnames(NIR) <- colnames(nirFull)
 		rownames(NIR) <- rownames(nirFull)
-		allFull$NIR <- NIR
+		allFull$NIR <- I(NIR)
 		return(allFull)
 	} # end one has only one (1) row
 	stop("An error has occured at the subtraction of datasets, sorry.", call.=FALSE)

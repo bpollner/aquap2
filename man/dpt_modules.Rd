@@ -67,7 +67,7 @@ csAvg, noise and exOut, and / or \strong{after} the splitting of the dataset
 Via the ... argument in the function \code{\link{getap}}, the values
 of both \code{dpt.pre} and \code{dpt.post} can be overridden. Via the 
 separator '@', additional values can be appended to some of the single modules. 
-Possible values for dpt-modules are 'sgol', 'snv', 'msc', 'emsc', 'osc', 'deTr'. Single 
+Possible values for dpt-modules are 'sgol', 'snv', 'msc', 'emsc', 'osc', 'deTr', 'gapDe'. Single 
 modules can be combined and repeated in any arbitrary order, i.e. there is no 
 upper limit on the modules that can be applied in the 'dpt.pre' and 'dpt.post' 
 process -- see examples.
@@ -104,11 +104,12 @@ dpt.post <- c("sgol@2-51-0", "emsc@myDF") # with 'myDF' being the name of a
 
 Other Data pre-treatment functions: \code{\link{[,aquap_data-method}},
   \code{\link{do_avg}}, \code{\link{do_emsc}},
-  \code{\link{do_msc}}, \code{\link{do_sgolay}},
-  \code{\link{selectWls}}, \code{\link{ssc}}
+  \code{\link{do_gapDer}}, \code{\link{do_msc}},
+  \code{\link{do_sgolay}}, \code{\link{selectWls}},
+  \code{\link{ssc}}
 
 Other dpt modules documentation: \code{\link{do_emsc}},
-  \code{\link{do_msc}}, \code{\link{do_sgolay}},
-  \code{\link{do_snv}}
+  \code{\link{do_gapDer}}, \code{\link{do_msc}},
+  \code{\link{do_sgolay}}, \code{\link{do_snv}}
 }
 

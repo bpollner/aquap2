@@ -51,11 +51,12 @@ criterion.
 
 Other Data pre-treatment functions: \code{\link{[,aquap_data-method}},
   \code{\link{do_avg}}, \code{\link{do_emsc}},
-  \code{\link{do_sgolay}}, \code{\link{dpt_modules}},
-  \code{\link{selectWls}}, \code{\link{ssc}}
+  \code{\link{do_gapDer}}, \code{\link{do_sgolay}},
+  \code{\link{dpt_modules}}, \code{\link{selectWls}},
+  \code{\link{ssc}}
 
 Other dpt modules documentation: \code{\link{do_emsc}},
-  \code{\link{do_sgolay}}, \code{\link{do_snv}},
-  \code{\link{dpt_modules}}
+  \code{\link{do_gapDer}}, \code{\link{do_sgolay}},
+  \code{\link{do_snv}}, \code{\link{dpt_modules}}
 }
 

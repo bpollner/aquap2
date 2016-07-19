@@ -775,7 +775,7 @@ performExcludeOutliers <- function(dataset, siExOut, ap) {
 
 performDPT_Core <- function(dataset, dptSeq) {
 # dptSeq is the pre or post charcter string coming from ap$dpt$dptModules
-#pv_dptModules <- c("sgol", "snv", "msc", "emsc", "osc", "deTr")
+# pv_dptModules <- c("sgol", "snv", "msc", "emsc", "osc", "deTr", "gapDe")
 # the modules itself are already checked
 #print(dptSeq); 
 	pvMod <- pv_dptModules	
@@ -857,6 +857,25 @@ performDPT_Core <- function(dataset, dptSeq) {
 					## have deTrend here soon 	
 					message("Sorry, no de-Trend yet")
 			} # end deTrend
+			if (first[i] == pvMod[7]) { # gap Derivative
+				if (!grepl("@", dptSeq[i])) {
+					dataset <- do_sgolay(dataset)
+				} else { # so, yes, we have an '@' present	
+					infoChar <- strsplit(dptSeq[i], "@")[[1]][[2]] # get only the second part of the module containing the numbers (still as character!)
+					options(warn=-1)
+					nums <- as.numeric(unlist(strsplit(infoChar, "-")))
+					options(warn=0)
+					if (any(is.na(nums)) | !all(is.wholenumber(nums))) {
+						stop("Please provide only integers as arguments to the Savitzky-Golay operation, e.g. sgol@2-21-0.\n Please check the analysis procedure / your input.", call.=FALSE)
+					}
+					if (length(nums) > 3) {
+						stop("Please provide only three integers as arguments to the Savitzky-Golay operation, e.g. sgol@2-21-0. \n Please check the analysis procedure / your input.", call.=FALSE)
+					}
+					dataset <- do_sgolay(dataset, p=nums[1], n=nums[2], m=nums[3])  # arguments: p=2, n=21, m=0)
+				}  # end else				
+
+
+			} # end gap Derivative	
 		} # end for i
 	} # end if
 	return(dataset)	
