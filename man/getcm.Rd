@@ -52,7 +52,7 @@ str(fd_2_pls)
 }
 }
 \seealso{
-\code{\link{do_emsc}}
+\code{\link{do_emsc}}, \code{\link{dpt_modules}}
 
 Other Extract Elements: \code{\link{getHeader}},
   \code{\link{getcd}}

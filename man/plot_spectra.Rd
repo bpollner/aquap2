@@ -8,7 +8,7 @@
 \alias{plot_spectra,aquap_data-method}
 \title{Plot Raw Spectra}
 \usage{
-\S4method{plot}{aquap_data,ANY}(x, y, ...)
+\S4method{plot}{aquap_data,ANY}(x, colorBy = NULL, ...)
 
 \S4method{plot_spectra}{aquap_data}(x, colorBy = NULL, ...)
 
@@ -18,13 +18,12 @@
 \item{x}{The standard dataset as produced by \code{\link{gfd}}, or a data-cube
 as produced by \code{\link{gdmm}}.}
 
-\item{y}{Will be ignored.}
+\item{colorBy}{Character vector, possible values are the class variables in 
+the dataset. Provide a character vector with length > 1 to color along all 
+these class variables, see examples.}
 
 \item{...}{Optional general plotting options as defined in 
 \code{\link{plot_pg_args}}.}
-
-\item{colorBy}{Character vector, possible values are the class variables in 
-the dataset.}
 }
 \description{
 Plot the raw spectra contained in the dataset or in the cube.
@@ -38,9 +37,9 @@ produced for every dataset contained within the cube.
 \dontrun{
 plot_spectra(dataset)
 plot(dataset) # the same as above
-plot(dataset, colorBy="C_Group")
+plot(dataset, colorBy=c("C_Group"))
 plot_spectra(dataset, "C_Group")
-plot_spectra(dataset, c("C_Group", "C_Repl"))
+plot_spectra(dataset, c("C_Group", "C_Repl")) # produces two plots
 plot(dataset, pg.where="") # for plotting to graphic device
 plot_spectra(dataset, c("C_Group", "C_Repl"), pg.where="", pg.main="foo")
 cube <- gdmm(gfd())
@@ -49,6 +48,10 @@ plot_spectra(cube)
 }
 \seealso{
 \code{\link{plot_all_modells}}
+
+Other Core functions: \code{\link{exportSampleList}},
+  \code{\link{gdmm}}, \code{\link{getFullData}},
+  \code{\link{plot,aquap_cube,ANY-method}}
 
 Other Plot arguments: \code{\link{plot_aqg_args}},
   \code{\link{plot_pca_args}}, \code{\link{plot_pg_args}},

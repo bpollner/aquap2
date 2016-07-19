@@ -46,9 +46,9 @@ for the grouping defining the scope for outlier detection.}
 \item{dpt.post}{Character vector, which of the available modules of data 
 pre-treatments to apply \strong{AFTER} (possibly) splitting the dataset. Leave 
 at NULL for no additional data treatment. Possible values are 
-'sgol', 'snv', 'msc', 'emsc', 'osc', 'deTr'. Add additional parameters to some of the single 
-strings via the separator '@'. For examples and further information see
-\code{\link{dpt_modules}}.}
+'sgol', 'snv', 'msc', 'emsc', 'osc', 'deTr'. Add additional parameters to \emph{some} of the 
+single strings via the separator '@'. For examples and further information 
+see \code{\link{dpt_modules}}.}
 
 \item{do.pca}{Logical. If used in \code{getap}, if a PCA should be calculated 
 with a given dataset.}

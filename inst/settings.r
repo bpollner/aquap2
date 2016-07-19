@@ -55,8 +55,9 @@ stn <- list(
 	gen_versionCheckDataset = TRUE,			## if it should be checked if the dataset was created with an older version of package aquap2. Recommended value is TRUE.
 	gen_plot_anprocSource = "defFile", 		## the default way to obtain the analysis procedure when *PLOTTING*. Possible values are "cube" to take the analysis procedure from within the cube, "defFile" to load instead the default filename of the analysis procedure file, or provide a custom analysis procedure filename. (Ending in ".r")
 	gen_plot_pgWhereDefault = "", 			## the default setting for the general plotting parameter 'pg.where'. If set to 'pdf', all graphics will be saved as a pdf. If anything but a pdf is provided, the graphics will be plotted to the graphics device.
+	gen_plot_maxNrDptInfoOnMain = 4, 		## the maximum number of dpt-info elements in the main of a title
 	gen_calc_allowSubtrDiffHead = FALSE, 	## if subtractions of datasets having a different header structure should be allowed.
-
+	
 
 	## Import Data
 	imp_specFileType = "vision_NSAS.da",	## the filetype of the spectral data. Refer to the help for 'getFullData'  for possible values

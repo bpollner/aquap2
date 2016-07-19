@@ -22,7 +22,8 @@ makePCAScorePlots <- function(cube, ap, comps=c(1:5), pcs=c(1,2), onMain="", onS
 	for (k in 1: length(cube)) {	
 		set <- cube[[k]]
 		PCAObject <- getPCAObject(set)
-		idString <- getIdString(set)
+#		idString <- getIdString(set)
+		idString <- adaptIdStringForDpt(ap, getIdString(set))
 		allVariancesPCs <- round((ChemometricsWithR::variances(PCAObject) / PCAObject$totalvar)*100, .ap2$stn$pca_nrDigitsVariance)
 		cumSumVars <- cumsum(allVariancesPCs)
 		ind99 <- which(cumSumVars >= 99)[1]
@@ -141,7 +142,7 @@ makePCALoadingPlots2 <- function (cube, ap, comps, onMain="", onSub="", where=""
 	#
 	for (k in 1: length(cube)) {
 		set <- cube[[k]]
-		mainTxt <- paste(onMain, getIdString(set), sep=" ")
+		mainTxt <- paste(onMain, adaptIdStringForDpt(ap, getIdString(set)), sep=" ")
 		wavelengths <- getWavelengths(set) # the set contains the dataset
 		PCAObject <- getPCAObject(set)
 		allVariancesPCs <- round((ChemometricsWithR::variances(PCAObject) / PCAObject$totalvar)*100, nrDigitsVariance)
@@ -292,12 +293,19 @@ plot_pca_data <- function(dataset, aps="def", ...) {
 		aps <- "def"
 	}
 	check_apDefaults(fn=aps)
-	ap <- getap(fn=aps, ...)
+	ap <- getap(fn=aps, do.pca=TRUE, do.sim=FALSE, do.pls=FALSE, do.aqg=FALSE, ...) # lets do only the pca!
 	ap <- setAllSplitVarsToNull(ap)
-		prev <- .ap2$stn$allSilent
-		.ap2$stn$allSilent <<- TRUE
-	cube <- gdmm(dataset, ap=ap)
-		.ap2$stn$allSilent <<- prev
+	##
+
+	prev <- .ap2$stn$allSilent
+	.ap2$stn$allSilent <<- TRUE
+	cube <- gdmm(dataset, ap=ap) ##### generate the cube !!! ######
+	prevIdString <- getIdString(cube[[1]]) # cube has only 1 set here !!
+	origAp <- getAnproc(dataset)
+	origDptMods <- origAp$dpt$dptModules
+#	cube[[1]]@idString <- adaptIdStringForDpt(dptSource=origAp, prevIdString) # put all the data treatment info in the idString
+	cube@anproc$dpt$dptModules <- origDptMods # put the dpt info that we got from the dataset into the cube AFTER the gdmm, so that we do not do the treatment again!!
+	.ap2$stn$allSilent <<- prev
 	plot_pca_cube(cube, aps="cube", ...)
 } # EOF
 

@@ -52,7 +52,8 @@ arguments.
 \code{\link{plot_spectra}}
 
 Other Core functions: \code{\link{exportSampleList}},
-  \code{\link{gdmm}}, \code{\link{getFullData}}
+  \code{\link{gdmm}}, \code{\link{getFullData}},
+  \code{\link{plot,aquap_data,ANY-method}}
 
 Other Plot functions: \code{\link{plot,aquap_data,ANY-method}},
   \code{\link{plot_aqg}},

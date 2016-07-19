@@ -5,10 +5,14 @@
 \title{Data pre-treatment modules}
 \arguments{
 \item{sgol}{Transform the dataset using the Savitzy-Golay 
-filter \code{\link[signal]{sgolay}}. Use a string in the format 
+filter by calling \code{\link{do_sgolay}} (what in turn is relying on 
+\code{\link[signal]{sgolay}}). Provide only the character 
+"sgol" to use the standard values for p, n and m, what are 
+2, 21 and 0, respectively. Use a string in the format 
 "sgol@p-n-m", with p,n,m being integers to modify the 
-behaviour of \code{\link{do_sgolay}}, what is called internally. The single 
-integers have to be separated by a 'minus' ('-').
+behaviour of \code{\link{do_sgolay}} by supplying your own values. Please note 
+that 'n' has to be odd. The single integers have to be separated by a 'minus' 
+('-').
 \describe{
 \item{p}{The filter order. Defaults to 2.}
 \item{n}{The filter length, must be odd. Defaults to 21.}

@@ -484,7 +484,7 @@ ssc <- function(dataset, criteria, include=TRUE, keepEC=FALSE) {
 	autoUpS()
 	cPref <- .ap2$stn$p_ClassVarPref
 	ecrmCol <- .ap2$stn$p_ECRMCol
-	ecLabel <- getMdDs(dataset)$postProc$ECRMLabel[1]
+	ecLabel <- getMetadata(dataset)$postProc$ECRMLabel[1]
 	string <- deparse(substitute(criteria))
 	cns <- colnames(dataset$header)
 	cnsPres <- cns[which(lapply(cns, function(x) grep(x, string)) > 0)] # gives back only those column names that appear in the string
@@ -512,7 +512,7 @@ ssc_s <- function(dataset, variable, value, keepEC=TRUE) {
 	# variable and value are always data frames with one row and 1 or *more* columns
 	cPref <- .ap2$stn$p_ClassVarPref
 	ecrmCol <- .ap2$stn$p_ECRMCol
-	ecLabel <- getMdDs(dataset)$postProc$ECRMLabel[1]
+	ecLabel <- getMetadata(dataset)$postProc$ECRMLabel[1]
 	noSplitCol <- paste(cPref, .ap2$stn$p_commonNoSplitCol, sep="")
 	indEC <- which(colnames(dataset$header) == paste(cPref, ecrmCol, sep=""))
 	selIndOut <-  NULL
@@ -707,7 +707,7 @@ getcd <- function(cube, index) {
 #' fd_2_pls <- getcm(cube, 2, "pls")
 #' str(fd_2_pls)
 #' }
-#' @seealso \code{\link{do_emsc}} 
+#' @seealso \code{\link{do_emsc}}, \code{\link{dpt_modules}}
 #' @family Extract Elements
 #' @export
 getcm <- function(cube, index, what="pca") {
@@ -737,4 +737,33 @@ getCubeNrs <- function(cube) {
 		nrWls <- c(nrWls, b)
 	 }
 	return(list(nrRows=nrRows, nrWls=nrWls))
+} # EOF
+
+adaptIdStringForDpt <- function(dptSource, prevIdString="") { # returns the new idString; dptSource is an analysis procedure
+	limit <- .ap2$stn$gen_plot_maxNrDptInfoOnMain
+	##
+	origAp <- dptSource #  we should get in the ap containing all the dpt information
+	combChar <- msg <- char <- ""
+	if (!is.null(origAp)) {
+		apo <- origAp$dpt$dptModules
+		dptPre <- apo$dptPre
+		dptPost <- apo$dptPost
+		if (!is.null(dptPost)) {
+			dptPost[1] <- paste(";", dptPost[1], sep="") ## add an "|" in front of the first element in dptPost
+		}
+		combSingle <- c(dptPre, dptPost)
+		if (length(combSingle) > limit) {
+			restNr <- length(combSingle) - limit
+			combSingle <- c(combSingle[1:limit], paste("+", restNr, sep=""))
+		}
+		combChar <- paste(combSingle, collapse=",")
+	} # end if !is.null(origApp)
+	if (combChar != "") {
+		msg <- " |dpt:"
+		char <- combChar
+	}
+	idStrAdd <- paste(msg, char, collapse="", sep="")
+	idStrAdd <- gsub(",;", ";", idStrAdd) # some mistake above, take it out
+	idStrNew <- paste(prevIdString, idStrAdd, collapse="", sep="")
+	return(idStrNew)
 } # EOF

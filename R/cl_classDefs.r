@@ -9,7 +9,8 @@ setClassUnion(name="numChar", members =c("numeric", "character"))
 ##	
 setClass("aquap_md", contains="list")
 setClass("aquap_ap", contains="list")
-setClass("aquap_data", slots=c(metadata="list", ncpwl="numeric", version="character"), contains="data.frame")
+setClassUnion(name="apNull", members =c("aquap_ap", "NULL"))
+setClass("aquap_data", slots=c(metadata="list", anproc="apNull", ncpwl="numeric", version="character"), contains="data.frame")
 setClass("aquap_cpt", slots=c(splitVars="list", wlSplit="list", csAvg="logical", noise="logical", exOut="logical", len="numeric"))
 setClass("aqg_calc", slots = c(ID="character", classVar="character", itemIndex="numeric", avg="matrix", colRep="numChar", possN="numeric", selInds="numeric", bootRes="matNull", rawSpec="dfNull", avgSpec="dfNull", subtrSpec="dfNull"))
 #setClass("aqg_cr", slots = c(res="list", ran="listNull"))
@@ -121,9 +122,13 @@ setGeneric("getNIR", function(object) standardGeneric("getNIR"))
 setMethod("getNIR", "aquap_data", definition=getNIR_df_dataset)
 setMethod("getNIR", "aquap_set", definition=getNIR_df_set)
 
-setGeneric("getMdDs", function(object) standardGeneric("getMdDs"))
-setMethod("getMdDs", "aquap_data", function(object) object@metadata)
+setGeneric("getMetadata", function(object) standardGeneric("getMetadata"))
+setMethod("getMetadata", "aquap_data", function(object) object@metadata)
+setMethod("getMetadata", "aquap_cube", function(object) object@metadata)
 
+setGeneric("getAnproc", function(object) standardGeneric("getAnproc"))
+setMethod("getAnproc", "aquap_cube", function(object) object@anproc)
+setMethod("getAnproc", "aquap_data", function(object) object@anproc)
 
 ## SIMCA
 setGeneric("getSIMCAClassList", function(object) standardGeneric("getSIMCAClassList"))

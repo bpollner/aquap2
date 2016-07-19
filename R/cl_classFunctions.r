@@ -46,7 +46,24 @@ showCube <- function(object) {
 		colnames(extend) <- c("  #spectra", " #wavelengths")
 		out <- cbind(cp, extend)
 	} # end if extend
-	print(out)
+	print(out) ## here the printing !!!! ####
+	ap <- getAnproc(object)
+	a <- ap$dpt$dptModules
+	preMsg <- preChar <- postMsg <- postChar <- lineBreak <- NULL
+	if (!is.null(a$dptPre) | !is.null(a$dptPost)) {
+		if (!is.null(a$dptPre)) {
+			preMsg <- "Data pre-treatment (dpt.pre): "
+			preChar <- paste(a$dptPre, collapse=", ", sep="")
+			lineBreak <- "\n"
+		}
+		if (!is.null(a$dptPost)) {
+			postMsg <- "Data post-treatment (dpt.post): "
+			postChar <- paste(a$dptPost, collapse=", ", sep="")
+			lineBreak <- "\n"		
+		}
+		cat(paste(preMsg, preChar, lineBreak, sep=""))
+		cat(paste(postMsg, postChar, lineBreak, sep=""))
+	}
 #	return(invisible(out)
 } # EOF
 
@@ -54,8 +71,8 @@ plot_cube_M <- function(x, ...) {
   plot_cube(x, ...)
 } # EOF
 
-plot_spectra_Data_M <- function(x, ...) {
-	plot_spectra_Data(x, ...)
+plot_spectra_Data_M <- function(x, colorBy=NULL, ...) {
+	plot_spectra_Data(x, colorBy, ...)
 } # EOF
 
 plot_spectra_Cube_M <- function(x, colorBy=NULL, ...) {

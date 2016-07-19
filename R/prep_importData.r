@@ -640,6 +640,7 @@ getFullData <- function(md=getmd(), filetype="def", naString="NA", slType="def",
 #	fullData@version <- as.character(packageVersion("aquap2")) # do not do this -- only change the info manualy here if really the structure of the dataset is different.
 	fullData@version <- pv_versionDataset # get from the constants -- change at the constants only if the structure of the dataset has changed !!! XXX
 	fullData@metadata <- md
+	fullData@anproc <- NULL # the ap not yet here of course
 	fullData@ncpwl <- si$info$nCharPrevWl
 	if (stf) {
 		saveAQdata(fullData, md, verbose=TRUE)

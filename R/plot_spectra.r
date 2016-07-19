@@ -1,4 +1,4 @@
-plotSpectra_outer <- function(dataset, colorBy, onMain, onSub) {
+plotSpectra_outer <- function(dataset, colorBy, onMain, onSub, idString="") {
 	cns <- colnames(dataset$header)
 	if (!all(colorBy %in% cns)) {
 		a <- which(! colorBy %in% cns)
@@ -8,16 +8,17 @@ plotSpectra_outer <- function(dataset, colorBy, onMain, onSub) {
 		plotSpectra_inner(dataset, singleColorBy=NULL, onMain, onSub)
 	} else {
 		for (i in 1: length(colorBy)) {
-			plotSpectra_inner(dataset, colorBy[i], onMain, onSub)
+			plotSpectra_inner(dataset, colorBy[i], onMain, onSub, idString)
 		} # end for i	
 	} 
 } # EOF
 
-plotSpectra_inner <- function(dataset, singleColorBy, onMain, onSub) {
+plotSpectra_inner <- function(dataset, singleColorBy, onMain, onSub, idString="") {
 	if (is.null(singleColorBy)) {
 		color <- 1
 		msg <- ""
 		makeLegend <- FALSE
+		lty <- 1
 	} else {
 		makeLegend <- TRUE
 		cns <- colnames(dataset$colRep)
@@ -40,9 +41,11 @@ plotSpectra_inner <- function(dataset, singleColorBy, onMain, onSub) {
 		legendCol <- getUniqLevelColor(color) # here read out in levels !!!
 		lty=1
 	} # end else
+	dptInfo <- adaptIdStringForDpt(getAnproc(dataset), idString)
+	onMain <- paste(onMain, dptInfo, sep="")
 	wls <- getWavelengths(dataset)
 	onSub <- paste(onSub, msg, sep=" ")
-	matplot(wls, t(dataset$NIR), type="l", xlab="Wavelengths", ylab="Absorbance", main=onMain, sub=onSub, col=color)
+	matplot(wls, t(dataset$NIR), type="l", xlab="Wavelengths", ylab="Absorbance", main=onMain, sub=onSub, col=color, lty=1)
 	abline(h=0, col="gray")
 	if (makeLegend) {
 		legBgCol <- rgb(255,255,255, alpha=.ap2$stn$col_alphaForLegends, maxColorValue=255) # is a white with alpha to be determined in the settings
@@ -76,6 +79,21 @@ plot_spectra_Data <- function(x, colorBy=NULL, ...) {
 	if (!.ap2$stn$allSilent & (where == "pdf" )) {cat("ok\n") }
 } # EOF
 
+plot_spectra_Data_nottoGutto_notInUse <- function(x, colorBy=NULL, ...) {
+	# x is a dataset
+	autoUpS()
+	ap <- getap(fn="def")
+	ap <- setAllSplitVarsToNull(ap)
+	cube <- gdmm(x, ap=ap) ##### generate the cube !!! ######
+	prev <- .ap2$stn$allSilent
+	.ap2$stn$allSilent <<- TRUE
+	origAp <- getAnproc(x)
+	origDptMods <- origAp$dpt$dptModules
+	cube@anproc$dpt$dptModules <- origDptMods # put the dpt info that we got from the dataset into the cube AFTER the gdmm, so that we do not do the treatment again!!
+	.ap2$stn$allSilent <<- prev
+	plot_spectra_Cube(cube, colorBy, ...)	
+} # EOF
+
 plot_spectra_Cube <- function(x, colorBy=NULL, ...) {
 	# the incoming x is the cube
 	autoUpS()
@@ -99,8 +117,9 @@ plot_spectra_Cube <- function(x, colorBy=NULL, ...) {
 	if (where != "pdf" & (Sys.getenv("RSTUDIO") != 1)) {dev.new(height=height, width=width)}	
 	for (i in 1: length(x)) {
 		dataset <- getDataset(x[[i]]) # the sets are in the list within the cube
+		idString <- getIdString(x[[i]])
 		if (!.ap2$stn$allSilent & (where == "pdf" )) {cat(paste("   working on #", i, " of ", length(x), "\n", sep=""))}
-		plotSpectra_outer(dataset, colorBy, onMain, onSub)
+		plotSpectra_outer(dataset, colorBy, onMain, onSub, idString)
 	} # end for i
 	if (where == "pdf") {dev.off()}
 	if (!.ap2$stn$allSilent & (where == "pdf" )) {cat("ok\n") }
@@ -113,9 +132,9 @@ plot_spectra_Cube <- function(x, colorBy=NULL, ...) {
 #' produced for every dataset contained within the cube.
 #' @param x The standard dataset as produced by \code{\link{gfd}}, or a data-cube
 #' as produced by \code{\link{gdmm}}.
-#' @param y Will be ignored.
 #' @param colorBy Character vector, possible values are the class variables in 
-#' the dataset.
+#' the dataset. Provide a character vector with length > 1 to color along all 
+#' these class variables, see examples.
 #' @param ... Optional general plotting options as defined in 
 #' \code{\link{plot_pg_args}}.
 #' @seealso \code{\link{plot_all_modells}}
@@ -123,9 +142,9 @@ plot_spectra_Cube <- function(x, colorBy=NULL, ...) {
 #' \dontrun{
 #' plot_spectra(dataset)
 #' plot(dataset) # the same as above
-#' plot(dataset, colorBy="C_Group")
+#' plot(dataset, colorBy=c("C_Group"))
 #' plot_spectra(dataset, "C_Group")
-#' plot_spectra(dataset, c("C_Group", "C_Repl"))
+#' plot_spectra(dataset, c("C_Group", "C_Repl")) # produces two plots
 #' plot(dataset, pg.where="") # for plotting to graphic device
 #' plot_spectra(dataset, c("C_Group", "C_Repl"), pg.where="", pg.main="foo")
 #' cube <- gdmm(gfd())
@@ -133,5 +152,6 @@ plot_spectra_Cube <- function(x, colorBy=NULL, ...) {
 #' }
 #' @family Plot functions
 #' @family Plot arguments
+#' @family Core functions
 #' @name plot_spectra
 NULL

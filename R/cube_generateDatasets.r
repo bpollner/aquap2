@@ -640,7 +640,7 @@ performConSAvg <- function(dataset, siCsAvg, numbers=NULL) {
 		yVarPref <- .ap2$stn$p_yVarPref
 		classVarPref <- .ap2$stn$p_ClassVarPref
 		usePar <- .ap2$stn$gen_useParallel
-		md <- getMdDs(dataset)
+		md <- getMetadata(dataset)
 		if (!.ap2$stn$allSilent) {cat("      averaging consecutive scans...")}
 		if (is.null(numbers)) {
 			numbers <- seq(1: md$postProc$nrConScans) # this is selecting *all* the consecutive scans
@@ -787,20 +787,23 @@ performDPT_Core <- function(dataset, dptSeq) {
 		for (i in 1: length(first)) {
 			###
 			if (first[i] == pvMod[1]) { # sgolay
+				## XXX have also the option to NOT add additional parameters to sgol
 				if (!grepl("@", dptSeq[i])) {
-					stop("You must have the parameters of the Savitzky-Golay operation defined via the character 'sgol@p-n-m', with p, n, m being integers; n has to be odd.\nDefault values could be e.g. 2-21-0 for a mild smoothing. Please check the analysis procedure / your input.", call.=FALSE)
-				}
-				infoChar <- strsplit(dptSeq[i], "@")[[1]][[2]] # get only the second part of the module containing the numbers (still as character!)
-				options(warn=-1)
-				nums <- as.numeric(unlist(strsplit(infoChar, "-")))
-				options(warn=0)
-				if (any(is.na(nums))) {
-					stop("Please provide only integers as arguments to the Savitzky-Golay operation, e.g. sgol@2-51-0.\n Please check the analysis procedure / your input.", call.=FALSE)
-				}
-				if (length(nums) > 3) {
-					stop("Please provide only three integers as arguments to the Savitzky-Golay operation, e.g. sgol@2-51-0. \n Please check the analysis procedure / your input.", call.=FALSE)
-				}
-				dataset <- do_sgolay(dataset, p=nums[1], n=nums[2], m=nums[3])  # arguments: p=2, n=21, m=0)
+					dataset <- do_sgolay(dataset)
+				} else { # so, yes, we have an '@' present	
+#		stop("You must have the parameters of the Savitzky-Golay operation defined via the character 'sgol@p-n-m', with p, n, m being integers; n has to be odd.\nDefault values could be e.g. 2-21-0 for a mild smoothing. Please check the analysis procedure / your input.", call.=FALSE)
+					infoChar <- strsplit(dptSeq[i], "@")[[1]][[2]] # get only the second part of the module containing the numbers (still as character!)
+					options(warn=-1)
+					nums <- as.numeric(unlist(strsplit(infoChar, "-")))
+					options(warn=0)
+					if (any(is.na(nums)) | !all(is.wholenumber(nums))) {
+						stop("Please provide only integers as arguments to the Savitzky-Golay operation, e.g. sgol@2-21-0.\n Please check the analysis procedure / your input.", call.=FALSE)
+					}
+					if (length(nums) > 3) {
+						stop("Please provide only three integers as arguments to the Savitzky-Golay operation, e.g. sgol@2-21-0. \n Please check the analysis procedure / your input.", call.=FALSE)
+					}
+					dataset <- do_sgolay(dataset, p=nums[1], n=nums[2], m=nums[3])  # arguments: p=2, n=21, m=0)
+				}  # end else
 			} # end sgolay
 			####
 			if (first[i] == pvMod[2]) { # snv
@@ -903,18 +906,19 @@ makeIdString <- function(siClass, siValue, siWlSplit, siCsAvg, siNoise, siExOut,
 	} else {
 		exOut <- ""
 	}
-	if (!is.null(dpt)) {
-		more <- TRUE
-		dptOut <- "dpt "
-	} else {
-		dptOut <- ""
-	}
+#	if (!is.null(dpt)) {
+#		more <- TRUE
+#		dptOut <- "dpt "
+#	} else {
+#		dptOut <- ""
+#	}
 	if (more) {
 		moreAdd <- ", "
 	} else {
 		moreAdd <- ""
 	}
-	easy <- paste(varString, "@", siWlSplit[1], "-to-", siWlSplit[2], moreAdd, csAvg, noise, exOut, dptOut, sep="")
+#	easy <- paste(varString, "@", siWlSplit[1], "-to-", siWlSplit[2], moreAdd, csAvg, noise, exOut, dptOut, sep="")
+	easy <- paste(varString, "@", siWlSplit[1], "-to-", siWlSplit[2], moreAdd, csAvg, noise, exOut, sep="")
 	return(easy)
 } # EOF
 
@@ -932,6 +936,7 @@ processSingleRow_CPT <- function(dataset, siClass, siValue, siWlSplit, siCsAvg, 
 	newDataset <- performDpt_Post(newDataset, ap)
 	##
 	idString <- makeIdString(siClass, siValue, siWlSplit, siCsAvg, siNoise, siExOut, ap)
+	newDataset@anproc <- ap
 	out <- new("aquap_set", dataset=newDataset, idString=idString)
 	return(out)
 } # EOF
@@ -1059,7 +1064,7 @@ gdmm <- function(dataset, ap=getap()) {
 	}
 	createOutlierFlagList() # needed to collect the flags and flag-data from the first block to the second
 	ap <- ap_cleanZeroValuesCheckExistenceDefaults(ap, dataset, haveExc=TRUE)
-	md <- getMdDs(dataset)
+	md <- getMetadata(dataset)
 	a <- makeCompPattern(dataset$header, md, ap)
 	cp <- a$cp
 	cpt <- a$cpt

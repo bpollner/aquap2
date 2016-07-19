@@ -30,6 +30,6 @@
 #' @param dpt.post Character vector, which of the available modules of data 
 #' pre-treatments to apply \strong{AFTER} (possibly) splitting the dataset. Leave 
 #' at NULL for no additional data treatment. Possible values are 
-#' <%=r_listize(pv_dptModules)%>. Add additional parameters to some of the single 
-#' strings via the separator '@@'. For examples and further information see
-#' \code{\link{dpt_modules}}.
+#' <%=r_listize(pv_dptModules)%>. Add additional parameters to \emph{some} of the 
+#' single strings via the separator '@@'. For examples and further information 
+#' see \code{\link{dpt_modules}}.
