@@ -11,15 +11,18 @@ do_gapDer(dataset, m = 1, w = 1, s = 1, deltaW)
 \code{\link{gfd}} or as can be extracted from a 'cube' via 
 \code{\link{getcd}}.}
 
-\item{m}{The order of the derivative, can be between 1 and 4. Default is 1.}
+\item{m}{Numeric length one. The order of the derivative, can be between 1 and 
+4. Default is 1.}
 
-\item{w}{The filter length (should be odd), ie. the spacing between points 
+\item{w}{Numeric length one. The filter length (should be odd), ie. the spacing 
+between points 
 over which the derivative is computed. Default is 1.}
 
-\item{s}{The segment size, i.e. the range over which the points are averaged.
-Default is 1.}
+\item{s}{Numeric length one. The segment size, i.e. the range over which the 
+points are averaged.Default is 1.}
 
-\item{deltaW}{The sampling interval / band spacing.}
+\item{deltaW}{Numeric length one. The sampling interval / band spacing. Default 
+is 1.}
 }
 \description{
 Performs gap-segment derivatives on the provided dataset. The 
@@ -33,8 +36,16 @@ the original dataset. The underlying function is \code{\link[prospectr]{gapDer}}
 }
 \section{Note}{
 
-The documentation for the parameters was taken from 
+The documentation for the parameters was mostly taken from 
 \code{\link[prospectr]{gapDer}} by Antoine Stevens.
+}
+\examples{
+\dontrun{
+fd <- gfd()
+fd_gsd <- do_gapDer(fd)
+fd_gsd2 <- do_gapDer(fd, 1,11,13,1)
+plot(fd_gsd - fd_gsd2)
+}
 }
 \seealso{
 \code{\link[prospectr]{gapDer}}

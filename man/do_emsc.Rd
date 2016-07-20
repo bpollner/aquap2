@@ -26,6 +26,14 @@ can be used as input to (try to) remove the effect on the data described by
 said loadings / regr. vector. For example, from a pca-model the first and 
 second loading vector can be extracted with \code{pcaModel$loadings[, c(1,2)]}.
 }
+\examples{
+\dontrun{
+fd <- gfd()
+cu <- gdmm(fd, getap(do.pca=TRUE)) # assumes no split
+loadings <- getcm(cu, 1, what="pca")$loadings[, c(1,2)]
+fd_emsc <- do_emsc(fd, loadings)
+}
+}
 \seealso{
 \code{\link{getcm}} for easy extraction of single models where 
 loading vectors or a regression vector can be obtained.

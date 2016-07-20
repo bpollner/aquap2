@@ -32,8 +32,8 @@ your workspace containing an oject of class \code{aquap_data} containing only
 one row, (as e.g. produced by \code{\link{do_avg}}) to use this as a reference 
 for baseline correction.
 \describe{
-\item{@yourObj}{Format: "msc@yourObj", with 'yourObj' naming an 
-existing object in your workspace containing an oject of class 
+\item{@yourObj}{Format: "msc@yourObj", with 'yourObj' 
+naming an existing object in your workspace containing an oject of class 
 \code{aquap_data} with only one row. See also \code{\link{getcd}} for 
 extracting a singel dataset from the 'cube' object, and \code{\link{do_avg}} 
 for averaging a single dataset into a single spectrum.}
@@ -44,15 +44,26 @@ function \code{\link{do_emsc}} is called. You have to provide the name of an
 object containing a data frame or matrix with one or two loadings or with one 
 regression vector in the format 
 \describe{
-\item{@yourObj}{Format: "emsc@yourObj", with 'yourObj' naming an 
-existing object in your workspace containing  a data frame or matrix with one 
-or two loadings or with one regression vector. See also \code{\link{getcm}} for 
-extracting single models from the 'cube' object.}
+\item{@yourObj}{Format: "emsc@yourObj", with 'yourObj' 
+naming an existing object in your workspace containing  a data frame or matrix 
+with one or two loadings or with one regression vector. See also 
+\code{\link{getcm}} for extracting single models from the 'cube' object.}
 }}
 
 \item{osc}{Not yet implemented.}
 
 \item{deTr}{Not yet implemented.}
+
+\item{gsd}{Transform the dataset using gap-segment 
+derivatives by calling internally the function \code{\link{do_gapDer}} (what 
+in turn is relying on \code{\link[prospectr]{gapDer}}). Provide only the 
+character "gsd" to use the standard values for m, w, s and 
+deltaW, what are all 1. Use a string in the format 
+"gsd@m-w-s-d", with m, w, s and d being integers to modify 
+the behaviour of \code{\link{do_gapDer}} by supplying your own values;'w' has 
+to be odd. The single integers have to be separated by a 'minus' ('-'). Please 
+not that the gap-derivative function will truncate your data at the first and 
+last wavelengths, depending on the provided values.}
 }
 \description{
 Apply one or more data pre-treatment modules to the dataset.
@@ -67,12 +78,12 @@ csAvg, noise and exOut, and / or \strong{after} the splitting of the dataset
 Via the ... argument in the function \code{\link{getap}}, the values
 of both \code{dpt.pre} and \code{dpt.post} can be overridden. Via the 
 separator '@', additional values can be appended to some of the single modules. 
-Possible values for dpt-modules are 'sgol', 'snv', 'msc', 'emsc', 'osc', 'deTr', 'gapDe'. Single 
+Possible values for dpt-modules are 'sgol', 'snv', 'msc', 'emsc', 'osc', 'deTr', 'gsd'. Single 
 modules can be combined and repeated in any arbitrary order, i.e. there is no 
 upper limit on the modules that can be applied in the 'dpt.pre' and 'dpt.post' 
 process -- see examples.
 }
-\section{Important}{
+\section{Note}{
 
 Please see the description and \code{\link{split_dataset}} to understand 
 \strong{when} in the data-processing procedure the respective data treatment 
@@ -94,6 +105,7 @@ dpt.pre <- c("msc", "snv", "msc") # (of course not useful, but it shows that
 dpt.post <- "msc@myDS" # with 'myDS' being the name of a standard dataset 
 dpt.post <- c("sgol@2-51-0", "emsc@myDF") # with 'myDF' being the name of a 
 ## data frame containing one or two loading vectors or one regression vector
+dpt.post <- "gsd@1-11-13-1"
 }
 }
 \seealso{

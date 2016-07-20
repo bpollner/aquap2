@@ -18,7 +18,7 @@ pre-treatments to apply \strong{AFTER} a (possible) split by variable
 \code{spl.var} and wavelength \code{spl.w.}, and \strong{BEFORE} a (possible) 
 splitting of the dataset according to the provided split-variables below 
 (csAvg, noise, exOut). Leave at NULL for no data pre-treatment. Possible values 
-are 'sgol', 'snv', 'msc', 'emsc', 'osc', 'deTr', 'gapDe'. Add additional parameters to \emph{some} of 
+are 'sgol', 'snv', 'msc', 'emsc', 'osc', 'deTr', 'gsd'. Add additional parameters to \emph{some} of 
 the single strings via the separator '@'. For further information and examples 
 see \code{\link{dpt_modules}}.}
 
@@ -46,7 +46,7 @@ for the grouping defining the scope for outlier detection.}
 \item{dpt.post}{Character vector, which of the available modules of data 
 pre-treatments to apply \strong{AFTER} (possibly) splitting the dataset. Leave 
 at NULL for no additional data treatment. Possible values are 
-'sgol', 'snv', 'msc', 'emsc', 'osc', 'deTr', 'gapDe'. Add additional parameters to \emph{some} of the 
+'sgol', 'snv', 'msc', 'emsc', 'osc', 'deTr', 'gsd'. Add additional parameters to \emph{some} of the 
 single strings via the separator '@'. For examples and further information 
 see \code{\link{dpt_modules}}.}
 

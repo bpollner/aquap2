@@ -785,7 +785,7 @@ performDPT_Core <- function(dataset, dptSeq) {
 			cat(paste("      Data treatment: ", paste(dptSeq, collapse=", "), "\n", sep=""))
 		}
 		for (i in 1: length(first)) {
-			###
+		###########
 			if (first[i] == pvMod[1]) { # sgolay
 				## XXX have also the option to NOT add additional parameters to sgol
 				if (!grepl("@", dptSeq[i])) {
@@ -797,15 +797,15 @@ performDPT_Core <- function(dataset, dptSeq) {
 					nums <- as.numeric(unlist(strsplit(infoChar, "-")))
 					options(warn=0)
 					if (any(is.na(nums)) | !all(is.wholenumber(nums))) {
-						stop("Please provide only integers as arguments to the Savitzky-Golay operation, e.g. sgol@2-21-0.\n Please check the analysis procedure / your input.", call.=FALSE)
+						stop("Please provide only integers as arguments to the Savitzky-Golay operation, e.g. ", pvMod[1], "@2-21-0.\n Please check the analysis procedure / your input.", call.=FALSE)
 					}
-					if (length(nums) > 3) {
-						stop("Please provide only three integers as arguments to the Savitzky-Golay operation, e.g. sgol@2-21-0. \n Please check the analysis procedure / your input.", call.=FALSE)
+					if (length(nums) != 3) {
+						stop("Please provide exactly three integers as arguments to the Savitzky-Golay operation, e.g. ", pvMod[1], "@2-21-0. \n Please check the analysis procedure / your input.", call.=FALSE)
 					}
 					dataset <- do_sgolay(dataset, p=nums[1], n=nums[2], m=nums[3])  # arguments: p=2, n=21, m=0)
 				}  # end else
 			} # end sgolay
-			####
+		###########
 			if (first[i] == pvMod[2]) { # snv
 				dataset <- do_snv(dataset)  # no additional arguments here
 			} # end snv
@@ -826,7 +826,7 @@ performDPT_Core <- function(dataset, dptSeq) {
 				} # end if grepl @ element			
 				dataset <- do_msc(dataset, vec) # one reference (a one-lined dataset)
 			} # end msc
-			####
+		###########
 			if (first[i] == pvMod[4]) { # emsc
 				lvObj <- NULL
 				if (!grepl("@", dptSeq[i])) {
@@ -848,7 +848,7 @@ performDPT_Core <- function(dataset, dptSeq) {
 				}				
 				dataset <- do_emsc(dataset, vecLoad = lvObj) # a data frame with max 2 columns (loadings or a regression vector)
 			} # end emsc
-			####
+		###########
 			if (first[i] == pvMod[5]) { # osc
 					## have osc here soon 
 					message("Sorry, no osc yet!")
@@ -857,25 +857,25 @@ performDPT_Core <- function(dataset, dptSeq) {
 					## have deTrend here soon 	
 					message("Sorry, no de-Trend yet")
 			} # end deTrend
+		###########
 			if (first[i] == pvMod[7]) { # gap Derivative
 				if (!grepl("@", dptSeq[i])) {
-					dataset <- do_sgolay(dataset)
-				} else { # so, yes, we have an '@' present	
+					dataset <- do_gapDer(dataset)
+				} else { # so, yes, we have an '@' present	meaning we are providing values
 					infoChar <- strsplit(dptSeq[i], "@")[[1]][[2]] # get only the second part of the module containing the numbers (still as character!)
 					options(warn=-1)
 					nums <- as.numeric(unlist(strsplit(infoChar, "-")))
 					options(warn=0)
 					if (any(is.na(nums)) | !all(is.wholenumber(nums))) {
-						stop("Please provide only integers as arguments to the Savitzky-Golay operation, e.g. sgol@2-21-0.\n Please check the analysis procedure / your input.", call.=FALSE)
+						stop("Please provide only integers as arguments to the gap-derivative operation, e.g. ", pvMod[7],"@1-11-13-1.\n Please check the analysis procedure / your input.", call.=FALSE)
 					}
-					if (length(nums) > 3) {
-						stop("Please provide only three integers as arguments to the Savitzky-Golay operation, e.g. sgol@2-21-0. \n Please check the analysis procedure / your input.", call.=FALSE)
+					if (length(nums) != 4) {
+						stop("Please provide exactly four integers as arguments to the gap-derivative operation, e.g. ", pvMod[7], "@1-11-13-1. \n Please check the analysis procedure / your input.", call.=FALSE)
 					}
-					dataset <- do_sgolay(dataset, p=nums[1], n=nums[2], m=nums[3])  # arguments: p=2, n=21, m=0)
-				}  # end else				
-
-
+					dataset <- do_gapDer(dataset, m=nums[1], w=nums[2], s=nums[3], deltaW=nums[4])  # arguments: p=2, n=21, m=0)
+				}  # end else
 			} # end gap Derivative	
+		###########			
 		} # end for i
 	} # end if
 	return(dataset)	

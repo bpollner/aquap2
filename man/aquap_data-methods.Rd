@@ -55,6 +55,7 @@ only the number of wavelengths as 'dictated' by the smaller dataset.
  ds <- dataset[1:5] # the same as above
 	dSub <- dataset - do_sgolay(dataset, n=71) # apply smoothing and subtract
  plot(dSub, pg.where="", pg.main=" | smoothed subtracted")
+ plot(do_gapDer(ds,1,11,13,1) - do_gapDer(ds, 1, 13, 13, 1))
 }
 }
 \seealso{

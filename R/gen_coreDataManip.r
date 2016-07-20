@@ -190,6 +190,13 @@ calc_emsc <- function(dataset, input) { ## this one possibly used "external"
 #' @return Returns the dataset with the transformed NIR data.
 #' @seealso \code{\link{getcm}} for easy extraction of single models where 
 #' loading vectors or a regression vector can be obtained.
+#' @examples 
+#' \dontrun{
+#' fd <- gfd()
+#' cu <- gdmm(fd, getap(do.pca=TRUE)) # assumes no split
+#' loadings <- getcm(cu, 1, what="pca")$loadings[, c(1,2)]
+#' fd_emsc <- do_emsc(fd, loadings)
+#' }
 #' @family Data pre-treatment functions 
 #' @family dpt modules documentation
 #' @export
@@ -234,16 +241,26 @@ do_scale_fc <- function(dataset, calibAvgTable) { # used in aquagram norm foreig
 #' order to have the same number of wavelengths in the resulting dataset as in 
 #' the original dataset. The underlying function is \code{\link[prospectr]{gapDer}}.
 #' @inheritParams do_sgolay
-#' @param m The order of the derivative, can be between 1 and 4. Default is 1.
-#' @param w The filter length (should be odd), ie. the spacing between points 
+#' @param m Numeric length one. The order of the derivative, can be between 1 and 
+#' 4. Default is 1.
+#' @param w Numeric length one. The filter length (should be odd), ie. the spacing 
+#' between points 
 #' over which the derivative is computed. Default is 1.
-#' @param s The segment size, i.e. the range over which the points are averaged.
-#' Default is 1.
-#' @param deltaW The sampling interval / band spacing.
+#' @param s Numeric length one. The segment size, i.e. the range over which the 
+#' points are averaged.Default is 1.
+#' @param deltaW Numeric length one. The sampling interval / band spacing. Default 
+#' is 1.
 #' @section Note:
-#' The documentation for the parameters was taken from 
+#' The documentation for the parameters was mostly taken from 
 #' \code{\link[prospectr]{gapDer}} by Antoine Stevens.
 #' @seealso \code{\link[prospectr]{gapDer}}
+#' @examples 
+#' \dontrun{
+#' fd <- gfd()
+#' fd_gsd <- do_gapDer(fd)
+#' fd_gsd2 <- do_gapDer(fd, 1,11,13,1)
+#' plot(fd_gsd - fd_gsd2)
+#' }
 #' @family Data pre-treatment functions 
 #' @family dpt modules documentation
 #' @export

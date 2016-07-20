@@ -41,8 +41,8 @@
 #' one row, (as e.g. produced by \code{\link{do_avg}}) to use this as a reference 
 #' for baseline correction.
 #' \describe{
-#' \item{@@yourObj}{Format: "<%=pv_dptModules[3]%>@@yourObj", with 'yourObj' naming an 
-#' existing object in your workspace containing an oject of class 
+#' \item{@@yourObj}{Format: "<%=pv_dptModules[3]%>@@yourObj", with 'yourObj' 
+#' naming an existing object in your workspace containing an oject of class 
 #' \code{aquap_data} with only one row. See also \code{\link{getcd}} for 
 #' extracting a singel dataset from the 'cube' object, and \code{\link{do_avg}} 
 #' for averaging a single dataset into a single spectrum.}
@@ -52,14 +52,24 @@
 #' object containing a data frame or matrix with one or two loadings or with one 
 #' regression vector in the format 
 #' \describe{
-#' \item{@@yourObj}{Format: "<%=pv_dptModules[4]%>@@yourObj", with 'yourObj' naming an 
-#' existing object in your workspace containing  a data frame or matrix with one 
-#' or two loadings or with one regression vector. See also \code{\link{getcm}} for 
-#' extracting single models from the 'cube' object.}
+#' \item{@@yourObj}{Format: "<%=pv_dptModules[4]%>@@yourObj", with 'yourObj' 
+#' naming an existing object in your workspace containing  a data frame or matrix 
+#' with one or two loadings or with one regression vector. See also 
+#' \code{\link{getcm}} for extracting single models from the 'cube' object.}
 #' }
 #' @param <%=pv_dptModules[5]%> Not yet implemented.
 #' @param <%=pv_dptModules[6]%> Not yet implemented.
-#' @section Important:
+#' @param <%=pv_dptModules[7]%> Transform the dataset using gap-segment 
+#' derivatives by calling internally the function \code{\link{do_gapDer}} (what 
+#' in turn is relying on \code{\link[prospectr]{gapDer}}). Provide only the 
+#' character "<%=pv_dptModules[7]%>" to use the standard values for m, w, s and 
+#' deltaW, what are all 1. Use a string in the format 
+#' "<%=pv_dptModules[7]%>@@m-w-s-d", with m, w, s and d being integers to modify 
+#' the behaviour of \code{\link{do_gapDer}} by supplying your own values;'w' has 
+#' to be odd. The single integers have to be separated by a 'minus' ('-'). Please 
+#' not that the gap-derivative function will truncate your data at the first and 
+#' last wavelengths, depending on the provided values.
+#' @section Note:
 #' Please see the description and \code{\link{split_dataset}} to understand 
 #' \strong{when} in the data-processing procedure the respective data treatment 
 #' modules are applied!
@@ -79,6 +89,7 @@
 #' dpt.post <- "msc@myDS" # with 'myDS' being the name of a standard dataset 
 #' dpt.post <- c("sgol@2-51-0", "emsc@myDF") # with 'myDF' being the name of a 
 #' ## data frame containing one or two loading vectors or one regression vector
+#' dpt.post <- "gsd@1-11-13-1"
 #' }
 #' @seealso \code{\link{split_dataset}}, \code{\link{anproc_file}}, 
 #' \code{\link{getcd}} for extracting a dataset from a 'cube' object, 
