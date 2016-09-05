@@ -26,7 +26,14 @@
 #' the raw original data should be used as well. If set to TRUE, outliers will 
 #' be flagged in the dataset in any case.
 #' @param spl.exOut.var Character vector. The variables that should be used 
-#' for the grouping defining the scope for outlier detection.
+#' for the grouping defining the scope for outlier detection. The name of the 
+#' resulting column consists of the class variable prefix (as defined in the 
+#' settings.r file in \code{p_ClassVarPref}), the general designator for an 
+#' outlier-column (as defined in the settings.r file in \code{p_outlierCol}) 
+#' followed by an underscore '\code{_}', and each of the provided variables 
+#' (without the class variable prefix) separated by a '.' dot. For example, if the 
+#' provided variables are \code{C_Group} and \code{C_Time}, the column containing 
+#' the outlier-flags might be called \code{C_outlier_Group.Time}.
 #' @param dpt.post Character vector, which of the available modules of data 
 #' pre-treatments to apply \strong{AFTER} (possibly) splitting the dataset. Leave 
 #' at NULL for no additional data treatment. Possible values are 
