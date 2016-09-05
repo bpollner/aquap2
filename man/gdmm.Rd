@@ -51,7 +51,7 @@ cube <- gdmm(dataset, getap(do.sim=FALSE, pls.regOn="Y_Temp"))
 
 Other Core functions: \code{\link{exportSampleList}},
   \code{\link{getFullData}},
-  \code{\link{plot,aquap_cube,ANY-method}},
-  \code{\link{plot,aquap_data,ANY-method}}
+  \code{\link{plot,aquap_cube,missing-method}},
+  \code{\link{plot,aquap_data,missing-method}}
 }
 

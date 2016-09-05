@@ -14,7 +14,7 @@
 #	spl.wl <- "1300-to-1600"
 #	spl.wl <- c("1000-to-2000", "1300-to-1600")
 	#######
-	dpt.pre <- NULL							## Character vector, which of the available modules of data pre-treatments to apply. Leave at NULL for no additional data pre-treatment. For possible values see XXX.
+	dpt.pre <- NULL							## Character vector, which of the available modules of data pre-treatments to apply. Leave at NULL for no additional data pre-treatment. For possible values see ?dpt_modules.
 	#######
 	spl.do.csAvg <- FALSE					## if all the consecutive scans of a single sample should be reduced, i.e. averaged into a single spectrum
 	spl.csAvg.raw <- TRUE					## if, should the consecutive scans of a single sample be reduced, an other dataset containing every single consecutive scan should be kept as well
@@ -26,7 +26,7 @@
 	spl.exOut.raw <- TRUE					## if, should exclusion of outliers be performed, the raw original data should be used as well; if set to TRUE, outliers will be flagged in the dataset in any case.
 	spl.exOut.var <- c("C_Group", "C_Water")## the variables (one or more) to be used for the grouping defining the scope for outlier detection.
 	#######
-	dpt.post <- NULL						## Character vector, which of the available modules of data pre-treatments to apply.  Leave at NULL for no additional data pre-treatment. For possible values see XXX.
+	dpt.post <- NULL						## Character vector, which of the available modules of data pre-treatments to apply.  Leave at NULL for no additional data pre-treatment. For possible values see ?dpt_modules.
 	################################################################
 			
 

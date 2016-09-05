@@ -170,7 +170,7 @@ strict and conscious handling of the files.
 
 Other Core functions: \code{\link{exportSampleList}},
   \code{\link{gdmm}},
-  \code{\link{plot,aquap_cube,ANY-method}},
-  \code{\link{plot,aquap_data,ANY-method}}
+  \code{\link{plot,aquap_cube,missing-method}},
+  \code{\link{plot,aquap_data,missing-method}}
 }
 

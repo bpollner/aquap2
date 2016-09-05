@@ -13,7 +13,7 @@ getcd(cube, index)
 rowname of the 'cube' object.}
 }
 \value{
-A standard dataset os e.g. produced by the function \code{\link{gfd}}.
+A standard dataset as e.g. produced by the function \code{\link{gfd}}.
 }
 \description{
 Get a single dataset, referenced by its index, from the 'cube' 

@@ -94,8 +94,8 @@ plot_pca(fd, pg.where="", pca.colorBy="C_Group") # assumes existence of "C_Group
 Other PCA documentation: \code{\link{calc_pca_args}},
   \code{\link{plot_pca_args}}
 
-Other Plot functions: \code{\link{plot,aquap_cube,ANY-method}},
-  \code{\link{plot,aquap_data,ANY-method}},
+Other Plot functions: \code{\link{plot,aquap_cube,missing-method}},
+  \code{\link{plot,aquap_data,missing-method}},
   \code{\link{plot_aqg}}, \code{\link{plot_pls}},
   \code{\link{plot_sim}}
 }

@@ -45,10 +45,10 @@ setMethod("-", signature(e1="aquap_data", e2="aquap_data"), definition = subtrac
 setGeneric("plot", function(x, y, ...) standardGeneric("plot"))
 #' @rdname plot_spectra
 #' @export
-setMethod("plot", signature(x = "aquap_data"), definition = plot_spectra_Data_M)
+setMethod("plot", signature(x = "aquap_data", y="missing"), definition = plot_spectra_Data_M)
 #' @rdname plot_all_modells
 #' @export
-setMethod("plot", signature(x = "aquap_cube"), definition = plot_cube_M) # strangely, adding any type except "ANY" for y at only one (1) of the two plot methods solved the missing class-documentation problem; the corresponding definition have to have each the same arguments (except the "...") as in the signature.
+setMethod("plot", signature(x = "aquap_cube", y="missing"), definition = plot_cube_M) # strangely, adding any type except "ANY" for y at only one (1) of the two plot methods solved the missing class-documentation problem; the corresponding definition have to have each the same arguments (except the "...") as in the signature.
 
 
 setGeneric("plot_spectra", function(x, colorBy=NULL, ...) standardGeneric("plot_spectra"))

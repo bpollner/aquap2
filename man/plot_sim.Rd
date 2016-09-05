@@ -31,8 +31,8 @@ The width and height of the resulting pdf can be set in the settings.
 }
 }
 \seealso{
-Other Plot functions: \code{\link{plot,aquap_cube,ANY-method}},
-  \code{\link{plot,aquap_data,ANY-method}},
+Other Plot functions: \code{\link{plot,aquap_cube,missing-method}},
+  \code{\link{plot,aquap_data,missing-method}},
   \code{\link{plot_aqg}},
   \code{\link{plot_pca,aquap_cube-method}},
   \code{\link{plot_pls}}

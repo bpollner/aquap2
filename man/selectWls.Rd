@@ -16,7 +16,8 @@ selected.}
 selected.}
 }
 \value{
-The standard dataset (class 'aquap_data')
+The standard dataset (class 'aquap_data') containing only the 
+selected wavelengths.
 }
 \description{
 Select wavelenghts from a dataset.

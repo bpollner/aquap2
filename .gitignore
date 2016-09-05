@@ -2,3 +2,4 @@ inst/doc
 .Rproj.user
 vignettes/*.html
 .Rapp.history
+.DS_Store

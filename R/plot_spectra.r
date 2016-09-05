@@ -1,11 +1,21 @@
 plotSpectra_outer <- function(dataset, colorBy, onMain, onSub, idString="") {
+	if (!is.null(colorBy)) {
+		if (colorBy == "all") {	
+			cPref <- .ap2$stn$p_ClassVarPref
+			le <- nchar(cPref)
+			cns <- colnames(dataset$header)
+			cnsM <- substr(cns, 1, le)
+			ind <- which(cnsM == cPref)
+			colorBy <- cns[ind] # get here all the classvariables
+		}
+	}
 	cns <- colnames(dataset$header)
 	if (!all(colorBy %in% cns)) {
 		a <- which(! colorBy %in% cns)
 		stop(paste("Sorry, the class-variable '", paste(colorBy[a], collapse=", "), "' does not exist. Please check your input.", sep=""), call.=FALSE)
 	}	
 	if (is.null(colorBy)) {
-		plotSpectra_inner(dataset, singleColorBy=NULL, onMain, onSub)
+		plotSpectra_inner(dataset, singleColorBy=NULL, onMain, onSub, idString)
 	} else {
 		for (i in 1: length(colorBy)) {
 			plotSpectra_inner(dataset, colorBy[i], onMain, onSub, idString)
@@ -15,41 +25,30 @@ plotSpectra_outer <- function(dataset, colorBy, onMain, onSub, idString="") {
 
 plotSpectra_inner <- function(dataset, singleColorBy, onMain, onSub, idString="") {
 	if (is.null(singleColorBy)) {
-		color <- 1
+		colorData <- 1
 		msg <- ""
 		makeLegend <- FALSE
-		lty <- 1
+#		lty <- 1
 	} else {
 		makeLegend <- TRUE
 		cns <- colnames(dataset$colRep)
 		colInd <- which(cns == singleColorBy)
 		color <- dataset$colRep[,colInd]
 		msg <- paste("Color by ", cns[colInd], sep="")
-		ind <- which(colnames(dataset$header) == singleColorBy)
-		grouping <- dataset$header[, ind]
-		legendText <- as.character(levels(grouping))
-		options(warn=-1)
-		nrs <- as.numeric(legendText)
-		options(warn=0)
-		if (any(is.na(nrs))) {
-			lto <- order(legendText) # should be straight from 1 to n, because "level" already gives out characters in alphabetical order
-		} else {
-			lto <- order(nrs) # so if the legend text is coming from all numbers *and* they are higher than 9 we get the real order to sort later
-		}		
-		partN <- sapply(levels(grouping), function(x, grAll) length(which(grAll==x)), grAll=grouping)
-		legendTextExtended <- paste(legendText[lto], "   N=", partN[lto], "", sep="") # have it in every line			
-		legendCol <- getUniqLevelColor(color) # here read out in levels !!!
-		lty=1
+		aa <- extractColorLegendValues(dataset, singleColorBy)  # color_data, color_unique, color_legend, txt, txtE, sumPart, dataGrouping
+		colorData <- aa$color_data
+		colorLegend <- aa$color_legend
+		legendTextExt <- aa$txtE
 	} # end else
 	dptInfo <- adaptIdStringForDpt(getAnproc(dataset), idString)
 	onMain <- paste(onMain, dptInfo, sep="")
 	wls <- getWavelengths(dataset)
 	onSub <- paste(onSub, msg, sep=" ")
-	matplot(wls, t(dataset$NIR), type="l", xlab="Wavelengths", ylab="Absorbance", main=onMain, sub=onSub, col=color, lty=1)
+	matplot(wls, t(dataset$NIR), type="l", xlab="Wavelengths", ylab="Absorbance", main=onMain, sub=onSub, col=colorData, lty=1)
 	abline(h=0, col="gray")
 	if (makeLegend) {
 		legBgCol <- rgb(255,255,255, alpha=.ap2$stn$col_alphaForLegends, maxColorValue=255) # is a white with alpha to be determined in the settings
-		legend("topright", legend=legendTextExtended, col=legendCol[lto], lty=lty, bg=legBgCol)
+		legend("topright", legend=legendTextExt, col=colorLegend, lty=1, bg=legBgCol)
 	}
 } # EOF
 
@@ -134,13 +133,15 @@ plot_spectra_Cube <- function(x, colorBy=NULL, ...) {
 #' as produced by \code{\link{gdmm}}.
 #' @param colorBy Character vector, possible values are the class variables in 
 #' the dataset. Provide a character vector with length > 1 to color along all 
-#' these class variables, see examples.
+#' these class variables; provide 'all' to use all available class variables for 
+#' coloring - see examples.
 #' @param ... Optional general plotting options as defined in 
 #' \code{\link{plot_pg_args}}.
 #' @seealso \code{\link{plot_all_modells}}
 #' @examples
 #' \dontrun{
 #' plot_spectra(dataset)
+#' plot_spectra(dataset, colorBy="all")
 #' plot(dataset) # the same as above
 #' plot(dataset, colorBy=c("C_Group"))
 #' plot_spectra(dataset, "C_Group")

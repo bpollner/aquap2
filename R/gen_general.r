@@ -622,7 +622,9 @@ extractColorLegendValues <- function(dataset, groupBy) { # returns a 4 element l
 	legendText <- legendText[lto]
 	legendTextExtended <- paste(legendText, "   N=", partN[lto], "", sep="") # have it in every line			
 	color_unique <- getUniqLevelColor(color_data)  # here read out in levels !!!
-	color_legend <- color_unique[lto] 
+#	color_legend <- color_unique[lto] # the old version, appears to be not always correct
+	ind <- which(colnames(dataset$colRep) == groupBy) # get once the index of our grouping variable in the colRep
+	color_legend <- sapply(legendText, function(x, cri, ds, grby) ssc_s(ds, grby, x)$colRep[1,cri], cri=ind, ds=dataset, grby=groupBy) # look through each of the elements of the legend text and extract and extract the corresponding color from the colRep
 	pch_data <- makePchSingle(grouping)
 	pch_legend <- as.numeric(levels(as.factor(pch_data)))[lto]
 	#
@@ -667,7 +669,7 @@ makeFlatDataFrame <- function(dataset, groupBy, fusionGroupBy=NULL) {
 #' @param index The index of the dataset to be obtained. See the leftmost
 #' rowname of the 'cube' object.
 #' @family Helper Functions
-#' @return A standard dataset os e.g. produced by the function \code{\link{gfd}}.
+#' @return A standard dataset as e.g. produced by the function \code{\link{gfd}}.
 #' @examples 
 #' \dontrun{
 #' dataset <- gfd()
