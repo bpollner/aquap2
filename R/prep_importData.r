@@ -551,7 +551,7 @@ flagOutliers_allScope <- function(NIR, detectOutliers) {
 		return(data.frame(DELETE = rep(NA, nrow(NIR))))
 	} else {
 		cPref <- .ap2$stn$p_ClassVarPref
-		cnOtl <- paste(.ap2$stn$p_OutlierCol, .ap2$stn$p_outlierCol_allSuffix, sep="_")
+		cnOtl <- paste(.ap2$stn$p_outlierCol, .ap2$stn$p_outlierCol_allSuffix, sep="_")
 		tol <- .ap2$stn$simca_tolerance
 		kmax <- .ap2$stn$simca_kMax
 		flatDf <- data.frame(grouping=rep("x", nrow(NIR)))

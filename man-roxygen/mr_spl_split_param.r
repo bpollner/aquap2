@@ -23,7 +23,7 @@
 #'  will be used as well in addition to the noise-data.
 #' @param spl.do.exOut Logical. If exclusion of outliers should be performed.
 #' @param spl.exOut.raw Logical. If, should exclusion of outliers be performed, 
-#' the raw original data should be used as well; if set to TRUE, outliers will 
+#' the raw original data should be used as well. If set to TRUE, outliers will 
 #' be flagged in the dataset in any case.
 #' @param spl.exOut.var Character vector. The variables that should be used 
 #' for the grouping defining the scope for outlier detection.
