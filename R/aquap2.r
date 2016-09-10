@@ -18,6 +18,10 @@
 #' @import methods
 #' @import foreach
 #' @import doParallel
+#' @importFrom pls MSEP
+#' @importFrom pls mvrValstats
+# the 'importFrom' seems to be necessary due to a bug (?) in the pls package, 
+# so that these two functions can not be found 
 #'
 #' @import grDevices
 #' @import graphics
