@@ -12,6 +12,12 @@ used for coloring in the RMSEP and RMSECV plots. Set to NULL for no coloring,
 or provide a character length one with a single column name of a class 
 variable that should be used for coloring.}
 
+\item{pls.what}{What types of plsr analysis to plot. Possible values are 
+'both', 'errors', 'regression'.}
+
+\item{pls.rdp}{Logical (TRUE or FALSE). If errors in the error plots should be 
+given in RDP or not.}
+
 \item{pg.where}{Character length one. If left at the default 'def', the value 
 from the settings.r file is read in (parameter \code{gen_plot_pgWhereDefault}). 
 For plotting to PDFs provide "pdf", for plotting to graphics device provide 
@@ -57,6 +63,6 @@ Other Plot arguments: \code{\link{plot,aquap_data,missing-method}},
   \code{\link{plot_pg_args}}, \code{\link{plot_sim_args}}
 
 Other PLSR documentation: \code{\link{calc_pls_args}},
-  \code{\link{plot_pls}}
+  \code{\link{plot_pls,aquap_cube-method}}
 }
 

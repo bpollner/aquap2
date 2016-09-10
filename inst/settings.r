@@ -5,7 +5,7 @@
 stn <- list(
 	# tag = value, # with a comma !!
 	
-	## Folder Management
+	## Folder management and default filenames
 	fn_analysisData = "anData",				## the folder name for storing any analysis data
 	fn_exports = "exports", 				## the folder name for any exported file
 	fn_rcode = "R-code", 					## the folder where all the r-code is kept
@@ -20,7 +20,7 @@ stn <- list(
 	fn_anProcDefFile = "anproc.r", 			## the default filename for the analysis procedure file
 
 	
-	## data preparation, standard column names & prefixes
+	## Data preparation, standard column names & prefixes
 	p_yVarPref = "Y_", 						## the prefix for numerical variables	
 	p_ClassVarPref = "C_",					## the prefix for class-variables
 	p_timeCol = "Time", 					## the name of the column containing the time-points (if any)
@@ -56,6 +56,7 @@ stn <- list(
 	gen_plot_anprocSource = "defFile", 		## the default way to obtain the analysis procedure when *PLOTTING*. Possible values are "cube" to take the analysis procedure from within the cube, "defFile" to load instead the default filename of the analysis procedure file, or provide a custom analysis procedure filename. (Ending in ".r")
 	gen_plot_pgWhereDefault = "", 			## the default setting for the general plotting parameter 'pg.where'. If set to 'pdf', all graphics will be saved as a pdf. If anything but a pdf is provided, the graphics will be plotted to the graphics device.
 	gen_plot_maxNrDptInfoOnMain = 4, 		## the maximum number of dpt-info elements in the main of a title
+	gen_plot_legendPosition = "auto", 		## the default position of the legend in a plot. Leave at the default 'auto' for automatically detecting the best corner for the legend, provide one of "bottomright", "bottomleft", "topright" or "topleft" for choosing the resp. corner.
 	gen_calc_allowSubtrDiffHead = FALSE, 	## if subtractions of datasets having a different header structure should be allowed.
 	gen_calc_allowSubtrDiffWavels = TRUE,	## if subtractions of datasets having different sets of wavelengths should be allowed. If TRUE, this is only successful if the smaller set of wavelengths is completely within the bigger set of wavelengths. In this case, the bigger set is virtually cut down to the size of the smaller set. This can be necessary when function do_gapDer was used.
 
@@ -110,7 +111,7 @@ stn <- list(
 
 
 	## noise
-	noi_noiseLevel = 1e-6, 					## the system-specific noise level XXX 
+	noi_noiseLevel = 1e-6,	 				## the system-specific noise level XXX 
 
 
 	## PCA
@@ -137,6 +138,21 @@ stn <- list(
 	simca_sampling = "interleaved",  		## either "random" or "interleaved"  -- only taken into account when the above percentage is 50. Under development.
 	simca_maxBarsPerGraph = 7, 				## the maximum number of bars on one graphic for the class-distance barplots
 	
+	
+	##PLSR
+	plsr_calcInParallel = TRUE, 			## if the calculation of the plsr models should be done in parallel
+	plsr_addCompsBoundaries = c(7, 20),		## The number of components demarking three regions (below the first number, between first and second, and above the second number) of number of components where the numbers of components listed below are added. (For showing an error plot going beyond the actual number of components)
+	plsr_addComps = c(3, 5, 8), 			## how many components should be added to the error plot beyond the calculated best nr. of components in the above specified boundaries
+	plsr_percentObservAsMaxNcomp = 50,		## the percentage of the available number of observations indicating the maximally allowed number of components for the test-runs to determine the optimal number of components
+	plsr_nrCompsSwitchToNrObserv = 12,		## the number of maximum allowed number of components below which to the number of observations for defining the max. nr. of allowed components for the test-runs to determine the optimal number of components is switched     XXX explain better !!
+	plsr_nrTestIterations = 16, 			## how many repetitions should be calculated when getting the optimal number of components. Not the lowest number of components is chosen, but the one that comes up most often as the lowest.
+	plsr_nrDigitsRMSEx = 4,					## rounding for the error values
+	plsr_colorForBestNumberComps = "blue",	## the color for the vertical line in the error plot showing the best number of components
+	plsr_regressionVector_discrim = TRUE,	## if it should be discriminated between true positive / negative peaks in the plsr regression vector
+	plsr_AdLines = TRUE, 					## Logical or integer vector [2..5]; if the additional lines should be added to the regression vector plot (see '?adLinesToVector' for details)	
+	plsr_rv_customColor = NULL, 			## the custom color for coloring the plsr regression vector. Set to NULL for not using custom colors. Provide a color for using it to color the regression vector.
+	plsr_rv_customLinetype = NULL,			## the custom linetype for plotting the plsr regression vector. Provide an integer to use it as linetype for the regression vector.
+
 
 	## Aquagram 
 	aqg_defaultMod = "aucs.dce", 			## the default mode for the Aquagram

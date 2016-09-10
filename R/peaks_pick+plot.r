@@ -363,7 +363,8 @@ plotPeaks <- function(pickPeaksResult, onMain="", onSub="", adLines=TRUE, pcaVar
 #' }
 #' }
 #' @return Additional graphical elements on a vector plot
-#' @seealso \code{\link{plot_pca}}, \code{\link{plot_aqg_args}}
+#' @seealso \code{\link{plot_pca}}, \code{\link{plot_pls}}, 
+#' \code{\link{plot_aqg_args}}
 #' @examples
 #'  \dontrun{
 #'  fd <- gfd()

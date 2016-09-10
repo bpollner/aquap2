@@ -510,6 +510,40 @@ ap_check_dptModules <- function(ap) {
 	}
 } # EOF
 
+ap_check_plsr_Input <- function(ap) {
+	if (!is.null(ap$plsr)) {
+		e <- ap$plsr
+		## ncomp
+		if (!is.null(e$ncomp)) {
+			if (!all(is.numeric(e$ncomp)) | length(e$ncomp) != 1) {
+				stop("Please provide a length one numeric to the argument 'pls.ncomp' in the analysis procedure / your input.", call.=FALSE)
+			}
+			if (!is.wholenumber(e$ncomp)) {
+				stop("Please provide an integer to the argument 'pls.ncomp' in the analysis procedure / your input.", call.=FALSE)
+			}
+		}
+		## valid  pv_plsr_crossvalidation <- c("CV", "LOO")
+		if (!all(is.character(e$valid)) | length(e$valid) !=1) {
+			stop(paste("Please provide a length one character to the argument 'pls.valid' in the analysis procedure / your input.\nPossible values are: '", paste(pv_plsr_crossvalidation, collapse="', '"), "'.\n", sep=""), call.=FALSE)
+		}
+		if (!e$valid %in% pv_plsr_crossvalidation) {
+			stop("Please provide one of: '", paste(pv_plsr_crossvalidation, collapse="', '"), "' to the argument 'pls.valid' in the analysis procedure / your input.", call.=FALSE)
+		}
+		## what pv_plsr_what <- c("both", "errors", "regression")
+		if (!all(is.character(e$what)) | length(e$what) !=1) {
+			stop(paste("Please provide a length one character to the argument 'pls.what' in the analysis procedure / your input.\nPossible values are: '", paste(pv_plsr_what, collapse="', '"), "'.", sep=""), call.=FALSE)
+		}
+		if (!e$what %in% pv_plsr_what) {
+			stop(paste("Please provide one of: '", paste(pv_plsr_what, collapse="', '"), "' to the argument 'pls.what' in the analysis procedure / your input.", sep=""), call.=FALSE)
+		}
+		## RDP
+		if (!all(is.logical(e$inRdp)) | length(e$inRdp) !=1) {
+			stop("Please provide either 'TRUE' or 'FALSE' to the argument 'pls.rdp' in the analysis procedure / your input", call.=FALSE)
+		}
+		##
+	} # end if !is.null
+} # EOF
+
 ap_checExistence_Defaults <- function(ap, dataset, haveExc) {
 	cPref <- .ap2$stn$p_ClassVarPref
 	yPref <- .ap2$stn$p_yVarPref
@@ -582,6 +616,7 @@ ap_checExistence_Defaults <- function(ap, dataset, haveExc) {
 	ap <- ap_check_pca_defaults(ap, dataset$header)
 	ap <- ap_check_gp_generalPlottingDefaults(ap)
 	ap_check_dptModules(ap)
+	ap_check_plsr_Input(ap)
 	# add more default checking for other statistics here
 	return(ap)
 } # EOF

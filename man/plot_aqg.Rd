@@ -37,6 +37,7 @@ Other Aquagram documentation: \code{\link{calc_aqg_args}},
 Other Plot functions: \code{\link{plot,aquap_cube,missing-method}},
   \code{\link{plot,aquap_data,missing-method}},
   \code{\link{plot_pca,aquap_cube-method}},
-  \code{\link{plot_pls}}, \code{\link{plot_sim}}
+  \code{\link{plot_pls,aquap_cube-method}},
+  \code{\link{plot_sim}}
 }
 

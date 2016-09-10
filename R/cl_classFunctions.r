@@ -190,3 +190,7 @@ plot_pca_cube_M <- function(object, ...) {
 plot_pca_data_M <- function(object, ...) {
 	plot_pca_data(dataset=object, ...)
 } # EOF
+
+plot_pls_cube_M <- function(object, ...) {
+	plot_pls_cube(cube=object, ...)
+} # EOF

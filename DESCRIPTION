@@ -1,7 +1,7 @@
 Package: aquap2
 Type: Package
 Title: Aquaphotomics NIRS Analysis
-Version: 0.1.4
+Version: 0.1.5
 Date: 2015-12-01
 Author: Bernhard Pollner, Zoltan Kovacs
 Maintainer: Bernhard Pollner <bernhard.pollner@mac.com>
@@ -29,13 +29,15 @@ Imports:
     latticeExtra,
     rrcov,
     rrcovHD,
-    prospectr
+    prospectr,
+    plotrix
 Suggests:
     knitr
 VignetteBuilder: knitr
 Collate:
     'aquap2.r'
     'calc_aqg.r'
+    'calc_plsr.r'
     'calc_simca.r'
     'cl_classFunctions.r'
     'cl_classDefs.r'

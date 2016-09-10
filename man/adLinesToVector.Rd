@@ -60,6 +60,7 @@ graphical elements should be produced:
 }
 }
 \seealso{
-\code{\link{plot_pca}}, \code{\link{plot_aqg_args}}
+\code{\link{plot_pca}}, \code{\link{plot_pls}}, 
+\code{\link{plot_aqg_args}}
 }
 

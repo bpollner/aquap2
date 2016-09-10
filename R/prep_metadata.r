@@ -307,7 +307,7 @@ getap_core_file <- function(fn="def") {
 	## 
 	pca <- list(doPCA=e$do.pca, colorBy=e$pca.colorBy, elci=e$pca.elci, elcolorBy=e$pca.elcolorBy, what=e$pca.what, pcs=e$pca.sc, pcSc=e$pca.sc.pairs, pcLo=e$pca.lo)
 	simca <- list(doSIMCA=e$do.sim, simcOn=e$sim.vars, simcK=e$sim.K)
-	plsr <- list(doPLSR=e$do.pls, regressOn=e$pls.regOn, ncomp=e$pls.ncomp, valid=e$pls.valid, colorBy=e$pls.colorBy)	
+	plsr <- list(doPLSR=e$do.pls, regressOn=e$pls.regOn, ncomp=e$pls.ncomp, valid=e$pls.valid, colorBy=e$pls.colorBy, what=e$pls.what, inRdp=e$pls.rdp)	
 	aquagr <- list(doAqg=e$do.aqg, vars=e$aqg.vars, nrCorr=e$aqg.nrCorr, spectra=e$aqg.spectra, minus=e$aqg.minus, mod=e$aqg.mod, TCalib=e$aqg.TCalib, Texp=e$aqg.Texp, bootCI=e$aqg.bootCI, R=e$aqg.R, smoothN=e$aqg.smoothN, selWls=e$aqg.selWls, msc=e$aqg.msc, reference=e$aqg.reference, fsa=e$aqg.fsa, fss=e$aqg.fss, ccol=e$aqg.ccol, clt=e$aqg.clt, pplot=e$aqg.pplot, plines=e$aqg.plines, discr=e$aqg.discr)	
 	genPlot <- list(where=e$pg.where, onMain=e$pg.main, onSub=e$pg.sub, fns=e$pg.fns)
 	##
@@ -455,11 +455,11 @@ getap <- function(fn="def", ...) {
 	###
 	PL <- ap$plsr
 	doIt <- checkDo(PL, "doPLSR")
-	modifyPLSR <- function(do.pls=doIt, pls.regOn=PL$regressOn, pls.ncomp=PL$ncomp, pls.valid=PL$valid, pls.colorBy=PL$colorBy, ...) {
+	modifyPLSR <- function(do.pls=doIt, pls.regOn=PL$regressOn, pls.ncomp=PL$ncomp, pls.valid=PL$valid, pls.colorBy=PL$colorBy, pls.what=PL$what, pls.rdp=PL$inRdp, ...) {
 		if (!do.pls) {
 			return(NULL)
 		} else {
-			return(list(regressOn=pls.regOn, ncomp=pls.ncomp, valid=pls.valid, colorBy=pls.colorBy))
+			return(list(regressOn=pls.regOn, ncomp=pls.ncomp, valid=pls.valid, colorBy=pls.colorBy, what=pls.what, inRdp=pls.rdp))
 		}
 	} # EOIF
 	apMod$plsr <- modifyPLSR(...)	

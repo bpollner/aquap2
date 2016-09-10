@@ -13,10 +13,11 @@ calculatePLSR <- function(dataset, md, ap) {
 	if (is.null(ap$plsr)) {
 		return(NULL)
 	}
-	if (!.ap2$stn$allSilent) {cat("      calc. PLSR...")}
-
+	if (!.ap2$stn$allSilent) {cat("      calc. PLSR, ")}
+		aa <- makePLSRModels(dataset, md, ap)
+#		print(str(aa)); wait()
 	if (!.ap2$stn$allSilent) {cat(" ok\n")}
-	return(list(plsr=NULL, plsrPlus=NULL))
+	return(list(model=aa$plsr, modelPlus=aa$plsrPlus, regrOn=aa$regrOn))
 } # EOF
 
 calculateSIMCA <- function(dataset, md, ap) { # is working on a single set. i.e. element of a cube, with this specific dataset

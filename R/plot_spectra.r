@@ -48,7 +48,10 @@ plotSpectra_inner <- function(dataset, singleColorBy, onMain, onSub, idString=""
 	abline(h=0, col="gray")
 	if (makeLegend) {
 		legBgCol <- rgb(255,255,255, alpha=.ap2$stn$col_alphaForLegends, maxColorValue=255) # is a white with alpha to be determined in the settings
-		legend("topright", legend=legendTextExt, col=colorLegend, lty=1, bg=legBgCol)
+		legPosition <- getCheckLegendPosition(as.numeric(matrix(rep(wls, ncol(t(dataset$NIR))), nrow=1)), as.numeric(matrix(t(dataset$NIR), nrow=1, byrow=TRUE)))
+#		legPosition <- "topright"
+		print(legPosition)
+		legend(legPosition, legend=legendTextExt, col=colorLegend, lty=1, bg=legBgCol)
 	}
 } # EOF
 

@@ -134,6 +134,12 @@ used for coloring in the RMSEP and RMSECV plots. Set to NULL for no coloring,
 or provide a character length one with a single column name of a class 
 variable that should be used for coloring.}
 
+\item{pls.what}{What types of plsr analysis to plot. Possible values are 
+'both', 'errors', 'regression'.}
+
+\item{pls.rdp}{Logical (TRUE or FALSE). If errors in the error plots should be 
+given in RDP or not.}
+
 \item{do.aqg}{Logical. If used in \code{getap}, if Aquagrams should be 
 calculated with a given dataset.}
 

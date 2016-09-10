@@ -78,6 +78,8 @@
 	# plotting
 	pls.colorBy <- NULL						## What class-variable should be used for coloring in the RMSEP and RMSECV plots? Leave empty c() or set to NULL for no coloring
 #	pls.colorBy <- "C_Temp"
+	pls.what <- "both"						## what types of plots to plot. Possible values are "regression" for the regression vector, "errors" for the error plots, or "both" for both of them.
+	pls.rdp <- FALSE						## if errors should be given in RDP
 	#########################
 
 

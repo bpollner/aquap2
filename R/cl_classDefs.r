@@ -69,6 +69,12 @@ setMethod("plot_pca", signature(object = "aquap_cube"), definition = plot_pca_cu
 setMethod("plot_pca", signature(object = "aquap_data"), definition = plot_pca_data_M)
 
 
+setGeneric("plot_pls", function(object, ...)  standardGeneric("plot_pls"))
+#' @rdname plot_pls
+#' @export
+setMethod("plot_pls", signature(object = "aquap_cube"), definition = plot_pls_cube_M)
+
+
 setGeneric("getNcpwl", function(object) standardGeneric("getNcpwl"))
 setMethod("getNcpwl", "aquap_data", function(object) object@ncpwl)
 
@@ -84,6 +90,9 @@ setMethod("getPCAObject", "aquap_set", function(object) object@pca$model)
 
 setGeneric("getPCAClassList", function(object) standardGeneric("getPCAClassList"))
 setMethod("getPCAClassList", "aquap_ap", function(object) object$pca$colorBy)
+
+setGeneric("getPLSRObjects", function(object) standardGeneric("getPLSRObjects"))
+setMethod("getPLSRObjects", "aquap_set", function(object) object@plsr)
 
 setGeneric("getColRep", function(object) standardGeneric("getColRep"))
 setMethod("getColRep", "aquap_data", definition=getColRep_data)

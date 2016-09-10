@@ -604,7 +604,7 @@ getUniqLevelColor <- function(nrc) {
 } # EOF
 
 # color_data, color_unique, color_legend, txt, txtE, sumPart, dataGrouping, pch_data, pch_legend
-extractColorLegendValues <- function(dataset, groupBy) { # returns a 4 element list
+extractColorLegendValues <- function(dataset, groupBy) { # returns a list
 	colInd <- which(colnames(dataset$colRep) == groupBy)
 	color_data <- dataset$colRep[, colInd]
 	ind <- which(colnames(dataset$header) == groupBy)
@@ -704,8 +704,8 @@ getcd <- function(cube, index) {
 #' # assumes that in the analysis procedure we have a split variable defined.
 #' fd_3_pca <- getcm(cube, 3)
 #' str(fd_3_pca)
-#' ld12 <- fd_3_pca$loadings[, c(1,2)] # extract the first two loadings
-#' ld24 <- fd_3_pca$loadings[, c(2,4)] # extract loadings 2 and 4
+#' ld12 <- fd_3_pca$model$loadings[, c(1,2)] # extract the first two loadings
+#' ld24 <- fd_3_pca$model$loadings[, c(2,4)] # extract loadings 2 and 4
 #' fd_2_pls <- getcm(cube, 2, "pls")
 #' str(fd_2_pls)
 #' }
@@ -725,7 +725,7 @@ getcm <- function(cube, index, what="pca") {
 		stop(paste("Sorry, the selected ", what, " model is not available.", sep=""), call.=FALSE)
 	}
 	out <- slot(cube[[index]], what)
-	return(out$model)
+	return(out)
 } # EOF
 
 # used in showCube
@@ -768,4 +768,35 @@ adaptIdStringForDpt <- function(dptSource, prevIdString="") { # returns the new 
 	idStrAdd <- gsub(",;", ";", idStrAdd) # some mistake above, take it out
 	idStrNew <- paste(prevIdString, idStrAdd, collapse="", sep="")
 	return(idStrNew)
+} # EOF
+
+getCheckLegendPosition <- function(xData, yData) {
+	defPos <- .ap2$stn$gen_plot_legendPosition
+	pvPos <- pv_legendPosition # ("auto", "topleft", "topright", "bottomright", "bottomleft")
+	if (!all(is.character(defPos)) | length(defPos) !=1) {
+		stop(paste("Please provide a character length one for the default legend position.\n Possible values are ", paste(pvPos, collapse=", "), ".", sep=""), call.=FALSE)
+	}
+	if (!defPos %in% pvPos) {
+		stop(paste("The legend-position '", defPos, "' can not be recognized. \nPlease provide one of '", paste(pvPos, collapse=", "), "' for the default legend position.", sep=""), call.=FALSE)
+	}
+	if (defPos == pvPos[1]) { # "auto"
+		es <- list()
+	#	es <- plotrix::emptyspace(xData, yData) # gives back a list with x and y value of the center of the "biggest empty rectangle"
+		mer <- plotrix::maxEmptyRect(range(xData), range(yData), xData, yData)
+		es$x <- mean(c(mer$rect[1], mer$rect[3]))
+		es$y <- mean(c(mer$rect[2], mer$rect[4]))
+		if (es$x >= mean(range(xData)) ) {
+			xChar <- "right"
+		} else {
+			xChar <- "left"
+		}
+		if (es$y >= mean(range(yData)) ) {
+			yChar <- "top"
+		} else {
+			yChar <- "bottom"
+		}
+		return(paste(yChar, xChar, sep=""))
+	} else {
+		return(defPos)
+	}
 } # EOF
