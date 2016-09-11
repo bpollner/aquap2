@@ -25,7 +25,7 @@ wavelength -- if there is no direct match with the wavelength, the next best
 hit will be taken.
 }
 \seealso{
-aquap_data-methods
+\code{\link{aquap_data-methods}}
 
 Other Extract Elements: \code{\link{getHeader}},
   \code{\link{getcd}}, \code{\link{getcm}}

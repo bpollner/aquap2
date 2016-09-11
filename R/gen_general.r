@@ -837,7 +837,7 @@ checkApsChar <- function(aps) {
 #' @param getMax Logical. Set to 'TRUE' to isolate the wavelength with the 
 #' highest sum of absorbtion values.
 #' @family Extract Elements
-#' @seealso aquap_data-methods
+#' @seealso \code{\link{aquap_data-methods}} 
 #' @export
 siWl <- function(dataset, wl, getMax=FALSE) {
 	wls <- getWavelengths(dataset)
