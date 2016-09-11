@@ -38,8 +38,11 @@ NULL
 #' \code{\link{do_gapDer}}. In this case, the bigger dataset, i.e. the dataset 
 #' having more wavelengths, is cut down to match exactly the wavelength-range of 
 #' the smaller dataset. In other words, the return in this case is a dataset having 
-#' only the number of wavelengths as 'dictated' by the smaller dataset.
-#' }}
+#' only the number of wavelengths as 'dictated' by the smaller dataset.}
+#' \item{Division via '/'}{Use the division via '/' to divide a first, complete 
+#' dataset by a dataset containing only a single wavelength in the NIR data. 
+#' Please see \code{\link{siWl}} for generating such a dataset. }
+#' }
 #' @note \code{drop} is always set to \code{FALSE} for subsrictping via 
 #' \code{'[]'}.
 #' @param x An object of class 'aquap_data'
@@ -54,6 +57,9 @@ NULL
 #' 	dSub <- dataset - do_sgolay(dataset, n=71) # apply smoothing and subtract
 #'  plot(dSub, pg.where="", pg.main=" | smoothed subtracted")
 #'  plot(do_gapDer(ds,1,11,13,1) - do_gapDer(ds, 1, 13, 13, 1))
+#'  ###
+#'  plot(dataset)
+#'  plot(dataset / siWl(dataset, 1450))
 #' }
 #' @family Data pre-treatment functions
 #' @aliases aquap_data-methods

@@ -55,6 +55,6 @@ str(fd_2_pls)
 \code{\link{do_emsc}}, \code{\link{dpt_modules}}
 
 Other Extract Elements: \code{\link{getHeader}},
-  \code{\link{getcd}}
+  \code{\link{getcd}}, \code{\link{siWl}}
 }
 

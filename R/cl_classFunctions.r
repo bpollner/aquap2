@@ -121,7 +121,7 @@ getColRep_set <- function(object) { # object is a set
 	return(getColRep(getDataset(object)))
 }# EOF
 
-subtract_two_aquap_data_M <- function(e1, e2) { # e1 and e1 being each an object of class aquap_data
+subtract_two_aquap_data_M <- function(e1, e2) { # e1 and e2 being each an object of class aquap_data
 	if (nrow(e1) != 1 & nrow(e2) != 1) {
 		if (nrow(e1) != nrow(e2)) {
 			stop("The provided datasets do not have the same number of rows.\nFor successful subtraction via '-', both datasets have to have the same number of rows, or one dataset has to have exactly one (1) row.", call.=FALSE)
@@ -182,6 +182,17 @@ subtract_two_aquap_data_M <- function(e1, e2) { # e1 and e1 being each an object
 	} # end one has only one (1) row
 	stop("An error has occured at the subtraction of datasets, sorry.", call.=FALSE)
 } # EOF
+
+divide_two_aquap_data_M <- function(e1, e2) { # e1 and e2 being each an object of class aquap_data
+	if (nrow(e1) != nrow(e2)) {
+		stop("The provided datasets do not have the same number of rows.\nFor successful division via '/', both datasets have to have the same number of rows.", call.=FALSE)
+	}
+	if (ncol(e2$NIR) != 1) {
+		stop("For successful division via '/', the second dataset must have only one column in the NIR-data, i.e. contain only a single wavelength.", call.=FALSE)
+	}
+	e1$NIR <- sweep(e1$NIR, 1, e2$NIR[,1], "/") ### CORE ###
+	return(e1)
+} #EOF
 
 plot_pca_cube_M <- function(object, ...) {
 	plot_pca_cube(cube=object, ...)

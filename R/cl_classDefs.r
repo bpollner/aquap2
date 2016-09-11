@@ -40,6 +40,9 @@ setMethod("[", signature(x = "aquap_data"), definition = function(x, i) {
 #' @rdname aquap_data-methods
 #' @export
 setMethod("-", signature(e1="aquap_data", e2="aquap_data"), definition = subtract_two_aquap_data_M)
+#' @rdname aquap_data-methods
+#' @export
+setMethod("/", signature(e1="aquap_data", e2="aquap_data"), definition = divide_two_aquap_data_M)
 
 
 setGeneric("plot", function(x, y, ...) standardGeneric("plot"))

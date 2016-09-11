@@ -824,3 +824,43 @@ checkApsChar <- function(aps) {
 	}
 	return(aps) # so the only left option is a custom filename, that will be checked later	
 } # EOF
+
+#' @title Isolate single wavelength
+#' @description Generate a dataset with a single wavelength.
+#' @details Provide the wavelength that should remain in the dataset in the 
+#' argument \code{wl}. It is not ncecessary to exactly know the desired 
+#' wavelength -- if there is no direct match with the wavelength, the next best
+#' hit will be taken.
+#' @param dataset An object of class 'aquap_data' as produced e.g. by 
+#' \code{\link{gfd}}.
+#' @param wl Numeric length one. The
+#' @param getMax Logical. Set to 'TRUE' to isolate the wavelength with the 
+#' highest sum of absorbtion values.
+#' @family Extract Elements
+#' @seealso aquap_data-methods
+#' @export
+siWl <- function(dataset, wl, getMax=FALSE) {
+	wls <- getWavelengths(dataset)
+	if (getMax) {
+		ind <- which.max(colSums(dataset$NIR))
+	} else {
+		ind <- match(wl, wls)		
+	}
+	if (is.na(ind)) { # so we do not have an exact match
+		a <- which(wls > wl)[1]
+		wlsBr <- wls[c(a-1, a)] # the two bordering values in the wavelengths
+		hit <- wlsBr[ which.min(abs(wlsBr - wl)) ] # get the closer one
+		ind <- match(hit, wls)
+	}
+	cns <- colnames(dataset$NIR)[ind]
+	rns <- rownames(dataset$NIR)
+	NIR <- dataset$NIR[,ind, drop=FALSE]
+	colnames(NIR) <- cns
+	rownames(NIR) <- rns
+	dataset$NIR <- I(NIR)
+	return(dataset)
+} # EOF
+
+
+
+

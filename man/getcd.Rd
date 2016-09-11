@@ -37,7 +37,7 @@ str(dataset_3)
 \code{\link{do_msc}}, \code{\link{do_avg}}
 
 Other Extract Elements: \code{\link{getHeader}},
-  \code{\link{getcm}}
+  \code{\link{getcm}}, \code{\link{siWl}}
 
 Other Helper Functions: \code{\link{genFolderStr}},
   \code{\link{instAquap2Examples}},
