@@ -36,10 +36,11 @@ pv_modifyDPT <- c("spl.do.csAvg", "spl.csAvg.raw", "spl.do.noise", "spl.noise.ra
 pv_modifyPCA <- c("do.pca", "pca.colorBy", "pca.elci", "pca.elcolorBy", "pca.what", "pca.sc", "pca.sc.pairs", "pca.lo")
 pv_modifySIMCA <- c("do.sim", "sim.vars", "sim.K")
 pv_modifyPLSR <- c("do.pls", "pls.regOn", "pls.ncomp", "pls.valid", "pls.colorBy", "pls.what", "pls.rdp")
-pv_modifyAquagram <- c("do.aqg", "aqg.vars", "aqg.nrCorr", "aqg.spectra", "aqg.minus", "aqg.mod", "aqg.TCalib", "aqg.Texp", "aqg.bootCI", "aqg.R", "aqg.smoothN", "aqg.selWls", "aqg.msc", "aqg.reference", "aqg.fsa", "aqg.fss", "aqg.ccol", "aqg.clt", "aqg.pplot", "aqg.plines", "aqg.disc")
+pv_modifyAquagram_calc <- c("do.aqg", "aqg.vars", "aqg.nrCorr", "aqg.spectra", "aqg.minus", "aqg.mod", "aqg.TCalib", "aqg.Texp", "aqg.bootCI", "aqg.R", "aqg.smoothN", "aqg.selWls", "aqg.msc", "aqg.reference")
+pv_modifyAquagram_plot <- c("aqg.fsa", "aqg.fss", "aqg.ccol", "aqg.clt", "aqg.pplot", "aqg.plines", "aqg.disc")
 pv_modifyGenPlot <- c("pg.where", "pg.main", "pg.sub", "pg.fns")	
 additionalElements <- c("aps")
-pv_tripleDotsMod <- c(pv_modifyUCL, pv_modifyDPT, pv_modifyPCA, pv_modifySIMCA, pv_modifyPLSR, pv_modifyAquagram, pv_modifyGenPlot, additionalElements)
+pv_tripleDotsMod <- c(pv_modifyUCL, pv_modifyDPT, pv_modifyPCA, pv_modifySIMCA, pv_modifyPLSR, pv_modifyAquagram_calc, pv_modifyAquagram_plot, pv_modifyGenPlot, additionalElements)
 ##############
 
 ## import, filetype etc.

@@ -348,6 +348,13 @@ plotAquagram_single <- function(aquCalc, classVarRanges, where, onSub, onMain, c
 	}
 } # EOF
 
+aq_checkTrippleDotsCalc <- function(...) {
+	a <- substitute(c(...))
+	chars <- names(eval(a))
+	if ( any(chars %in% pv_modifyAquagram_calc) ) {
+		stop("Sorry, you can not provide aquagram calculation arguments to the plotting function.", call.=FALSE)
+	}
+} # EOF
 
 # new below --------------------------------
 #' @title Plot Aquagram
@@ -357,6 +364,20 @@ plotAquagram_single <- function(aquCalc, classVarRanges, where, onSub, onMain, c
 #' @param ... Optional 'aqg' plotting parameters to override the values in the 
 #'  analysis procedure - for possible arguments see 
 #'  \code{\link{plot_aqg_args}}.
+#' @param aps Character length one. The default way to obtain the analysis 
+#' procedure containing the aquagram \strong{plotting} parameters. Defaults to 
+#' "def". Possible values are:
+#' \describe{
+#' \item{"def"}{The default from the settings.r file is taken. (Argument 
+#' \code{gen_plot_anprocSource})}
+#' \item{"cube"}{Take the analysis procedure from within the cube, i.e. the 
+#' analysis procedure that was used when creating the cube via \code{\link{gdmm}}
+#' is used.}
+#' \item{"defFile"}{Use the analysis procedure with the default filename as 
+#' specified in the settings.r file in \code{fn_anProcDefFile}.}
+#' \item{Custom filename}{Provide any valid filename for an analysis procedure to 
+#' use as input for specifying the plotting options.}
+#' }
 #' @return A pdf or graphic device.
 #' @family Plot functions
 #' @family Aquagram documentation
@@ -366,13 +387,22 @@ plotAquagram_single <- function(aquCalc, classVarRanges, where, onSub, onMain, c
 #'  cube <- gdmm(dataset)
 #'  plot(cube)
 #'  plot_aqg(cube)
+#'  plot_aqg(cube, aps="fooBar.r") # obtain the analysis procedure with the 
+#'  # plotting parameters from the file 'fooBar.r'.
 #'  }
 #' @export
-plot_aqg <- function(cube, ...) {
+plot_aqg <- function(cube, aps="def", ...) {
   	autoUpS()
- # 	ap <- getap(.lafw_fromWhere="cube", cube=cube, ...)    	 # the ... are here used for additionally modifying (if matching arguments) the analysis procedure obtained from the cube
-	ap <- getap(...) # load from file, possibly modify via ...
+  	aq_checkTrippleDotsCalc(...) # to prevent the user to provide a calculation argument to the plotting function
+	aps <- checkApsChar(aps)
+	if (aps == "cube") {
+		ap <- getap(.lafw_fromWhere="cube", cube=cube, ...)			 # the ... are here used for additionally modifying (if matching arguments) the analysis procedure obtained from the cube
+	} else {
+		check_apDefaults(fn=aps)
+		ap <- getap(fn=aps, ...) # load from file, possibly modify via ...
+	}
   	ap <- ap_cleanZeroValuesCheckExistenceDefaults(ap, dataset=getDataset(cube[[1]]), haveExc=FALSE) # just take the first dataset, as we mainly need the header (and the wavelengths are already checked.. )
+  	apCube <- getap(.lafw_fromWhere="cube", cube=cube)	
   	if (is.null(ap$aquagr)) {
   	 	return(cat("*** Aquagram not available or not selected for plotting \n"))
  	}
@@ -397,16 +427,16 @@ plot_aqg <- function(cube, ...) {
 	}
 	ncpwl <- getNcpwl(getDataset(cube[[1]])) # all are the same
 	a <- ap$aquagr
+	aC <- apCube$aquagr # to make it impossible to change the calculated values, the info depending on the calculation etc.
 	b <- ap$genPlot
 	for (va in 1: length(ap$aquagr$vars)) {
 		for (cu in 1: length(cube)) {
-			plotAquagram_single(getAqgResList(cube[[cu]])[[va]], cube@aqgRan[[va]], where, b$onSub, b$onMain, a$ccol, a$spectra, a$pplot, a$plines, a$discr, a$clt, a$mod, a$TCalib, a$Texp, a$selWls, a$nrCorr, a$bootCI, a$minus, a$fsa, a$fss, a$R, ncpwl)
+			plotAquagram_single(getAqgResList(cube[[cu]])[[va]], cube@aqgRan[[va]], where, b$onSub, b$onMain, a$ccol, a$spectra, a$pplot, a$plines, a$discr, a$clt, aC$mod, aC$TCalib, aC$Texp, aC$selWls, aC$nrCorr, aC$bootCI, aC$minus, a$fsa, a$fss, aC$R, ncpwl)
 		} # end for i
 	} # end for va
 	if (where == "pdf") {dev.off()}
 	if (!.ap2$stn$allSilent & (where == "pdf" )) {cat("ok\n") }
 } # EOF
-
 
 
 #' @title Plot Aquagram - Arguments

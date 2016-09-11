@@ -550,7 +550,9 @@ ssc_s <- function(dataset, variable, value, keepEC=TRUE) {
 	if (!keepEC) {
 		ind <- which(colnames(dataset$header) == paste(cPref, ecrmCol, sep="")) # where is the EC-column
 		ECInds <- which(dataset$header[,ind] == ecLabel)
-		dataset <- dataset[-(ECInds)]
+		if (length(ECInds) != 0) {
+			dataset <- dataset[-(ECInds)]			
+		}
 	}
 	return(dataset) # re-factoring is already included in the "[" operation
 } # EOF
@@ -799,4 +801,26 @@ getCheckLegendPosition <- function(xData, yData) {
 	} else {
 		return(defPos)
 	}
+} # EOF
+
+checkApsChar <- function(aps) {
+	path <- .ap2$stn$fn_metadata
+	if (all(aps == "def")) {
+		aps <- .ap2$stn$gen_plot_anprocSource
+	}
+	if (!all(is.character(aps)) | length(aps) != 1) {
+		stop("Please provide a length one character to the argument 'aps' resp. the corresponding variable (gen_plot_anprocSource) in 'settings.r', thank you.", call.=FALSE)
+	}
+	if (aps == "cube") {
+		return(aps)
+	}
+	if (aps == "defFile") {
+		fn <- .ap2$stn$fn_anProcDefFile
+		ok <- file.exists(paste(path, fn, sep="/"))
+		if (!ok) {
+			stop(paste("The analysis procedure file \"", fn, "\" does not seem to exist. Please check your input.", sep=""), call.=FALSE)
+		}
+		return(fn)
+	}
+	return(aps) # so the only left option is a custom filename, that will be checked later	
 } # EOF

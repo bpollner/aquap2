@@ -214,28 +214,6 @@ plot_pca_checkDefaultsParams <- function(ld.bandwidth, ld.adLines, ld.col, ld.lt
 	##	
 } # EOF
 
-checkApsChar <- function(aps) {
-	path <- .ap2$stn$fn_metadata
-	if (all(aps == "def")) {
-		aps <- .ap2$stn$gen_plot_anprocSource
-	}
-	if (!all(is.character(aps)) | length(aps) != 1) {
-		stop("Please provide a length one character to the argument 'aps' resp. the corresponding variable (gen_plot_anprocSource) in 'settings.r', thank you.", call.=FALSE)
-	}
-	if (aps == "cube") {
-		return(aps)
-	}
-	if (aps == "defFile") {
-		fn <- .ap2$stn$fn_anProcDefFile
-		ok <- file.exists(paste(path, fn, sep="/"))
-		if (!ok) {
-			stop(paste("The analysis procedure file \"", fn, "\" does not seem to exist. Please check your input.", sep=""), call.=FALSE)
-		}
-		return(fn)
-	}
-	return(aps) # so the only left option is a custom filename, that will be checked later	
-} # EOF
-
 #### CORE ###
 plot_pca_cube <- function(cube, aps="def", ld.bandwidth="def", ld.adLines="def", ld.col="def", ld.lty="def", ...) {
 	autoUpS()
