@@ -9,28 +9,36 @@
 \S4method{plot_simca}{aquap_cube}(object, ...)
 }
 \arguments{
-\item{object}{An object of class 'aquap_cube' as produced by \code{\link{gdmm}}.}
+\item{object}{An object of class 'aquap_cube' as produced by
+\code{\link{gdmm}}.}
 
-\item{...}{Optional 'simca' plotting parameters to override the values in the 
- analysis procedure - for possible arguments see 
- \code{\link{plot_sim_args}} and here below:
- \describe{
-\item{aps}{Character length one. The default way to obtain the analysis 
-procedure. Defaults to "def". Possible values are:
-\describe{
-\item{"def"}{The default from the settings.r file is taken. (Argument 
-\code{gen_plot_anprocSource})}
-\item{"cube"}{Take the analysis procedure from within the cube, i.e. the 
-analysis procedure that was used when creating the cube via \code{\link{gdmm}}
-is used.}
+\item{...}{Optional 'simca' plotting parameters to override the values in the
+analysis procedure - for possible arguments see \code{\link{plot_sim_args}}
+and here below: 
+\describe{ 
+\item{aps}{Character length one. The default way
+to obtain the analysis procedure. Defaults to "def". Possible values are: 
+\describe{ 
+\item{"def"}{The default from the settings.r file is taken.
+(Argument \code{gen_plot_anprocSource})} 
+\item{"cube"}{Take the analysis
+procedure from within the cube, i.e. the analysis procedure that was used
+when creating the cube via \code{\link{gdmm}} is used.} 
 \item{"defFile"}{Use the analysis procedure with the default filename as 
-specified in the settings.r file in \code{fn_anProcDefFile}.}
-\item{Custom filename}{Provide any valid filename for an analysis procedure to 
-use as input for specifying the plotting options.}
-}}
-\item{sim.distType}{The type of distance to be calculated, can be either 'od' or 
-'sd'. Defaults to 'od', the standardized orthogonal distances (see 
+specified in the settings.r file in \code{fn_anProcDefFile}.} 
+\item{Custom filename}{Provide any valid filename for an analysis procedure 
+to use as input for specifying the plotting options.}}} 
+\item{sim.distType}{The type
+of distance to be calculated, can be either 'od' or 'sd'. Defaults to 'od',
+the standardized orthogonal distances (see 
 \code{\link[rrcovHD]{PredictSimca-class}} in package 'rrcovHD')}
+\item{sim.icdRan}{Can be 'def', NULL, or a numeric length one. The range for 
+all the interclass-distance barplots. Set to NULL for no pre-defined range 
+at all, or provide a numeric length one to specify the upper limit on the 
+Y-axis of the interclass distances to be plotted. If values higher than 
+specified appear, the range will be extended automatically. If left at the 
+default 'def', the value from the settings.r file (parameter 
+\code{simca_rangeForDistBarPlots}) is read in.}
 }}
 }
 \value{
@@ -40,7 +48,8 @@ A pdf or graphic device.
 Plot SIMCA interclass distances.
 }
 \details{
-The width and height of the resulting pdf can be set in the settings.
+The width and height of the resulting pdf can be set in the
+  settings.
 }
 \examples{
  \dontrun{
@@ -56,6 +65,9 @@ The width and height of the resulting pdf can be set in the settings.
  # above, but have the graphics in a PDF.
  plot_simca(cube, pg.main="Foo", pg.fns="_foo") # use the default for aps, 
  # add 'Foo' on each main, and add '_foo' to the filename of the possible pdf
+ plot_simca(cube, sim.icdRan=2)
+ plot(cube, sim.icdRan=2)
+ plot_simca(cube, sim.icdRan=NULL) # to not have a pre-defined range
 }
 }
 \seealso{

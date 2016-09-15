@@ -43,7 +43,7 @@ simca_plotClassDistances <- function(SimcaPredObj, SimcaModel, distMat, where=""
 	} # end for i
 } # EOF
 
-simca_barplotClassDistances <- function(classDistanceMatrix, where="", onMain="", onSub="", dataset, grouping) {
+simca_barplotClassDistances <- function(classDistanceMatrix, where="", onMain="", onSub="", dataset, grouping, icdRan) {
 	cdm <- classDistanceMatrix
 	###
 	aa <- extractColorLegendValues(dataset, groupBy=grouping)  # color_data, color_unique, color_legend, txt, txtE, sumPart, dataGrouping, pch_data, pch_legend
@@ -56,14 +56,25 @@ simca_barplotClassDistances <- function(classDistanceMatrix, where="", onMain=""
 	par(mai=c(2.2, 0.82, 0.82, 0.42))
 	insetVal <- c(0, -0.37)
 	subDownVal <- 6.5
-	plotBarsPlusLegend <- function(obj, legTxt) {
-		barplot(obj, beside=T, ylab="Interclass Distance", cex.names=0.8, las=2, main=mainText, sub="", col=legendColors)
+	roPerc <- 10 # the percents to add to the range of the object for the ylim
+	icHorizon <- .ap2$stn$simca_BarBlot_horizontalLine
+	if (!all(is.numeric(icHorizon)) | length(icHorizon) != 1) {icHorizon <- NULL}
+	plotBarsPlusLegend <- function(obj, legTxt, ran=icdRan) {
+		if (!is.null(ran)) {
+			ranObj <- range(obj)
+			if (max(ranObj) > ran) {
+				ran <- max(ranObj) + ((max(ranObj)/100)*roPerc)
+			}
+		} # end !is.null
+		if (is.null(ran)) { ranUse <- NULL	} else { ranUse <- c(0, ran) }
+		barplot(obj, beside=T, ylim=ranUse, ylab="Interclass Distance", cex.names=0.8, las=2, main=mainText, sub="", col=legendColors)
+		abline(h=icHorizon, col="gray", lwd=0.7)
 		title(sub=onSub, line=subDownVal)
 		if (length(legTxt) != 0) {
 #			legend("bottom", legend=legendText, text.col=legendColors, xpd=TRUE, horiz=TRUE, inset=insetVal, bty="n", bg=legBgCol)
 			legend("bottom", legend=legTxt, text.col=legendColors, xpd=TRUE, horiz=FALSE, ncol=6, cex=0.9,  inset=insetVal, bty="n", bg=legBgCol)	
 		} # end if
-	} # EOIF
+	}# EOIF
 	##
 	plotBarsPlusLegend(cdm, legTxt=legendText)
 	##
@@ -83,7 +94,7 @@ simca_barplotClassDistances <- function(classDistanceMatrix, where="", onMain=""
 	par(mai=oldMai) # back to before
 } # EOF
 
-makeSimcaClassDistPlots_inner <- function(set, ap, where, onMain, onSub, con_simcaTable=NULL, distType) { # is working within a single set, we can have more than one grouping variable !!
+makeSimcaClassDistPlots_inner <- function(set, ap, where, onMain, onSub, con_simcaTable=NULL, distType, icdRan) { # is working within a single set, we can have more than one grouping variable !!
 	groupingVec <- getCorrectSimcaClasses(set)
 	leng <- length(groupingVec)
 	mods <- getSIMCAModels(set)
@@ -96,7 +107,7 @@ makeSimcaClassDistPlots_inner <- function(set, ap, where, onMain, onSub, con_sim
 	onMain <- paste0(onMain, idString)
 	for (i in 1: leng) {
 #		colRepSimcOn <- numRep[, groupingVec[i]]
-		simca_barplotClassDistances(icDists[[i]], where, onMain, onSub, dataset, groupingVec[i])
+		simca_barplotClassDistances(icDists[[i]], where, onMain, onSub, dataset, groupingVec[i], icdRan)
 		simca_plotClassDistances(preds[[i]], mods[[i]], icDists[[i]], where, onMain, onSub, distType, dataset, groupingVec[i])
 #		mainText <- paste(groupingVec[i], " - ", onMain, sep="")
 		mainText <- paste0("grp: ", groupingVec[i], "   ", onMain)
@@ -118,9 +129,9 @@ makeSimcaClassDistPlots_inner <- function(set, ap, where, onMain, onSub, con_sim
 	} # end for i
 } # EOF
 
-makeSimcaClassDistPlots <- function(cube, ap, where, onMain, onSub, con_simcaTable, distType) { # is going through the cube
+makeSimcaClassDistPlots <- function(cube, ap, where, onMain, onSub, con_simcaTable, distType, icdRan) { # is going through the cube
 	for (i in 1: length(cube)) {
-		makeSimcaClassDistPlots_inner(cube[[i]], ap, where, onMain, onSub, con_simcaTable, distType) # sending down a single set
+		makeSimcaClassDistPlots_inner(cube[[i]], ap, where, onMain, onSub, con_simcaTable, distType, icdRan) # sending down a single set
 	} # end for i
 } # EOF
 
@@ -139,12 +150,14 @@ checkSimcaPlottingValues <- function(sim.distType, sim.icdRan) {
 		if (all(icdRan == "def")) {
 			icdRan <- .ap2$stn$simca_rangeForDistBarPlots
 		}
-		if (!all(is.numeric(icdRan)) | length(icdRan) != 1) {
-			stop("Please provide a numeric length one for the argument 'sim.icdRan'.", call.=FALSE)
-		}
-		if (icdRan > pv_warningIcDistRange) {
-			message(paste0("Alert: The fixed range for the SIMCA interclass-distance in the bar-plots is currently set to ", icdRan))
-		}
+		if (!is.null(icdRan)) {
+			if (!all(is.numeric(icdRan)) | length(icdRan) != 1) {
+				stop("Please provide a numeric length one for the argument 'sim.icdRan'.", call.=FALSE)
+			}
+	#		if (icdRan > pv_warningIcDistRange) {
+	#			message(paste0("Alert: The fixed range for the SIMCA interclass-distance in the bar-plots is currently set to ", icdRan))
+	#		}
+		} # end !is.null
 	} # end !is.null
 	assign("icdRan", icdRan, pos=parent.frame(n=1))
 	##
@@ -191,7 +204,7 @@ plot_simca_cube <- function(cube, aps="def", sim.distType="od", sim.icdRan="def"
 		}
 	}
 	if (where != "pdf" & Sys.getenv("RSTUDIO") != 1) {dev.new(height=height, width=width)}	
-	makeSimcaClassDistPlots(cube, ap, where, onMain, onSub, con_simcaTable, distType)
+	makeSimcaClassDistPlots(cube, ap, where, onMain, onSub, con_simcaTable, distType, icdRan)
 	if (where == "pdf") {
 		dev.off()
 		if (.ap2$stn$simca_tablesToTxt == TRUE) {	
@@ -204,29 +217,38 @@ plot_simca_cube <- function(cube, aps="def", sim.distType="od", sim.icdRan="def"
 
 #' @title Plot SIMCA
 #' @description Plot SIMCA interclass distances.
-#' @details The width and height of the resulting pdf can be set in the settings.
-#' @param object An object of class 'aquap_cube' as produced by \code{\link{gdmm}}.
-#' @param ... Optional 'simca' plotting parameters to override the values in the 
-#'  analysis procedure - for possible arguments see 
-#'  \code{\link{plot_sim_args}} and here below:
-#'  \describe{
-#' \item{aps}{Character length one. The default way to obtain the analysis 
-#' procedure. Defaults to "def". Possible values are:
-#' \describe{
-#' \item{"def"}{The default from the settings.r file is taken. (Argument 
-#' \code{gen_plot_anprocSource})}
-#' \item{"cube"}{Take the analysis procedure from within the cube, i.e. the 
-#' analysis procedure that was used when creating the cube via \code{\link{gdmm}}
-#' is used.}
-#' \item{"defFile"}{Use the analysis procedure with the default filename as 
-#' specified in the settings.r file in \code{fn_anProcDefFile}.}
-#' \item{Custom filename}{Provide any valid filename for an analysis procedure to 
-#' use as input for specifying the plotting options.}
-#' }}
-#' \item{sim.distType}{The type of distance to be calculated, can be either 'od' or 
-#' 'sd'. Defaults to 'od', the standardized orthogonal distances (see 
-#' \code{\link[rrcovHD]{PredictSimca-class}} in package 'rrcovHD')}
-#' }
+#' @details The width and height of the resulting pdf can be set in the
+#'   settings.
+#' @param object An object of class 'aquap_cube' as produced by
+#'   \code{\link{gdmm}}.
+#' @param ... Optional 'simca' plotting parameters to override the values in the
+#'   analysis procedure - for possible arguments see \code{\link{plot_sim_args}}
+#'   and here below: 
+#'   \describe{ 
+#'   \item{aps}{Character length one. The default way
+#'   to obtain the analysis procedure. Defaults to "def". Possible values are: 
+#'   \describe{ 
+#'   \item{"def"}{The default from the settings.r file is taken.
+#'   (Argument \code{gen_plot_anprocSource})} 
+#'   \item{"cube"}{Take the analysis
+#'   procedure from within the cube, i.e. the analysis procedure that was used
+#'   when creating the cube via \code{\link{gdmm}} is used.} 
+#'   \item{"defFile"}{Use the analysis procedure with the default filename as 
+#'   specified in the settings.r file in \code{fn_anProcDefFile}.} 
+#'   \item{Custom filename}{Provide any valid filename for an analysis procedure 
+#'   to use as input for specifying the plotting options.}}} 
+#'   \item{sim.distType}{The type
+#'   of distance to be calculated, can be either 'od' or 'sd'. Defaults to 'od',
+#'   the standardized orthogonal distances (see 
+#'   \code{\link[rrcovHD]{PredictSimca-class}} in package 'rrcovHD')}
+#'   \item{sim.icdRan}{Can be 'def', NULL, or a numeric length one. The range for 
+#'   all the interclass-distance barplots. Set to NULL for no pre-defined range 
+#'   at all, or provide a numeric length one to specify the upper limit on the 
+#'   Y-axis of the interclass distances to be plotted. If values higher than 
+#'   specified appear, the range will be extended automatically. If left at the 
+#'   default 'def', the value from the settings.r file (parameter 
+#'   \code{simca_rangeForDistBarPlots}) is read in.}
+#'   }
 #' @return A pdf or graphic device.
 #' @family Plot functions
 #' @family SIMCA documentation
@@ -244,6 +266,9 @@ plot_simca_cube <- function(cube, aps="def", sim.distType="od", sim.icdRan="def"
 #'  # above, but have the graphics in a PDF.
 #'  plot_simca(cube, pg.main="Foo", pg.fns="_foo") # use the default for aps, 
 #'  # add 'Foo' on each main, and add '_foo' to the filename of the possible pdf
+#'  plot_simca(cube, sim.icdRan=2)
+#'  plot(cube, sim.icdRan=2)
+#'  plot_simca(cube, sim.icdRan=NULL) # to not have a pre-defined range
 #' }
 #' @name plot_simca
 NULL
