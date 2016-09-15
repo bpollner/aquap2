@@ -24,6 +24,14 @@ argument \code{wl}. It is not ncecessary to exactly know the desired
 wavelength -- if there is no direct match with the wavelength, the next best
 hit will be taken.
 }
+\examples{
+\dontrun{
+fd <- gfd()
+dataset_single <- siWl(fd, 1300) # to only leave wavelength 1300
+dataset_single2 <- siWl(fd, getMax=TRUE) # to look for the wavelength with 
+# highest sum of absorbtion values
+}
+}
 \seealso{
 \code{\link{aquap_data-methods}}
 

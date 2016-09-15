@@ -140,6 +140,7 @@ stn <- list(
 	simca_percNewData_CV = 50, 				## the percentage of the original data to be used as new data (the other part is used for making the model)
 	simca_sampling = "interleaved",  		## either "random" or "interleaved"  -- only taken into account when the above percentage is 50. Under development.
 	simca_maxBarsPerGraph = 7, 				## the maximum number of bars on one graphic for the class-distance barplots
+	simca_rangeForDistBarPlots = NULL, 		## the range for all the interclass-distance barplots. Set to NULL for no pre-defined range at all, or provide a numeric length one to specify the upper limit on the Y-axis of the interclass distances to be plotted. If values higher than specified appear, the range will be extended automatically.
 	
 	
 	##PLSR

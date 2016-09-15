@@ -51,6 +51,6 @@ Other Calc. arguments: \code{\link{calc_aqg_args}},
   \code{\link{split_dataset}}
 
 Other SIMCA documentation: \code{\link{plot_sim_args}},
-  \code{\link{plot_sim}}
+  \code{\link{plot_simca,aquap_cube-method}}
 }
 

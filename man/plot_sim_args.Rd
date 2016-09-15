@@ -23,12 +23,12 @@ the pdf.}
 }
 \description{
 The following parameters can be used in the \code{...} argument in 
-function \code{\link{plot}} and \code{\link{plot_sim}} to override the values 
+function \code{\link{plot}} and \code{\link{plot_simca}} to override the values 
 in the analysis procedure file and so to modify the graphics - see examples.
 
 \code{plot(cube, ...)}
 
-\code{plot_sim(cube, ...)}
+\code{plot_simca(cube, ...)}
 }
 \details{
 For a list of all parameters that can be used in the \code{...} 
@@ -40,18 +40,19 @@ please see \code{\link{anproc_file}}.
 dataset <- gfd()
 cube <- gdmm(dataset)
 plot(cube, pg.sub="bar") # adds 'bar' to the subtitle of each single plot
-plot_sim(cube, pg.sub="bar", pg.fns="_bar") # adds '_bar' to the filename of 
+plot_simca(cube, pg.where="pdf", pg.sub="bar", pg.fns="_bar") # adds '_bar' 
+# to the filename of 
 # the pdf
 }
 }
 \seealso{
-\code{\link{plot_sim}}
+\code{\link{plot_simca}}
 
 Other Plot arguments: \code{\link{plot,aquap_data,missing-method}},
   \code{\link{plot_aqg_args}}, \code{\link{plot_pca_args}},
   \code{\link{plot_pg_args}}, \code{\link{plot_pls_args}}
 
 Other SIMCA documentation: \code{\link{calc_sim_args}},
-  \code{\link{plot_sim}}
+  \code{\link{plot_simca,aquap_cube-method}}
 }
 

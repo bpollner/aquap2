@@ -22,6 +22,9 @@ show_aquap_data <- function(object) {
 
 showCube <- function(object) {
 	stats <- checkCubeForRealStats(object)  ## list(cnt=cnt, char=char)
+	len <-  object@cpt@len
+	if (len > 1) {addPlural <- "s"} else {addPlural <- ""}	
+	if (stats$cnt > 1) {addModelsPlural <- "s"} else {addModelsPlural <- ""}
 	if (stats$cnt == 0) {
 		add <- "and no models."
 	} else {
@@ -32,9 +35,9 @@ showCube <- function(object) {
 			specTxt <- "+spectra"
 		}
 		txt <- sub("Aquagram", paste("Aquagram", specTxt," [", object@anproc$aquagr$mod, "]", sep=""), ModNames)
-		add <- paste("and ", stats$cnt, " models (", txt, ") in each [or some] sets.", sep="")
+		add <- paste("and ", stats$cnt, " model", addModelsPlural ," (", txt, ") in each [or some] sets.", sep="")
 	}
-	cat(paste("Formal class 'aquap_cube', containing ", object@cpt@len, " datasets in total ", add, "\n", sep=""))
+	cat(paste("Formal class 'aquap_cube', containing ", len, " dataset", addPlural, " in total ", add, "\n", sep=""))
 	cat("\n")
 	cp <- getCP(object) # is a method
 	out <- cp
@@ -204,4 +207,8 @@ plot_pca_data_M <- function(object, ...) {
 
 plot_pls_cube_M <- function(object, ...) {
 	plot_pls_cube(cube=object, ...)
+} # EOF
+
+plot_simca_cube_M <- function(object, ...) {
+	plot_simca_cube(cube=object, ...)
 } # EOF

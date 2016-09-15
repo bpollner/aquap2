@@ -93,7 +93,8 @@ plot_plsr_error <- function(plsModel, plsPlusModel, dataset, ClassVar, onMain=""
 #	yax <- vecsCorr
 	matplot(xax, yax, type="l", xlab="Nr of components", ylab=ylab, main=onMain, sub=subText)
 	abline(v=plsModel$ncomp, col=modCorrCol, lwd=0.4)
-	legend(legPos, legend=c("RMSEC", "RMSECV", "RMSECV_adj"), col=1:3, lty=1:3)
+	legBgCol <- rgb(255,255,255, alpha=.ap2$stn$col_alphaForLegends, maxColorValue=255) # is a white with alpha to be determined in the settings
+	legend(legPos, legend=c("RMSEC", "RMSECV", "RMSECV_adj"), col=1:3, lty=1:3, bg=legBgCol)
 } # EOF
 
 plot_plsr_calibration <- function(plsModel, dataset, regrOn, classFCol, onMain="", onSub="",  inRDP=FALSE) {
@@ -124,7 +125,8 @@ plot_plsr_calibration <- function(plsModel, dataset, regrOn, classFCol, onMain="
 	}
 	legend("topleft", legend=legendText)
 	if (colLegend) {
-		legend("bottomright", legend=clv$txtE, col=clv$color_legend, pch=16)
+		legBgCol <- rgb(255,255,255, alpha=.ap2$stn$col_alphaForLegends, maxColorValue=255) # is a white with alpha to be determined in the settings
+		legend("bottomright", legend=clv$txtE, col=clv$color_legend, pch=16, bg=legBgCol)
 	}
 } # EOF
 
@@ -156,8 +158,9 @@ plot_plsr_validation <- function(plsModel, dataset, regrOn, classFCol, onMain=""
 		legendText <- paste("RMSECV: ", RMSECV, "\nR2CV: ", R2CV, sep="")
 	}
 	legend("topleft", legend=legendText)	
-	if (colLegend) {	
-		legend("bottomright", legend=clv$txtE, col=clv$color_legend, pch=16)
+	if (colLegend) {
+		legBgCol <- rgb(255,255,255, alpha=.ap2$stn$col_alphaForLegends, maxColorValue=255) # is a white with alpha to be determined in the settings	
+		legend("bottomright", legend=clv$txtE, col=clv$color_legend, pch=16, bg=legBgCol)
 	}
 } # EOF
 

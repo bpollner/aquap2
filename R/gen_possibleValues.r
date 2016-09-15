@@ -12,9 +12,9 @@ pv_what_models <- c("pca", "simca", "plsr", "aquagr") # what possible values for
 pv_pca_what <- c("both", "scores", "loadings")
 
 
-## SIMCA calculation
+## SIMCA 
 pv_simca_calc_sampling <- c("random", "interleaved")
-
+pv_warningIcDistRange <- 12
 
 ## PLSR calculation
 pv_plsr_crossvalidation <- c("CV", "LOO")

@@ -763,7 +763,7 @@ adaptIdStringForDpt <- function(dptSource, prevIdString="") { # returns the new 
 		combChar <- paste(combSingle, collapse=",")
 	} # end if !is.null(origApp)
 	if (combChar != "") {
-		msg <- " |dpt:"
+		msg <- "  dpt:"
 		char <- combChar
 	}
 	idStrAdd <- paste(msg, char, collapse="", sep="")
@@ -838,6 +838,13 @@ checkApsChar <- function(aps) {
 #' highest sum of absorbtion values.
 #' @family Extract Elements
 #' @seealso \code{\link{aquap_data-methods}} 
+#' @examples
+#' \dontrun{
+#' fd <- gfd()
+#' dataset_single <- siWl(fd, 1300) # to only leave wavelength 1300
+#' dataset_single2 <- siWl(fd, getMax=TRUE) # to look for the wavelength with 
+#' # highest sum of absorbtion values
+#' }
 #' @export
 siWl <- function(dataset, wl, getMax=FALSE) {
 	wls <- getWavelengths(dataset)

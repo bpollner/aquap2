@@ -78,6 +78,12 @@ setGeneric("plot_pls", function(object, ...)  standardGeneric("plot_pls"))
 setMethod("plot_pls", signature(object = "aquap_cube"), definition = plot_pls_cube_M)
 
 
+setGeneric("plot_simca", function(object, ...)  standardGeneric("plot_simca"))
+#' @rdname plot_simca
+#' @export
+setMethod("plot_simca", signature(object = "aquap_cube"), definition = plot_simca_cube_M)
+
+
 setGeneric("getNcpwl", function(object) standardGeneric("getNcpwl"))
 setMethod("getNcpwl", "aquap_data", function(object) object@ncpwl)
 
@@ -143,7 +149,24 @@ setMethod("getAnproc", "aquap_cube", function(object) object@anproc)
 setMethod("getAnproc", "aquap_data", function(object) object@anproc)
 
 ## SIMCA
-setGeneric("getSIMCAClassList", function(object) standardGeneric("getSIMCAClassList"))
-setMethod("getSIMCAClassList", "aquap_ap", function(object) object$simca$simcOn)
+setGeneric("getApSimcaClassList", function(object) standardGeneric("getApSimcaClassList"))
+setMethod("getApSimcaClassList", "aquap_ap", function(object) object$simca$simcOn)
+setMethod("getApSimcaClassList", "aquap_cube", function(object) object@anproc$simca$simcOn)
 
+setGeneric("getSIMCAModels", function(object) standardGeneric("getSIMCAModels"))
+setMethod("getSIMCAModels", "aquap_set", function(object) object@simca$mods)
 
+setGeneric("getSIMCAPredictions", function(object) standardGeneric("getSIMCAPredictions"))
+setMethod("getSIMCAPredictions", "aquap_set", function(object) object@simca$preds)
+
+setGeneric("getSIMCAModels_cv", function(object) standardGeneric("getSIMCAModels_cv"))
+setMethod("getSIMCAModels_cv", "aquap_set", function(object) object@simca$mods_cv)
+
+setGeneric("getSIMCAPredictions_cv", function(object) standardGeneric("getSIMCAPredictions_cv"))
+setMethod("getSIMCAPredictions_cv", "aquap_set", function(object) object@simca$preds_cv)
+
+setGeneric("getSIMCAicDists", function(object) standardGeneric("getSIMCAicDists"))
+setMethod("getSIMCAicDists", "aquap_set", function(object) object@simca$icDists)
+
+setGeneric("getCorrectSimcaClasses", function(object) standardGeneric("getCorrectSimcaClasses"))
+setMethod("getCorrectSimcaClasses", "aquap_set", function(object) object@simca$groupingVector)

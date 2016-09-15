@@ -39,7 +39,7 @@ calculateSIMCA <- function(dataset, md, ap) { # is working on a single set. i.e.
 	#
 	mods <-  makeSimcaModels(dataset, groupingVector=simcaClasses, k=simca_k, simcaVersion) # returns a list with one model for each grouping
 	preds <-  makeSimcaPredictions(SimcaModelList=mods, newFlatData=NULL, newCorrectGrouping=NULL)
-	icDist <- calculateInterclassDistances(mods)
+	icDists <- calculateInterclassDistances(mods)
 	#
 	if (.ap2$stn$simca_tablesToTxt) {
 		percNew <- .ap2$stn$simca_percNewData_CV
@@ -70,7 +70,7 @@ calculateSIMCA <- function(dataset, md, ap) { # is working on a single set. i.e.
 	if (!.ap2$stn$allSilent) {cat(paste(.ap2$.gs, whatErr, "\n", sep="")) }
 	.ap2$.charCollect <- NULL
 	.ap2$.gs <- " ok"
-	return(list(mods=mods, preds=preds, mods_cv=mods_cv, preds_cv=preds_cv, groupingVector=simcaClasses))
+	return(list(mods=mods, preds=preds, mods_cv=mods_cv, preds_cv=preds_cv, icDists=icDists, groupingVector=simcaClasses))
 } # EOF
 
 calculateAquagram <- function(dataset, md, ap, idString) {

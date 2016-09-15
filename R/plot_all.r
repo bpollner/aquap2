@@ -11,7 +11,7 @@ plot_cube <- function(x, what="all", ...) {
 		plot_pca(x, ...)
 	}
 	if (any(c(pv[1], pv[3]) %in% what)) { # SIMCA
-		plot_sim(x, ...)	
+		plot_simca(x, ...)	
 	}
 	if (any(c(pv[1], pv[4]) %in% what)) { # PLSR
 		plot_pls(x, ...)
