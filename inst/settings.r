@@ -53,11 +53,11 @@ stn <- list(
 	gen_showExtendedCube = TRUE, 			## if set to TRUE, the number of rows and the number of wavelengths in each element of a cube will be displayed as well.
 	gen_useParallel = FALSE, 				## if parallel computing should be used where applicable and implemented
 	gen_numberOfCPUs = NA, 					## the number of CPUs used for parallel computing; leave at 'NA' for automatically using the system defaults
-	gen_showData_NIR = FALSE, 				## if the first rows of the NIR data should be printed as well wenn printing an object of class 'aquap_data' to the screen.
+	gen_showData_NIR = FALSE, 				## if the first rows of the NIR data should be printed as well wenn printing (showing) an object of class 'aquap_data' to the screen.
 	gen_versionCheckDataset = TRUE,			## if it should be checked if the dataset was created with an older version of package aquap2. Recommended value is TRUE.
 	gen_plot_anprocSource = "defFile", 		## the default way to obtain the analysis procedure when *PLOTTING*. Possible values are "cube" to take the analysis procedure from within the cube, "defFile" to load instead the default filename of the analysis procedure file, or provide a custom analysis procedure filename. (Ending in ".r")
-	gen_plot_pgWhereDefault = "", 			## the default setting for the general plotting parameter 'pg.where'. If set to 'pdf', all graphics will be saved as a pdf. If anything but a pdf is provided, the graphics will be plotted to the graphics device.
-	gen_plot_maxNrDptInfoOnMain = 4, 		## the maximum number of dpt-info elements in the main of a title
+	gen_plot_pgWhereDefault = "pdf",		## the default setting for the general plotting parameter 'pg.where'. If set to 'pdf', all graphics will be saved as a pdf. If anything but a pdf is provided, the graphics will be plotted to the graphics device.
+	gen_plot_maxNrDptInfoOnMain = 4, 		## the maximum number of data-pre-treatment modules info elements in the main of a title
 	gen_plot_legendPosition = "auto", 		## the default position of the legend in a plot. Leave at the default 'auto' for automatically detecting the best corner for the legend, provide one of "bottomright", "bottomleft", "topright" or "topleft" for choosing the resp. corner.
 	gen_calc_allowSubtrDiffHead = FALSE, 	## if subtractions of datasets having a different header structure should be allowed.
 	gen_calc_allowSubtrDiffWavels = TRUE,	## if subtractions of datasets having different sets of wavelengths should be allowed. If TRUE, this is only successful if the smaller set of wavelengths is completely within the bigger set of wavelengths. In this case, the bigger set is virtually cut down to the size of the smaller set. This can be necessary when function do_gapDer was used.

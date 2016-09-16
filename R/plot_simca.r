@@ -112,19 +112,23 @@ makeSimcaClassDistPlots_inner <- function(set, ap, where, onMain, onSub, con_sim
 #		mainText <- paste(groupingVec[i], " - ", onMain, sep="")
 		mainText <- paste0("grp: ", groupingVec[i], "   ", onMain)
 		if (.ap2$stn$simca_tablesToTxt == TRUE) {	
-			sink(file=con_simcaTable, append = TRUE, type = c("output"), split = FALSE)
-				cat("\n\n\n")
-				cat("-----------------------------------------\n")
-				cat("-----------------------------------------\n")
-				cat(mainText); cat("\n\n")
-				cat("Interclass Distances:\n")
-				print(icDists[[i]])
-				print(preds[[i]])
-				cat("------------------\n\n")
-				cat(paste("Predictions based on ", .ap2$stn$simca_percNewData_CV, "% new data:\n", sep=""))
-				print(preds_cv[[i]])
-				cat("-----------------------------------------\n")
-			sink()
+			if (where == "pdf") {
+				sink(file=con_simcaTable, append = TRUE, type = c("output"), split = FALSE)
+			}
+			cat("\n\n\n")
+			cat("-----------------------------------------\n")
+			cat("-----------------------------------------\n")
+			cat(mainText); cat("\n\n")
+			cat("Interclass Distances:\n")
+			print(icDists[[i]])
+			print(preds[[i]])
+			cat("------------------\n\n")
+			cat(paste("Predictions based on ", .ap2$stn$simca_percNewData_CV, "% new data:\n", sep=""))
+			print(preds_cv[[i]])
+			cat("-----------------------------------------\n")
+			if (where == "pdf") {
+				sink()
+			}
 		} # end if	
 	} # end for i
 } # EOF
