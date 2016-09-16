@@ -1,6 +1,6 @@
 plotSpectra_outer <- function(dataset, colorBy, onMain, onSub, idString="") {
 	if (!is.null(colorBy)) {
-		if (colorBy == "all") {	
+		if (any(colorBy == "all")) {	
 			cPref <- .ap2$stn$p_ClassVarPref
 			le <- nchar(cPref)
 			cns <- colnames(dataset$header)
@@ -75,7 +75,7 @@ plot_spectra_Data <- function(x, colorBy=NULL, ...) {
 	filename <- paste(path, "/", filename, fns, ".pdf", sep="")
 	onMain <- paste(expName, onMain, sep=" ")
 	if (where == "pdf") { pdf(file=filename, width, height, onefile=TRUE, family='Helvetica', pointsize=12) }
-	if (where != "pdf" & (Sys.getenv("RSTUDIO") != 1) & (!names(dev.cur()) == "quartz") ) {dev.new()}	
+	if (where != "pdf" & (Sys.getenv("RSTUDIO") != 1) & (!names(dev.cur()) == "quartz") ) {dev.new(height=height, width=width)}	
 	plotSpectra_outer(dataset, colorBy, onMain, onSub)
 	if (where == "pdf") {dev.off()}
 	if (!.ap2$stn$allSilent & (where == "pdf" )) {cat("ok\n") }
