@@ -37,6 +37,7 @@ VignetteBuilder: knitr
 Collate:
     'aquap2.r'
     'calc_aqg.r'
+    'calc_noise.r'
     'calc_plsr.r'
     'calc_simca.r'
     'cl_classFunctions.r'

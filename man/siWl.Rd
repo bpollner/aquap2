@@ -37,5 +37,8 @@ dataset_single2 <- siWl(fd, getMax=TRUE) # to look for the wavelength with
 
 Other Extract Elements: \code{\link{getHeader}},
   \code{\link{getcd}}, \code{\link{getcm}}
+
+Other Extract Elements: \code{\link{getHeader}},
+  \code{\link{getcd}}, \code{\link{getcm}}
 }
 

@@ -17,7 +17,7 @@ setClass("aqg_calc", slots = c(ID="character", classVar="character", itemIndex="
 #setClassUnion(name="aqgCrNull", members =c("aqg_cr", "NULL"))
 setClass("aquap_set", slots=c(dataset="aquap_data", idString="character", pca="listNull", plsr="listNull", simca="listNull", aquagr="listNull")) 
 setClass("aquap_cube", slots=c(metadata="aquap_md", anproc="aquap_ap", cp="data.frame", cpt="aquap_cpt", aqgRan="listNull"), contains="list")
-
+setClass("aquap_noiseDist", slots=c(timestamp="POSIXct", version="character"), contains="matrix")
 
 # methods ----------------------------------------
 setMethod("show", signature(object = "aquap_data"), definition = show_aquap_data )

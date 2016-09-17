@@ -134,3 +134,4 @@
 #'  fd <- getFullData(md) # load a rawdata-file called "bar"
 #' }
 #' @family Core functions
+

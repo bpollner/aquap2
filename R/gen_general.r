@@ -315,7 +315,7 @@ genFolderStr <- function() {
 	fn_results <- .ap2$stn$fn_results 
 	fn_sampleLists <- .ap2$stn$fn_sampleLists
 	fn_sampleListOut <- .ap2$stn$fn_sampleListOut
-	fn_sampleListIn <- .ap2$stn$f_sampleListIn
+	fn_sampleListIn <- .ap2$stn$fn_sampleListIn
 	
 	fn_mDataDefFile <- .ap2$stn$fn_mDataDefFile
 	fn_anProcDefFile <- .ap2$stn$fn_anProcDefFile
@@ -845,6 +845,7 @@ checkApsChar <- function(aps) {
 #' dataset_single2 <- siWl(fd, getMax=TRUE) # to look for the wavelength with 
 #' # highest sum of absorbtion values
 #' }
+#' @family Extract Elements
 #' @export
 siWl <- function(dataset, wl, getMax=FALSE) {
 	wls <- getWavelengths(dataset)

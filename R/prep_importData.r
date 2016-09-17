@@ -554,7 +554,7 @@ flagOutliers_allScope <- function(NIR, detectOutliers) {
 		return(data.frame(DELETE = rep(NA, nrow(NIR))))
 	} else {
 		cPref <- .ap2$stn$p_ClassVarPref
-		cnOtl <- paste(.ap2$stn$p_outlierCol, .ap2$stn$p_outlierCol_allSuffix, sep="_")
+		cnOtl <- paste0(.ap2$stn$p_outlierCol, .ap2$stn$p_outlierCol_allSuffix)
 		tol <- .ap2$stn$simca_tolerance
 		kmax <- .ap2$stn$simca_kMax
 		flatDf <- data.frame(grouping=rep("x", nrow(NIR)))
@@ -578,6 +578,14 @@ flagOutliers_allScope <- function(NIR, detectOutliers) {
 	} # end else
 } # EOF
 
+checkDatasetVersion <- function(dataset, dsName) {
+	if (.ap2$stn$gen_versionCheckDataset) {
+			if (dataset@version != pv_versionDataset) {
+				stop(paste("The dataset '", dsName, "' was created with an older version of package 'aquap2' and so has a different structure than what is required now.\nPlease re-import the raw-data.\n(You can switch off the checking of the dataset-version in the settings-file at the parameter 'gen_versionCheckDataset'.)", sep=""), call.=FALSE)
+			}
+	}
+} # EOF
+
 # get full data ---------------------------------------------------------------
 #' @template mr_getFullData
 #' @export
@@ -590,11 +598,7 @@ getFullData <- function(md=getmd(), filetype="def", naString="NA", slType="def",
 		dataset <- loadAQdata(md, verbose=FALSE)
 	}
 	if(!is.null(dataset)) { # so the path existed and it could be loaded
-		if (.ap2$stn$gen_versionCheckDataset) {
-			if (dataset@version != pv_versionDataset) {
-				stop(paste("The dataset '", md$meta$expName, "' was made with a different version of package 'aquap2' and so has a different structure than what is required now.\nPlease re-import the raw-data.\n(You can switch off the checking of the dataset-version in the settings-file at the parameter 'gen_versionCheckDataset'.)", sep=""), call.=FALSE)
-			}
-		}
+		checkDatasetVersion(dataset, md$meta$expName)
 		if(!.ap2$stn$allSilent) {cat(paste("Dataset \"", md$meta$expName, "\" was loaded.\n", sep="")) }
 		return(invisible(dataset)) # returns the dataset and we exit here
 	}
@@ -679,6 +683,7 @@ gfd <- function(md=getmd(), filetype="def", naString="NA", slType="def", trhLog=
 #' \dontrun{
 #' saveAQdata(dataset)
 #' loadAQdata()
+#' saveAQdata(dataset, getmd(expName="FooBar")) # save under the name 'FooBar'
 #' }
 #' @export
 saveAQdata <- function(dataset, md=getmd(), verbose=TRUE) {
@@ -905,7 +910,7 @@ readHeader_checkDefaults <- function(slType, possibleValues, md, multiplyRows) {
 } # EOF
 
 check_sl_existence <- function(filename, ext) {
-	slInFolder <- paste(.ap2$stn$fn_sampleLists, "/", .ap2$stn$f_sampleListIn, sep="")
+	slInFolder <- paste(.ap2$stn$fn_sampleLists, "/", .ap2$stn$fn_sampleListIn, sep="")
 	fn <- paste(filename, ext, sep="")
 	a <- paste(slInFolder, "/", fn, sep="")
 	if (!file.exists(a)) {
@@ -970,7 +975,7 @@ readHeader <- function(md=getmd(), slType="def", multiplyRows="def") {
 	poss_sl_types <- c("csv", "txt", "xls") 			### XXXVARXXX
 	filename <- NULL # will be changed in the checking
 	readHeader_checkDefaults(slType, poss_sl_types, md, multiplyRows)
-	slInFolder <- paste(.ap2$stn$fn_sampleLists, "/", .ap2$stn$f_sampleListIn, "/", sep="")
+	slInFolder <- paste(.ap2$stn$fn_sampleLists, "/", .ap2$stn$fn_sampleListIn, "/", sep="")
 	if (is.null(slType)) {
 		return(NULL)
 	}

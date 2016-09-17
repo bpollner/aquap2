@@ -36,6 +36,7 @@ From the provided metadata the experiment name is extracted.
 \dontrun{
 saveAQdata(dataset)
 loadAQdata()
+saveAQdata(dataset, getmd(expName="FooBar")) # save under the name 'FooBar'
 }
 }
 \seealso{

@@ -510,14 +510,14 @@ getTempNormAUCPercTable <- function(univAucTable, Texp, aucExtrema) {
 ## gets called once at the first call to sdrc_plotAquagram
 aq_loadGlobalAquagramCalibData <- function() {
 	if (!exists("tcd", where=.ap2)) {
-	assign("tcd", tempCalibReadRaw(), pos=.ap2) 
+		assign("tcd", tempCalibReadRaw(), pos=.ap2) 
 	}
 	if (!exists("aquagramPSettings",  where=.ap2)) {
-	assign("aquagramPSettings", readInAquagramPSettings(), pos=.ap2)
+		assign("aquagramPSettings", readInAquagramPSettings(), pos=.ap2)
 	}
 	if (!exists("univAucTable", where=.ap2)) {
-	aut <-  calcUnivAucTable(.ap2$tcd, smoothN=.ap2$stn$aqg_smoothCalib, ot=getOvertoneCut(.ap2$stn$aqg_OT))
-	assign("univAucTable", aut, pos=.ap2)
+		aut <-  calcUnivAucTable(.ap2$tcd, smoothN=.ap2$stn$aqg_smoothCalib, ot=getOvertoneCut(.ap2$stn$aqg_OT))
+		assign("univAucTable", aut, pos=.ap2)
 	}
 } # EOF
 

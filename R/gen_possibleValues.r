@@ -29,6 +29,7 @@ pv_fsa_fss <- c("both", "only")
 ## General Plotting
 pv_legendPosition <- c("auto", "topleft", "topright", "bottomright", "bottomleft")
 
+
 ############
 ## complete possible values for modifying via ...
 pv_modifyUCL <- c("spl.var", "spl.wl")
@@ -52,3 +53,6 @@ pv_dptModules <- c("sgol", "snv", "msc", "emsc", "osc", "deTr", "gsd")
 
 ## the version of the dataset
 pv_versionDataset <- "0.1.4"   # change this only!! if the structure of the dataset has been changed !! XXX
+
+## the version of the noise distribution
+pv_versionNoiseDist <- "0.1.4"
