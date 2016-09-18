@@ -72,6 +72,15 @@ check_mdDefaultValues <- function(localEnv) {
 	}
 	assign("noiseFileName", nfn, pos=parent.frame(n=1))
 	# 
+	spac <- le$spacing
+	msg <- "Please provide either FALSE or a length one numeric to the variable 'spacing' in the metadata file."
+	if ( length(spac) != 1  | (!all(is.logical(spac)) & !all(is.numeric(spac))) ) {
+		stop(msg, call.=FALSE)
+	}
+	if (is.logical(spac) & spac == TRUE) {
+		stop(msg, call.=FALSE)		
+	}
+	#
 } # EOF
 
 copyMetadataFile <- function(fromPath, toPath) {
@@ -128,7 +137,6 @@ check_mdVersion <- function(localEnv) {
 		check_mdVersion_I(localEnv)
 	}
 } # EOF
-
 
 getmd_core <- function(fn="def") {
 	check_mdDefaults(fn)

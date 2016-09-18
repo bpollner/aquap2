@@ -147,11 +147,18 @@ insertTRH <- function(sampleList) { # insert a column for Temperatur and RH (to 
 
 createSingleTimePointSampleList <- function(expMetaData) {
 	delChar <- .ap2$stn$p_deleteCol
+	spacing <- expMetaData$postProc$spacing
 	rndList <- createRandomizedSampleList(expMetaData$expClasses) 
-	envList <- insertEnvControls(rndList, expMetaData$postProc) 
+	if (!is.logical(spacing)) { # can only come in as logical FALSE --> we WANT to insert env. control
+		envList <- insertEnvControls(rndList, expMetaData$postProc) 
+		lo <- 1	
+	} else { # so it is FALSE, we do not want to insert env. control samples
+		envList <- rndList
+		lo <- c(1,2) # have to kick out the ECRM column
+	}
 #	noSplitList <- insertNoSplit(envList, expMetaData$postProc)	
 	TRHList <- insertTRH(envList)
-	names(TRHList) <- cns <- expMetaData$meta$coluNames[-1]
+	names(TRHList) <- cns <- expMetaData$meta$coluNames[-(lo)]
 	a <- which(grepl(delChar, cns, fixed=TRUE))					## deletes the columns having the defaule "DELETE" char (the L2 problem)
 	if (length(a) != 0) {
 		TRHList <- TRHList[, -a]
