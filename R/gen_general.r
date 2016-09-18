@@ -294,15 +294,16 @@ autoUpS <- function() { # stops if somethings goes wrong
 } # EOF
 
 #' @title Generate Folder Structure
-#' @description Generate the required folder structure in the current working 
-#' directory.
+#' @description Generate the required folder structure for a new experiment in 
+#' the current working directory.
 #' @details \code{genFolderStr} will generate all the required folders in the 
 #' current working directory that 'aquap2' needs to work properly. Templates 
 #' for metadata and analysis procedure will be copied into the metadata-folder.
 #' You can change the defaults for the folder names in the settings file.
 #' @return Folders get created in the current working directory.
 #' @family Helper Functions
-#' @seealso \code{\link{settings_file}} 
+#' @seealso \code{\link{settings_file}}, \code{\link{noise_procedures}}, 
+#' \code{\link{genNoiseRecExp}} 
 #' @export
 genFolderStr <- function() {
 	autoUpS()

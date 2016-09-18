@@ -10,8 +10,8 @@ genFolderStr()
 Folders get created in the current working directory.
 }
 \description{
-Generate the required folder structure in the current working 
-directory.
+Generate the required folder structure for a new experiment in 
+the current working directory.
 }
 \details{
 \code{genFolderStr} will generate all the required folders in the 
@@ -20,10 +20,11 @@ for metadata and analysis procedure will be copied into the metadata-folder.
 You can change the defaults for the folder names in the settings file.
 }
 \seealso{
-\code{\link{settings_file}}
+\code{\link{settings_file}}, \code{\link{noise_procedures}}, 
+\code{\link{genNoiseRecExp}}
 
-Other Helper Functions: \code{\link{getcd}},
-  \code{\link{instAquap2Examples}},
+Other Helper Functions: \code{\link{genNoiseRecExp}},
+  \code{\link{getcd}}, \code{\link{instAquap2Examples}},
   \code{\link{printStdColnames}}, \code{\link{saveAQdata}},
   \code{\link{updateAquap}}, \code{\link{updateSettings}}
 }
