@@ -869,6 +869,10 @@ siWl <- function(dataset, wl, getMax=FALSE) {
 	return(dataset)
 } # EOF
 
-
+setCheck_NumericLengthOne <- function(num, char) {
+	if (!all(is.numeric(num)) | length(num) != 1) {
+		stop(paste0("Please provide a numeric length one to the argument '", char, "' in the settings.r file."), call.=FALSE)
+	}
+}
 
 

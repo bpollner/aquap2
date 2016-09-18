@@ -119,7 +119,8 @@ stn <- list(
 	noi_forceExclusionOfOutliers = TRUE, 	## if, should noise be added to the data, the exclusion of outliers in the noise-dataset should be forced or not. Set to FALSE for not excluding outiers in the noise-dataset.
 	noi_forceTimeDifferenceCheck = TRUE, 	## if, should noise be added to the data, the time difference between recording of the noise-data and the actual dataset should be checked, in other words - the age of the noise-data should be checked. Set to FALSE for not checking the time difference between noise-data and actual dataset. If either the noise-data or the actual dataset do *not* contain a timestamp, then the checking of time difference is skipped without note.
 	noi_acceptTimeDiffDays = 90, 			## the acceptable time difference in days between recording of the noise-data and the actual data
-	noi_noiseLevel = 1e-6,	 				## the system-specific noise level XXX 
+	noi_forceNoisePlausibility = TRUE, 		## if, should noise be added to the data, it should be checked if the values of the noise data file are not above a defined percentage of the actual dataset (see below); in other words, a plausibility check for the noise-data file.
+	noi_plausPercentage = 5, 				## the percentage for plausibility check; see above.
 
 
 	## PCA

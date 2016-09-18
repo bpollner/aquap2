@@ -15,8 +15,9 @@ gdmm(dataset, ap = getap(), noiseFile = "def")
 file residing in the AQUAP2SH folder. Leave at the default 'def' to read in the 
 value from the settings.r file (parameter \code{noi_noiseDataFilename}), or 
 provide the name of an existing R-data file in your specified AQUAP2SH folder 
-to use this as source for the noise data. Please see 
-\code{\link{noise_procedures}} for more information.}
+to use this as source for the noise data. If a value other than "def" is 
+provided, this is overriding the value of "noiseFileName" in the metadata file.
+Please see \code{\link{noise_procedures}} for more information.}
 }
 \value{
 An object of class \code{\link{aquap_cube}} containing all the 

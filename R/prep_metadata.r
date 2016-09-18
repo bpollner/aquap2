@@ -63,6 +63,15 @@ check_mdDefaultValues <- function(localEnv) {
 	}
 	assign("filetype", ft, pos=parent.frame(n=1))	
 	#
+	nfn <- le$noiseFileName
+	if (all(nfn == "def")) {
+		nfn <- .ap2$stn$noi_noiseDataFilename
+	}
+	if (length(nfn) != 1 | !all(is.character(nfn))) {
+		stop("Please provide a character length one to the variable 'noiseFileName' in the metadata file resp. the argument 'noi_noiseDataFilename' in the settings file.", call.=FALSE)
+	}
+	assign("noiseFileName", nfn, pos=parent.frame(n=1))
+	# 
 } # EOF
 
 copyMetadataFile <- function(fromPath, toPath) {
@@ -147,7 +156,7 @@ getmd_core <- function(fn="def") {
 	e <- new.env()
 	sys.source(path, envir=e)
 	check_mdVersion(localEnv=e) 	### Version check here !!
-	noSplitLabel <- ECLabel <- RMLabel <- filetype <- NULL # gets assigned below
+	noSplitLabel <- ECLabel <- RMLabel <- filetype <- noiseFileName <- NULL # gets assigned below
 	check_mdDefaultValues(localEnv=e) ### checking and assigning
 	##
 	Repls <- (paste(defReplPref, seq(1, e$Repls), sep=""))
@@ -169,7 +178,7 @@ getmd_core <- function(fn="def") {
 	## put together
  	expClasses <- list(L1=e$L1, L2=e$L2, Repls=Repls, Group=Group, timeLabels=TimePoints)
  	postProc <- list(spacing=e$spacing, ECRMLabel=c(ECLabel, RMLabel), noSplitLabel=noSplitLabel, nrConScans=e$nrConScans)
- 	meta <- list(expName=e$expName, coluNames=coluNames, filetype=filetype, noiseFile=e$noiseFileName)
+ 	meta <- list(expName=e$expName, coluNames=coluNames, filetype=filetype, noiseFile=noiseFileName)
 	expMetaData <- list(expClasses = expClasses, postProc = postProc, meta = meta)
 	return(new("aquap_md", expMetaData))
 } # EOF

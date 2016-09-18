@@ -53,6 +53,3 @@ pv_dptModules <- c("sgol", "snv", "msc", "emsc", "osc", "deTr", "gsd")
 
 ## the version of the dataset
 pv_versionDataset <- "0.1.4"   # change this only!! if the structure of the dataset has been changed !! XXX
-
-## the version of the noise distribution
-pv_versionNoiseDist <- "0.1.4"
