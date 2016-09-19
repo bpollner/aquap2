@@ -108,22 +108,28 @@ insertEnvControls <- function(rndSampleList, postProc) {
 	EClabel <- ECRMlabel[[1]]
 	RMlabel <- ECRMlabel[[2]]
 	rsl <- rndSampleList
+	if (spacing > nrow(rsl)) {
+		spacing <- nrow(rsl) -1
+	}
+	##
 	DF <- data.frame(ECRM=RMlabel, rsl) # ad a first column all filled with the RM-label to the provided list
-	
-	insertBlock <- data.frame(matrix(EClabel, nrow=length(noSplitLabel), ncol=ncol(DF)))
-	names(insertBlock) <- names(DF)
-	NrInserts <- floor(nrow(DF)/spacing)
-	cIn <- seq(spacing+1, ((spacing+1)*NrInserts), by=(spacing+1)) ## the cutting index
-	for (i in 1: (length(cIn)) ) {
-		a <- DF[1:(cIn[i]-1) ,]
-		b <- DF[ (cIn[i]  ) : (nrow(DF)), ]
-		if ( any(is.na(b)) ) {  # so if we are over the limits ... not well tested !!! Possible mistake here !
-			DF <- rbind(a, insertBlock)
-		} else {
-			DF <- rbind(a,insertBlock,b)
-		}		
-	} # end i loop
+	##
+	if (!is.logical(spacing)) { # can only come in as logical FALSE --> we WANT to insert env. control
+		insertBlock <- data.frame(matrix(EClabel, nrow=length(noSplitLabel), ncol=ncol(DF)))
+		names(insertBlock) <- names(DF)
+		NrInserts <- floor(nrow(DF)/spacing)
+		cIn <- seq(spacing+1, ((spacing+1)*NrInserts), by=(spacing+1)) ## the cutting index
+		for (i in 1: (length(cIn)) ) {
+			a <- DF[1:(cIn[i]-1) ,]
+			b <- DF[ (cIn[i]  ) : (nrow(DF)), ]
+			if ( any(is.na(b)) ) {  # so if we are over the limits ... not well tested !!! Possible mistake here !
+				DF <- rbind(a, insertBlock)
+			} else {
+				DF <- rbind(a,insertBlock,b)
+			}		
+		} # end i loop
 	DF <- rbind(insertBlock, DF)
+	} # end !is.logical spacing
 	rownames(DF) <- 1:nrow(DF)
 	return(DF)
 } # EOF
@@ -149,16 +155,10 @@ createSingleTimePointSampleList <- function(expMetaData) {
 	delChar <- .ap2$stn$p_deleteCol
 	spacing <- expMetaData$postProc$spacing
 	rndList <- createRandomizedSampleList(expMetaData$expClasses) 
-	if (!is.logical(spacing)) { # can only come in as logical FALSE --> we WANT to insert env. control
-		envList <- insertEnvControls(rndList, expMetaData$postProc) 
-		lo <- 1	
-	} else { # so it is FALSE, we do not want to insert env. control samples
-		envList <- rndList
-		lo <- c(1,2) # have to kick out the ECRM column
-	}
+	envList <- insertEnvControls(rndList, expMetaData$postProc) 
 #	noSplitList <- insertNoSplit(envList, expMetaData$postProc)	
 	TRHList <- insertTRH(envList)
-	names(TRHList) <- cns <- expMetaData$meta$coluNames[-(lo)]
+	names(TRHList) <- cns <- expMetaData$meta$coluNames[-1]
 	a <- which(grepl(delChar, cns, fixed=TRUE))					## deletes the columns having the defaule "DELETE" char (the L2 problem)
 	if (length(a) != 0) {
 		TRHList <- TRHList[, -a]
@@ -213,8 +213,10 @@ esl_checkDefaults <- function(form) {
 #' @param md List. An object with the metadata of the experiment. Defaults to 
 #' 	\code{getmd()}, what is calling the default filename for the metadata file. 
 #' See \code{\link{getmd}} and \code{\link{metadata_file}}.
-#' @param form Character, can be either 'txt' to export the sample list in a tab 
-#' delimited text file, or 'xls' to export as an Excel file.
+#' @param form Character, can be 'txt' to export the sample list in a tab 
+#' delimited text file, 'xls' to export as an Excel file, or if left at the 
+#' default 'def' is reading in the value from the settings.r file (parameter 
+#' \code{p_sampleListExportFormat}).
 #' @param showFirstRows Logical. If the first rows of the sample list should be 
 #' displayed.
 #' @param timeEstimate Logical. If time estimates should be displayed.

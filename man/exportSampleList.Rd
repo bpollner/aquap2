@@ -16,8 +16,10 @@ esl(md = getmd(), form = "def", showFirstRows = TRUE,
     \code{getmd()}, what is calling the default filename for the metadata file. 
 See \code{\link{getmd}} and \code{\link{metadata_file}}.}
 
-\item{form}{Character, can be either 'txt' to export the sample list in a tab 
-delimited text file, or 'xls' to export as an Excel file.}
+\item{form}{Character, can be 'txt' to export the sample list in a tab 
+delimited text file, 'xls' to export as an Excel file, or if left at the 
+default 'def' is reading in the value from the settings.r file (parameter 
+\code{p_sampleListExportFormat}).}
 
 \item{showFirstRows}{Logical. If the first rows of the sample list should be 
 displayed.}

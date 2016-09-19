@@ -51,6 +51,7 @@ convertToRDP <- function(errorValue, ClassVar, header) {	# the dataset with all 
 	sdY <- sd(header[,ClassVar], na.rm=TRUE)
 	 out <- round(sdY/errorValue, .ap2$stn$plsr_nrDigitsRMSEx)
 } # EOF
+
 # plotting ----------------------------------------
 plot_plsr_error <- function(plsModel, plsPlusModel, dataset, ClassVar, onMain="", onSub="", inRDP=FALSE) { # ClassVar = regrOn
 	modCorrCol <- .ap2$stn$plsr_colorForBestNumberComps
@@ -325,8 +326,8 @@ plsr_plotErrors <- function(cube, ap) {
 	onMain <- paste(expName, onMain, sep=" ")
 	if (where == "pdf") { pdf(file=filename, width, height, onefile=TRUE, family='Helvetica', pointsize=12) }
 	if (where != "pdf" & Sys.getenv("RSTUDIO") != 1) {dev.new(height=height, width=width)}	
-	makePLSRErrorPlots(cube, ap, onMain, onSub, where, inRDP) ####### HERE #######
-	if (where == "pdf") {dev.off()}
+	makePLSRErrorPlots(cube, ap, onMain, onSub, where, inRDP) ### HERE ###
+	if (where == "pdf") { dev.off() }
 	if (!.ap2$stn$allSilent & (where == "pdf" )) {cat("ok\n") }
 } # EOF
 
@@ -399,7 +400,7 @@ plot_pls_cube <- function(cube, aps="def", rv.bandwidth="def", rv.adLine="def", 
   	return(invisible(NULL))
 } # EOF
 
-
+# documentation ----------------------------------------
 #' @title Plot PLSR
 #' @description Plot PLSR error and calibration / crossvalidation plots. 
 #' @details By providing one or more of the \code{...} arguments you can 
@@ -469,11 +470,10 @@ NULL
 #' @description The following parameters can be used in the \code{...} argument in 
 #' function \code{\link{plot}} and \code{\link{plot_pls}} to override the values 
 #' in the analysis procedure file and so to modify the graphics - see examples.
-#' 
-#' \code{plot(cube, ...)}
-#' 
-#' \code{plot_pls(cube, ...)}
-#' 
+#' \describe{
+#' \item{\code{plot(cube, ...)}}{ }
+#' \item{ \code{plot_pls(cube, ...)}}{ }
+#' }
 #' @template mr_details_allParams
 #' @template mr_pls_plot_param
 #' @template mr_pg_genParams
@@ -498,11 +498,10 @@ NULL
 #' function \code{\link{getap}}, also within function \code{\link{gdmm}}, to 
 #' override the values in the analysis procedure file and so to modify the 
 #' calculation of PLSR models - see examples.
-#' 
-#' \code{getap(...)}
-#'  
-#' \code{gdmm(dataset, ap=getap(...))}
-#' 
+#' \describe{
+#' \item{\code{getap(...)}}{ }
+#' \item{\code{gdmm(dataset, ap=getap(...))}}{ }
+#' }
 #' @section Note: Calculation of PLSR models is done with the function  
 #' \code{\link[pls]{plsr}}. 
 #' @template mr_details_allParams

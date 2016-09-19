@@ -36,10 +36,10 @@ the pdf.}
 The following parameters can be used in the \code{...} argument in 
 function \code{\link{plot}} and \code{\link{plot_pls}} to override the values 
 in the analysis procedure file and so to modify the graphics - see examples.
-
-\code{plot(cube, ...)}
-
-\code{plot_pls(cube, ...)}
+\describe{
+\item{\code{plot(cube, ...)}}{ }
+\item{ \code{plot_pls(cube, ...)}}{ }
+}
 }
 \details{
 For a list of all parameters that can be used in the \code{...} 

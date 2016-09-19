@@ -29,10 +29,10 @@ The following parameters can be used in the \code{...} argument in
 function \code{\link{getap}}, also within function \code{\link{gdmm}}, to 
 override the values in the analysis procedure file and so to modify the 
 calculation of PLSR models - see examples.
-
-\code{getap(...)}
- 
-\code{gdmm(dataset, ap=getap(...))}
+\describe{
+\item{\code{getap(...)}}{ }
+\item{\code{gdmm(dataset, ap=getap(...))}}{ }
+}
 }
 \details{
 For a list of all parameters that can be used in the \code{...} 

@@ -11,14 +11,16 @@ Generate the folder structure for a new experiment and populate
 it with the metadata suggested for recording then the noise-spectra.
 }
 \details{
-For a suggested workflow please see examples.
+This generates the folder structure for a standard experiment and is 
+adapting the metadata to record 12 noise-spectra with each 3 consecutive scans.
+For a possible workflow please see examples.
 }
 \examples{
 \dontrun{
 genNoiseRecExp() # generate the folder structure in the current working 
 # directory
 esl() # export the sample list
-#### now record the noise-spectra #### (move sample list!)
+#### now record the noise-spectra #### (move sample list to folder 'sl_in')
 gfd <- gfd() # imports noise raw-data and saves noise-data file in the 
 # R-data folder, from where you take it and move it into your 
 # AQUAP2SH folder
