@@ -581,7 +581,11 @@ ap_checExistence_Defaults <- function(ap, dataset, haveExc) {
 		}
 	} # EOIF
 	checkEx(ap$ucl$splitClasses, "variable split", cPref)
-	checkEx(ap$dpt$excludeOutliers$exOutVar, "exclude outliers (variable)", cPref)
+	exOut <-  ap$dpt$excludeOutliers$exOut
+	exOutRaw <-  ap$dpt$excludeOutliers$exOutRaw
+	if (exOut | exOutRaw) {
+			checkEx(ap$dpt$excludeOutliers$exOutVar, "exclude outliers (variable)", cPref)
+	}
 	checkEx(ap$pca$colorBy, "PCA (colorBy)", cPref)
 	el2c <- ap$pca$elcolorBy
 	if (!is.null(el2c)) {
@@ -714,10 +718,10 @@ performConSAvg <- function(dataset, siCsAvg, numbers=NULL) {
 	return(dataset)
 }# EOF
 
-performNoise <- function(dataset, siNoise) {
+performNoise <- function(dataset, siNoise, noiseFile) {
 	if (siNoise) {
 		if (!.ap2$stn$allSilent) {cat("      adding noise...")}
-		dataset <- noi_performNoise(dataset)	
+		dataset <- noi_performNoise(dataset, noiseFile)	
 		if (!.ap2$stn$allSilent) {cat(" ok\n")}
 	}
 	return(dataset)
@@ -973,7 +977,7 @@ makeIdString <- function(siClass, siValue, siWlSplit, siCsAvg, siNoise, siExOut,
 	return(easy)
 } # EOF
 
-processSingleRow_CPT <- function(dataset, siClass, siValue, siWlSplit, siCsAvg, siNoise, siExOut, ap) { # si for single
+processSingleRow_CPT <- function(dataset, siClass, siValue, siWlSplit, siCsAvg, siNoise, siExOut, ap, noiseFile) { # si for single
 	keepEC <- .ap2$stn$gd_keepECs
 	newDataset <- ssc_s(dataset, siClass, siValue, keepEC) 
 	if (is.null(newDataset)) { # character "nixnox" is returned if a variable combination yields no data. That is because returning NULL introduced a bug if it was on the end of the list... probably...
@@ -982,7 +986,7 @@ processSingleRow_CPT <- function(dataset, siClass, siValue, siWlSplit, siCsAvg, 
 	newDataset <- selectWls(newDataset, siWlSplit[1], siWlSplit[2])
 	newDataset <- performDpt_Pre(newDataset, ap)
 	newDataset <- performConSAvg(newDataset, siCsAvg)
-	newDataset <- performNoise(newDataset, siNoise)
+	newDataset <- performNoise(newDataset, siNoise, noiseFile)
 	newDataset <- performExcludeOutliers(newDataset, siExOut, ap)
 	newDataset <- performDpt_Post(newDataset, ap)
 	##
@@ -1131,7 +1135,7 @@ checkLoadNoiseFile <- function(header, maxNir, ap, md, noiseFile) {
 			}
 		}
 		##
-		assign("noiseFile", noiseFile, pos=parent.frame(n=1))
+		assign("noiseFile", noiseFile, pos=parent.frame(n=1)) # important for handing over the correct name of the noise file
 		return(noiDataset)
 	} else { #
 		return(NULL)
@@ -1189,6 +1193,10 @@ gdmm <- function(dataset, ap=getap(), noiseFile="def") {
 	createOutlierFlagList() # needed to collect the flags and flag-data from the first block to the second
 	ap <- ap_cleanZeroValuesCheckExistenceDefaults(ap, dataset, haveExc=TRUE)
 	md <- getMetadata(dataset)
+	mdF <- getmd() # the name of the noise file could be different(?)
+	if (md$meta$noiseFile != mdF$meta$noiseFile) {
+		md$meta$noiseFile <- mdF$meta$noiseFile # if different, take the value from the file
+	}
 	##
 	noiseDataset <- checkLoadNoiseFile(dataset$header, max(dataset$NIR), ap, md, noiseFile) # only if noise is added; if not returns NULL; is assigning noiseFile !!
 	noi_calculateNoiseDistribution(noiseDataset, noiseFile) # only if noise: calculate noise distribution, save as global variable in .ap2
@@ -1211,7 +1219,7 @@ gdmm <- function(dataset, ap=getap(), noiseFile="def") {
 	if (!.ap2$stn$allSilent) {cat("Generating Datasets...\n")}
 	for (i in 1:len) {
 		if (!.ap2$stn$allSilent) {cat(paste("   Working on #", i, " of ", len, "\n", sep=""))}
-		cubeList[[i]] <- processSingleRow_CPT(dataset, as.data.frame(classes[i,,drop=F]), as.data.frame(values[i,,drop=F]), wlSplit[[i]], csAvg[i], noise[i], exOut[i], ap) # the "as.data.frame" is necessary if we only have one column
+		cubeList[[i]] <- processSingleRow_CPT(dataset, as.data.frame(classes[i,,drop=F]), as.data.frame(values[i,,drop=F]), wlSplit[[i]], csAvg[i], noise[i], exOut[i], ap, noiseFile) # the "as.data.frame" is necessary if we only have one column
 	} # end for i
 	if (!.ap2$stn$allSilent) {cat("Done.\n")}
 	###

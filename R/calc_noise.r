@@ -1,6 +1,7 @@
 noi_calculateNoiseDistribution <- function(noiseDataset, noiseFileName) { # is called from gdmm; if no noise, the noiseDataset comes in as NULL
 	if (!is.null(noiseDataset)) { # so we want to do some noise
-		if (!exists("noiseDist", where=.ap2)) {
+		noiseDistName <- paste0(pv_noiseDistPrefix, noiseFileName)
+		if (!exists(noiseDistName, where=.ap2)) {
 			if (!.ap2$stn$allSilent) {cat(paste0("Calculating specific noise distribution from noise-data file '", noiseFileName, "'..."))}	
 			###
 			hullValues <- apply(noiseDataset$NIR, 2, range) # gives back a matrix with 2 rows and ncol(NIR) columns with the lower values in the first row
@@ -8,7 +9,7 @@ noi_calculateNoiseDistribution <- function(noiseDataset, noiseFileName) { # is c
 			wls <- getWavelengths(noiseDataset)
 			noiseDist <- list(hull=hullValues, wls=wls)
 			###
-			assign("noiseDist", noiseDist, pos=.ap2) # we could hand it over in the functions, but we require this to be done only once the first time
+			assign(noiseDistName, noiseDist, pos=.ap2) # we could hand it over in the functions, but we require this to be done only once the first time
 			if (!.ap2$stn$allSilent) {cat("ok\n")}
 		} # end if !exists noiseDist
 	} # end if !is.null noiseDataset
@@ -16,11 +17,12 @@ noi_calculateNoiseDistribution <- function(noiseDataset, noiseFileName) { # is c
 
 
 ### CORE ### is called in file: cube_generateDatasets.r
-noi_performNoise <- function(dataset)	{ # is working on a single dataset, i.e. within each single element of the cube
-	if (!exists("noiseDist", where=.ap2)) {
+noi_performNoise <- function(dataset, noiseFile)	{ # is working on a single dataset, i.e. within each single element of the cube
+	noiseDistName <- paste0(pv_noiseDistPrefix, noiseFile)
+	if (!exists(noiseDistName, where=.ap2)) {
 		stop("Sorry, an error with calculating the noise distribution appeared. Please restart the R-process.", call.=FALSE)
 	}
-	aa <- .ap2$noiseDist
+	aa <- get(noiseDistName, pos=.ap2)
 	noiseHull <- aa$hull
 	noiseWls <- aa$wls
 	dataWls <- getWavelengths(dataset)

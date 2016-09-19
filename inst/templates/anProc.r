@@ -23,8 +23,8 @@
 	spl.noise.raw <- TRUE					## if, should the noise-test be performed, the raw original data should be used as well. Recommended value = TRUE
 
 	spl.do.exOut <- FALSE					## if exclusion of outliers should be performed
-	spl.exOut.raw <- TRUE					## if, should exclusion of outliers be performed, the raw original data should be used as well. If set to TRUE, outliers will be flagged in the dataset in *ANY* case.
-	spl.exOut.var <- c("C_Group", "C_Water")## the variables (one or more) to be used for the grouping defining the scope for outlier detection.
+	spl.exOut.raw <- FALSE					## if, should exclusion of outliers be performed, the raw original data should be used as well. If set to TRUE, outliers will be flagged in the dataset in *ANY* case.
+	spl.exOut.var <- c("C_Group", "C_FooBar")## the variables (one or more) to be used for the grouping defining the scope for outlier detection.
 	#######
 	dpt.post <- NULL						## Character vector, which of the available modules of data pre-treatments to apply.  Leave at NULL for no additional data pre-treatment. For possible values see ?dpt_modules.
 	################################################################
