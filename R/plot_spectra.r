@@ -51,7 +51,13 @@ plotSpectra_inner <- function(dataset, singleColorBy, onMain, onSub, idString=""
 #		legPosition <- getCheckLegendPosition(as.numeric(matrix(rep(wls, ncol(t(dataset$NIR))), nrow=1)), as.numeric(matrix(t(dataset$NIR), nrow=1, byrow=TRUE)))
 		legPosition <- "topright"
 #		print(legPosition)
-		legend(legPosition, legend=legendTextExt, col=colorLegend, lty=1, bg=legBgCol)
+		Cex <- 0.8
+		nlc <- 1
+		if (length(legendTextExt) > 18) {
+			Cex <- 0.5
+			nlc <- 2
+		}
+		legend(legPosition, legend=legendTextExt, col=colorLegend, lty=1, bg=legBgCol, cex=Cex, ncol=nlc)
 	}
 } # EOF
 

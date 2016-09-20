@@ -1134,6 +1134,11 @@ checkLoadNoiseFile <- function(header, maxNir, ap, md, noiseFile) {
 				stop(paste0("It seems to be unlikely that the data in the R-data file '", noiseFile, "' in your AQUAP2SH-folder actually are noise-data, as their spectral maximum is exceeding ", accPer, "% of the spectral maximum in the actual dataset. \n(You can deactivate the checking of the plausibility of the noise-data file in the settings at the argument 'noi_forceNoisePlausibility'.)"), call.=FALSE)
 			}
 		}
+		## check noise mode
+		noiMode <- .ap2$stn$noi_addMode
+		if (!all(noiMode %in% pv_noiseAddModes) | length(noiMode) != 1) { # c("sd", "extrema")
+			stop(paste0("Please provide one of '", paste(pv_noiseAddModes, collapse="', '"), "' to the argument 'noi_addMode' in the settings file."), call.=FALSE)
+		}
 		##
 		assign("noiseFile", noiseFile, pos=parent.frame(n=1)) # important for handing over the correct name of the noise file
 		return(noiDataset)

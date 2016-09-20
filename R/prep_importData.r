@@ -580,9 +580,9 @@ flagOutliers_allScope <- function(NIR, detectOutliers) {
 
 checkDatasetVersion <- function(dataset, dsName) {
 	if (.ap2$stn$gen_versionCheckDataset) {
-			if (dataset@version != pv_versionDataset) {
-				stop(paste("The dataset '", dsName, "' was created with an older version of package 'aquap2' and so has a different structure than what is required now.\nPlease re-import the raw-data.\n(You can switch off the checking of the dataset-version in the settings-file at the parameter 'gen_versionCheckDataset'.)", sep=""), call.=FALSE)
-			}
+		if (dataset@version != pv_versionDataset) {
+			stop(paste("The dataset '", dsName, "' was created with an older version of package 'aquap2' and so has a different structure than what is required now.\nPlease re-import the raw-data.\n(You can switch off the checking of the dataset-version in the settings-file at the parameter 'gen_versionCheckDataset'.)", sep=""), call.=FALSE)
+		}
 	}
 } # EOF
 

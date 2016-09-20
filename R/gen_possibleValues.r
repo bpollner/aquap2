@@ -21,6 +21,9 @@ pv_plsr_crossvalidation <- c("CV", "LOO")
 pv_plsr_what <- c("both", "errors", "regression")
 
 
+## Noise
+pv_noiseAddModes <- c("sdNorm", "sdUnif", "extrema")
+
 
 ## Aquagram plotting
 pv_fsa_fss <- c("both", "only")

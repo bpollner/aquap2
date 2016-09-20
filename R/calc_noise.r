@@ -2,12 +2,25 @@ noi_calculateNoiseDistribution <- function(noiseDataset, noiseFileName) { # is c
 	if (!is.null(noiseDataset)) { # so we want to do some noise
 		noiseDistName <- paste0(pv_noiseDistPrefix, noiseFileName)
 		if (!exists(noiseDistName, where=.ap2)) {
-			if (!.ap2$stn$allSilent) {cat(paste0("Calculating specific noise distribution from noise-data file '", noiseFileName, "'..."))}	
+			noiMode <- .ap2$stn$noi_addMode 		## pv_noiseAddModes <- c("sdNorm", "sdUnif", "extrema")
+			if (!.ap2$stn$allSilent) {cat(paste0("Calculating specific noise distribution from noise-data file '", noiseFileName, "' with ",noiMode , " method..."))}	
+			aa <- pv_noiseAddModes
+			if (noiMode == aa[1] | noiMode == aa[2]) { # so we want the sd method
+				meanV <- apply(noiseDataset$NIR, 2, mean)
+				sdV <- apply(noiseDataset$NIR, 2, sd)
+				lower <- meanV - sdV
+				higher <- meanV + sdV
+				hullValues <- matrix(c(lower, higher), nrow=2, byrow=TRUE)
+				colnames(hullValues) <- colnames(noiseDataset$NIR)
+				names(meanV) <- names(sdV) <- NULL
+			} else {	# so it must be the extrama method
+				hullValues <- apply(noiseDataset$NIR, 2, range) # gives back a matrix with 2 rows and ncol(NIR) columns with the lower values in the first row
+				meanV <- sdV <- NULL
+			} # end if
 			###
-			hullValues <- apply(noiseDataset$NIR, 2, range) # gives back a matrix with 2 rows and ncol(NIR) columns with the lower values in the first row
 			rownames(hullValues) <- c("lower", "higher")
 			wls <- getWavelengths(noiseDataset)
-			noiseDist <- list(hull=hullValues, wls=wls)
+			noiseDist <- list(hull=hullValues, meanV=meanV, sdV=sdV, wls=wls)
 			###
 			assign(noiseDistName, noiseDist, pos=.ap2) # we could hand it over in the functions, but we require this to be done only once the first time
 			if (!.ap2$stn$allSilent) {cat("ok\n")}
@@ -22,23 +35,54 @@ noi_performNoise <- function(dataset, noiseFile)	{ # is working on a single data
 	if (!exists(noiseDistName, where=.ap2)) {
 		stop("Sorry, an error with calculating the noise distribution appeared. Please restart the R-process.", call.=FALSE)
 	}
-	aa <- get(noiseDistName, pos=.ap2)
-	noiseHull <- aa$hull
-	noiseWls <- aa$wls
+	nodi <- get(noiseDistName, pos=.ap2) ##### get the noise distribution ####
+	noiseHull <- nodi$hull
+	noiseWls <- nodi$wls
 	dataWls <- getWavelengths(dataset)
 	if (!all(dataWls %in% noiseWls)) { # noiseWls is always ALL of them
-		stop(paste0("The wavelengths of the dataset do not match the available wavelengths in the noise-data. \nPlease check applicability of the noise-data."), call.=FALSE)
+		stop(paste0("\nThe wavelengths of the dataset do not match the available wavelengths in the noise-data. \nPlease check applicability of the noise-data."), call.=FALSE)
 	}
 	selInd <- which(noiseWls %in% dataWls) # probably we need to cut down the noise-distribution data to match the wavelengths in the current dataset
 	noiseHull <- noiseHull[, selInd]
-	#
+	##
+	noiMode <- .ap2$stn$noi_addMode 		## pv_noiseAddModes <- c("sdNorm", "sdUnif", "extrema")
 	nr <- nrow(dataset$NIR)
 	nc <- ncol(dataset$NIR)
 	noiseMat <- matrix(NA, nr, nc)
-	for (i in 1: nrow(noiseMat)) {	
-		noiseMat[i,] <-apply(noiseHull, 2, function(x) x[sample(c(1,2),1)]) # select from columns from noiseHull and fill into noise matrix
+	halfOnly <- .ap2$stn$noi_sdNormHalfOnly
+	if (!is.logical(halfOnly)) { halfOnly <- TRUE} # some security
+	if (halfOnly) {
+		div <- 2 
+	} else {
+		div <- 1
 	}
-#	print("----"); 	print(noiseHull[,1:5]); print(noiseMat[1:50, 1:5]) ; wait()
+	#
+	if (noiMode == pv_noiseAddModes[1] | noiMode == pv_noiseAddModes[2]) { # ## c("sdNorm", "sdUnif", "extrema") ## so we want the sd method	
+		sampSize <- .ap2$stn$noi_sampleSize
+		meanV <- matrix(nodi$meanV[selInd], nrow=1) # possibly have to cut them down
+		sdV <- matrix(nodi$sdV[selInd], nrow=1)
+		noiseCompound <- rbind(noiseHull, meanV, sdV) ### a matrix with: 1st row the lower hull, 2nd the higher hull, 3rd the mean, 4th the sd ####
+		if (noiMode == pv_noiseAddModes[1]) { # the sdNorm
+			for (i in 1: nrow(noiseMat)) {
+				noiseMat[i,] <- apply(noiseCompound, 2, function(x) 
+					pool <- rnorm(sampSize, mean=x[3], sd=x[4]/div)
+					ind <- which(pool < x[1] | pool > x[2] )
+					pool <- pool[-ind] # kick out those that are beyond the maxima of our noise-data
+					sample(pool, 1)
+				#	sample(rnorm(sampSize, mean=x[3], sd=x[4]/div), 1) 
+				)  # !!!  only maybe use half the sd here !!! (because otherwise we get too many extrema)
+			}
+		} else { # the sdUnif
+			for (i in 1: nrow(noiseMat)) {
+				noiseMat[i,] <- apply(noiseCompound, 2, function(x) sample(runif(sampSize, min=x[1], max=x[2]), 1) ) 
+			}		
+		} # end ifelse
+	} else { # so it must be the extrema method
+		for (i in 1: nrow(noiseMat)) {	
+			noiseMat[i,] <-apply(noiseHull, 2, function(x) x[sample(c(1,2),1)]) # select from columns from noiseHull and fill into noise matrix
+		}	
+	} # end if
+	print("----"); 	print(noiseHull[,1:5]); print(noiseMat[1:50, 1:5]) ; wait()
 	dataset$NIR <- dataset$NIR + noiseMat
 	return(dataset)
 } # EOF
@@ -60,7 +104,7 @@ noi_performNoise <- function(dataset, noiseFile)	{ # is working on a single data
 #' # R-data folder, from where you take it and move it into your 
 #' # AQUAP2SH folder
 #' }
-#' @seealso \code{\link{noise_procedures}}, \code{\link{genFolderStr}}
+#' @seealso \code{\link{genTempCalibExp}}, \code{\link{genFolderStr}}
 #' @family Helper Functions
 #' @family Noise procedures
 #' @export
@@ -82,7 +126,7 @@ genNoiseRecExp <- function() {
 	txt[grep("columnNamesL2", txt)] <- paste0("\tcolumnNamesL2 <- \"", clPref, deleteCol,"\"")
 	txt[grep("L1  <-", txt)] <- "\tL1 <- list(list(\"\"))"
 	txt[grep("L2  <-", txt)] <- "\tL2 <- list(list(\"\"))"
-	txt[grep("Repls", txt)] <- "\tRepls <- 12"
+	txt[grep("Repls", txt)] <- "\tRepls <- 24"
 	txt[grep("Group", txt)] <- "\tGroup <- \"noise\""
 	con <- file(pathMd, open="wt")
 	writeLines(txt, con)

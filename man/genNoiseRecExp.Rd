@@ -27,7 +27,7 @@ gfd <- gfd() # imports noise raw-data and saves noise-data file in the
 }
 }
 \seealso{
-\code{\link{noise_procedures}}, \code{\link{genFolderStr}}
+\code{\link{genTempCalibExp}}, \code{\link{genFolderStr}}
 
 Other Helper Functions: \code{\link{genFolderStr}},
   \code{\link{genTempCalibExp}}, \code{\link{getcd}},
