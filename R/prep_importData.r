@@ -914,7 +914,7 @@ check_sl_existence <- function(filename, ext) {
 	fn <- paste(filename, ext, sep="")
 	a <- paste(slInFolder, "/", fn, sep="")
 	if (!file.exists(a)) {
-		stop(paste("The file \"", fn, "\" does not seem to exist in \"", slInFolder, "\".", sep=""), call.=FALSE)
+		stop(paste("The sample-list file \"", fn, "\" does not seem to exist in \"", slInFolder, "\".", sep=""), call.=FALSE)
 	}	
 } # EOF
 

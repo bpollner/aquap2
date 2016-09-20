@@ -43,6 +43,7 @@ others
 XXX the Aquagram paper XXX
 }
 \seealso{
-\code{\link{calc_aqg_args}}
+\code{\link{calc_aqg_args}}, for recording your own temperature 
+calibration spectra: \code{\link{genTempCalibExp}}
 }
 

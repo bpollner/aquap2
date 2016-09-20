@@ -26,9 +26,9 @@ noise to each single wavelength in the individual dataset within the cube.
 obtain a wavelength-specific noise distribution consists of the following 
 steps:
 \describe{
-\item{Record noise spectra}{Use the function XXX to generate a folder structure
-for an experiment, then record some noise-spectra, for what the following 
-procedure is suggested: 
+\item{Record noise spectra}{Use the function \code{\link{genNoiseRecExp}} to 
+generate a folder structure for an experiment, then record some noise-spectra, 
+for what the following procedure is suggested: 
 XXX. 
 Finally, use \code{\link{gfd}} to import the noise-data and create the R-data 
 file (in the folder 'R-data' in the working directory of the experiment).}
@@ -50,15 +50,15 @@ is a difference between the datasets without and with added noise.}
 }
 
 \section{Noise distribution and adding noise -- the math}{
- The noise distribution is 
-calculated automatically once should it be required, and stored in the object
-\code{noiseDist} in the environment \code{.ap2}; (look at it via 
-\code{str(.ap2$noiseDist)}). It simply represents the range of absorbance 
-values within each single wavelength over all observations of the noise dataset.
-If noise should be added now to a dataset, for each single observation and 
-there for each single wavelength a random process is selecting one of the two 
-values from the corresponding wavelength in the noise distribution to be added 
-to the original NIR data. In other words, for each single wavelength the 
+ The noise distribution 
+is calculated automatically once should it be required, and stored in an object 
+where the name is starting with \code{nd_} (for 'noise distribution') in the 
+environment \code{.ap2}; (\code{ls(.ap2)}). It simply represents the range of 
+absorbance values within each single wavelength over all observations of the 
+noise dataset. If noise should be added now to a dataset, for each single 
+observation and there for each single wavelength a random process is selecting one 
+of the two values from the corresponding wavelength in the noise distribution to 
+be added to the original NIR data. In other words, for each single wavelength the 
 original NIR-data absorbance values get increased or reduced by the maximum 
 of (positive or negative) noise occuring at this specific wavelength.
 }

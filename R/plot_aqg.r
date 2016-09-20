@@ -524,7 +524,8 @@ NULL
 #' \item \code{aucs.dce-diff}: same as above + one group subtracted from all the
 #' others
 #' }
-#' @seealso \code{\link{calc_aqg_args}}
+#' @seealso \code{\link{calc_aqg_args}}, for recording your own temperature 
+#' calibration spectra: \code{\link{genTempCalibExp}}
 #' @references XXX the Aquagram paper XXX
 #' @name calc_aqg_modes
 NULL

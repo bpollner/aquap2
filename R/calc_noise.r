@@ -87,9 +87,93 @@ genNoiseRecExp <- function() {
 	con <- file(pathMd, open="wt")
 	writeLines(txt, con)
 	close(con)
-#	esl()
 	return(invisible(NULL))
 } # EOF
+
+
+mod_md_txt <- function(where, fill, target) {
+	target[grep(where, target)] <- paste0("\t", where, " <- \"", fill, "\"")
+	return(target)
+} # EOF
+
+mod_md_logic <- function(where, logVal, target) {
+	target[grep(where, target)] <- paste0("\t", where, " <- ", logVal)
+	return(target)
+} # EOF
+
+mod_md_num <- function(where, numVal, target) {
+	target[grep(where, target)] <- paste0("\t", where, " <- ", numVal)
+	return(target)
+} # EOF
+
+#' @title Generate temperature recording experiment
+#' @description Generate the folder structure for a new experiment and populate 
+#' it with the metadata suggested for recording then the temperature 
+#' calibration-spectra used e.g. in the aquagram (see argument \code{aqg.TCalib} 
+#' and \code{aqg.Texp} in \code{\link{calc_aqg_args}}).
+#' @details This generates the folder structure for a standard experiment and is 
+#' adapting the metadata to record spectra at various temperatures in each 3 
+#' consecutive scans. For a possible workflow please see examples.
+#' @param Tcenter Numeric length one. The temperature at which usually the 
+#' measurements are performed. The final temperature will range from 
+#' Tcenter-Tdelta to Tcenter+Tdelta, in steps given by argument 'stepsBy'. 
+#' @param Tdelta Numeric length one, defaults to 5. The temperature range below 
+#' and above 'Tcenter'.
+#' @param stepBy Numeric length one, defaults to 1. The temperature step between 
+#' each single temperature in the range from Tcenter-Tdelta to Tcenter+Tdelta.
+#' @param repls Numeric length one. How many replicates of each single temperature 
+#' to record. Defaults to 4.
+#' @section Important: When exporting the sample list via \code{\link{esl}}, make 
+#' sure to export it \strong{non randomized} - please see examples.
+#' @examples
+#' \dontrun{
+#' genTempCalibExp(Tcenter=30) # generate the folder structure in the current 
+#' working directory
+#' esl(rnd=FALSE) # export a *non* randomized sample list
+#' #### now record the temperature-spectra #### (move sample list to folder 'sl_in')
+#' gfd <- gfd() # imports temperature raw-data and saves an R-data file in the 
+#' # R-data folder, from where you take it and move it into your 
+#' # AQUAP2SH folder
+#' }
+#' @seealso \code{\link{genFolderStr}}, \code{\link{genNoiseRecExp}}
+#' @family Helper Functions
+#' @family Temperature calibration procedures
+#' @export
+genTempCalibExp <- function(Tcenter=NULL, Tdelta=5, stepBy=1, repls=4) {
+	if(is.null(Tcenter)) {
+		stop("Please provide a numeric value for 'Tcenter'.", call.=FALSE)
+	}
+	genFolderStr()
+	fn_metadata <- .ap2$stn$fn_metadata # folder name for metadata
+	fn_mDataDefFile <- .ap2$stn$fn_mDataDefFile
+	deleteCol <- .ap2$stn$p_deleteCol
+	clPref <- .ap2$stn$p_ClassVarPref
+	yPref <- .ap2$stn$p_yVarPref
+	#
+	temps <- as.character(Tcenter + seq(-Tdelta, Tdelta, by=stepBy))
+	temps <- rep(temps, each=repls)
+	temps <- paste(temps, collapse="\",\"")
+	#
+	pathMd <- paste(fn_metadata, fn_mDataDefFile, sep="/")
+	con <- file(pathMd, open="rt")
+	txt <- readLines(con)
+	close(con)
+	txt <- mod_md_txt("expName", "TemperatureCalibration", txt)
+	txt <- mod_md_logic("TimePoints", FALSE, txt)
+	txt <- mod_md_logic("spacing", FALSE, txt)
+	txt <- mod_md_txt("columnNamesL1", paste0(yPref, "waterTemp"), txt)
+	txt <- mod_md_txt("columnNamesL2", paste0(clPref, "DELETE"), txt)
+	txt[grep("L1  <-", txt)] <- paste0("\tL1  <- list(list(\"", temps, "\"))")
+	txt[grep("L2  <-", txt)] <- paste0("\tL2  <- list(list(\"", temps, "\"))")
+	txt <- mod_md_num("Repls", 1, txt)
+	txt <- mod_md_num("nrConScans", 3, txt)
+	txt <- mod_md_txt("Group", "no", txt)
+	con <- file(pathMd, open="wt")
+	writeLines(txt, con)
+	close(con)
+	return(invisible(NULL))
+} # EOF
+
 
 
 #' @title Record / add noise
@@ -111,9 +195,9 @@ genNoiseRecExp <- function() {
 #' obtain a wavelength-specific noise distribution consists of the following 
 #' steps:
 #' \describe{
-#' \item{Record noise spectra}{Use the function XXX to generate a folder structure
-#' for an experiment, then record some noise-spectra, for what the following 
-#' procedure is suggested: 
+#' \item{Record noise spectra}{Use the function \code{\link{genNoiseRecExp}} to 
+#' generate a folder structure for an experiment, then record some noise-spectra, 
+#' for what the following procedure is suggested: 
 #' XXX. 
 #' Finally, use \code{\link{gfd}} to import the noise-data and create the R-data 
 #' file (in the folder 'R-data' in the working directory of the experiment).}
@@ -132,15 +216,15 @@ genNoiseRecExp <- function() {
 #' \item{Evaluate difference}{Use any of the provided methods to check if there 
 #' is a difference between the datasets without and with added noise.}
 #' }
-#' @section Noise distribution and adding noise -- the math: The noise distribution is 
-#' calculated automatically once should it be required, and stored in the object
-#' \code{noiseDist} in the environment \code{.ap2}; (look at it via 
-#' \code{str(.ap2$noiseDist)}). It simply represents the range of absorbance 
-#' values within each single wavelength over all observations of the noise dataset.
-#' If noise should be added now to a dataset, for each single observation and 
-#' there for each single wavelength a random process is selecting one of the two 
-#' values from the corresponding wavelength in the noise distribution to be added 
-#' to the original NIR data. In other words, for each single wavelength the 
+#' @section Noise distribution and adding noise -- the math: The noise distribution 
+#' is calculated automatically once should it be required, and stored in an object 
+#' where the name is starting with \code{nd_} (for 'noise distribution') in the 
+#' environment \code{.ap2}; (\code{ls(.ap2)}). It simply represents the range of 
+#' absorbance values within each single wavelength over all observations of the 
+#' noise dataset. If noise should be added now to a dataset, for each single 
+#' observation and there for each single wavelength a random process is selecting one 
+#' of the two values from the corresponding wavelength in the noise distribution to 
+#' be added to the original NIR data. In other words, for each single wavelength the 
 #' original NIR-data absorbance values get increased or reduced by the maximum 
 #' of (positive or negative) noise occuring at this specific wavelength.
 #' @seealso \code{\link{gdmm}}, \code{\link{settings_file}}, 

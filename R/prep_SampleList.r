@@ -91,13 +91,16 @@ randomizeSampleList <- function(sampleList) {
 	a <- DF[order(rnd),]
 	out <- a[- ncol(DF)]
 	rownames(out) <- 1:nrow(out)
-	out ## returns now a data frame !!?
+	return(out) ## returns now a data frame !!?
 } # EOF
 
 ###
-createRandomizedSampleList <- function(expClasses) { ########### gives back a data frame
-	a <- createOrderedSampleList(expClasses)
-	out <- randomizeSampleList(a)
+createRandomizedSampleList <- function(expClasses, rnd) { ########### gives back a data frame
+	out <- createOrderedSampleList(expClasses)
+	if (rnd) {
+		out <- randomizeSampleList(out)	
+	}
+	return(out)
 } # EOF
 ###
 
@@ -151,10 +154,10 @@ insertTRH <- function(sampleList) { # insert a column for Temperatur and RH (to 
 	out <- cbind(sampleList, DF)
 } # EOF
 
-createSingleTimePointSampleList <- function(expMetaData) {
+createSingleTimePointSampleList <- function(expMetaData, rnd) {
 	delChar <- .ap2$stn$p_deleteCol
 	spacing <- expMetaData$postProc$spacing
-	rndList <- createRandomizedSampleList(expMetaData$expClasses) 
+	rndList <- createRandomizedSampleList(expMetaData$expClasses, rnd) 
 	envList <- insertEnvControls(rndList, expMetaData$postProc) 
 #	noSplitList <- insertNoSplit(envList, expMetaData$postProc)	
 	TRHList <- insertTRH(envList)
@@ -170,11 +173,11 @@ cstsl <- function(expMetaData) {
 	out <- createSingleTimePointSampleList(expMetaData)
 } # EOF
 
-makeTimeLabelSampleList <- function(expMetaData) {
+makeTimeLabelSampleList <- function(expMetaData, rnd) {
 	timeLabels <- expMetaData$expClasses$timeLabels
 	out <- NULL
 	for (i in 1: length(timeLabels)) {
-		singleTimeList <- createSingleTimePointSampleList(expMetaData)
+		singleTimeList <- createSingleTimePointSampleList(expMetaData, rnd)
 		timeCol <- data.frame(matrix(timeLabels[[i]], nrow=nrow(singleTimeList)))
 		colnames(timeCol) <- expMetaData$meta$coluNames[[1]]
 		fuseSingleTime <- cbind(timeCol, singleTimeList)
@@ -217,13 +220,17 @@ esl_checkDefaults <- function(form) {
 #' delimited text file, 'xls' to export as an Excel file, or if left at the 
 #' default 'def' is reading in the value from the settings.r file (parameter 
 #' \code{p_sampleListExportFormat}).
+#' @param rnd Logical, if the sample list should be randomized or not, defaults 
+#' to TRUE. (Having a non-randomized sample list can be interesting to check the 
+#' correctness of the sample list when designing the experiment, i.e. when 
+#' providing the values for the argument 'L1' and 'L2' in the metadata file.)
 #' @param showFirstRows Logical. If the first rows of the sample list should be 
 #' displayed.
 #' @param timeEstimate Logical. If time estimates should be displayed.
 #' @section Note: You can provide your own values for how many seconds you 
 #' need for a single scan etc. at the bottom of the settings.r file to make the 
 #' time estimate valid for you.
-#' @return An (invisible) data frame with a randomized sample list resp. this 
+#' @return An (invisible) data frame with a (randomized) sample list resp. this 
 #' list saved to  a file.
 #' @family Import-Export
 #' @examples
@@ -239,7 +246,7 @@ esl_checkDefaults <- function(form) {
 #' }
 #' @family Core functions
 #' @export exportSampleList
-exportSampleList <- function(md=getmd(), form="def", showFirstRows=TRUE, timeEstimate=FALSE) {
+exportSampleList <- function(md=getmd(), form="def", rnd=TRUE, showFirstRows=TRUE, timeEstimate=FALSE) {
 	autoUpS()
 	esl_checkDefaults(form)
 	fn_sl <- .ap2$stn$fn_sampleLists
@@ -253,7 +260,7 @@ exportSampleList <- function(md=getmd(), form="def", showFirstRows=TRUE, timeEst
 		totalTime <- scanSeconds + handlingTime
 	##
 	if(!.ap2$stn$allSilent) {cat("Creating sample list...\n")}
-	a <- makeTimeLabelSampleList(md)
+	a <- makeTimeLabelSampleList(md, rnd)
 	b <- insertEnumeration(a)
 	##
 		totalTimeInHours <- round((nrow(b)* totalTime) / (60*60),1)
@@ -298,8 +305,8 @@ exportSampleList <- function(md=getmd(), form="def", showFirstRows=TRUE, timeEst
 
 #' @rdname exportSampleList
 #' @export
-esl <- function(md=getmd(), form="def", showFirstRows=TRUE, timeEstimate=FALSE) {
-	out <- exportSampleList(md, form, showFirstRows, timeEstimate)
+esl <- function(md=getmd(), form="def", rnd=TRUE, showFirstRows=TRUE, timeEstimate=FALSE) {
+	out <- exportSampleList(md, form, rnd, showFirstRows, timeEstimate)
 } # EOF
 ####### / Master ################################################
 ############################################################################################

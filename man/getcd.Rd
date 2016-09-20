@@ -41,6 +41,7 @@ Other Extract Elements: \code{\link{getHeader}},
 
 Other Helper Functions: \code{\link{genFolderStr}},
   \code{\link{genNoiseRecExp}},
+  \code{\link{genTempCalibExp}},
   \code{\link{instAquap2Examples}},
   \code{\link{printStdColnames}}, \code{\link{saveAQdata}},
   \code{\link{updateAquap}}, \code{\link{updateSettings}}
