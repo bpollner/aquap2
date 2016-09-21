@@ -355,7 +355,11 @@ genTempCalibExp <- function(Tcenter=NULL, Tdelta=5, stepBy=1, repls=4) {
 #' @title Record / add noise
 #' @description Record a special noise-data file on your spectroscopy device, and 
 #' use this file to calculate data that can then be used to specifically add 
-#' 'custom' noise to your datasets.
+#' 'custom' noise to your datasets. Alternatively, if you do not want to record 
+#' a specific noise file, you can also add static noise (with mean=0) to your 
+#' datasets. Use the parameter \code{noi_addMode} in the settings file to choose 
+#' from one of the modes of adding noise, please see section 'Modes for noise 
+#' calculation' for details.
 #' @details The noise data file is an R-data file generated / imported via the 
 #' \code{\link{gfd}}) function, but containing only noise-spectra recorded 
 #' following the recommendations below. This R-data file (where the factory-default 
@@ -365,14 +369,18 @@ genTempCalibExp <- function(Tcenter=NULL, Tdelta=5, stepBy=1, repls=4) {
 #' datasets or not (parameter \code{spl.do.noise} in the analysis procedure resp. 
 #' your input. If, and only if, you choose to add noise, first (and only once per 
 #' R-session) the noise R-data file is read in and used to calculate the specific 
-#' noise distribution. This noise distribution is then used to specifically add 
-#' noise to each single wavelength in the individual dataset within the cube.
+#' noise distribution. It is stored in an object where the name is starting with 
+#' \code{nd_} (for 'noise distribution') in the environment \code{.ap2}; 
+#' (\code{ls(.ap2)}). This noise distribution is then used to specifically add, 
+#' according to the selected mode (see section 'Modes for noise calculation' 
+#' below), noise to each single wavelength in each single observation in the 
+#' individual dataset within the cube.
 #' @section Procedure: The procedure to work with noise-data files and use them to 
 #' obtain a wavelength-specific noise distribution consists of the following 
 #' steps:
 #' \describe{
 #' \item{Record noise spectra}{Use the function \code{\link{genNoiseRecExp}} to 
-#' generate a folder structure for an experiment, then record some noise-spectra, 
+#' generate a folder structure for an experiment, then record the noise-spectra, 
 #' for what the following procedure is suggested: 
 #' XXX. 
 #' Finally, use \code{\link{gfd}} to import the noise-data and create the R-data 
@@ -392,17 +400,7 @@ genTempCalibExp <- function(Tcenter=NULL, Tdelta=5, stepBy=1, repls=4) {
 #' \item{Evaluate difference}{Use any of the provided methods to check if there 
 #' is a difference between the datasets without and with added noise.}
 #' }
-#' @section Noise distribution and adding noise -- the math: The noise distribution 
-#' is calculated automatically once should it be required, and stored in an object 
-#' where the name is starting with \code{nd_} (for 'noise distribution') in the 
-#' environment \code{.ap2}; (\code{ls(.ap2)}). It simply represents the range of 
-#' absorbance values within each single wavelength over all observations of the 
-#' noise dataset. If noise should be added now to a dataset, for each single 
-#' observation and there for each single wavelength a random process is selecting one 
-#' of the two values from the corresponding wavelength in the noise distribution to 
-#' be added to the original NIR data. In other words, for each single wavelength the 
-#' original NIR-data absorbance values get increased or reduced by the maximum 
-#' of (positive or negative) noise occuring at this specific wavelength.
+#' @template mr_noiseModes
 #' @seealso \code{\link{gdmm}}, \code{\link{settings_file}}, 
 #' \code{\link{genFolderStr}}
 #' @family Noise procedures
