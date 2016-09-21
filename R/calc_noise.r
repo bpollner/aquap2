@@ -78,13 +78,15 @@ test_plotSDValues <- function(doTest=FALSE, nodi) {
 } # EOF
 
 test_plotSinglePool <- function(doTest=FALSE, swl, pool, nc, out) {
-	if (doTest & .ap2$.poolCnt < nc) {
-		n <- length(pool)
-		x <- rep(swl, n)
-		y <- pool
-		points(x, y, col="gray")
-	#	points(swl, out, col="red", pch=3)
-		assign(".poolCnt", .ap2$.poolCnt+1, pos=.ap2)
+	if (doTest) {
+		if (.ap2$.poolCnt < nc) {
+			n <- length(pool)
+			x <- rep(swl, n)
+			y <- pool
+			points(x, y, col="gray")
+		#	points(swl, out, col="red", pch=3)
+			assign(".poolCnt", .ap2$.poolCnt+1, pos=.ap2)
+		}
 	}
 } # EOF
 
