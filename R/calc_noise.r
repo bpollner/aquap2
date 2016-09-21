@@ -1,8 +1,9 @@
 noi_calculateNoiseDistribution <- function(noiseDataset, noiseFileName) { # is called from gdmm; if no noise, the noiseDataset comes in as NULL
-	if (!is.null(noiseDataset)) { # so we want to do some noise
+	# noiseDataset also comes in as NULL when we are having the static noise mode, is checked in the checking function when calling gdmm
+	if (!is.null(noiseDataset)) { # so we want to do some noise, and do not have the static mode
 		noiseDistName <- paste0(pv_noiseDistPrefix, noiseFileName)
 		if (!exists(noiseDistName, where=.ap2)) {
-			noiMode <- .ap2$stn$noi_addMode 		## pv_noiseAddModes <- c("sdNorm", "sdUnif", "extrema")
+			noiMode <- .ap2$stn$noi_addMode 		## pv_noiseAddModes <- c("sdNorm", "sdUnif", "extrema", "static")
 			if (!.ap2$stn$allSilent) {cat(paste0("Calculating specific noise distribution from noise-data file '", noiseFileName, "' with ",noiMode , " method..."))}	
 			aa <- pv_noiseAddModes
 			if (noiMode == aa[1] | noiMode == aa[2]) { # so we want the sd method
@@ -10,17 +11,19 @@ noi_calculateNoiseDistribution <- function(noiseDataset, noiseFileName) { # is c
 				sdV <- apply(noiseDataset$NIR, 2, sd)
 				lower <- meanV - sdV
 				higher <- meanV + sdV
-				hullValues <- matrix(c(lower, higher), nrow=2, byrow=TRUE)
-				colnames(hullValues) <- colnames(noiseDataset$NIR)
+				confInt <- matrix(c(lower, higher), nrow=2, byrow=TRUE)
+				colnames(confInt) <- colnames(noiseDataset$NIR)
+				rownames(confInt) <- c("lower", "higher")
+				hullValues <- apply(noiseDataset$NIR, 2, range) # gives back a matrix with 2 rows and ncol(NIR) columns with the lower values in the first row
 				names(meanV) <- names(sdV) <- NULL
 			} else {	# so it must be the extrama method
 				hullValues <- apply(noiseDataset$NIR, 2, range) # gives back a matrix with 2 rows and ncol(NIR) columns with the lower values in the first row
-				meanV <- sdV <- NULL
+				meanV <- sdV <- confInt <-  NULL
 			} # end if
 			###
 			rownames(hullValues) <- c("lower", "higher")
 			wls <- getWavelengths(noiseDataset)
-			noiseDist <- list(hull=hullValues, meanV=meanV, sdV=sdV, wls=wls)
+			noiseDist <- list(hull=hullValues, confInt=confInt, meanV=meanV, sdV=sdV, wls=wls)
 			###
 			assign(noiseDistName, noiseDist, pos=.ap2) # we could hand it over in the functions, but we require this to be done only once the first time
 			if (!.ap2$stn$allSilent) {cat("ok\n")}
@@ -28,9 +31,119 @@ noi_calculateNoiseDistribution <- function(noiseDataset, noiseFileName) { # is c
 	} # end if !is.null noiseDataset
 } # EOF
 
+test_plotNoiseData <- function(doTest=FALSE, noiseFile) {
+	if (doTest) {
+		C_outlier_all <- NULL
+		ss <- .ap2$stn$noi_sampleSize
+		modus <- .ap2$stn$noi_addMode
+		pathSH <- Sys.getenv("AQUAP2SH")
+		noisePath <- paste(pathSH, noiseFile, sep="/")
+		noiDataset <- eval(parse(text=load(noisePath)))
+		noiDataset@metadata$meta$expName <- paste0("Noise Data (", noiseFile, ")")
+		if (modus == "sdNorm") {
+			halfSdAdd <- paste0("halfSD = ", .ap2$stn$noi_sdNormHalfOnly)
+		} else {
+			halfSdAdd <- ""
+		}
+		if (modus == "extrema") {
+			ssAdd <- ""
+		} else {
+			ssAdd <- paste0("sample size = ", ss, ", ")
+		}
+		subT <- paste0("mode = ", modus, ssAdd, halfSdAdd)
+#		print(subT)
+		plot_spectra(ssc(noiDataset, C_outlier_all == FALSE), pg.where="", pg.sub="outliers excluded ")
+		mtext(subT, side=1, line=2)
+		assign(".poolCnt", 0, pos=.ap2) # for testing the pool data
+		#
+	}
+} # EOF
+
+test_plotMaxima <- function(doTest=FALSE, wls, noiseHull) {
+	if (doTest) {
+		lines(wls, noiseHull[1,], col="red", lty=1)
+		lines(wls, noiseHull[2,], col="blue", lty=1)
+	}
+} # EOF
+
+test_plotSDValues <- function(doTest=FALSE, nodi) {
+	if (doTest) {
+		wls <- nodi$wls
+		meanV <- nodi$meanV
+		confInt <- nodi$confInt
+		lines(wls, confInt[1,], col="purple", lty=1, lwd=2)
+		lines(wls, confInt[2,], col="purple", lty=1, lwd=2)
+		lines(wls, meanV, col="green", lty=1, lwd=2)
+	}
+} # EOF
+
+test_plotSinglePool <- function(doTest=FALSE, swl, pool, nc, out) {
+	if (doTest & .ap2$.poolCnt < nc) {
+		n <- length(pool)
+		x <- rep(swl, n)
+		y <- pool
+		points(x, y, col="gray")
+	#	points(swl, out, col="red", pch=3)
+		assign(".poolCnt", .ap2$.poolCnt+1, pos=.ap2)
+	}
+} # EOF
+
+test_plotSingleResult <- function(doTest=FALSE, wls, siRow) {
+	if (doTest) {
+		lines(wls, siRow, col="red", lwd=0.7)
+	}
+} # EOF
+
+test_plotSingleResult_static <- function(doTest=FALSE, wls, siRow) {
+	if (doTest) {
+		statSd <- .ap2$stn$noi_staticValue
+		lines(wls, siRow, col="red", lwd=0.7)
+		abline(h=0, col="black", lwd=0.7)
+		abline(h=c(-statSd, statSd), col="black", lty=2, lwd=0.7)
+	}
+} # EOF
+
+test_plotStaticNoise <- function(doTest=FALSE, nc) {
+	if (doTest) {
+		statSd <- .ap2$stn$noi_staticValue
+		ss <- .ap2$stn$noi_sampleSize
+		ti <- 3
+		subT <- paste0("sample size = ", ss, ", static sd = ", statSd)
+		plot(0, xlim=c(0, nc), ylim=c(-(ti*statSd), ti*statSd), ylab="random noise value", col="white", sub=subT, main="Static Noise")
+		assign(".poolCnt", 0, pos=.ap2) # for testing the pool data
+	}
+}
 
 ### CORE ### is called in file: cube_generateDatasets.r
 noi_performNoise <- function(dataset, noiseFile)	{ # is working on a single dataset, i.e. within each single element of the cube
+	noiMode <- .ap2$stn$noi_addMode 
+	sampSize <- .ap2$stn$noi_sampleSize
+	pvnad <- pv_noiseAddModes  # ## c("sdNorm", "sdUnif", "extrema", "static")
+	nr <- nrow(dataset$NIR)
+	nc <- ncol(dataset$NIR)
+	noiseMat <- matrix(NA, nr, nc)
+	doTest <- FALSE
+	######
+	if (noiMode == pvnad[4]) { # the static method
+		statSd <- .ap2$stn$noi_staticValue
+		iw_static <- function(x) {
+			pool <- rnorm(sampSize, mean=0, sd=statSd)
+			out <- sample(pool, 1)
+			test_plotSinglePool(doTest, swl=x, pool, nc, out)
+			return(out)
+		} # EOF
+		test_plotStaticNoise(doTest, nc)
+		for (i in 1: nrow(noiseMat)) {	
+		#	noiseMat[i,] <- sapply(1:ncol(noiseMat), function(x) sample(rnorm(sampSize, mean=0, sd=statSd), 1) )
+			noiseMat[i,] <- sapply(1:ncol(noiseMat), iw_static )
+		}
+		test_plotSingleResult_static(doTest, wls=1:ncol(noiseMat), siRow=noiseMat[1,])
+		dataset$NIR <- dataset$NIR + noiseMat
+		return(dataset) # exit here
+	} # end if static
+	#######
+	test_plotNoiseData(doTest, noiseFile)
+	#
 	noiseDistName <- paste0(pv_noiseDistPrefix, noiseFile)
 	if (!exists(noiseDistName, where=.ap2)) {
 		stop("Sorry, an error with calculating the noise distribution appeared. Please restart the R-process.", call.=FALSE)
@@ -42,47 +155,66 @@ noi_performNoise <- function(dataset, noiseFile)	{ # is working on a single data
 	if (!all(dataWls %in% noiseWls)) { # noiseWls is always ALL of them
 		stop(paste0("\nThe wavelengths of the dataset do not match the available wavelengths in the noise-data. \nPlease check applicability of the noise-data."), call.=FALSE)
 	}
+	test_plotMaxima(doTest, noiseWls, noiseHull)
+	test_plotSDValues(doTest, nodi)
 	selInd <- which(noiseWls %in% dataWls) # probably we need to cut down the noise-distribution data to match the wavelengths in the current dataset
 	noiseHull <- noiseHull[, selInd]
+	noiseWls <- noiseWls[selInd]
 	##
-	noiMode <- .ap2$stn$noi_addMode 		## pv_noiseAddModes <- c("sdNorm", "sdUnif", "extrema")
-	nr <- nrow(dataset$NIR)
-	nc <- ncol(dataset$NIR)
-	noiseMat <- matrix(NA, nr, nc)
-	halfOnly <- .ap2$stn$noi_sdNormHalfOnly
-	if (!is.logical(halfOnly)) { halfOnly <- TRUE} # some security
-	if (halfOnly) {
-		div <- 2 
-	} else {
-		div <- 1
-	}
+	halfOnly <- .ap2$stn$noi_sdNormHalfOnly; 	if (!is.logical(halfOnly)) { halfOnly <- TRUE} ; 	if (halfOnly) {	div <- 2 } else { div <- 1 }
 	#
-	if (noiMode == pv_noiseAddModes[1] | noiMode == pv_noiseAddModes[2]) { # ## c("sdNorm", "sdUnif", "extrema") ## so we want the sd method	
-		sampSize <- .ap2$stn$noi_sampleSize
+	if (noiMode == pvnad[1] | noiMode == pvnad[2]) {  ## so we want the sd method	
 		meanV <- matrix(nodi$meanV[selInd], nrow=1) # possibly have to cut them down
 		sdV <- matrix(nodi$sdV[selInd], nrow=1)
-		noiseCompound <- rbind(noiseHull, meanV, sdV) ### a matrix with: 1st row the lower hull, 2nd the higher hull, 3rd the mean, 4th the sd ####
-		if (noiMode == pv_noiseAddModes[1]) { # the sdNorm
+		confInt <- nodi$confInt[, selInd] # is already a matrix
+		nwls <- matrix(nodi$wls[selInd], nrow=1) # !! only for the testing functions !!
+		noiseCompound <- rbind(noiseHull, confInt, meanV, sdV, nwls) ### a matrix with: 1st row the lower hull, 2nd the higher hull, 3rd the lower confInt, 4th the higher confInt, 5th the mean, 6th the sd; and 7th the wavelengths ####
+		#
+		iw_rnorm <- function(x, ss=sampSize, di=div) {
+			pool <- rnorm(ss, mean=x[5], sd=(x[6]/di))
+			ind <- which(pool < x[1] | pool > x[2] )
+			if (length(ind) > 0) {
+				pool <- pool[-ind] # kick out those that are beyond the maxima (in the first and second row of the compound) of our noise-data
+			}
+			out <- sample(pool, 1)
+			test_plotSinglePool(doTest, swl=x[7], pool, nc, out)			
+			return(out)
+		} # EOIF
+		iw_runif <- function(x, ss=sampSize) {
+			pool <- runif(ss, min=x[3], max=x[4])
+			out <- sample(pool, 1)
+			test_plotSinglePool(doTest, swl=x[7], pool, nc, out)
+			return(out)
+		} # EOIF
+		#
+		if (noiMode == pvnad[1]) { # the sdNorm
 			for (i in 1: nrow(noiseMat)) {
-				noiseMat[i,] <- apply(noiseCompound, 2, function(x) 
-					pool <- rnorm(sampSize, mean=x[3], sd=x[4]/div)
-					ind <- which(pool < x[1] | pool > x[2] )
-					pool <- pool[-ind] # kick out those that are beyond the maxima of our noise-data
-					sample(pool, 1)
-				#	sample(rnorm(sampSize, mean=x[3], sd=x[4]/div), 1) 
-				)  # !!!  only maybe use half the sd here !!! (because otherwise we get too many extrema)
+				noiseMat[i,] <- apply(noiseCompound, 2, iw_rnorm)
 			}
 		} else { # the sdUnif
 			for (i in 1: nrow(noiseMat)) {
-				noiseMat[i,] <- apply(noiseCompound, 2, function(x) sample(runif(sampSize, min=x[1], max=x[2]), 1) ) 
+			#	noiseMat[i,] <- apply(noiseCompound, 2, function(x) sample(runif(sampSize, min=x[3], max=x[4]), 1) ) 
+				noiseMat[i,] <- apply(noiseCompound, 2,  iw_runif) 
 			}		
 		} # end ifelse
-	} else { # so it must be the extrema method
-		for (i in 1: nrow(noiseMat)) {	
-			noiseMat[i,] <-apply(noiseHull, 2, function(x) x[sample(c(1,2),1)]) # select from columns from noiseHull and fill into noise matrix
-		}	
-	} # end if
-	print("----"); 	print(noiseHull[,1:5]); print(noiseMat[1:50, 1:5]) ; wait()
+	test_plotSingleResult(doTest, nwls, siRow=noiseMat[1,])
+	} # end sd modes
+	###
+	if (noiMode == pvnad[3])	{ # the extrema method
+		noiseCompound <- rbind(noiseHull, matrix(noiseWls, nrow=1)) # need the wls only for testing
+		iw_extrema <- function(x) {
+				out <- x[sample(c(1,2),1)]
+		#		test_plotSinglePool(doTest, swl=x[3], pool=out, nc, out=NULL)
+				return(out)
+			} # EOIF
+		for (i in 1: nrow(noiseMat)) {
+		#	noiseMat[i,] <- apply(noiseHull, 2, function(x) x[sample(c(1,2),1)]) # select from columns from noiseHull and fill into noise matrix
+			noiseMat[i,] <- apply(noiseCompound, 2, iw_extrema) # select from columns from noiseHull and fill into noise matrix
+		}
+		test_plotSingleResult(doTest, wls=noiseWls, siRow=noiseMat[1,])	
+	} # end if extrema
+	###	
+#	print("----"); 	print(noiseHull[,1:5]); print(noiseMat[1:50, 1:5]) ; wait()
 	dataset$NIR <- dataset$NIR + noiseMat
 	return(dataset)
 } # EOF

@@ -22,7 +22,7 @@ pv_plsr_what <- c("both", "errors", "regression")
 
 
 ## Noise
-pv_noiseAddModes <- c("sdNorm", "sdUnif", "extrema")
+pv_noiseAddModes <- c("sdNorm", "sdUnif", "extrema", "static")
 
 
 ## Aquagram plotting
