@@ -121,6 +121,10 @@ stn <- list(
 	noi_acceptTimeDiffDays = 90, 			## the acceptable time difference in days between recording of the noise-data and the actual data
 	noi_forceNoisePlausibility = TRUE, 		## if, should noise be added to the data, it should be checked if the values of the noise data file are not above a defined percentage of the actual dataset (see below); in other words, a plausibility check for the noise-data file.
 	noi_plausPercentage = 5, 				## the percentage for plausibility check; see above.
+	noi_addMode = "sdNorm", 				## the mathematical procedure to add noise to the data, possible values are 'sdNorm' for the standard-deviation based method with normal distribution sampling, sdUnif for the standard-deviation based method with uniform distribution sampling, 'extrema' for the extrema-based method, and 'static' for drawing samples from a normal distribution with a fixed standard deviation. Please see ?noise_procedures for further details. Factory default is 'sdNorm'.
+	noi_sampleSize = 100, 					## the number of values to be generated, from which then the random sample is taken. (Factory default is 100.)
+	noi_sdNormHalfOnly = FALSE, 			## recommended value is FALSE. If, in mode sdNorm, only the half of the standard deviation should be used for calculating the random values. If set to TRUE, this is reducing the amount of noise added to the data. Factory default is FALSE.
+	noi_staticValue = 1e-6, 				## for the static mode: the standard deviation used to calculate the normal distributed values to take a sampled from (using a mean of zero).
 
 
 	## PCA

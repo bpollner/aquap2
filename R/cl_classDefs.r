@@ -93,6 +93,7 @@ setMethod("getCP", "aquap_cube", function(object) object@cp)
 
 setGeneric("getExpName", function(object) standardGeneric("getExpName"))
 setMethod("getExpName", "aquap_md", function(object) object$meta$expName)
+setMethod("getExpName", "aquap_data", function(object) object@metadata$meta$expName)
 setMethod("getExpName", "aquap_cube", function(object) object@metadata$meta$expName)
 
 setGeneric("getPCAObject", function(object) standardGeneric("getPCAObject"))

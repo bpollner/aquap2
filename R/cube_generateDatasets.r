@@ -1080,7 +1080,9 @@ createOutlierFlagList <- function() {
 
 checkLoadNoiseFile <- function(header, maxNir, ap, md, noiseFile) {
 	useNoise <- ap$dpt$noise$useNoise
-	if (useNoise) {
+	noiMode <- .ap2$stn$noi_addMode 
+	pvNM <- pv_noiseAddModes
+	if (useNoise & noiMode != pvNM[4]) { # also do not do this if we have the static mode
 		if (all(noiseFile == "def")) { # the incoming 'noiseFile' is from the gdmm function. If any other than 'def' we do not even look at the metadata
 			noiseFile <- .ap2$stn$noi_noiseDataFilename
 			# If a value other than "def" is provided in the argument "noiseFile" in "gdmm", this is overriding the value of "noiseFileName" in the metadata file.
@@ -1133,6 +1135,16 @@ checkLoadNoiseFile <- function(header, maxNir, ap, md, noiseFile) {
 			if (max(noiDataset$NIR) > maxAccept) {
 				stop(paste0("It seems to be unlikely that the data in the R-data file '", noiseFile, "' in your AQUAP2SH-folder actually are noise-data, as their spectral maximum is exceeding ", accPer, "% of the spectral maximum in the actual dataset. \n(You can deactivate the checking of the plausibility of the noise-data file in the settings at the argument 'noi_forceNoisePlausibility'.)"), call.=FALSE)
 			}
+		}
+		## check noise mode
+		noiMode <- .ap2$stn$noi_addMode
+		if (!all(noiMode %in% pv_noiseAddModes) | length(noiMode) != 1) { # c("sd", "extrema")
+			stop(paste0("Please provide one of '", paste(pv_noiseAddModes, collapse="', '"), "' to the argument 'noi_addMode' in the settings file."), call.=FALSE)
+		}
+		## check sample size
+		sampSize <- .ap2$stn$noi_sampleSize
+		if (!all(is.numeric(sampSize)) | length(sampSize) != 1 | !all(is.wholenumber(sampSize)) | !all(sampSize > 0) ) {
+			stop(paste0("Please provide a positive integer length one to the argument 'noi_sampleSize' in the settings.r file."), call.=FALSE)
 		}
 		##
 		assign("noiseFile", noiseFile, pos=parent.frame(n=1)) # important for handing over the correct name of the noise file

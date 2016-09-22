@@ -187,10 +187,12 @@ Texp-x to Texp+x.  The 'Factory' default is 'symm@2'.
 Applies to all modes except the 'classic' and 'sfc'  modes. 
 If, in any of the modes showing percentages, the numbers on the 
 Aquagram are below 0 or above 100, then the calibration range has to be 
-extended.}
+extended. To record your own temperature calibration spectra, please see 
+\code{\link{genTempCalibExp}}.}
 
 \item{aqg.Texp}{Numeric length one. The temperature at which the 
-spectra were taken. The default (leave at 'def') can be set in the settings.}
+spectra were taken. The default (leave at 'def') can be set in the settings. 
+Please see also  \code{\link{genTempCalibExp}}.}
 
 \item{aqg.bootCI}{Logical. If confidence intervalls for the selected wavelengths
 should be calculated within each group (using bootstrap). Leave at 'def' for 

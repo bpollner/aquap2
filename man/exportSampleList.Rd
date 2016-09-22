@@ -5,10 +5,10 @@
 \alias{exportSampleList}
 \title{Create and Export Sample Lists}
 \usage{
-exportSampleList(md = getmd(), form = "def", showFirstRows = TRUE,
-  timeEstimate = FALSE)
+exportSampleList(md = getmd(), form = "def", rnd = TRUE,
+  showFirstRows = TRUE, timeEstimate = FALSE)
 
-esl(md = getmd(), form = "def", showFirstRows = TRUE,
+esl(md = getmd(), form = "def", rnd = TRUE, showFirstRows = TRUE,
   timeEstimate = FALSE)
 }
 \arguments{
@@ -21,13 +21,18 @@ delimited text file, 'xls' to export as an Excel file, or if left at the
 default 'def' is reading in the value from the settings.r file (parameter 
 \code{p_sampleListExportFormat}).}
 
+\item{rnd}{Logical, if the sample list should be randomized or not, defaults 
+to TRUE. (Having a non-randomized sample list can be interesting to check the 
+correctness of the sample list when designing the experiment, i.e. when 
+providing the values for the argument 'L1' and 'L2' in the metadata file.)}
+
 \item{showFirstRows}{Logical. If the first rows of the sample list should be 
 displayed.}
 
 \item{timeEstimate}{Logical. If time estimates should be displayed.}
 }
 \value{
-An (invisible) data frame with a randomized sample list resp. this 
+An (invisible) data frame with a (randomized) sample list resp. this 
 list saved to  a file.
 }
 \description{
