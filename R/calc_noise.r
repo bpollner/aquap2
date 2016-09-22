@@ -268,7 +268,6 @@ genNoiseRecExp <- function() {
 	return(invisible(NULL))
 } # EOF
 
-
 mod_md_txt <- function(where, fill, target) {
 	target[grep(where, target)] <- paste0("\t", where, " <- \"", fill, "\"")
 	return(target)
@@ -283,6 +282,7 @@ mod_md_num <- function(where, numVal, target) {
 	target[grep(where, target)] <- paste0("\t", where, " <- ", numVal)
 	return(target)
 } # EOF
+
 
 #' @title Generate temperature recording experiment
 #' @description Generate the folder structure for a new experiment and populate 
@@ -351,7 +351,6 @@ genTempCalibExp <- function(Tcenter=NULL, Tdelta=5, stepBy=1, repls=4) {
 	close(con)
 	return(invisible(NULL))
 } # EOF
-
 
 
 #' @title Record / add noise

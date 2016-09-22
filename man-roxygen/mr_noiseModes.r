@@ -6,7 +6,7 @@
 #' \describe{
 #' \item{<%=pv_noiseAddModes[1]%>}{Factory default. Standard deviation based, 
 #' sampling from \strong{normal} distribution. The noise distribution is described 
-#' by \code{Noise_Mean  Noise_sd} whithin each single wavelength of the noise 
+#' by \code{Noise_Mean +/- Noise_sd} whithin each single wavelength of the noise 
 #' dataset. If noise should be added now to an actual dataset, for each single 
 #' observation and there for each single wavelength the noise-value to be added 
 #' to the actual spectral value can be described by 
@@ -16,7 +16,7 @@
 #' settings file.)}
 #' \item{<%=pv_noiseAddModes[2]%>}{Standard deviation based, 
 #' sampling from \strong{uniform} distribution. The noise distribution is 
-#' described by \code{Noise_Mean  Noise_sd} whithin each single wavelength of 
+#' described by \code{Noise_Mean +/- Noise_sd} whithin each single wavelength of 
 #' the noise dataset. If noise should be added now to an actual dataset, for each 
 #' single observation and there for each single wavelength the noise-value to 
 #' be added to the actual spectral value can be described by \code{noiseValue = 

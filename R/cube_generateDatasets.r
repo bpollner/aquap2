@@ -1251,10 +1251,12 @@ gdmm <- function(dataset, ap=getap(), noiseFile="def") {
 	### now make the models (so far, we have only the dataset and the id-string in the set)
 	stat <- checkForStats(ap) 	#  check the ap if and where we calculate a model
 	if (!.ap2$stn$allSilent & (stat$cnt != 0)) {cat("\nCalculating models...\n")}
+	maybeGeneratePlsrCluster(ap)
 	for (i in 1: cpt@len) {
 		if (!.ap2$stn$allSilent & (stat$cnt != 0)) {cat(paste("   Working on dataset #", i, " of ", cpt@len, " (", getIdString(cubeList[[i]]), ") \n", sep=""))}
 		cubeList[[i]] <- makeAllModels(cubeList[[i]], md, ap) ###### CORE #########  CORE ############ CORE ##############
 	} # end for i
+	maybeStopPlsrCluster()
 	# collect the ranges for aquagram (if any)
 	rangesColl <- NULL
 	if ( (any(ap$aquagr$fsa!=FALSE) | any(ap$aquagr$fss!=FALSE)) & !is.null(ap$aquagr) ) {
