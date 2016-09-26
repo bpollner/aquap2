@@ -4,16 +4,29 @@
 \alias{indepPlsPred}
 \title{Independent plsr prediction}
 \usage{
-indepPlsPred(indepDataset, numVar, cube)
+indepPlsPred(indepDataset, cube, cubeNumVar, indepNumVar = NULL, ...)
 }
 \arguments{
 \item{indepDataset}{The dataset containing the independent data. An object 
 of class 'aquap_data' as produced by \code{\link{gfd}}.}
 
-\item{numVar}{Character length one. The name of a numeric variable in the 
-independent dataset.}
-
 \item{cube}{An object of class 'aquap_cube' as produced by \code{\link{gdmm}}.}
+
+\item{cubeNumVar}{Character length one. The name of a numeric variable in the 
+cube on which the models have been calculated.}
+
+\item{indepNumVar}{Character length one or NULL. The name of a numeric 
+variable in the independent dataset. If left at the default NULL, first a 
+numeric variable with the same name as specified in the argument 'cubeNumVar' 
+is looked for in the independent dataset and, if this is found, is used for 
+validation. If no numeric variable with the same name as specified in argument 
+'cubeNumVar' is found in the independent dataset, the data from the independent 
+dataset are used for predictions with the model(s) from the cube, and no 
+validation is calculated. If a valid name of a numerical variable in the 
+independent dataset is provided, this variable is used for validation.}
+
+\item{...}{For overriding one or more of the plotting parameters, 
+please see \code{\link{plot_pls_args}}.}
 }
 \description{
 Use independent data for predictions in the pls-models within 
