@@ -287,7 +287,7 @@ calculateIndepPlsPrediction <- function(indepDataset, cube, cnv, inv, ap) {
 			 	predResult <- predict(singleModel, comps=1:nc, newdata = newData)
 				R2pr <- as.numeric(pls::R2(singleModel, estimate = "test", newdata = newData, ncomp = nc, intercept = FALSE)$val) # returns NA if we do not have data in the yvar
 				RMSEP <- as.numeric(pls::RMSEP(singleModel, estimate = "test", newdata = newData, ncomp = nc, intercept = FALSE)$val) # returns NaN (which still is.na=TRUE)
-				innerList[[k]] <- list(modRegrOn=modRegrOn, indepValid=indepValid, idString=idString, predResult=predResult, R2pr=R2pr, RMSEP=RMSEP, ncomp=nc)
+				innerList[[k]] <- list(modRegrOn=modRegrOn, indepValid=indepValid, idString=idString, predResult=predResult, indepValue=indVal, R2pr=R2pr, RMSEP=RMSEP, ncomp=nc)
 			} # end for k
 			resultList[[i]] <- innerList
 		} else { # so cutIndepData comes in as NULL, meaning we are not within the wavelengths of the current cube datset
@@ -297,10 +297,79 @@ calculateIndepPlsPrediction <- function(indepDataset, cube, cnv, inv, ap) {
 	return(resultList)
 } # EOF
 
+
+templateForBelow <- function(plsModel, dataset, regrOn, classFCol, onMain="", onSub="",  inRDP=FALSE) {
+	header <- getHeader(dataset)
+	if (is.null(classFCol)) {
+		color <- 1
+		colorMsg <- ""
+		colLegend <- FALSE
+	} else {
+		clv <- extractColorLegendValues(dataset, groupBy=classFCol) # returns a list: color_data, color_unique, color_legend, txt, txtE, sumPart, dataGrouping, pch_data, pch_legend
+		color <- clv$color_data
+		colorMsg <- " color by: "
+		colLegend <- TRUE
+	}
+	RMSEC <- getRMSEC(plsModel)
+	RMSEC_rdp <- convertToRDP(RMSEC, regrOn, header)
+	R2C <- getR2C(plsModel)
+	regrOnMsg <- paste("   regr. on: ", regrOn, "   ",sep="")
+	ncompMsg <- paste("   ", plsModel$ncomp, " comps.", sep="")
+	Nmsg <- paste("   N=", nrow(header), sep="")
+	subText <- paste(onSub, regrOnMsg, colorMsg, classFCol, ncompMsg, Nmsg, sep="")
+	pls::predplot(plsModel, which="train" , main=paste(onMain, "- Training"), sub=subText, col=color)
+	abline(0,1,col="gray")
+	if (inRDP) {
+		legendText <- paste("RMSEC: ", RMSEC, "\nRMSEC[RDP]: ", RMSEC_rdp, "\nR2C: ", R2C, "\n\n ", sep="")
+	} else {
+		legendText <- paste("RMSEC: ", RMSEC, "\nR2C: ", R2C, sep="")
+	}
+	legend("topleft", legend=legendText)
+	if (colLegend) {
+		legBgCol <- rgb(255,255,255, alpha=.ap2$stn$col_alphaForLegends, maxColorValue=255) # is a white with alpha to be determined in the settings
+		legend("bottomright", legend=clv$txtE, col=clv$color_legend, pch=16, bg=legBgCol)
+	}
+} # EOF
+
+
+makeIndepPlsrValidationPlots_inner <- function(cube, predResults, ap, onMain, onSub, where, inRDP) {
+
+} # EOF
+
+
+makeIndepPlsrValidationPlots <- function(cube, predResults, ap2) {
+	ap <- ap2
+	#
+	where <- ap$genPlot$where
+	onMain <- ap$genPlot$onMain
+	onSub <- ap$genPlot$onSub
+	fns <- ap$genPlot$fns
+  	inRDP <- ap$plsr$inRdp
+	#
+	if (!.ap2$stn$allSilent & (where == "pdf" )) {cat("Plotting PLSR error plots... ")}
+	expName <- getExpName(cube)
+	height <-.ap2$stn$pdf_Height_sq
+	width <- .ap2$stn$pdf_Width_sq
+	path <- .ap2$stn$fn_results
+	suffix <- "plsIndepPred"
+	message <- "PLSR Preds"
+	filename <- paste(expName, suffix, sep="_")
+	filename <- paste(path, "/", filename, fns, ".pdf", sep="")
+	onMain <- paste(expName, onMain, sep=" ")
+	if (where == "pdf") { pdf(file=filename, width, height, onefile=TRUE, family='Helvetica', pointsize=12) }
+	if (where != "pdf" & Sys.getenv("RSTUDIO") != 1) {dev.new(height=height, width=width)}	
+	makeIndepPlsrValidationPlots_inner(cube, predResults, ap, onMain, onSub, where, inRDP) ### HERE ###
+	if (where == "pdf") { dev.off() }
+	if (!.ap2$stn$allSilent & (where == "pdf" )) {cat("ok\n") }
+} # EOF
+
+
 #' @title Independent plsr prediction
 #' @description Use independent data for predictions in the pls-models within 
-#' the cube
-#' @details XXX
+#' the cube and plot those predictions and, if available, the validation data.
+#' @details Please see the documentation for the single parameters to see how 
+#' the selection of the available models and the selection of possibly available 
+#' data for validation is handled.
 #' @param indepDataset The dataset containing the independent data. An object 
 #' of class 'aquap_data' as produced by \code{\link{gfd}}. 
 #' @param cube An object of class 'aquap_cube' as produced by \code{\link{gdmm}}. 
@@ -321,6 +390,19 @@ calculateIndepPlsPrediction <- function(indepDataset, cube, cnv, inv, ap) {
 #' validating the predictions. If a character vector is provided, it has to have 
 #' the same length as the one in \code{cnv}, and those variables will be 
 #' used, in the given sequence, for validating the predictions.
+#' @param aps Character length one. The default way to obtain the analysis 
+#' procedure. Defaults to "def". Possible values are:
+#' \describe{
+#' \item{"def"}{The default from the settings.r file is taken. (Argument 
+#' \code{gen_plot_anprocSource})}
+#' \item{"cube"}{Take the analysis procedure from within the cube, i.e. the 
+#' analysis procedure that was used when creating the cube via \code{\link{gdmm}}
+#' is used.}
+#' \item{"defFile"}{Use the analysis procedure with the default filename as 
+#' specified in the settings.r file in \code{fn_anProcDefFile}.}
+#' \item{Custom filename}{Provide any valid filename for an analysis procedure to 
+#' use as input for specifying the plotting options.}
+#' }
 #' @param ... For overriding one or more of the plotting parameters, 
 #' please see \code{\link{plot_pls_args}}.
 #' @return An (invisible) list containing the numerical results of the 
@@ -329,21 +411,23 @@ calculateIndepPlsPrediction <- function(indepDataset, cube, cnv, inv, ap) {
 #' \dontrun{
 #' XXX	
 #' }
+#' @family PLSR documentation
 #' @export
-indepPlsPred <- function(indepDataset, cube, cnv=NULL, inv=NULL, ...) { 
+plot_pls_indepPred <- function(indepDataset, cube, cnv=NULL, inv=NULL, aps="def", ...) { 
 	autoUpS()
 	dsName <- deparse(substitute(indepDataset))
 	cubeName <- deparse(substitute(cube))
 	check_indPlsPrediction_input(indepDataset, cube, cnv, inv, cubeName, dsName) ## !! is assigning cnv, inv
-	ap <- getap(.lafw_fromWhere="cube", cube=cube, ...)
+	ap1 <- getap(.lafw_fromWhere="cube", cube=cube)
+	ap2 <- doApsTrick(aps, cube, ...)
 	if (!.ap2$stn$allSilent) {printMessagePairing(cnv, inv)}
 	if (length(cube) == 1) {ad1 <- ""} else {ad1 <- "s"};  	if (length(cnv) == 1) {ad2 <- ""} else {ad2 <- "s"}
 	if (!.ap2$stn$allSilent) {cat(paste0("Calc. plsr predictions for ", length(cube), " cube element", ad1, " (", length(cnv), " model", ad2, " each)... "))}
-	predList <- calculateIndepPlsPrediction(indepDataset, cube, cnv, inv, ap) #### CORE #### calculation 
+	predList <- calculateIndepPlsPrediction(indepDataset, cube, cnv, inv, ap1) #### CORE #### calculation 
 	if (!.ap2$stn$allSilent) {cat("ok\n")}
 	###
-	# now plot, please
-	
+	# now plot, please (use the ap2 now!)
+	makeIndepPlsrValidationPlots(cube, predResults=predList, ap2)
 	###
 	return(invisible(predList))
 } # EOF

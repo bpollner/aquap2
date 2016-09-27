@@ -58,6 +58,7 @@ Other Calc. arguments: \code{\link{calc_aqg_args}},
   \code{\link{split_dataset}}
 
 Other PLSR documentation: \code{\link{plot_pls,aquap_cube-method}},
-  \code{\link{plot_pls_args}}
+  \code{\link{plot_pls_args}},
+  \code{\link{plot_pls_indepPred}}
 }
 

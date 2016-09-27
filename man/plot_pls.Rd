@@ -81,6 +81,7 @@ Other Plot functions: \code{\link{plot,aquap_cube,missing-method}},
   \code{\link{plot_simca,aquap_cube-method}}
 
 Other PLSR documentation: \code{\link{calc_pls_args}},
-  \code{\link{plot_pls_args}}
+  \code{\link{plot_pls_args}},
+  \code{\link{plot_pls_indepPred}}
 }
 

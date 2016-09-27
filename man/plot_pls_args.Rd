@@ -63,6 +63,7 @@ Other Plot arguments: \code{\link{plot,aquap_data,missing-method}},
   \code{\link{plot_pg_args}}, \code{\link{plot_sim_args}}
 
 Other PLSR documentation: \code{\link{calc_pls_args}},
-  \code{\link{plot_pls,aquap_cube-method}}
+  \code{\link{plot_pls,aquap_cube-method}},
+  \code{\link{plot_pls_indepPred}}
 }
 
