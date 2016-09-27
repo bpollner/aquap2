@@ -642,6 +642,7 @@ ap_cleanZeroValuesCheckExistenceDefaults <- function(ap, dataset, haveExc) {
 #' selected.
 #' @param to Numeric lengtho one. The upper limit of the wavelengths to be 
 #' selected.
+#' @seealso \code{\link{siWl}}
 #' @return The standard dataset (class 'aquap_data') containing only the 
 #' selected wavelengths.
 #' @family Data pre-treatment functions

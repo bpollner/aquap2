@@ -837,8 +837,7 @@ checkApsChar <- function(aps) {
 #' @param wl Numeric length one. The
 #' @param getMax Logical. Set to 'TRUE' to isolate the wavelength with the 
 #' highest sum of absorbtion values.
-#' @family Extract Elements
-#' @seealso \code{\link{aquap_data-methods}} 
+#' @seealso \code{\link{aquap_data-methods}}, \code{\link{selectWls}}
 #' @examples
 #' \dontrun{
 #' fd <- gfd()

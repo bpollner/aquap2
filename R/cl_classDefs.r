@@ -172,3 +172,14 @@ setMethod("getSIMCAicDists", "aquap_set", function(object) object@simca$icDists)
 
 setGeneric("getCorrectSimcaClasses", function(object) standardGeneric("getCorrectSimcaClasses"))
 setMethod("getCorrectSimcaClasses", "aquap_set", function(object) object@simca$groupingVector)
+
+
+## PLSR
+setGeneric("getPlsrModels", function(object) standardGeneric("getPlsrModels"))
+setMethod("getPlsrModels", "aquap_set", function(object) object@plsr$model)
+
+setGeneric("getPlsrRegrOnList", function(object) standardGeneric("getPlsrRegrOnList"))
+setMethod("getPlsrRegrOnList", "aquap_set", function(object) object@plsr$regrOn)
+
+
+

@@ -4,29 +4,39 @@
 \alias{indepPlsPred}
 \title{Independent plsr prediction}
 \usage{
-indepPlsPred(indepDataset, cube, cubeNumVar, indepNumVar = NULL, ...)
+indepPlsPred(indepDataset, cube, cnv = NULL, inv = NULL, ...)
 }
 \arguments{
 \item{indepDataset}{The dataset containing the independent data. An object 
 of class 'aquap_data' as produced by \code{\link{gfd}}.}
 
-\item{cube}{An object of class 'aquap_cube' as produced by \code{\link{gdmm}}.}
+\item{cube}{An object of class 'aquap_cube' as produced by \code{\link{gdmm}}. 
+It is an error to have no plsr models in the cube.}
 
-\item{cubeNumVar}{Character length one. The name of a numeric variable in the 
-cube on which the models have been calculated.}
+\item{cnv}{Character vector or NULL. The names of one or more numeric 
+variables in the cube on which models have been calculated. Leave at the 
+default NULL to use \strong{all} of the numeric variables on which a plsr model 
+has been calculated, or provide a character vector with valid variable names 
+for a sub-selection. For the selected variables, predictions from the data in 
+the independent dataset will be made. If argument \code{inv} is left 
+at its default NULL, numerical variables with exactly the same name are looked 
+for in the independent dataset and, if present, are used for validating the 
+predictions.}
 
-\item{indepNumVar}{Character length one or NULL. The name of a numeric 
-variable in the independent dataset. If left at the default NULL, first a 
-numeric variable with the same name as specified in the argument 'cubeNumVar' 
-is looked for in the independent dataset and, if this is found, is used for 
-validation. If no numeric variable with the same name as specified in argument 
-'cubeNumVar' is found in the independent dataset, the data from the independent 
-dataset are used for predictions with the model(s) from the cube, and no 
-validation is calculated. If a valid name of a numerical variable in the 
-independent dataset is provided, this variable is used for validation.}
+\item{inv}{Character vector or NULL. The names of numeric 
+variables in the independent dataset. If left at the default NULL, numerical 
+variables in the independent dataset with exactly the same name(s) as specified 
+in argument \code{cnv} are looked for and, if present, are used for 
+validating the predictions. If a character vector is provided, it has to have 
+the same length as the one in \code{cnv}, and those variables will be 
+used, in the given sequence, for validating the predictions.}
 
 \item{...}{For overriding one or more of the plotting parameters, 
 please see \code{\link{plot_pls_args}}.}
+}
+\value{
+An (invisible) list containing the numerical results of the 
+predictions.
 }
 \description{
 Use independent data for predictions in the pls-models within 

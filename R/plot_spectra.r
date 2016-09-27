@@ -27,6 +27,7 @@ plotSpectra_inner <- function(dataset, singleColorBy, onMain, onSub, idString=""
 	if (is.null(singleColorBy)) {
 		colorData <- 1
 		msg <- ""
+		partNMsg <- paste0("   (all N=", nrow(dataset), ")")
 		makeLegend <- FALSE
 #		lty <- 1
 	} else {
@@ -39,11 +40,13 @@ plotSpectra_inner <- function(dataset, singleColorBy, onMain, onSub, idString=""
 		colorData <- aa$color_data
 		colorLegend <- aa$color_legend
 		legendTextExt <- aa$txtE
+		sumPart <- aa$sumPart
+		partNMsg <- paste0("  (all N=", sumPart, ")")
 	} # end else
 	dptInfo <- adaptIdStringForDpt(getAnproc(dataset), idString)
 	onMain <- paste(onMain, dptInfo, sep="")
 	wls <- getWavelengths(dataset)
-	onSub <- paste(onSub, msg, sep=" ")
+	onSub <- paste(onSub, msg, partNMsg, sep=" ")
 	matplot(wls, t(dataset$NIR), type="l", xlab="Wavelengths", ylab="Absorbance", main=onMain, sub=onSub, col=colorData, lty=1)
 	abline(h=0, col="gray")
 	if (makeLegend) {
