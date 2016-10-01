@@ -5,7 +5,7 @@
 \title{Independent plsr prediction}
 \usage{
 plot_pls_indepPred(indepDataset, cube, cnv = NULL, inv = NULL,
-  aps = "def", ...)
+  aps = "def", pl = TRUE, ...)
 }
 \arguments{
 \item{indepDataset}{The dataset containing the independent data. An object 
@@ -14,23 +14,23 @@ of class 'aquap_data' as produced by \code{\link{gfd}}.}
 \item{cube}{An object of class 'aquap_cube' as produced by \code{\link{gdmm}}. 
 It is an error to have no plsr models in the cube.}
 
-\item{cnv}{Character vector or NULL. The names of one or more numeric 
-variables in the cube on which models have been calculated. Leave at the 
-default NULL to use \strong{all} of the numeric variables on which a plsr model 
-has been calculated, or provide a character vector with valid variable names 
-for a sub-selection. For the selected variables, predictions from the data in 
-the independent dataset will be made. If argument \code{inv} is left 
-at its default NULL, numerical variables with exactly the same name are looked 
-for in the independent dataset and, if present, are used for validating the 
-predictions.}
+\item{cnv}{"Cube numeric variable", character vector or NULL. The names of 
+one or more numeric variables in the cube on which models have been 
+calculated. Leave at the default NULL to use \strong{all} of the numeric 
+variables on which a plsr model has been calculated, or provide a character 
+vector with valid variable names for a sub-selection. For the selected 
+variables, predictions from the data in the independent dataset will be made. 
+If argument \code{inv} is left at its default NULL, numerical variables with 
+exactly the same name are looked for in the independent dataset and, if 
+present, are used for validating the predictions.}
 
-\item{inv}{Character vector or NULL. The names of numeric 
-variables in the independent dataset. If left at the default NULL, numerical 
-variables in the independent dataset with exactly the same name(s) as specified 
-in argument \code{cnv} are looked for and, if present, are used for 
-validating the predictions. If a character vector is provided, it has to have 
-the same length as the one in \code{cnv}, and those variables will be 
-used, in the given sequence, for validating the predictions.}
+\item{inv}{"Independent numeric variable", character vector or NULL. The names 
+of numeric variables in the independent dataset. If left at the default 
+NULL, numerical variables in the independent dataset with exactly the same 
+name(s) as specified in argument \code{cnv} are looked for and, if present, 
+are used for validating the predictions. If a character vector is provided, 
+it has to have the same length as the one in \code{cnv}, and those variables 
+will be used, in the given sequence, for validating the predictions.}
 
 \item{aps}{Character length one. The default way to obtain the analysis 
 procedure. Defaults to "def". Possible values are:
@@ -46,30 +46,64 @@ specified in the settings.r file in \code{fn_anProcDefFile}.}
 use as input for specifying the plotting options.}
 }}
 
-\item{...}{For overriding one or more of the plotting parameters, 
-please see \code{\link{plot_pls_args}}.}
+\item{pl}{Logical, defaults to TRUE. If predicted data should be plotted 
+at all. If FALSE, only the calculation and the (possible) export to an excel 
+file (see details) will be performed.}
+
+\item{...}{Arguments for overriding one or more of the plotting parameters 
+from the analysis procedure, please see \code{\link{plot_pls_args}}.}
 }
 \value{
 An (invisible) list containing the numerical results of the 
-predictions.
+predictions, and if parameter \code{plsr_indepPred_exportToExcel} in the 
+settings file is set to TRUE, these data are exported to an excel file in the 
+results folder as well.
 }
 \description{
 Use independent data for predictions in the pls-models within 
 the cube and plot those predictions and, if available, the validation data.
 }
 \details{
-Please see the documentation for the single parameters to see how 
-the selection of the available models and the selection of possibly available 
-data for validation is handled.
+Please see the documentation for the single parameters (\code{cnv} 
+and \code{inv}) to see how the selection of the available models and the 
+selection of possibly available data for validation is handled. For coloring, 
+the argument code{pls.colorBy} of the analysis procedure can be used, but 
+here the data for the colors are selected from the \strong{independent} 
+dataset. If the parameter \code{plsr_indepPred_exportToExcel} in the 
+settings file is set to TRUE, the results are exported to an excel file in the 
+results folder as well.
 }
 \examples{
 \dontrun{
-XXX	
+fd <- gfd()
+cu <- gdmm(fd) # assumes that you have plsr enabled in the analysis procedure
+fdIndep <- fd # !!!pretend!!! that fdIndep is now an other, independent dataset
+predList <- plot_pls_indepPred(fdIndep, cu)
+predList <- plot_pls_indepPred(fdIndep, cu, cnv="Y_Temp") # to only use the 
+# models regressed on 'Y_Temp'
+predList <- plot_pls_indepPred(fdIndep, cu, cnv="Y_Temp", inv="Y_fooBar")
+# to only use the models regressed on 'Y_Temp', and use the numeric variable 
+# 'Y_fooBar' from the independent dataset for validation
+predList <- plot_pls_indepPred(fdIndep, cu, aps="fooBar.r") # use the values 
+from the analysis procedure file 'fooBar.r' for plotting
+predList <- plot_pls_indepPred(fdIndep, cu, pl=FALSE) # no plotting, just 
+# calculation and possible export to excel.
+predList <- plot_pls_indepPred(fdIndep, cu, pls.colorBy="C_Group") # use the 
+# class variable 'C_Group' from the independent dataset for coloring
+predList <- plot_pls_indepPred(fdIndep, cu, pg.where="pdf", pg.fns="_fooBar") 
+# add the string '_fooBar' to the generated pdfs.
 }
 }
 \seealso{
 Other PLSR documentation: \code{\link{calc_pls_args}},
   \code{\link{plot_pls,aquap_cube-method}},
   \code{\link{plot_pls_args}}
+
+Other Plot functions: \code{\link{plot,aquap_cube,missing-method}},
+  \code{\link{plot,aquap_data,missing-method}},
+  \code{\link{plot_aqg}},
+  \code{\link{plot_pca,aquap_cube-method}},
+  \code{\link{plot_pls,aquap_cube-method}},
+  \code{\link{plot_simca,aquap_cube-method}}
 }
 

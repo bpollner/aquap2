@@ -99,6 +99,10 @@ plot_plsr_error <- function(plsModel, plsPlusModel, dataset, ClassVar, onMain=""
 } # EOF
 
 plot_plsr_calibration <- function(plsModel, dataset, regrOn, classFCol, onMain="", onSub="",  inRDP=FALSE) {
+	colLm <- .ap2$stn$plsr_colorForLinearModel
+	ltTarg <- .ap2$stn$plsr_linetypeTargetLine
+	ltLm <- .ap2$stn$plsr_linetypeLinearModel
+	#
 	header <- getHeader(dataset)
 	if (is.null(classFCol)) {
 		color <- 1
@@ -113,12 +117,16 @@ plot_plsr_calibration <- function(plsModel, dataset, regrOn, classFCol, onMain="
 	RMSEC <- getRMSEC(plsModel)
 	RMSEC_rdp <- convertToRDP(RMSEC, regrOn, header)
 	R2C <- getR2C(plsModel)
+	ncomp <- plsModel$ncomp
+	yvar <- plsModel$model$yvar
+	yvarFitted <- plsModel$fitted.values[ , , ncomp]
 	regrOnMsg <- paste("   regr. on: ", regrOn, "   ",sep="")
-	ncompMsg <- paste("   ", plsModel$ncomp, " comps.", sep="")
+	ncompMsg <- paste("   ", ncomp, " comps.", sep="")
 	Nmsg <- paste("   N=", nrow(header), sep="")
 	subText <- paste(onSub, regrOnMsg, colorMsg, classFCol, ncompMsg, Nmsg, sep="")
 	pls::predplot(plsModel, which="train" , main=paste(onMain, "- Training"), sub=subText, col=color)
-	abline(0,1,col="gray")
+	abline(0,1, col="gray", lty=ltTarg, lwd=1)
+	abline(lm(yvarFitted ~ yvar), lty=ltLm, lwd=1, col=colLm) # fitting linear model
 	if (inRDP) {
 		legendText <- paste("RMSEC: ", RMSEC, "\nRMSEC[RDP]: ", RMSEC_rdp, "\nR2C: ", R2C, "\n\n ", sep="")
 	} else {
@@ -132,6 +140,10 @@ plot_plsr_calibration <- function(plsModel, dataset, regrOn, classFCol, onMain="
 } # EOF
 
 plot_plsr_validation <- function(plsModel, dataset, regrOn, classFCol, onMain="", onSub="", inRDP=FALSE, valid="") {
+	colLm <- .ap2$stn$plsr_colorForLinearModel
+	ltTarg <- .ap2$stn$plsr_linetypeTargetLine
+	ltLm <- .ap2$stn$plsr_linetypeLinearModel
+
 	header <- getHeader(dataset)
 	if (is.null(classFCol)) {
 		color <- 1
@@ -146,13 +158,17 @@ plot_plsr_validation <- function(plsModel, dataset, regrOn, classFCol, onMain=""
 	RMSECV <- getRMSECV(plsModel)
 	RMSECV_rdp <- convertToRDP(RMSECV, regrOn, header)
 	R2CV <- getR2CV(plsModel)
+	ncomp <- plsModel$ncomp
+	yvar <- plsModel$model$yvar
+	yvarFitted <- plsModel$validation$pred[ , , ncomp]	
 	regrOnMsg <- paste("   regr. on: ", regrOn, "   ",sep="")
-	ncompMsg <- paste("   ", plsModel$ncomp, " comps.", sep="")
+	ncompMsg <- paste("   ", ncomp, " comps.", sep="")
 	Nmsg <- paste("   N=", nrow(header), sep="")
 	mainText <- paste(onMain, " - Validation (", valid, ")", sep="")
 	subText <- paste(onSub, regrOnMsg, colorMsg, classFCol, ncompMsg, Nmsg, sep="")
 	pls::predplot(plsModel, which="validation" , main=mainText, sub=subText, col=color)
-	abline(0,1,col="gray")
+	abline(0,1, col="gray", lty=ltTarg, lwd=1)
+	abline(lm(yvarFitted ~ yvar), lty=ltLm, lwd=1, col=colLm) # fitting linear model	
 	if (inRDP) {
 		legendText <- paste("RMSECV: ", RMSECV, "\nRMSECV[RDP]: ", RMSECV_rdp, "\nR2CV: ", R2CV, "\n\n ", sep="")
 	} else {
@@ -400,6 +416,11 @@ plot_pls_cube <- function(cube, aps="def", rv.bandwidth="def", rv.adLine="def", 
   	return(invisible(NULL))
 } # EOF
 
+###
+# plot_pls_indepPred , i.e. plotting independent plsr predictions, is in the calc_plsr.r file (as there is plotting and calculation...)
+###
+
+
 # documentation ----------------------------------------
 #' @title Plot PLSR
 #' @description Plot PLSR error and calibration / crossvalidation plots. 
@@ -467,9 +488,10 @@ NULL
 
 
 #' @title Plot PLSR - Arguments
-#' @description The following parameters can be used in the \code{...} argument in 
-#' function \code{\link{plot}} and \code{\link{plot_pls}} to override the values 
-#' in the analysis procedure file and so to modify the graphics - see examples.
+#' @description The following parameters can be used in the \code{...} argument 
+#' e.g. in function \code{\link{plot}} and \code{\link{plot_pls}} to override 
+#' the values in the analysis procedure file and so to modify the graphics - 
+#' see examples.
 #' \describe{
 #' \item{\code{plot(cube, ...)}}{ }
 #' \item{ \code{plot_pls(cube, ...)}}{ }

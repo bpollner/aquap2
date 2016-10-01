@@ -75,7 +75,8 @@ Other Plot functions: \code{\link{plot,aquap_cube,missing-method}},
   \code{\link{plot,aquap_data,missing-method}},
   \code{\link{plot_aqg}},
   \code{\link{plot_pca,aquap_cube-method}},
-  \code{\link{plot_pls,aquap_cube-method}}
+  \code{\link{plot_pls,aquap_cube-method}},
+  \code{\link{plot_pls_indepPred}}
 
 Other SIMCA documentation: \code{\link{calc_sim_args}},
   \code{\link{plot_sim_args}}

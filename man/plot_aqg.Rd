@@ -55,6 +55,7 @@ Other Plot functions: \code{\link{plot,aquap_cube,missing-method}},
   \code{\link{plot,aquap_data,missing-method}},
   \code{\link{plot_pca,aquap_cube-method}},
   \code{\link{plot_pls,aquap_cube-method}},
+  \code{\link{plot_pls_indepPred}},
   \code{\link{plot_simca,aquap_cube-method}}
 }
 

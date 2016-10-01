@@ -8,7 +8,7 @@
 models should be plotted.}
 
 \item{pls.colorBy}{NULL or character. What class-variable should be 
-used for coloring in the RMSEP and RMSECV plots. Set to NULL for no coloring, 
+used for coloring in the RMSEC and RMSECV plots. Set to NULL for no coloring, 
 or provide a character length one with a single column name of a class 
 variable that should be used for coloring.}
 
@@ -58,12 +58,12 @@ plot_pls(cube, pls.colorBy="C_Temp")
 \seealso{
 \code{\link{plot_pls}}
 
-Other Plot arguments: \code{\link{plot,aquap_data,missing-method}},
-  \code{\link{plot_aqg_args}}, \code{\link{plot_pca_args}},
-  \code{\link{plot_pg_args}}, \code{\link{plot_sim_args}}
-
 Other PLSR documentation: \code{\link{calc_pls_args}},
   \code{\link{plot_pls,aquap_cube-method}},
   \code{\link{plot_pls_indepPred}}
+
+Other Plot arguments: \code{\link{plot,aquap_data,missing-method}},
+  \code{\link{plot_aqg_args}}, \code{\link{plot_pca_args}},
+  \code{\link{plot_pg_args}}, \code{\link{plot_sim_args}}
 }
 
