@@ -5,7 +5,7 @@
 \title{Independent plsr prediction}
 \usage{
 plot_pls_indepPred(indepDataset, cube, cnv = NULL, inv = NULL,
-  aps = "def", pl = TRUE, ...)
+  aps = "def", pl = TRUE, toxls = "def", ...)
 }
 \arguments{
 \item{indepDataset}{The dataset containing the independent data. An object 
@@ -50,6 +50,11 @@ use as input for specifying the plotting options.}
 at all. If FALSE, only the calculation and the (possible) export to an excel 
 file (see details) will be performed.}
 
+\item{toxls}{'def' or logical. If left at the default 'def' the value from 
+\code{plsr_indepPred_exportToExcel} in the settings file is used. Set to TRUE 
+or FALSE to directly control if export of predicted data to excel should be 
+performed or not.}
+
 \item{...}{Arguments for overriding one or more of the plotting parameters 
 from the analysis procedure, please see \code{\link{plot_pls_args}}.}
 }
@@ -92,18 +97,19 @@ predList <- plot_pls_indepPred(fdIndep, cu, pls.colorBy="C_Group") # use the
 # class variable 'C_Group' from the independent dataset for coloring
 predList <- plot_pls_indepPred(fdIndep, cu, pg.where="pdf", pg.fns="_fooBar") 
 # add the string '_fooBar' to the generated pdfs.
+predList <- plot_pls_indepPred(fdIndep, cu, toxls=FALSE) # no exporting to xls
 }
 }
 \seealso{
-Other PLSR documentation: \code{\link{calc_pls_args}},
-  \code{\link{plot_pls,aquap_cube-method}},
-  \code{\link{plot_pls_args}}
-
 Other Plot functions: \code{\link{plot,aquap_cube,missing-method}},
   \code{\link{plot,aquap_data,missing-method}},
   \code{\link{plot_aqg}},
   \code{\link{plot_pca,aquap_cube-method}},
   \code{\link{plot_pls,aquap_cube-method}},
   \code{\link{plot_simca,aquap_cube-method}}
+
+Other PLSR documentation: \code{\link{calc_pls_args}},
+  \code{\link{plot_pls,aquap_cube-method}},
+  \code{\link{plot_pls_args}}
 }
 

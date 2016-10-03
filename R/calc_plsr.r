@@ -151,7 +151,7 @@ dev_collectNcomps <- function(cube) {
 
 # independent validation ------------------------
 
-check_indPlsPrediction_input <- function(indepDataset, cube, cnv=NULL, inv=NULL, cubeName, dsName) { 
+check_indPlsPrediction_input <- function(indepDataset, cube, cnv=NULL, inv=NULL, cubeName, dsName, toxls) { 
 	dataset <- indepDataset
 	yPref <- .ap2$stn$p_yVarPref
 	ap <- getAnproc(cube)
@@ -221,6 +221,14 @@ check_indPlsPrediction_input <- function(indepDataset, cube, cnv=NULL, inv=NULL,
 			stop(paste0("Sorry, the provided variable", ad1, " '", paste(inv[indNo], collapse="', '"), "' at the independent dataset '", dsName, "' seem", ad2, " not to be entirely numerical.\nPlease check (or re-import) the dataset '", dsName, "'."), call.=FALSE)
 		}
 	} # end !is.null(inv)
+	###
+	if (all(toxls) == "def") {
+		toxls <- .ap2$stn$plsr_indepPred_exportToExcel
+	}
+	if (!all(is.logical(toxls)) | length(toxls) != 1) {
+		stop("Please provide either TRUE or FALSE to the argument 'toxls' resp. to the argument 'plsr_indepPred_exportToExcel' in the settings file.", call.=FALSE)
+	}
+	assign("toxls", toxls, pos=parent.frame(n=1))
 	###
 } # EOF
 
@@ -300,11 +308,51 @@ calculateIndepPlsPrediction <- function(indepDataset, cube, cnv, inv, ap) {
 	return(resultList)
 } # EOF
 
-makeIndepPlsrValidationPlots_inner <- function(cube, indepDataset, predResults, ap, onMain, onSub, where, inRDP, colorBy) {
-	colLm <- .ap2$stn$plsr_colorForLinearModel
+maybeMakeSwarm <- function(ind, DF, cols=1, plSwarm=.ap2$stn$plsr_plotDataInSwarm, prio="density", swCex=0.95) {
+	if (length(cols)==1) {
+		pwColor <- rep(1, nrow(DF))
+	} else {
+		pwColor <- cols
+	}
+	if (length(ind) > 1) {
+		if (plSwarm) {
+			locDF <- beeswarm::swarmx(DF[ind, "xval"], DF[ind, "yval"], priority=prio, cex=swCex)
+			locDF$color <- pwColor[ind]
+		} else {
+			locDF <- data.frame(x=DF[ind, "xval"], y=DF[ind, "yval"], color=pwColor[ind])
+		}
+	} else {
+		locDF <- data.frame(x=DF[ind, "xval"], y=DF[ind, "yval"], color=pwColor[ind])				
+	}
+	return(locDF)
+} # EOF
+
+plotPlsrErrorPoints <- function(DF, colors, xlab, ylab, mainText, subText, ppch) {
+	uniX <- unique(DF[,"xval"])
+	indMin <- which(DF[,"xval"] == min(uniX)) 
+	minX <- min(maybeMakeSwarm(indMin, DF)$x) # get min range
+	indMax <- which(DF[,"xval"] == max(uniX))
+	maxX <- max(maybeMakeSwarm(indMax, DF)$x) # get max range
+#	print(maxX)
+	plot(minX-1, xlim= c(minX, maxX), ylim=range(DF[, "yval"]), xlab=xlab, ylab=ylab, main=mainText, sub=subText) # make an empty plot
+	plotList <- vector("list", length=length(uniX))
+	for (m in 1: length(uniX)) {
+		ind <- which(DF[,"xval"] == uniX[m])
+		plotList[[m]] <- maybeMakeSwarm(ind, DF, cols=colors)
+	} # end for m
+	lapply(plotList, function(le) points(le, col=le$color, pch=ppch))
+	return(invisible(plotList))
+} # EOF	
+				
+makeIndepPlsrValidationPlots_inner <- function(cube, indepDataset, predResults, ap, onMain, onSub, where, inRDP, colorBy, dsName) {
+	colLmTrain <- .ap2$stn$plsr_color_lm_training
+	colLmCV <- .ap2$stn$plsr_color_lm_crossvalid
+	colLmPred <- .ap2$stn$plsr_color_lm_indepPred
 	ltTarg <- .ap2$stn$plsr_linetypeTargetLine
 	ltLm <- .ap2$stn$plsr_linetypeLinearModel
 	rnd <- .ap2$stn$plsr_nrDigitsRMSEx
+	plotSwarm <- .ap2$stn$plsr_plotDataInSwarm
+	allPch <- 16
 	#
 	dataset <- indepDataset
 	header <- getHeader(dataset)
@@ -318,43 +366,81 @@ makeIndepPlsrValidationPlots_inner <- function(cube, indepDataset, predResults, 
 		colorMsg <- " color by: "
 		colLegend <- TRUE
 	} # end else
-	for (i in 1: length(predResults)) {
+	for (i in 1: length(predResults)) { # has the same length as the cube; we could take the cube here instead
+		plsModels <- getPlsrModels(cube[[i]])
+		regrOnList <- getPlsrRegrOnList(cube[[i]])
 		for (k in 1: length(predResults[[i]])) {
+			# prediction
 			pred <- predResults[[i]][[k]]
 			R2pr <- round(pred$R2pr, rnd)
 			RMSEP <- round(pred$RMSEP, rnd)
 			ncomp <- pred$ncomp
+			# calibration
+			ind <- which(regrOnList == pred$modRegrOn) # we have to be careful with the sorting, as the user input might have a different order !!
+			singleModel <- plsModels[[ind]]
+			RMSEC <- getRMSEC(singleModel)
+			RMSEC_rdp <- convertToRDP(RMSEC, pred$modRegrOn, header)
+			R2C <- getR2C(singleModel)	
+			# crossvalidatoin
+			RMSECV <- getRMSECV(singleModel)
+			RMSECV_rdp <- convertToRDP(RMSECV, pred$modRegrOn, header)
+			R2CV <- getR2CV(singleModel)
+			#
+			yvar <- singleModel$model$yvar
+			yvarFittedCalib <- singleModel$fitted.values[ , , ncomp]
+			yvarFittedCV <- singleModel$validation$pred[ , , ncomp]	
+			#
 			if (all(is.na(pred$indepValue))) { # so we had NO validation data
 				# do nothing for the moment
 			} else {
 				RMSEP_rdp <- convertToRDP(RMSEP, pred$indepValid, header)
-				mainT <- paste0("plsr model from: ", onMain, pred$idString)
-				regrOnMsg <- paste0("   indep. data: predicted value: ", pred$indepValid, "   ")
+				mainText <- paste0("plsr mod. (", pred$modRegrOn, ") from: ", onMain, pred$idString)
+				regrOnMsg <- paste0("   indep. data from '", dsName, "', predicted value: ", pred$indepValid, "   ")
 				ncompMsg <- paste0("   ", ncomp, " comps.")
 				Nmsg <- paste0("   N=", nrow(header))
 				subText <- paste0(onSub, regrOnMsg, colorMsg, colorBy, ncompMsg, Nmsg)
-				plot(pred$predResult ~ pred$indepValue, col=color, main=mainT, sub=subText, xlab="actual value", ylab="(independent) predicted value")
+				#
+				datPred <- data.frame(xval=as.numeric(pred$indepValue), yval=as.numeric(pred$predResult))
+				xlab <- "measured value"
+				ylab <- "independent predicted value"
+				#
+				plotPlsrErrorPoints(DF=datPred, colors=color, xlab, ylab, mainText, subText, ppch=allPch) ### CORE ### CORE	
+				#
 				abline(0,1, col="gray", lty=ltTarg, lwd=1)
+				abline(lm(yvarFittedCalib ~ yvar), lty=ltLm, lwd=1, col=colLmTrain) 
+				abline(lm(yvarFittedCV ~ yvar), lty=ltLm, lwd=1, col=colLmCV) 	
 				if (length(unique(pred$indepValue)) > 1) {
-					abline(lm(pred$predResult ~ pred$indepValue), lty=ltLm, lwd=1, col=colLm) # fitting linear model
+					abline(lm(pred$predResult ~ pred$indepValue), lty=ltLm, lwd=1, col=colLmPred) # fitting linear model
 				}
-			#	plot(res_pred ~ PredYvar, main = paste("PLSR to predict ", main," (n_new=",nrow(NewData),") ",sep=""),pch = 1, col=2, cex.lab = 1.5)
+				#
+				nrComps <- paste0("# comps.: ", ncomp)
+				rmsec <- paste0("RMSEC: ", RMSEC)
+				rmsec_rdp <- paste0("RMSEC[RDP]: ", RMSEC_rdp)
+				r2c <- paste0("R2C: ", R2C)
+				rmsecv <- paste0("RMSECV: ", RMSECV)
+				rmsecv_rdp <- paste0("RMSECV[RDP]: ", RMSECV_rdp)
+				r2cv <- paste0("R2CV: ", R2CV)	
+				rmsep <- paste0("RMSEP: ", RMSEP)
+				rmsep_rdp <- paste0("RMSEP[RDP]: ", RMSEP_rdp)
+				r2pr <- paste0("R2pr: ", R2pr)
 				if (inRDP) {
-					legendText <- paste0("RMSEP: ", RMSEP, "\nRMSEP[RDP]: ", RMSEP_rdp, "\nR2pr: ", R2pr, "\n\n ")
+					legendText <- c(nrComps, rmsec, rmsec_rdp, r2c, rmsecv, rmsecv_rdp, r2cv, rmsep, rmsep_rdp, r2pr)
+					legTxtCol <- c("black", rep(colLmTrain, 3), rep(colLmCV, 3), rep(colLmPred, 3))
 				} else {
-					legendText <- paste0("RMSEP: ", RMSEP, "\nR2pr: ", R2pr)
+					legendText <- c(nrComps, rmsec, r2c, rmsecv, r2cv, rmsep, r2pr)
+					legTxtCol <- c("black", rep(colLmTrain, 2), rep(colLmCV, 2), rep(colLmPred, 2))
 				}
-				legend("topleft", legend=legendText)
+				legBgCol <- rgb(255,255,255, alpha=.ap2$stn$col_alphaForLegends, maxColorValue=255) # is a white with alpha to be determined in the settings	
+				legend("topleft", legend=legendText, text.col=legTxtCol, bg=legBgCol)	
 				if (colLegend) {
-					legBgCol <- rgb(255,255,255, alpha=.ap2$stn$col_alphaForLegends, maxColorValue=255) # is a white with alpha to be determined in the settings
-					legend("bottomright", legend=clv$txtE, col=clv$color_legend, pch=16, bg=legBgCol)
+					legend("bottomright", legend=clv$txtE, col=clv$color_legend, pch=allPch, bg=legBgCol)
 				}
 			} # end else
 		} # end for k
 	} # end for i
 } # EOF
 
-makeIndepPlsrValidationPlots <- function(cube, indepDataset, predResults, anp2) {
+makeIndepPlsrValidationPlots <- function(cube, indepDataset, predResults, anp2, dsName) {
 	ap <- anp2
 	#
 	where <- ap$genPlot$where
@@ -376,7 +462,7 @@ makeIndepPlsrValidationPlots <- function(cube, indepDataset, predResults, anp2) 
 	onMain <- paste(expName, onMain, sep=" ")
 	if (where == "pdf") { pdf(file=filename, width, height, onefile=TRUE, family='Helvetica', pointsize=12) }
 	if (where != "pdf" & Sys.getenv("RSTUDIO") != 1) {dev.new(height=height, width=width)}	
-	makeIndepPlsrValidationPlots_inner(cube, indepDataset, predResults, ap, onMain, onSub, where, inRDP, colorBy) ### HERE ###
+	makeIndepPlsrValidationPlots_inner(cube, indepDataset, predResults, ap, onMain, onSub, where, inRDP, colorBy, dsName) ### HERE ###
 	if (where == "pdf") { dev.off() }
 	if (!.ap2$stn$allSilent & (where == "pdf" )) {cat("ok\n") }
 } # EOF
@@ -492,6 +578,10 @@ pls_pred_checkColorBy <- function(indepDataset, anp2, dsName) {
 #' @param pl Logical, defaults to TRUE. If predicted data should be plotted 
 #' at all. If FALSE, only the calculation and the (possible) export to an excel 
 #' file (see details) will be performed.
+#' @param toxls 'def' or logical. If left at the default 'def' the value from 
+#' \code{plsr_indepPred_exportToExcel} in the settings file is used. Set to TRUE 
+#' or FALSE to directly control if export of predicted data to excel should be 
+#' performed or not.
 #' @param ... Arguments for overriding one or more of the plotting parameters 
 #' from the analysis procedure, please see \code{\link{plot_pls_args}}.
 #' @return An (invisible) list containing the numerical results of the 
@@ -517,15 +607,16 @@ pls_pred_checkColorBy <- function(indepDataset, anp2, dsName) {
 #' # class variable 'C_Group' from the independent dataset for coloring
 #' predList <- plot_pls_indepPred(fdIndep, cu, pg.where="pdf", pg.fns="_fooBar") 
 #' # add the string '_fooBar' to the generated pdfs.
+#' predList <- plot_pls_indepPred(fdIndep, cu, toxls=FALSE) # no exporting to xls
 #' }
 #' @family PLSR documentation
 #' @family Plot functions
 #' @export
-plot_pls_indepPred <- function(indepDataset, cube, cnv=NULL, inv=NULL, aps="def", pl=TRUE, ...) { 
+plot_pls_indepPred <- function(indepDataset, cube, cnv=NULL, inv=NULL, aps="def", pl=TRUE, toxls="def", ...) { 
 	autoUpS()
 	dsName <- deparse(substitute(indepDataset))
 	cubeName <- deparse(substitute(cube))
-	check_indPlsPrediction_input(indepDataset, cube, cnv, inv, cubeName, dsName) ## !! is assigning cnv, inv
+	check_indPlsPrediction_input(indepDataset, cube, cnv, inv, cubeName, dsName, toxls) ## !! is assigning cnv, inv, toxls
 	ap1 <- getap(.lafw_fromWhere="cube", cube=cube)
 	anp2 <- doApsTrick(aps, cube, ...)
 	pls_pred_checkColorBy(indepDataset, anp2, dsName)
@@ -538,7 +629,7 @@ plot_pls_indepPred <- function(indepDataset, cube, cnv=NULL, inv=NULL, aps="def"
 	predList <- calculateIndepPlsPrediction(indepDataset, cube, cnv, inv, ap1) #### CORE #### calculation 
 	if (!.ap2$stn$allSilent) {cat("ok\n")}
 	###
-	if (.ap2$stn$plsr_indepPred_exportToExcel) {
+	if (toxls) {
 		if (!.ap2$stn$allSilent) {cat(paste0("Exporting predicted data to excel file... "))}
 		exportPredListToExcel(cube, predList, anp2) #### export to excel ####
 		if (!.ap2$stn$allSilent) {cat("ok\n")}
@@ -546,7 +637,7 @@ plot_pls_indepPred <- function(indepDataset, cube, cnv=NULL, inv=NULL, aps="def"
 	###
 	# now plot, please (use the ap2 now!)
 	if (pl) {
-		makeIndepPlsrValidationPlots(cube, indepDataset, predResults=predList, anp2) #### plot the results ####
+		makeIndepPlsrValidationPlots(cube, indepDataset, predResults=predList, anp2, dsName) #### plot the results ####
 	}
 	###
 	return(invisible(predList))

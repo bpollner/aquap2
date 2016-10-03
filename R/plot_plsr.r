@@ -98,8 +98,8 @@ plot_plsr_error <- function(plsModel, plsPlusModel, dataset, ClassVar, onMain=""
 	legend(legPos, legend=c("RMSEC", "RMSECV", "RMSECV_adj"), col=1:3, lty=1:3, bg=legBgCol)
 } # EOF
 
-plot_plsr_calibration <- function(plsModel, dataset, regrOn, classFCol, onMain="", onSub="",  inRDP=FALSE) {
-	colLm <- .ap2$stn$plsr_colorForLinearModel
+plot_plsr_calibration_classic <- function(plsModel, dataset, regrOn, classFCol, onMain="", onSub="",  inRDP=FALSE) {
+	colLm <- .ap2$stn$plsr_color_lm_training
 	ltTarg <- .ap2$stn$plsr_linetypeTargetLine
 	ltLm <- .ap2$stn$plsr_linetypeLinearModel
 	#
@@ -139,11 +139,11 @@ plot_plsr_calibration <- function(plsModel, dataset, regrOn, classFCol, onMain="
 	}
 } # EOF
 
-plot_plsr_validation <- function(plsModel, dataset, regrOn, classFCol, onMain="", onSub="", inRDP=FALSE, valid="") {
-	colLm <- .ap2$stn$plsr_colorForLinearModel
+plot_plsr_validation_classic <- function(plsModel, dataset, regrOn, classFCol, onMain="", onSub="", inRDP=FALSE, valid="") {
+	colLm <- .ap2$stn$plsr_color_lm_crossvalid
 	ltTarg <- .ap2$stn$plsr_linetypeTargetLine
 	ltLm <- .ap2$stn$plsr_linetypeLinearModel
-
+	#
 	header <- getHeader(dataset)
 	if (is.null(classFCol)) {
 		color <- 1
@@ -178,6 +178,75 @@ plot_plsr_validation <- function(plsModel, dataset, regrOn, classFCol, onMain=""
 	if (colLegend) {
 		legBgCol <- rgb(255,255,255, alpha=.ap2$stn$col_alphaForLegends, maxColorValue=255) # is a white with alpha to be determined in the settings	
 		legend("bottomright", legend=clv$txtE, col=clv$color_legend, pch=16, bg=legBgCol)
+	}
+} # EOF
+
+plot_plsr_calibValidSwarm <- function(plsModel, dataset, regrOn, classFCol, onMain="", onSub="", inRDP=FALSE, valid="") {
+	colLmTrain <- .ap2$stn$plsr_color_lm_training
+	colLmCV <- .ap2$stn$plsr_color_lm_crossvalid
+	ltTarg <- .ap2$stn$plsr_linetypeTargetLine
+	ltLm <- .ap2$stn$plsr_linetypeLinearModel
+	allPch <- 16
+	#
+	header <- getHeader(dataset)
+	if (is.null(classFCol)) {
+		color <- 1
+		colorMsg <- ""
+		colLegend <- FALSE
+	} else {
+		clv <- extractColorLegendValues(dataset, groupBy=classFCol) # returns a list: color_data, color_unique, color_legend, txt, txtE, sumPart, dataGrouping, pch_data, pch_legend
+		color <- clv$color_data
+		colorMsg <- " color by: "
+		colLegend <- TRUE
+	}
+	ncomp <- plsModel$ncomp
+	#
+	RMSEC <- getRMSEC(plsModel)
+	RMSEC_rdp <- convertToRDP(RMSEC, regrOn, header)
+	R2C <- getR2C(plsModel)
+	#
+	RMSECV <- getRMSECV(plsModel)
+	RMSECV_rdp <- convertToRDP(RMSECV, regrOn, header)
+	R2CV <- getR2CV(plsModel)
+	#
+	yvar <- plsModel$model$yvar
+	yvarFittedCalib <- plsModel$fitted.values[ , , ncomp]
+	yvarFittedCV <- plsModel$validation$pred[ , , ncomp]	
+	#
+	regrOnMsg <- paste("   regr. on: ", regrOn, "   ",sep="")
+	ncompMsg <- paste("   ", ncomp, " comps.", sep="")
+	Nmsg <- paste("   N=", nrow(header), sep="")
+	mainText <- paste0(onMain, " (valid. ", valid, ")")
+	subText <- paste(onSub, regrOnMsg, colorMsg, classFCol, ncompMsg, Nmsg, sep="")
+	#
+	datCV <- data.frame(xval=yvar, yval=yvarFittedCV)
+	xlab <- "measured value"
+	ylab <- "predicted value"
+	#
+	plotPlsrErrorPoints(DF=datCV, colors=color, xlab, ylab, mainText, subText, ppch=allPch) ### CORE ### CORE	
+	#
+	abline(0,1, col="gray", lty=ltTarg, lwd=1)
+	abline( lm(yvarFittedCalib ~ yvar), lty=ltLm, lwd=1, col=colLmTrain) 
+	abline(lm(yvarFittedCV ~ yvar), lty=ltLm, lwd=1, col=colLmCV) 
+	#
+	nrComps <- paste0("# comps.: ", ncomp)
+	rmsec <- paste0("RMSEC: ", RMSEC)
+	rmsec_rdp <- paste0("RMSEC[RDP]: ", RMSEC_rdp)
+	r2c <- paste0("R2C: ", R2C)
+	rmsecv <- paste0("RMSECV: ", RMSECV)
+	rmsecv_rdp <- paste0("RMSECV[RDP]: ", RMSECV_rdp)
+	r2cv <- paste0("R2CV: ", R2CV)	
+	if (inRDP) {
+		legendText <- c(nrComps, rmsec, rmsec_rdp, r2c, rmsecv, rmsecv_rdp, r2cv)
+		legTxtCol <- c("black", rep(colLmTrain, 3), rep(colLmCV, 3))
+	} else {
+		legendText <- c(nrComps, rmsec, r2c, rmsecv, r2cv)
+		legTxtCol <- c("black", rep(colLmTrain, 2), rep(colLmCV, 2))
+	}
+	legBgCol <- rgb(255,255,255, alpha=.ap2$stn$col_alphaForLegends, maxColorValue=255) # is a white with alpha to be determined in the settings	
+	legend("topleft", legend=legendText, text.col=legTxtCol, bg=legBgCol)
+	if (colLegend) {
+		legend("bottomright", legend=clv$txtE, col=clv$color_legend, pch=allPch, bg=legBgCol)
 	}
 } # EOF
 
@@ -299,6 +368,8 @@ plsr_plotRegressionVectors <- function(cube, ap, bw, adLines, ccol, clty) {
 } # EOF
 
 makePLSRErrorPlots_inner <- function(plsModels, plsPlusModels, regrOn, onMain, onSub, classForColoring, dataset, inRDP, idString) { # is cycling through all the regrOn of a single set; has the data from a single set; all models(plus) and the regrOn are a list with 1 to n elements !
+	plotSwarm <- .ap2$stn$plsr_plotDataInSwarm
+	#
 	onMainOrig <- onMain
 	for (i in 1: length(plsModels)) { # just take the 'plsModels', as they all have the same length
 		validChar <- plsModels[[i]]$validation$method
@@ -307,8 +378,12 @@ makePLSRErrorPlots_inner <- function(plsModels, plsPlusModels, regrOn, onMain, o
 		onMain <- paste(onMainOrig, idString)
 		#
 		plot_plsr_error(plsModels[[i]], plsPlusModels[[i]], dataset, regrOn[[i]], onMain, onSub, inRDP)
-		plot_plsr_calibration(plsModels[[i]], dataset, regrOn[[i]], classForColoring, onMain, onSub, inRDP)
-		plot_plsr_validation(plsModels[[i]], dataset, regrOn[[i]], classForColoring, onMain, onSub, inRDP, valid)
+		if (TRUE) {
+			plot_plsr_calibValidSwarm(plsModels[[i]], dataset, regrOn[[i]], classForColoring, onMain, onSub, inRDP, valid)
+		} else { # abandoned !!
+			plot_plsr_calibration_classic(plsModels[[i]], dataset, regrOn[[i]], classForColoring, onMain, onSub, inRDP)
+			plot_plsr_validation_classic(plsModels[[i]], dataset, regrOn[[i]], classForColoring, onMain, onSub, inRDP, valid)
+		}
 	} # end for i
 } # EOF
 

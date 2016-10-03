@@ -30,7 +30,8 @@ Imports:
     rrcov,
     rrcovHD,
     prospectr,
-    plotrix
+    plotrix,
+    beeswarm
 Suggests:
     knitr
 VignetteBuilder: knitr

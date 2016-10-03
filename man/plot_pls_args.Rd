@@ -33,9 +33,10 @@ each single plot.}
 the pdf.}
 }
 \description{
-The following parameters can be used in the \code{...} argument in 
-function \code{\link{plot}} and \code{\link{plot_pls}} to override the values 
-in the analysis procedure file and so to modify the graphics - see examples.
+The following parameters can be used in the \code{...} argument 
+e.g. in function \code{\link{plot}} and \code{\link{plot_pls}} to override 
+the values in the analysis procedure file and so to modify the graphics - 
+see examples.
 \describe{
 \item{\code{plot(cube, ...)}}{ }
 \item{ \code{plot_pls(cube, ...)}}{ }
@@ -58,12 +59,12 @@ plot_pls(cube, pls.colorBy="C_Temp")
 \seealso{
 \code{\link{plot_pls}}
 
-Other PLSR documentation: \code{\link{calc_pls_args}},
-  \code{\link{plot_pls,aquap_cube-method}},
-  \code{\link{plot_pls_indepPred}}
-
 Other Plot arguments: \code{\link{plot,aquap_data,missing-method}},
   \code{\link{plot_aqg_args}}, \code{\link{plot_pca_args}},
   \code{\link{plot_pg_args}}, \code{\link{plot_sim_args}}
+
+Other PLSR documentation: \code{\link{calc_pls_args}},
+  \code{\link{plot_pls,aquap_cube-method}},
+  \code{\link{plot_pls_indepPred}}
 }
 

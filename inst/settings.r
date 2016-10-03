@@ -156,6 +156,7 @@ stn <- list(
 	
 	##PLSR
 	plsr_calcInParallel = TRUE, 			## if the calculation of the plsr models should be done in parallel
+	plsr_plotDataInSwarm = TRUE, 			## set to FALSE to only use the classical (with possibly several points overlapping on a single line) way to plot the training, crossvalidation and prediction plots.
 	plsr_addCompsBoundaries = c(7, 20),		## The number of components demarking three regions (below the first number, between first and second, and above the second number) of number of components where the numbers of components listed below are added. (For showing an error plot going beyond the actual number of components)
 	plsr_addComps = c(3, 5, 8), 			## how many components should be added to the error plot beyond the calculated best nr. of components in the above specified boundaries
 	plsr_percentObservAsMaxNcomp = 35,		## the percentage of the available number of observations indicating the maximally allowed number of components for the test-runs to determine the optimal number of components
@@ -163,7 +164,9 @@ stn <- list(
 	plsr_nrTestIterations = 10, 			## how many repetitions should be calculated when getting the optimal number of components. Not the lowest number of components is chosen, but the one that comes up most often as the lowest.
 	plsr_nrDigitsRMSEx = 4,					## rounding for the error values
 	plsr_colorForBestNumberComps = "blue",	## the color for the vertical line in the error plot showing the best number of components
-	plsr_colorForLinearModel = "red", 		## the color for the line showing the linear model of predicted vs. actual data
+	plsr_color_lm_training = "blue", 		## the color for the line showing the linear model of predicted vs. actual data at the training
+	plsr_color_lm_crossvalid = "red", 		## the color for the line showing the linear model of predicted vs. actual data at the crossvalidation
+	plsr_color_lm_indepPred = "darkgreen",	## the color for the line showing the linear model of predicted vs. actual data at the independent prediction
 	plsr_linetypeTargetLine = 1, 			## the line-type for the grey target line
 	plsr_linetypeLinearModel = 1, 			## the line-type for the line showing the liner model of predicted vs. actual data
 	plsr_regressionVector_discrim = TRUE,	## if it should be discriminated between true positive / negative peaks in the plsr regression vector
