@@ -35,7 +35,7 @@ setMethod("[", signature(x = "aquap_data"), definition = function(x, i) {
 			rownames(NIR) <- rownames(x$NIR)[i]
 			colnames(NIR) <- colnames(x$NIR)
 			fd <- reFactor(data.frame(I(header), I(colRep), I(NIR)))
-			return(new("aquap_data", fd, ncpwl=x@ncpwl, metadata=x@metadata))
+			return(new("aquap_data", fd, ncpwl=x@ncpwl, metadata=x@metadata, anproc=x@anproc, version=x@version))
 		} ) # end set method
 
 #' @rdname aquap_data-methods
