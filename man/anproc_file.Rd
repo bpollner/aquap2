@@ -122,16 +122,21 @@ number of components in the PLSR.}
 \itemize{
   \item "def" Read in the default value from settings.r (parameter 
   \code{plsr_calc_typeOfCrossvalid})
-  \item A numeric length one for this n-fold crossvalidation
-  \item input in the format like e.g. \code{10@C_Group} for performing a 
-  10-fold crossvalidation with groups XXX something here for using a certain 
-  class-variable for grouping XXX
+  \item A numeric length one for this n-fold crossvalidation. The default is 
+  to always exclude resp. include consecutive scans together.
+  \item A valid name of a class variable for performing a crossvalidation 
+  based on the grouping defined by this variable. For a class variable 
+  containing e.g. four different levels, a 4-fold crossvalidation with always 
+  all members of one group being excluded is performed.
+  This is overruling any grouping that would result from the consecutive 
+  scans, please see below.
   \item "LOO" for a leave-one-out crossvalidation
 }
 Please note that via the parameter \code{plsr_calc_CV_consecsTogether} in 
-the settings file you can select if for crossvalidation the consecutive scans 
-(i.e. the scans with the same sample number) should always be excluded or 
-included together.}
+the settings file you can select if for crossvalidation the 
+\strong{consecutive scans} (i.e. the scans with the same sample number) should 
+always be excluded or included together. The default is to always exclude resp. 
+include the consecutive scans of a single sample together.}
 
 \item{do.pls}{Logical. If used in a plotting function, if analysis from PLSR 
 models should be plotted.}

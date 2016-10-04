@@ -510,8 +510,10 @@ ap_check_dptModules <- function(ap) {
 	}
 } # EOF
 
-ap_check_plsr_Input <- function(ap) {
+ap_check_plsr_Input <- function(ap, header) {
 	if (!is.null(ap$plsr)) {
+		cPref <- .ap2$stn$p_ClassVarPref
+		##
 		e <- ap$plsr
 		## ncomp
 		if (!is.null(e$ncomp)) {
@@ -526,11 +528,28 @@ ap_check_plsr_Input <- function(ap) {
 		if (all(e$valid ==  "def")) {
 			e$valid <- .ap2$stn$plsr_calc_typeOfCrossvalid
 		}
-		if (!all(e$valid == "LOO")) {
-			if (!all(is.numeric(e$valid)) | length(e$valid) != 1) {
-				stop(paste0("Please provide either 'LOO', or a length one numeric to the argument 'pls.valid' in the analysis procedure / your input."), call.=FALSE)
-			}
+		if (all(e$valid == "LOO")) {
+			e$valid <- "LOO"
 		}
+		if (!all(e$valid == "LOO")) {
+			if (all(is.character(e$valid))) {
+				if (length(e$valid) !=1) {
+					stop("Please provide a length one character or number to the argument 'pls.valid' in the analysis procedure / your input.", call.=FALSE)
+				}
+				cns <- colnames(header)
+				cns <- cns[grep(cPref, cns)]
+				if (!e$valid %in% cns) {
+					stop(paste0("Sorry, the class-variable '", e$valid, "' for grouping scans for crossvalidation seems not to exist in the provided dataset.\nPlease check your input at the argument 'pls.valid' or in the analysis procedure. \nPossible values are: '", paste(cns, collapse="', '"), "."), call.=FALSE)
+				}
+				if (nlevels(header[, e$valid]) < 2) {
+					stop(paste0("Sorry, you need to have at least two distinct groups for crossvalidation. The selected variable '", e$valid, "' contains only one group in the current dataset."), call.=FALSE)
+				}
+			} else { # end all character
+				if (!all(is.numeric(e$valid)) | length(e$valid) != 1) {
+					stop(paste0("Please provide either 'LOO', a valid class variable name or a length one numeric to the argument 'pls.valid' in the analysis procedure / your input."), call.=FALSE)
+				}
+			} # end else
+		} # end if !LOO
 		ap$plsr$valid <- e$valid
 		## what pv_plsr_what <- c("both", "errors", "regression")
 		if (!all(is.character(e$what)) | length(e$what) !=1) {
@@ -624,7 +643,7 @@ ap_checExistence_Defaults <- function(ap, dataset, haveExc) {
 	ap <- ap_check_pca_defaults(ap, dataset$header)
 	ap <- ap_check_gp_generalPlottingDefaults(ap)
 	ap_check_dptModules(ap)
-	ap <- ap_check_plsr_Input(ap)
+	ap <- ap_check_plsr_Input(ap, dataset$header)
 	# add more default checking for other statistics here
 	return(ap)
 } # EOF

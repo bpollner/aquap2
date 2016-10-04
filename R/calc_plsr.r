@@ -42,10 +42,20 @@ createSegmentList <- function(header, nrSegs=10) { # gives back a list that can 
 	return(out) 		
 } # EOF
 
+createCustomGroupList <- function(header, groupBy) {
+	lev <- levels(header[, groupBy])
+	grList <- vector("list", length=length(lev))
+	for (i in 1: length(lev)) {
+		grList[[i]] <- which(header[, groupBy] == lev[i])
+	}
+	return(grList)
+} # EOF
+
 createPlsrSegments <- function(header, valid=10) { # gives back a number or a list
-	if (valid == nrow(header)) {
-		return(valid)
-	} else { 
+	if (is.numeric(valid)) {
+		if (valid == nrow(header)) {
+			return(valid)
+		}
 		if (valid > nrow(header)) {
 			return(nrow(header))
 		}
@@ -53,8 +63,10 @@ createPlsrSegments <- function(header, valid=10) { # gives back a number or a li
 		if (.ap2$stn$plsr_calc_CV_consecsTogether) {
 			out <- createSegmentList(header, nrSegs=valid)
 		}
-		return(out)
-	} # end else
+	} else { # so it must be a valid variable name
+		out <- createCustomGroupList(header, groupBy=valid)
+	}
+	return(out)
 } # EOF
 
 makePLSRModel_inner <- function(dataset, Y_Class, niter=5, ncomp=NULL, valid, stnLoc) {
@@ -66,7 +78,7 @@ makePLSRModel_inner <- function(dataset, Y_Class, niter=5, ncomp=NULL, valid, st
 	dataset <- data.frame(yvar=header[,Y_Class], allData=dataset$NIR ) ### here make a new "flat" dataset
 	typeValid <- "CV"
 	if (valid == "LOO") {
-		valid <- nrow(dataset)
+		valid <- nrow(dataset) # because otherwise the plsr function throws an error (bug??)
 	}
 	if (niter == 1) {niter <- 2} # otherwise we never get out of the while loop !!!
 	if (is.null(ncomp)) {
@@ -164,7 +176,7 @@ makePLSRModels <- function(dataset, md, ap) {
 		modPlus <- c(modPlus, list(modelList[[i]]$modelsPlus))
 		regrOn <- c(regrOn, list(modelList[[i]]$regrOn))
 	} # end for i	
-	out <- list(plsr=modCorr, plsrPlus=modPlus, regrOn=regrOn)
+	out <- list(plsr=modCorr, plsrPlus=modPlus, regrOn=regrOn, valid=valid)
 	return(out)
 } # EOF
 

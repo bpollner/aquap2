@@ -379,7 +379,7 @@ plsr_plotRegressionVectors <- function(cube, ap, bw, adLines, ccol, clty) {
 	if (!.ap2$stn$allSilent & (where == "pdf" )) {cat("ok\n") }
 } # EOF
 
-makePLSRErrorPlots_inner <- function(plsModels, plsPlusModels, regrOn, onMain, onSub, classForColoring, dataset, inRDP, idString, psd) { # is cycling through all the regrOn of a single set; has the data from a single set; all models(plus) and the regrOn are a list with 1 to n elements !
+makePLSRErrorPlots_inner <- function(plsModels, plsPlusModels, regrOn, onMain, onSub, classForColoring, dataset, inRDP, idString, psd, finalValid) { # is cycling through all the regrOn of a single set; has the data from a single set; all models(plus) and the regrOn are a list with 1 to n elements !
 	plotSwarm <- .ap2$stn$plsr_plotDataInSwarm
 	#
 	onMainOrig <- onMain
@@ -389,6 +389,11 @@ makePLSRErrorPlots_inner <- function(plsModels, plsPlusModels, regrOn, onMain, o
 		valid <- paste(validChar, " ", foldnes, "", sep="")
 		if (foldnes == nrow(dataset)) {
 			valid <- "LOO"
+		}
+		if (is.character(finalValid)) {
+			if (finalValid %in% colnames(dataset$header)) {
+				valid <- paste0(valid, " by ", finalValid)
+			}
 		}
 		onMain <- paste(onMainOrig, idString)
 		#
@@ -408,7 +413,7 @@ makePLSRErrorPlots <- function(cube, ap, onMain, onSub, where, inRDP, psd) { # i
 		aa <- getPLSRObjects(cube[[i]])
 		dataset <- getDataset(cube[[i]])
 		idString <- adaptIdStringForDpt(ap, getIdString(cube[[i]]))
-		makePLSRErrorPlots_inner(aa$model, aa$modelPlus, aa$regrOn, onMain, onSub, classForColoring, dataset, inRDP, idString, psd) #### handing down data from a single set; model, modelPlus and RegrOn are each a list having 1 to n elements !!
+		makePLSRErrorPlots_inner(aa$model, aa$modelPlus, aa$regrOn, onMain, onSub, classForColoring, dataset, inRDP, idString, psd, aa$valid) #### handing down data from a single set; model, modelPlus and RegrOn are each a list having 1 to n elements !!
 	} # end for i
 } # EOF
 
