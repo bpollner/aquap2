@@ -16,13 +16,20 @@ those for regression in the PLSR.}
 PLSR. Set to NULL for automatic detection, or provide an integer to use this 
 number of components in the PLSR.}
 
-\item{pls.valid}{Character. Which crossvalidation to use. Possible values are
+\item{pls.valid}{Character. Which crossvalidation to use. Possible values are:
 \itemize{
-  \item "def" Read in the default value from settings.r
-  \item "CV" for a 10-fold crossvalidation
+  \item "def" Read in the default value from settings.r (parameter 
+  \code{plsr_calc_typeOfCrossvalid})
+  \item A numeric length one for this n-fold crossvalidation
+  \item input in the format like e.g. \code{10@C_Group} for performing a 
+  10-fold crossvalidation with groups XXX something here for using a certain 
+  class-variable for grouping XXX
   \item "LOO" for a leave-one-out crossvalidation
-  \item XXX something here for using a certain class-variable for grouping XXX
-}}
+}
+Please note that via the parameter \code{plsr_calc_CV_consecsTogether} in 
+the settings file you can select if for crossvalidation the consecutive scans 
+(i.e. the scans with the same sample number) should always be excluded or 
+included together.}
 }
 \description{
 The following parameters can be used in the \code{...} argument in 

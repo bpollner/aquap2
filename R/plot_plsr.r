@@ -181,12 +181,15 @@ plot_plsr_validation_classic <- function(plsModel, dataset, regrOn, classFCol, o
 	}
 } # EOF
 
-plot_plsr_calibValidSwarm <- function(plsModel, dataset, regrOn, classFCol, onMain="", onSub="", inRDP=FALSE, valid="") {
+plot_plsr_calibValidSwarm <- function(plsModel, dataset, regrOn, classFCol, onMain="", onSub="", inRDP=FALSE, valid="", psd) { ##### CORE ###
 	colLmTrain <- .ap2$stn$plsr_color_lm_training
 	colLmCV <- .ap2$stn$plsr_color_lm_crossvalid
 	ltTarg <- .ap2$stn$plsr_linetypeTargetLine
 	ltLm <- .ap2$stn$plsr_linetypeLinearModel
-	allPch <- 16
+	plotSwarm <- .ap2$stn$plsr_plotDataInSwarm
+	secAlpha <- .ap2$stn$plsr_color_alpha_secondaryData
+	pchPrim <- .ap2$stn$plsr_color_pch_primaryData
+	pchSec <- .ap2$stn$plsr_color_pch_secondaryData
 	#
 	header <- getHeader(dataset)
 	if (is.null(classFCol)) {
@@ -220,11 +223,17 @@ plot_plsr_calibValidSwarm <- function(plsModel, dataset, regrOn, classFCol, onMa
 	subText <- paste(onSub, regrOnMsg, colorMsg, classFCol, ncompMsg, Nmsg, sep="")
 	#
 	datCV <- data.frame(xval=yvar, yval=yvarFittedCV)
+	datCalib <- data.frame(xval=yvar, yval=yvarFittedCalib)
 	xlab <- "measured value"
 	ylab <- "predicted value"
-	#
-	plotPlsrErrorPoints(DF=datCV, colors=color, xlab, ylab, mainText, subText, ppch=allPch) ### CORE ### CORE	
-	#
+	######
+	plotPlsrErrorPoints(DF=datCV, colors=color, xlab, ylab, mainText, cex.main=1, subText, ppch=pchPrim) ### CORE ### CORE	
+	legPchSec <- NA	
+	if (psd) {
+		plotPlsrErrorPoints(DF=datCalib, colors=makeColorsTransparent(color, secAlpha), ppch=pchSec, pointsOnly=TRUE) 	
+		legPchSec <- pchSec
+	}
+	######
 	abline(0,1, col="gray", lty=ltTarg, lwd=1)
 	abline( lm(yvarFittedCalib ~ yvar), lty=ltLm, lwd=1, col=colLmTrain) 
 	abline(lm(yvarFittedCV ~ yvar), lty=ltLm, lwd=1, col=colLmCV) 
@@ -239,14 +248,17 @@ plot_plsr_calibValidSwarm <- function(plsModel, dataset, regrOn, classFCol, onMa
 	if (inRDP) {
 		legendText <- c(nrComps, rmsec, rmsec_rdp, r2c, rmsecv, rmsecv_rdp, r2cv)
 		legTxtCol <- c("black", rep(colLmTrain, 3), rep(colLmCV, 3))
+		legPch <- c(NA, rep(legPchSec, 3), rep(pchPrim, 3))	
 	} else {
 		legendText <- c(nrComps, rmsec, r2c, rmsecv, r2cv)
 		legTxtCol <- c("black", rep(colLmTrain, 2), rep(colLmCV, 2))
+		legPch <- c(NA, rep(legPchSec, 2), rep(pchPrim, 2))		
 	}
 	legBgCol <- rgb(255,255,255, alpha=.ap2$stn$col_alphaForLegends, maxColorValue=255) # is a white with alpha to be determined in the settings	
-	legend("topleft", legend=legendText, text.col=legTxtCol, bg=legBgCol)
+	legCex <- 0.8	
+	legend("topleft", legend=legendText, text.col=legTxtCol, pch=legPch, bg=legBgCol, cex=legCex)
 	if (colLegend) {
-		legend("bottomright", legend=clv$txtE, col=clv$color_legend, pch=allPch, bg=legBgCol)
+		legend("bottomright", legend=clv$txtE, col=clv$color_legend, pch=pchPrim, bg=legBgCol, cex=legCex)
 	}
 } # EOF
 
@@ -367,7 +379,7 @@ plsr_plotRegressionVectors <- function(cube, ap, bw, adLines, ccol, clty) {
 	if (!.ap2$stn$allSilent & (where == "pdf" )) {cat("ok\n") }
 } # EOF
 
-makePLSRErrorPlots_inner <- function(plsModels, plsPlusModels, regrOn, onMain, onSub, classForColoring, dataset, inRDP, idString) { # is cycling through all the regrOn of a single set; has the data from a single set; all models(plus) and the regrOn are a list with 1 to n elements !
+makePLSRErrorPlots_inner <- function(plsModels, plsPlusModels, regrOn, onMain, onSub, classForColoring, dataset, inRDP, idString, psd) { # is cycling through all the regrOn of a single set; has the data from a single set; all models(plus) and the regrOn are a list with 1 to n elements !
 	plotSwarm <- .ap2$stn$plsr_plotDataInSwarm
 	#
 	onMainOrig <- onMain
@@ -375,30 +387,32 @@ makePLSRErrorPlots_inner <- function(plsModels, plsPlusModels, regrOn, onMain, o
 		validChar <- plsModels[[i]]$validation$method
 		foldnes <- length(plsModels[[i]]$validation$segments)
 		valid <- paste(validChar, " ", foldnes, "", sep="")
+		if (foldnes == nrow(dataset)) {
+			valid <- "LOO"
+		}
 		onMain <- paste(onMainOrig, idString)
 		#
+		plot_plsr_calibValidSwarm(plsModels[[i]], dataset, regrOn[[i]], classForColoring, onMain, onSub, inRDP, valid, psd)
 		plot_plsr_error(plsModels[[i]], plsPlusModels[[i]], dataset, regrOn[[i]], onMain, onSub, inRDP)
-		if (TRUE) {
-			plot_plsr_calibValidSwarm(plsModels[[i]], dataset, regrOn[[i]], classForColoring, onMain, onSub, inRDP, valid)
-		} else { # abandoned !!
+		if (FALSE) { # abandoned !!
 			plot_plsr_calibration_classic(plsModels[[i]], dataset, regrOn[[i]], classForColoring, onMain, onSub, inRDP)
 			plot_plsr_validation_classic(plsModels[[i]], dataset, regrOn[[i]], classForColoring, onMain, onSub, inRDP, valid)
 		}
 	} # end for i
 } # EOF
 
-makePLSRErrorPlots <- function(cube, ap, onMain, onSub, where, inRDP) { # is cycling through the cube
+makePLSRErrorPlots <- function(cube, ap, onMain, onSub, where, inRDP, psd) { # is cycling through the cube
 	classForColoring <- ap$plsr$colorBy
 	##
 	for (i in 1: length(cube)) {
 		aa <- getPLSRObjects(cube[[i]])
 		dataset <- getDataset(cube[[i]])
 		idString <- adaptIdStringForDpt(ap, getIdString(cube[[i]]))
-		makePLSRErrorPlots_inner(aa$model, aa$modelPlus, aa$regrOn, onMain, onSub, classForColoring, dataset, inRDP, idString) #### handing down data from a single set; model, modelPlus and RegrOn are each a list having 1 to n elements !!
+		makePLSRErrorPlots_inner(aa$model, aa$modelPlus, aa$regrOn, onMain, onSub, classForColoring, dataset, inRDP, idString, psd) #### handing down data from a single set; model, modelPlus and RegrOn are each a list having 1 to n elements !!
 	} # end for i
 } # EOF
 
-plsr_plotErrors <- function(cube, ap) {
+plsr_plotErrors <- function(cube, ap, psd) {
 	where <- ap$genPlot$where
 	onMain <- ap$genPlot$onMain
 	onSub <- ap$genPlot$onSub
@@ -417,12 +431,12 @@ plsr_plotErrors <- function(cube, ap) {
 	onMain <- paste(expName, onMain, sep=" ")
 	if (where == "pdf") { pdf(file=filename, width, height, onefile=TRUE, family='Helvetica', pointsize=12) }
 	if (where != "pdf" & Sys.getenv("RSTUDIO") != 1) {dev.new(height=height, width=width)}	
-	makePLSRErrorPlots(cube, ap, onMain, onSub, where, inRDP) ### HERE ###
+	makePLSRErrorPlots(cube, ap, onMain, onSub, where, inRDP, psd) ### HERE ###
 	if (where == "pdf") { dev.off() }
 	if (!.ap2$stn$allSilent & (where == "pdf" )) {cat("ok\n") }
 } # EOF
 
-plot_plsr_checkDefaultsParams <- function(rv.bandwidth, rv.adLine, rv.col, rv.lty) {
+plot_plsr_checkDefaultsParams <- function(rv.bandwidth, rv.adLine, rv.col, rv.lty, psd) {
 	if (all(rv.bandwidth == "def")) {
 		rv.bandwidth <- .ap2$stn$pp_bandwidth
 	}
@@ -461,11 +475,19 @@ plot_plsr_checkDefaultsParams <- function(rv.bandwidth, rv.adLine, rv.col, rv.lt
 		}
 	}
 	assign("rv.lty", lty, pos=parent.frame(n=1))
+	##
+	if (all(psd == "def")) {
+		psd <- .ap2$stn$plsr_plot_secondaryData
+	}
+	if (!all(is.logical(psd)) | length(psd) != 1) {
+		stop("Please provide either TRUE or FALSE to the argument 'psd' resp. to the argument 'plsr_plot_secondaryData' in the settings file.", call.=FALSE)
+	}
+	assign("psd", psd, pos=parent.frame(n=1))
 	##	
 } # EOF
 
 ### CORE ### CORE ###
-plot_pls_cube <- function(cube, aps="def", rv.bandwidth="def", rv.adLine="def", rv.col="def", rv.lty="def", ...) {
+plot_pls_cube <- function(cube, aps="def", rv.bandwidth="def", rv.adLine="def", rv.col="def", rv.lty="def", psd="def", ...) {
 	autoUpS()
 	aps <- checkApsChar(aps)
 	if (aps == "cube") {
@@ -478,12 +500,12 @@ plot_pls_cube <- function(cube, aps="def", rv.bandwidth="def", rv.adLine="def", 
 	if (is.null(ap$plsr)) {
 		return(cat("*** PLSR model not available or not selected for plotting \n"))
 	}
-	plot_plsr_checkDefaultsParams(rv.bandwidth, rv.adLine, rv.col, rv.lty) # is assigning here !!
+	plot_plsr_checkDefaultsParams(rv.bandwidth, rv.adLine, rv.col, rv.lty, psd) # is assigning here !!
 	##
 	wch <- pv_plsr_what  # c("both", "errors", "regression")
   	what <- ap$plsr$what
   	if( any(c(wch[2], wch[1]) %in% what) ) {
-		plsr_plotErrors(cube, ap)  		  	
+		plsr_plotErrors(cube, ap, psd)  		  	
   	}
   	if( any(c(wch[3], wch[1]) %in% what) ) { 
   		plsr_plotRegressionVectors(cube, ap, bw=rv.bandwidth, adLines=rv.adLine, ccol=rv.col, clty=rv.lty) 	
@@ -538,6 +560,12 @@ plot_pls_cube <- function(cube, aps="def", rv.bandwidth="def", rv.adLine="def", 
 #'  \item{rv.lty}{Character "def" or a positive integer indicating the 
 #' desired line type. When left at the default "def" the value from the 
 #' settings.r file is read in (parameter \code{plsr_rv_customLinetype}).}
+#' \item{psd}{'plot secondary data'; either character 'def' or logical. If 
+#' secondary (i.e. calibration data) should be plotted as well. Leave at the 
+#' default 'def' to take the value from the parameter 
+#' \code{plsr_plot_secondaryData} in the settings file, or provide TRUE or FALSE.
+#' The alpha level for the secondary data can be set in parameter 
+#' \code{plsr_color_alpha_secondaryData} in the settings file.}
 #' }
 #' @return A pdf or graphic device.
 #' @examples

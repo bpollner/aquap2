@@ -886,3 +886,9 @@ doApsTrick <- function(aps, cube, ...) {
 	return(ap)
 } # EOF
 
+makeColorsTransparent <- function(colVec, alpha=100) {
+	mat <- col2rgb(colVec, alpha=TRUE)
+	mat[4,] <- alpha
+	colVec <- apply(mat, 2, function(x) rgb(x[1], x[2], x[3], x[4], maxColorValue=255))
+	return(colVec)
+} # EOF

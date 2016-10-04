@@ -5,7 +5,7 @@
 \title{Independent plsr prediction}
 \usage{
 plot_pls_indepPred(indepDataset, cube, cnv = NULL, inv = NULL,
-  aps = "def", pl = TRUE, toxls = "def", ...)
+  psd = "def", aps = "def", pl = TRUE, toxls = "def", ...)
 }
 \arguments{
 \item{indepDataset}{The dataset containing the independent data. An object 
@@ -31,6 +31,13 @@ name(s) as specified in argument \code{cnv} are looked for and, if present,
 are used for validating the predictions. If a character vector is provided, 
 it has to have the same length as the one in \code{cnv}, and those variables 
 will be used, in the given sequence, for validating the predictions.}
+
+\item{psd}{'plot secondary data'; either character 'def' or logical. If 
+secondary (i.e.crossvalidation data) should be plotted as well. Leave at the 
+default 'def' to take the value from the parameter 
+\code{plsr_plot_secondaryData} in the settings file, or provide TRUE or FALSE.
+The alpha level for the secondary data can be set in parameter 
+\code{plsr_color_alpha_secondaryData} in the settings file.}
 
 \item{aps}{Character length one. The default way to obtain the analysis 
 procedure. Defaults to "def". Possible values are:
@@ -101,15 +108,15 @@ predList <- plot_pls_indepPred(fdIndep, cu, toxls=FALSE) # no exporting to xls
 }
 }
 \seealso{
+Other PLSR documentation: \code{\link{calc_pls_args}},
+  \code{\link{plot_pls,aquap_cube-method}},
+  \code{\link{plot_pls_args}}
+
 Other Plot functions: \code{\link{plot,aquap_cube,missing-method}},
   \code{\link{plot,aquap_data,missing-method}},
   \code{\link{plot_aqg}},
   \code{\link{plot_pca,aquap_cube-method}},
   \code{\link{plot_pls,aquap_cube-method}},
   \code{\link{plot_simca,aquap_cube-method}}
-
-Other PLSR documentation: \code{\link{calc_pls_args}},
-  \code{\link{plot_pls,aquap_cube-method}},
-  \code{\link{plot_pls_args}}
 }
 

@@ -73,7 +73,7 @@
 	pls.regOn <- NULL						## which variables should be used to regress on? Leave empty c() or set to NULL for using all numerical variables
 #	pls.regOn <- c("Y_Temp")
 	pls.ncomp <- NULL						## number of components, leave at NULL for automatic detection of optimal number of components
-	pls.valid <- "CV"						## "CV" will perform a 10-fold crossvalidation, "LOO" a leave-one-out crossvalidation
+	pls.valid <- "def"						## 'def' to get the default value from the settings file (parameter 'plsr_calc_typeOfCrossvalid'); a number to perform a n-fold crossvalidation, or 'LOO' for a leave-one-out crossvalidation
 	
 	# plotting
 	pls.colorBy <- NULL						## What class-variable should be used for coloring in the RMSEP and RMSECV plots? Leave empty c() or set to NULL for no coloring

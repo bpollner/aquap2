@@ -523,12 +523,15 @@ ap_check_plsr_Input <- function(ap) {
 			}
 		}
 		## valid  pv_plsr_crossvalidation <- c("CV", "LOO")
-		if (!all(is.character(e$valid)) | length(e$valid) !=1) {
-			stop(paste("Please provide a length one character to the argument 'pls.valid' in the analysis procedure / your input.\nPossible values are: '", paste(pv_plsr_crossvalidation, collapse="', '"), "'.\n", sep=""), call.=FALSE)
+		if (all(e$valid ==  "def")) {
+			e$valid <- .ap2$stn$plsr_calc_typeOfCrossvalid
 		}
-		if (!e$valid %in% pv_plsr_crossvalidation) {
-			stop("Please provide one of: '", paste(pv_plsr_crossvalidation, collapse="', '"), "' to the argument 'pls.valid' in the analysis procedure / your input.", call.=FALSE)
+		if (!all(e$valid == "LOO")) {
+			if (!all(is.numeric(e$valid)) | length(e$valid) != 1) {
+				stop(paste0("Please provide either 'LOO', or a length one numeric to the argument 'pls.valid' in the analysis procedure / your input."), call.=FALSE)
+			}
 		}
+		ap$plsr$valid <- e$valid
 		## what pv_plsr_what <- c("both", "errors", "regression")
 		if (!all(is.character(e$what)) | length(e$what) !=1) {
 			stop(paste("Please provide a length one character to the argument 'pls.what' in the analysis procedure / your input.\nPossible values are: '", paste(pv_plsr_what, collapse="', '"), "'.", sep=""), call.=FALSE)
@@ -542,6 +545,7 @@ ap_check_plsr_Input <- function(ap) {
 		}
 		##
 	} # end if !is.null
+	return(ap)
 } # EOF
 
 ap_checExistence_Defaults <- function(ap, dataset, haveExc) {
@@ -620,7 +624,7 @@ ap_checExistence_Defaults <- function(ap, dataset, haveExc) {
 	ap <- ap_check_pca_defaults(ap, dataset$header)
 	ap <- ap_check_gp_generalPlottingDefaults(ap)
 	ap_check_dptModules(ap)
-	ap_check_plsr_Input(ap)
+	ap <- ap_check_plsr_Input(ap)
 	# add more default checking for other statistics here
 	return(ap)
 } # EOF

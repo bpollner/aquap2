@@ -156,10 +156,15 @@ stn <- list(
 	
 	##PLSR
 	plsr_calcInParallel = TRUE, 			## if the calculation of the plsr models should be done in parallel
+	plsr_calc_CV_consecsTogether = TRUE, 	## if for crossvalidation the consecutive scans (i.e. the scans with the same sample number) should always be excluded or included together
+	plsr_calc_typeOfCrossvalid = 10, 		## the default way to perform crossvalidation. Provide either 'LOO' for a leave-one-out crossvalidation, or a number for performing this n-fold crossvalidation.
 	plsr_plotDataInSwarm = TRUE, 			## set to FALSE to only use the classical (with possibly several points overlapping on a single line) way to plot the training, crossvalidation and prediction plots.
+	plsr_plot_secondaryData = TRUE, 		## if the secondary data, i.e. the calibration data for the cross-validation resp. the cross-validation data for the prediction data should be plotted as well.
+	plsr_usePureRangeX = FALSE, 			## (recommended value is FALSE) Set to TRUE to use the pure range of the extreme x-swarms to determine the range of the swarm-plot. --> If there are problems with the range of the plots, try setting 'plsr_usePureRangeX' to TRUE.
+	plsr_cexForSwarm = 1, 					## the character expansion --> space between the dots in the swarm plots. Set to lower than 1 (~0.88) for the dots moving closer together.
 	plsr_addCompsBoundaries = c(7, 20),		## The number of components demarking three regions (below the first number, between first and second, and above the second number) of number of components where the numbers of components listed below are added. (For showing an error plot going beyond the actual number of components)
 	plsr_addComps = c(3, 5, 8), 			## how many components should be added to the error plot beyond the calculated best nr. of components in the above specified boundaries
-	plsr_percentObservAsMaxNcomp = 35,		## the percentage of the available number of observations indicating the maximally allowed number of components for the test-runs to determine the optimal number of components
+	plsr_percentObservAsMaxNcomp = 30,		## the percentage of the available number of observations indicating the maximally allowed number of components for the test-runs to determine the optimal number of components
 	plsr_nrCompsSwitchToNrObserv = 12,		## the number of maximum allowed number of components below which to the number of observations for defining the max. nr. of allowed components for the test-runs to determine the optimal number of components is switched     XXX explain better !!
 	plsr_nrTestIterations = 10, 			## how many repetitions should be calculated when getting the optimal number of components. Not the lowest number of components is chosen, but the one that comes up most often as the lowest.
 	plsr_nrDigitsRMSEx = 4,					## rounding for the error values
@@ -167,6 +172,9 @@ stn <- list(
 	plsr_color_lm_training = "blue", 		## the color for the line showing the linear model of predicted vs. actual data at the training
 	plsr_color_lm_crossvalid = "red", 		## the color for the line showing the linear model of predicted vs. actual data at the crossvalidation
 	plsr_color_lm_indepPred = "darkgreen",	## the color for the line showing the linear model of predicted vs. actual data at the independent prediction
+	plsr_color_pch_primaryData = 16, 		## the pch for the primary data
+	plsr_color_pch_secondaryData = 3, 		## the pch for the secondary data
+	plsr_color_alpha_secondaryData = 120, 	## the alpha value for the secondary data, i.e. the calibration data for the cross-validation, and the cross-validation data for the prediction data. Values between 1 and 255, with 1 being completely transparent.
 	plsr_linetypeTargetLine = 1, 			## the line-type for the grey target line
 	plsr_linetypeLinearModel = 1, 			## the line-type for the line showing the liner model of predicted vs. actual data
 	plsr_regressionVector_discrim = TRUE,	## if it should be discriminated between true positive / negative peaks in the plsr regression vector

@@ -1,10 +1,74 @@
-makePLSRModel_inner <- function(dataset, Y_Class, niter=5, ncomp=NULL, valid="CV", stnLoc) {
+createSegmentList <- function(header, nrSegs=10) { # gives back a list that can be given to "segments" in the plsr
+	yPref <- .ap2$stn$p_yVarPref
+	snCol <- .ap2$stn$p_sampleNrCol
+	csnCol <- .ap2$stn$p_conSNrCol
+	nrSegsSwitch <- 2
+	## first see how many consecutive scans there are within each sample number (some (outlier) could have been removed)	
+	snName <- paste0(yPref, snCol)
+	snInd <- which(colnames(header) == snName)
+	conSnInd <- which(colnames(header) == paste0(yPref, csnCol))
+	headerDim <- header[,c(snInd, conSnInd)]
+	res <- plyr::ddply(headerDim, snName, nrow) 		## data frame with two columns, has the number of rows in in the second column
+	segList <- NULL
+	currInd <- 1
+	for (i in 1: nrow(res)) {
+		indices <- currInd:( (currInd-1) + res[i,2] )
+		currInd <- max(indices)+1
+		segList <- c(segList, list(indices))  ## gives segList with all the same sample numbers (different cons. scans from the same sample number) in the same list element
+	} # end for i
+	if (length(segList) <= nrSegsSwitch) {
+		return(nrow(header))
+	}
+	## randomize
+	if (nrSegs > length(segList)) {
+		nrSegs <-  length(segList)
+	}	
+	le <- length(segList)
+	pool <- 1: le
+	nrFull <- floor(le / nrSegs)
+	indList <- NULL
+	for (i in 1: nrSegs) {
+		res <- sample(pool, nrFull)
+		pool <- pool[-(which(pool %in% res))]
+		indList <- c(indList, list(res))
+	} # end for i
+	if (length(pool) > 0) {
+		for (i in 1: length(pool)) {
+			indList[[i]] <- c(indList[[i]], pool[i]) # add the rest of the values to the seg list
+		}
+	}
+	## map back to the segment list
+	out <- lapply(indList, function(x) unlist(segList[x]))
+	return(out) 		
+} # EOF
+
+createPlsrSegments <- function(header, valid=10) { # gives back a number or a list
+	if (valid == nrow(header)) {
+		return(valid)
+	} else { 
+		if (valid > nrow(header)) {
+			return(nrow(header))
+		}
+		out <- valid
+		if (.ap2$stn$plsr_calc_CV_consecsTogether) {
+			out <- createSegmentList(header, nrSegs=valid)
+		}
+		return(out)
+	} # end else
+} # EOF
+
+makePLSRModel_inner <- function(dataset, Y_Class, niter=5, ncomp=NULL, valid, stnLoc) {
 	nrSwitch <- stnLoc$plsr_nrCompsSwitchToNrObserv		## from the local settings
 	addComps <- stnLoc$plsr_addComps
 	acb <- stnLoc$plsr_addCompsBoundaries
 	facObs <- stnLoc$plsr_percentObservAsMaxNcomp / 100
 	header <- getHeader(dataset)
 	dataset <- data.frame(yvar=header[,Y_Class], allData=dataset$NIR ) ### here make a new "flat" dataset
+	typeValid <- "CV"
+	if (valid == "LOO") {
+		valid <- nrow(dataset)
+	}
+	if (niter == 1) {niter <- 2} # otherwise we never get out of the while loop !!!
 	if (is.null(ncomp)) {
 		allOneTime <- TRUE
 		while (allOneTime) {
@@ -15,7 +79,8 @@ makePLSRModel_inner <- function(dataset, Y_Class, niter=5, ncomp=NULL, valid="CV
 			}
 			if (maxNcomp <= nrSwitch) {			## so if we have very few rows -- now we do not want to give any nr of comps at all
 				for (i in 1: niter) {
-					testModel <- pls::plsr(yvar ~ allData, data=dataset, validation=valid)
+					segms <- createPlsrSegments(header, valid)
+					testModel <- pls::plsr(yvar ~ allData, data=dataset, validation=typeValid, segments=segms)
 					a <- pls::RMSEP(testModel, intercept=FALSE, estimate="adjCV")$val
 					ind <- which.min(a)
 		#			if ( (!allow1C) & (ind == 1)) { ind <- order(a)[2] }
@@ -23,7 +88,8 @@ makePLSRModel_inner <- function(dataset, Y_Class, niter=5, ncomp=NULL, valid="CV
 				} # end for i niter		
 			} else {						## so if we have a lot of rows !!!
 				for (i in 1: niter) {
-					testModel <- pls::plsr(yvar ~ allData, data=dataset, validation=valid, ncomp=maxNcomp)
+					segms <- createPlsrSegments(header, valid)
+					testModel <- pls::plsr(yvar ~ allData, data=dataset, validation=typeValid, ncomp=maxNcomp, segments=segms)
 					a <- pls::RMSEP(testModel, intercept=FALSE, estimate="adjCV")$val
 					ind <- which.min(a)
 		#			if ( (!allow1C) & (ind == 1)) { ind <- order(a)[2] }
@@ -37,7 +103,8 @@ makePLSRModel_inner <- function(dataset, Y_Class, niter=5, ncomp=NULL, valid="CV
 	} else {		## so if a value for ncomp was provided
 		bestNC <- ncomp
 	} # end if is.null(ncomp)
-	plsModelCorrect <- pls::plsr(yvar ~ allData, ncomp=bestNC, data=dataset, validation=valid)	#### here it happens !!
+	segms <- createPlsrSegments(header, valid)
+	plsModelCorrect <- pls::plsr(yvar ~ allData, ncomp=bestNC, data=dataset, validation=typeValid, segments=segms)	#### here it happens !!
 	bn <- bestNC
 	if(bn <= acb[1] ){
 		add <- addComps[1]
@@ -48,7 +115,7 @@ makePLSRModel_inner <- function(dataset, Y_Class, niter=5, ncomp=NULL, valid="CV
 	if (bn > acb[2]) {
 		add <- addComps[3]
 	} 
-	plsModelPlus <-  pls::plsr(yvar ~ allData, ncomp=bestNC+add, data=dataset, validation=valid)	#### here it happens !!
+	plsModelPlus <-  pls::plsr(yvar ~ allData, ncomp=bestNC+add, data=dataset, validation=typeValid, segments=segms)	#### here it happens !!
 	out <- list(modelsCorr=plsModelCorrect, modelsPlus=plsModelPlus, regrOn=Y_Class)
 	return(out)
 } # EOF
@@ -148,10 +215,9 @@ dev_collectNcomps <- function(cube) {
 	return(out) 
 } # EOF
 
-
 # independent validation ------------------------
 
-check_indPlsPrediction_input <- function(indepDataset, cube, cnv=NULL, inv=NULL, cubeName, dsName, toxls) { 
+check_indPlsPrediction_input <- function(indepDataset, cube, cnv=NULL, inv=NULL, cubeName, dsName, toxls, psd) { 
 	dataset <- indepDataset
 	yPref <- .ap2$stn$p_yVarPref
 	ap <- getAnproc(cube)
@@ -222,7 +288,7 @@ check_indPlsPrediction_input <- function(indepDataset, cube, cnv=NULL, inv=NULL,
 		}
 	} # end !is.null(inv)
 	###
-	if (all(toxls) == "def") {
+	if (all(toxls == "def")) {
 		toxls <- .ap2$stn$plsr_indepPred_exportToExcel
 	}
 	if (!all(is.logical(toxls)) | length(toxls) != 1) {
@@ -230,6 +296,14 @@ check_indPlsPrediction_input <- function(indepDataset, cube, cnv=NULL, inv=NULL,
 	}
 	assign("toxls", toxls, pos=parent.frame(n=1))
 	###
+	if (all(psd == "def")) {
+		psd <- .ap2$stn$plsr_plot_secondaryData
+	}
+	if (!all(is.logical(psd)) | length(psd) != 1) {
+		stop("Please provide either TRUE or FALSE to the argument 'psd' resp. to the argument 'plsr_plot_secondaryData' in the settings file.", call.=FALSE)
+	}
+	assign("psd", psd, pos=parent.frame(n=1))
+	###	
 } # EOF
 
 printMessagePairing <- function(cnv, inv) {
@@ -308,43 +382,68 @@ calculateIndepPlsPrediction <- function(indepDataset, cube, cnv, inv, ap) {
 	return(resultList)
 } # EOF
 
-maybeMakeSwarm <- function(ind, DF, cols=1, plSwarm=.ap2$stn$plsr_plotDataInSwarm, prio="density", swCex=0.95) {
+maybeMakeSwarm <- function(ind, DF, cols=1, plSwarm=.ap2$stn$plsr_plotDataInSwarm, prio="density", swCex=.ap2$stn$plsr_cexForSwarm, xsi=NULL) {
 	if (length(cols)==1) {
-		pwColor <- rep(1, nrow(DF))
+		pwColor <- rep(cols, nrow(DF))
 	} else {
 		pwColor <- cols
 	}
+#	if (length(ind) == 0) {stop("Swarm Error")} # 
 	if (length(ind) > 1) {
 		if (plSwarm) {
-			locDF <- beeswarm::swarmx(DF[ind, "xval"], DF[ind, "yval"], priority=prio, cex=swCex)
+			if (is.null(xsi)) {
+				xsiUse <- 0.08
+			} else {
+				xsiUse <- xsi
+			}
+			locDF <- beeswarm::swarmx(DF[ind, "xval"], DF[ind, "yval"], priority=prio, cex=swCex, xsize=xinch(xsiUse))		
 			locDF$color <- pwColor[ind]
+		#	locDF <- data.frame(x=DF[ind, "xval"], y=DF[ind, "yval"], color=pwColor[ind]) # for debugging
 		} else {
-			locDF <- data.frame(x=DF[ind, "xval"], y=DF[ind, "yval"], color=pwColor[ind])
+			locDF <- data.frame(x=DF[ind, "xval"], y=DF[ind, "yval"], color=pwColor[ind], stringsAsFactors=FALSE)
 		}
 	} else {
-		locDF <- data.frame(x=DF[ind, "xval"], y=DF[ind, "yval"], color=pwColor[ind])				
+		locDF <- data.frame(x=DF[ind, "xval"], y=DF[ind, "yval"], color=pwColor[ind], stringsAsFactors=FALSE)				
 	}
 	return(locDF)
 } # EOF
 
-plotPlsrErrorPoints <- function(DF, colors, xlab, ylab, mainText, subText, ppch) {
+plotPlsrErrorPoints <- function(DF, colors, xlab=NULL, ylab=NULL, mainText=NULL, subText=NULL, ppch, pointsOnly=FALSE, ...) {
+	if (all(is.numeric(colors))) {
+		class(colors) <- "numeric"
+	}
+	usePureRangeX <- .ap2$stn$plsr_usePureRangeX
+	#
 	uniX <- unique(DF[,"xval"])
+	xStep <- abs(min(diff(sort(uniX))))
+	if (xStep < 1) {
+		xStep <- 0.001 # trial and errror !! (?)
+	}
+	if (usePureRangeX) { # if TRUE, then we use the default xsize from the package beeswarm (default in the settings is FALSE)
+		xStep <- NULL
+	}
 	indMin <- which(DF[,"xval"] == min(uniX)) 
-	minX <- min(maybeMakeSwarm(indMin, DF)$x) # get min range
+	minX <- min(maybeMakeSwarm(indMin, DF, xsi=xStep)$x) # get min range
 	indMax <- which(DF[,"xval"] == max(uniX))
-	maxX <- max(maybeMakeSwarm(indMax, DF)$x) # get max range
-#	print(maxX)
-	plot(minX-1, xlim= c(minX, maxX), ylim=range(DF[, "yval"]), xlab=xlab, ylab=ylab, main=mainText, sub=subText) # make an empty plot
+	maxX <- max(maybeMakeSwarm(indMax, DF, xsi=xStep)$x) # get max range
+	xRange <- c(minX, maxX)
+	if (!pointsOnly) {
+		plot(NA, xlim=xRange, ylim=range(DF[, "yval"]), xlab=xlab, ylab=ylab, main=mainText, sub=subText, ...) # make an empty plot
+	}
 	plotList <- vector("list", length=length(uniX))
 	for (m in 1: length(uniX)) {
 		ind <- which(DF[,"xval"] == uniX[m])
 		plotList[[m]] <- maybeMakeSwarm(ind, DF, cols=colors)
 	} # end for m
-	lapply(plotList, function(le) points(le, col=le$color, pch=ppch))
+		lapply(plotList, function(le) {
+			points(x=le$x, y=le$y, col=le$color, pch=ppch)
+		})
+	#
 	return(invisible(plotList))
 } # EOF	
 				
-makeIndepPlsrValidationPlots_inner <- function(cube, indepDataset, predResults, ap, onMain, onSub, where, inRDP, colorBy, dsName) {
+makeIndepPlsrValidationPlots_inner <- function(cube, indepDataset, predResults, ap, onMain, onSub, where, inRDP, colorBy, dsName, psd) {
+	# psd: logical for plot secondary data or not
 	colLmTrain <- .ap2$stn$plsr_color_lm_training
 	colLmCV <- .ap2$stn$plsr_color_lm_crossvalid
 	colLmPred <- .ap2$stn$plsr_color_lm_indepPred
@@ -352,7 +451,9 @@ makeIndepPlsrValidationPlots_inner <- function(cube, indepDataset, predResults, 
 	ltLm <- .ap2$stn$plsr_linetypeLinearModel
 	rnd <- .ap2$stn$plsr_nrDigitsRMSEx
 	plotSwarm <- .ap2$stn$plsr_plotDataInSwarm
-	allPch <- 16
+	secAlpha <- .ap2$stn$plsr_color_alpha_secondaryData
+	pchPrim <- .ap2$stn$plsr_color_pch_primaryData
+	pchSec <- .ap2$stn$plsr_color_pch_secondaryData
 	#
 	dataset <- indepDataset
 	header <- getHeader(dataset)
@@ -381,7 +482,7 @@ makeIndepPlsrValidationPlots_inner <- function(cube, indepDataset, predResults, 
 			RMSEC <- getRMSEC(singleModel)
 			RMSEC_rdp <- convertToRDP(RMSEC, pred$modRegrOn, header)
 			R2C <- getR2C(singleModel)	
-			# crossvalidatoin
+			# crossvalidation
 			RMSECV <- getRMSECV(singleModel)
 			RMSECV_rdp <- convertToRDP(RMSECV, pred$modRegrOn, header)
 			R2CV <- getR2CV(singleModel)
@@ -389,6 +490,7 @@ makeIndepPlsrValidationPlots_inner <- function(cube, indepDataset, predResults, 
 			yvar <- singleModel$model$yvar
 			yvarFittedCalib <- singleModel$fitted.values[ , , ncomp]
 			yvarFittedCV <- singleModel$validation$pred[ , , ncomp]	
+			datCV <- data.frame(xval=yvar, yval=yvarFittedCV)
 			#
 			if (all(is.na(pred$indepValue))) { # so we had NO validation data
 				# do nothing for the moment
@@ -403,9 +505,14 @@ makeIndepPlsrValidationPlots_inner <- function(cube, indepDataset, predResults, 
 				datPred <- data.frame(xval=as.numeric(pred$indepValue), yval=as.numeric(pred$predResult))
 				xlab <- "measured value"
 				ylab <- "independent predicted value"
-				#
-				plotPlsrErrorPoints(DF=datPred, colors=color, xlab, ylab, mainText, subText, ppch=allPch) ### CORE ### CORE	
-				#
+				######
+				plotPlsrErrorPoints(DF=datPred, colors=color, xlab, ylab, mainText, cex.main=0.9, subText, ppch=pchPrim) ### CORE ### CORE	
+				legPchSec <- NA
+				if (psd) {
+					plotPlsrErrorPoints(DF=datCV, colors=makeColorsTransparent(color, secAlpha), ppch=pchSec, pointsOnly=TRUE) 
+					legPchSec <- pchSec
+				}
+				######
 				abline(0,1, col="gray", lty=ltTarg, lwd=1)
 				abline(lm(yvarFittedCalib ~ yvar), lty=ltLm, lwd=1, col=colLmTrain) 
 				abline(lm(yvarFittedCV ~ yvar), lty=ltLm, lwd=1, col=colLmCV) 	
@@ -426,21 +533,24 @@ makeIndepPlsrValidationPlots_inner <- function(cube, indepDataset, predResults, 
 				if (inRDP) {
 					legendText <- c(nrComps, rmsec, rmsec_rdp, r2c, rmsecv, rmsecv_rdp, r2cv, rmsep, rmsep_rdp, r2pr)
 					legTxtCol <- c("black", rep(colLmTrain, 3), rep(colLmCV, 3), rep(colLmPred, 3))
+					legPch <- c(rep(NA, 4), rep(legPchSec, 3), rep(pchPrim, 3))
 				} else {
 					legendText <- c(nrComps, rmsec, r2c, rmsecv, r2cv, rmsep, r2pr)
 					legTxtCol <- c("black", rep(colLmTrain, 2), rep(colLmCV, 2), rep(colLmPred, 2))
+					legPch <- c(rep(NA, 3), rep(legPchSec, 2), rep(pchPrim, 2))
 				}
 				legBgCol <- rgb(255,255,255, alpha=.ap2$stn$col_alphaForLegends, maxColorValue=255) # is a white with alpha to be determined in the settings	
-				legend("topleft", legend=legendText, text.col=legTxtCol, bg=legBgCol)	
+				legCex <- 0.8
+				legend("topleft", legend=legendText, text.col=legTxtCol, bg=legBgCol, cex=legCex, pch=legPch)	
 				if (colLegend) {
-					legend("bottomright", legend=clv$txtE, col=clv$color_legend, pch=allPch, bg=legBgCol)
+					legend("bottomright", legend=clv$txtE, col=clv$color_legend, pch=pchPrim, bg=legBgCol, cex=legCex)
 				}
 			} # end else
 		} # end for k
 	} # end for i
 } # EOF
 
-makeIndepPlsrValidationPlots <- function(cube, indepDataset, predResults, anp2, dsName) {
+makeIndepPlsrValidationPlots <- function(cube, indepDataset, predResults, anp2, dsName, psd) {
 	ap <- anp2
 	#
 	where <- ap$genPlot$where
@@ -462,7 +572,7 @@ makeIndepPlsrValidationPlots <- function(cube, indepDataset, predResults, anp2, 
 	onMain <- paste(expName, onMain, sep=" ")
 	if (where == "pdf") { pdf(file=filename, width, height, onefile=TRUE, family='Helvetica', pointsize=12) }
 	if (where != "pdf" & Sys.getenv("RSTUDIO") != 1) {dev.new(height=height, width=width)}	
-	makeIndepPlsrValidationPlots_inner(cube, indepDataset, predResults, ap, onMain, onSub, where, inRDP, colorBy, dsName) ### HERE ###
+	makeIndepPlsrValidationPlots_inner(cube, indepDataset, predResults, ap, onMain, onSub, where, inRDP, colorBy, dsName, psd) ### HERE ###
 	if (where == "pdf") { dev.off() }
 	if (!.ap2$stn$allSilent & (where == "pdf" )) {cat("ok\n") }
 } # EOF
@@ -562,6 +672,12 @@ pls_pred_checkColorBy <- function(indepDataset, anp2, dsName) {
 #' are used for validating the predictions. If a character vector is provided, 
 #' it has to have the same length as the one in \code{cnv}, and those variables 
 #' will be used, in the given sequence, for validating the predictions.
+#' @param psd 'plot secondary data'; either character 'def' or logical. If 
+#' secondary (i.e.crossvalidation data) should be plotted as well. Leave at the 
+#' default 'def' to take the value from the parameter 
+#' \code{plsr_plot_secondaryData} in the settings file, or provide TRUE or FALSE.
+#' The alpha level for the secondary data can be set in parameter 
+#' \code{plsr_color_alpha_secondaryData} in the settings file.
 #' @param aps Character length one. The default way to obtain the analysis 
 #' procedure. Defaults to "def". Possible values are:
 #' \describe{
@@ -612,11 +728,11 @@ pls_pred_checkColorBy <- function(indepDataset, anp2, dsName) {
 #' @family PLSR documentation
 #' @family Plot functions
 #' @export
-plot_pls_indepPred <- function(indepDataset, cube, cnv=NULL, inv=NULL, aps="def", pl=TRUE, toxls="def", ...) { 
+plot_pls_indepPred <- function(indepDataset, cube, cnv=NULL, inv=NULL, psd="def", aps="def", pl=TRUE, toxls="def", ...) { 
 	autoUpS()
 	dsName <- deparse(substitute(indepDataset))
 	cubeName <- deparse(substitute(cube))
-	check_indPlsPrediction_input(indepDataset, cube, cnv, inv, cubeName, dsName, toxls) ## !! is assigning cnv, inv, toxls
+	check_indPlsPrediction_input(indepDataset, cube, cnv, inv, cubeName, dsName, toxls, psd) ## !! is assigning cnv, inv, toxls, psd
 	ap1 <- getap(.lafw_fromWhere="cube", cube=cube)
 	anp2 <- doApsTrick(aps, cube, ...)
 	pls_pred_checkColorBy(indepDataset, anp2, dsName)
@@ -637,7 +753,7 @@ plot_pls_indepPred <- function(indepDataset, cube, cnv=NULL, inv=NULL, aps="def"
 	###
 	# now plot, please (use the ap2 now!)
 	if (pl) {
-		makeIndepPlsrValidationPlots(cube, indepDataset, predResults=predList, anp2, dsName) #### plot the results ####
+		makeIndepPlsrValidationPlots(cube, indepDataset, predResults=predList, anp2, dsName, psd) #### plot the results ####
 	}
 	###
 	return(invisible(predList))
