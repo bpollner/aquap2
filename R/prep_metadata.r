@@ -72,6 +72,15 @@ check_mdDefaultValues <- function(localEnv) {
 	}
 	assign("noiseFileName", nfn, pos=parent.frame(n=1))
 	# 
+	tcfn <- le$tempCalibFileName
+	if (all(tcfn == "def")) {
+		tcfn <- .ap2$stn$aqg_tempCalib_Filename
+	}
+	if (length(tcfn) != 1 | !all(is.character(tcfn))) {
+		stop("Please provide a character length one to the variable 'tempCalibFileName' in the metadata file resp. the argument 'aqg_tempCalib_Filename' in the settings file.", call.=FALSE)
+	}
+	assign("tempCalibFileName", tcfn, pos=parent.frame(n=1))
+	#
 	spac <- le$spacing
 	msg <- "Please provide either FALSE or a length one numeric to the variable 'spacing' in the metadata file."
 	if ( length(spac) != 1  | (!all(is.logical(spac)) & !all(is.numeric(spac))) ) {
@@ -164,7 +173,7 @@ getmd_core <- function(fn="def") {
 	e <- new.env()
 	sys.source(path, envir=e)
 	check_mdVersion(localEnv=e) 	### Version check here !!
-	noSplitLabel <- ECLabel <- RMLabel <- filetype <- noiseFileName <- NULL # gets assigned below
+	noSplitLabel <- ECLabel <- RMLabel <- filetype <- noiseFileName <- tempCalibFileName <- NULL # gets assigned below
 	check_mdDefaultValues(localEnv=e) ### checking and assigning
 	##
 	Repls <- (paste(defReplPref, seq(1, e$Repls), sep=""))
@@ -186,7 +195,7 @@ getmd_core <- function(fn="def") {
 	## put together
  	expClasses <- list(L1=e$L1, L2=e$L2, Repls=Repls, Group=Group, timeLabels=TimePoints)
  	postProc <- list(spacing=e$spacing, ECRMLabel=c(ECLabel, RMLabel), noSplitLabel=noSplitLabel, nrConScans=e$nrConScans)
- 	meta <- list(expName=e$expName, coluNames=coluNames, filetype=filetype, noiseFile=noiseFileName)
+ 	meta <- list(expName=e$expName, coluNames=coluNames, filetype=filetype, noiseFile=noiseFileName, tempFile=tempCalibFileName)
 	expMetaData <- list(expClasses = expClasses, postProc = postProc, meta = meta)
 	return(new("aquap_md", expMetaData))
 } # EOF

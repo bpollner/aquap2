@@ -45,7 +45,7 @@ saveAQdata(dataset, getmd(expName="FooBar")) # save under the name 'FooBar'
 Other Helper Functions: \code{\link{genFolderStr}},
   \code{\link{genNoiseRecExp}},
   \code{\link{genTempCalibExp}}, \code{\link{getcd}},
-  \code{\link{instAquap2Examples}},
+  \code{\link{getcm}}, \code{\link{instAquap2Examples}},
   \code{\link{printStdColnames}},
   \code{\link{updateAquap}}, \code{\link{updateSettings}}
 }

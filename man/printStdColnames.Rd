@@ -14,7 +14,7 @@ settings.r file to stdout.
 Other Helper Functions: \code{\link{genFolderStr}},
   \code{\link{genNoiseRecExp}},
   \code{\link{genTempCalibExp}}, \code{\link{getcd}},
-  \code{\link{instAquap2Examples}},
+  \code{\link{getcm}}, \code{\link{instAquap2Examples}},
   \code{\link{saveAQdata}}, \code{\link{updateAquap}},
   \code{\link{updateSettings}}
 }

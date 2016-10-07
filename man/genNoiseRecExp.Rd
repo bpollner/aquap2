@@ -31,7 +31,7 @@ gfd <- gfd() # imports noise raw-data and saves noise-data file in the
 
 Other Helper Functions: \code{\link{genFolderStr}},
   \code{\link{genTempCalibExp}}, \code{\link{getcd}},
-  \code{\link{instAquap2Examples}},
+  \code{\link{getcm}}, \code{\link{instAquap2Examples}},
   \code{\link{printStdColnames}}, \code{\link{saveAQdata}},
   \code{\link{updateAquap}}, \code{\link{updateSettings}}
 

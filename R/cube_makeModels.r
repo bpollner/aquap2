@@ -73,23 +73,25 @@ calculateSIMCA <- function(dataset, md, ap) { # is working on a single set. i.e.
 	return(list(mods=mods, preds=preds, mods_cv=mods_cv, preds_cv=preds_cv, icDists=icDists, groupingVector=simcaClasses))
 } # EOF
 
-calculateAquagram <- function(dataset, md, ap, idString) {
+calculateAquagram <- function(dataset, md, ap, idString, tempFile) {
 	if (is.null(ap$aquagr)) {
 		return(NULL)
 	}
-	aq_loadGlobalAquagramCalibData()
+#	aq_loadGlobalAquagramCalibData()
 	if (is.character(ap$aquagr$spectra)) { message <- "      calc. Aquagrams & spectra... "	} else { message <- "      calc. Aquagrams... "	}
 	if (ap$aquagr$bootCI) {bootTxtCorr <- "\n"; bootTxtClosingAdd <- "      Aquagrams ok.\n" } else {bootTxtCorr <- ""; bootTxtClosingAdd <- "ok\n"}
 	message <- paste(message, bootTxtCorr)
 	if (!.ap2$stn$allSilent) {cat(message)}
-	ap <- aq_getTCalibRange(ap) 	# checks with the calibration file if the temperature range is ok
-	aq_makeGlobals(.ap2$tcd, TCalib=ap$aquagr$TCalib, Texp=ap$aquagr$Texp, ot=getOvertoneCut(.ap2$stn$aqg_OT), smoothN=.ap2$stn$aqg_smoothCalib) ## generate the global variables with TCalib and Texp
+	ap <- aq_getTCalibRange(ap, tempFile) 	# checks with the calibration file if the temperature range is ok
+	aq_makeGlobals(TCalib=ap$aquagr$TCalib, Texp=ap$aquagr$Texp, ot=getOvertoneCut(.ap2$stn$aqg_OT), smoothN=.ap2$stn$aqg_smoothCalib, tempFile) ## generate the global variables with TCalib and Texp
 	##
 	vars <- ap$aquagr$vars
 	aquCalcRes  <- list()
 	length(aquCalcRes) <- lec <- length(vars)
 	if (ap$aquagr$bootCI) {
 		registerParallelBackend()  ## will be used in the calculation of confidence intervals
+	} else {
+		registerDoSEQ() # XXX new !
 	}
 	for (i in 1: length(vars)) {
 		aquCalcRes[[i]] <- calcAquagramSingle(dataset, md, ap, vars[i], idString)
@@ -100,13 +102,13 @@ calculateAquagram <- function(dataset, md, ap, idString) {
 } # EOF
 
 # works on a single element of the list in the cube
-makeAllModels <- function(set, md, ap) {
+makeAllModels <- function(set, md, ap, tempFile) {
 #	dataset <- set@dataset
 	newSet <- new("aquap_set")
 	newSet@pca <- calculatePCA(getDataset(set), md, ap)
 	newSet@plsr <- calculatePLSR(getDataset(set), md, ap)
 	newSet@simca <- calculateSIMCA(getDataset(set), md, ap)
-	newSet@aquagr <- calculateAquagram(getDataset(set), md, ap, getIdString(set))
+	newSet@aquagr <- calculateAquagram(getDataset(set), md, ap, getIdString(set), tempFile)
 	newSet@dataset <- getDataset(set)
 	newSet@idString <- set@idString
 	return(newSet)

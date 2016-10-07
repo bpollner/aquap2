@@ -27,7 +27,9 @@ noise distribution. It is stored in an object where the name is starting with
 (\code{ls(.ap2)}). This noise distribution is then used to specifically add, 
 according to the selected mode (see section 'Modes for noise calculation' 
 below), noise to each single wavelength in each single observation in the 
-individual dataset within the cube.
+individual dataset within the cube. If you do not want to use a specific 
+noise-data file, you can set the noise mode to 'static' (parameter 
+\code{noi_addMode} in the settings file).
 }
 \section{Procedure}{
  The procedure to work with noise-data files and use them to 

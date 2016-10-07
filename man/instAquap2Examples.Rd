@@ -18,7 +18,8 @@ in the .Renviron file. (see \code{\link{updateSettings}})
 Other Helper Functions: \code{\link{genFolderStr}},
   \code{\link{genNoiseRecExp}},
   \code{\link{genTempCalibExp}}, \code{\link{getcd}},
-  \code{\link{printStdColnames}}, \code{\link{saveAQdata}},
-  \code{\link{updateAquap}}, \code{\link{updateSettings}}
+  \code{\link{getcm}}, \code{\link{printStdColnames}},
+  \code{\link{saveAQdata}}, \code{\link{updateAquap}},
+  \code{\link{updateSettings}}
 }
 

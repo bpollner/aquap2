@@ -205,6 +205,8 @@ stn <- list(
 	aqg_Texp = 28.6,						## the temperature at which the measurements were done
 	aqg_OT = "1st",							## what overtone (in development, leave at "1st")
 	aqq_nCoord = 12,	 					## only applies to the 1st overtone: how many coordinates to plot (can be 12 or 15)
+	aqg_tempCalib_Filename = "TempCalib", 	## the name of the temperature calibration file residing in the AQUAP2SH folder, i.e. the R-data file containing the spectra from the temperature calibration experiment.
+	aqg_tempCalib_forceOutlExcl = TRUE, 	## if the exclusion of outliers in the temperature calibration dataset should be forced or not.
 	
 
 	## plotting PDFs

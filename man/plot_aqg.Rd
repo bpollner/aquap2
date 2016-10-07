@@ -49,7 +49,8 @@ The width and height of the resulting pdf can be set in the settings.
 }
 \seealso{
 Other Aquagram documentation: \code{\link{calc_aqg_args}},
-  \code{\link{plot_aqg_args}}
+  \code{\link{plot_aqg_args}},
+  \code{\link{tempCalib_procedures}}
 
 Other Plot functions: \code{\link{plot,aquap_cube,missing-method}},
   \code{\link{plot,aquap_data,missing-method}},

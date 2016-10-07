@@ -196,11 +196,12 @@ maybeAssignPlsrClusterToPlsrFunction <- function() {
 	return(out)
 } # EOF
 
-maybeGeneratePlsrCluster <- function(ap, nc=4) { # this is happening in gdmm before going into the cube
+maybeGeneratePlsrCluster <- function(ap) { # this is happening in gdmm before going into the cube
 	if (.ap2$stn$plsr_calcInParallel & !is.null(ap$plsr)) {
 		if (length(ap$plsr$regressOn) == 1) {
+			nrWorkers <- getDesiredNrCPUs(allowNA=FALSE)
 			if (!exists(".plsrClust", where=.ap2)) {
-				assign(".plsrClust", parallel::makePSOCKcluster(nc), pos=.ap2)
+				assign(".plsrClust", parallel::makePSOCKcluster(nrWorkers), pos=.ap2)
 			}	
 		}
 	}

@@ -217,13 +217,7 @@ plot_pca_checkDefaultsParams <- function(ld.bandwidth, ld.adLines, ld.col, ld.lt
 #### CORE ###
 plot_pca_cube <- function(cube, aps="def", ld.bandwidth="def", ld.adLines="def", ld.col="def", ld.lty="def", ...) {
 	autoUpS()
-	aps <- checkApsChar(aps)
-	if (aps == "cube") {
-		ap <- getap(.lafw_fromWhere="cube", cube=cube, ...)			 # the ... are here used for additionally modifying (if matching arguments) the analysis procedure obtained from the cube
-	} else {
-		check_apDefaults(fn=aps)
-		ap <- getap(fn=aps, ...) # load from file, possibly modify via ...
-	}
+	ap <- doApsTrick(aps, cube, ...)
 	ap <- ap_cleanZeroValuesCheckExistenceDefaults(ap, dataset=getDataset(cube[[1]]), haveExc=FALSE) # just take the first dataset, as we mainly need the header (and the wavelengths are already checked.. )
 	if (is.null(ap$pca)) {
 		return(cat("*** PCA model not available or not selected for plotting \n"))

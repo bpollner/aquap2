@@ -208,7 +208,8 @@ calc_aquagr_bootCI <- function(dataset, smoothN, reference, msc, selIndsWL, colI
 	} # EOIF
 	if (!.ap2$stn$allSilent) {cat(paste("      calc.", R, "bootstrap replicates... ")) }
 	thisR <- R
-	bootResult <- boot::boot(dataset, innerWorkings, R=thisR, strata=dataset$header[,colInd], parallel=useMC, ncpus=.ap2$stn$gen_numberOfCPUs)   	### here the bootstrap replicates happen
+	nCPUs <- getDesiredNrCPUs(allowNA=FALSE)
+	bootResult <- boot::boot(dataset, innerWorkings, R=thisR, strata=dataset$header[,colInd], parallel=useMC, ncpus=nCPUs)   	### here the bootstrap replicates happen
 	if (!.ap2$stn$allSilent) {cat("ok\n")}
 	if (saveBootResult) {
 		save(bootResult, file=path)
@@ -324,19 +325,13 @@ calc_minus_avg_aquagram_spectra <- function(avgAquagrSpectra, minus) {
 
  ######################
  
-tempCalibReadRaw <- function() {
-	if (exists(".devMode", envir=.ap2)) {
-		filepath <- .ap2$.devDataPath
-		filepath <- paste(filepath, "tcalib", sep="") 	## tcalib is an r-file manually prepared from the temperature calibration data
-	} else {
-		a <- path.package("aquap2")
-		File <- "/pData/tcalib"
-		filepath <- paste(a, File, sep="")
-	}
-	if (!.ap2$stn$allSilent) {cat(" * Reading in AUC calibration data... ")}
-	load(filepath)
-	out <- get("tcalib")
-#	rm(tcalib)
+tempCalibTransformDataset <- function(tempCalibDataset) {
+	if (!.ap2$stn$allSilent) {cat(" * Reading in temperature data... ")}
+	yPref <- .ap2$stn$p_yVarPref
+	wtcn <- paste0(yPref, pv_YcolumnNameWaterTemp)
+	header <- data.frame(sample=rep("RM", nrow(tempCalibDataset)), temp_W=as.numeric(tempCalibDataset$header[,wtcn])) # we already checked for the existence of the water temp column
+	nir <- getNIR(tempCalibDataset)
+	out <- cbind(header, nir)
 	if (!.ap2$stn$allSilent) {cat("ok\n")}
 	return(out)
 } # EOF
@@ -381,7 +376,8 @@ tempCalibMakeAvgTable <- function(fdata, smoothN=17, TRange=NULL, ot=c(1300, 160
 	return(avgSpect[, -1])
 } # EOF
 
-calcUnivAucTable <- function(dataset, smoothN=17, ot=c(1300, 1600)) {
+calcUnivAucTable <- function(smoothN=17, ot=c(1300, 1600), tcdName) {
+	dataset <- get(tcdName, pos=.ap2)
 	if (!.ap2$stn$allSilent) {cat(" * Calculating universal AUC table... ")}
 	avgTable <- tempCalibMakeAvgTable(dataset, smoothN, TRange=NULL, ot)
 	aucd <- calcAUCtable(avgTable)$aucd
@@ -507,25 +503,32 @@ getTempNormAUCPercTable <- function(univAucTable, Texp, aucExtrema) {
 	normPerc <- calcAUCPercent(out, aucExtrema)
 } # EOF
 
-## gets called once at the first call to sdrc_plotAquagram
-aq_loadGlobalAquagramCalibData <- function() {
-	if (!exists("tcd", where=.ap2)) {
-		assign("tcd", tempCalibReadRaw(), pos=.ap2) 
-	}
-	if (!exists("aquagramPSettings",  where=.ap2)) {
-		assign("aquagramPSettings", readInAquagramPSettings(), pos=.ap2)
-	}
-	if (!exists("univAucTable", where=.ap2)) {
-		aut <-  calcUnivAucTable(.ap2$tcd, smoothN=.ap2$stn$aqg_smoothCalib, ot=getOvertoneCut(.ap2$stn$aqg_OT))
-		assign("univAucTable", aut, pos=.ap2)
-	}
+## gets called once in gdmm only if we will calculate an aquagram, so if tempCalibDataset does NOT come in as NULL
+aq_loadGlobalAquagramCalibData <- function(tempCalibDataset, tempFile) {
+	if (!is.null(tempCalibDataset)) {
+		tcdName <- paste0(tempFile, "_tcd")
+		if (!exists(tcdName, where=.ap2)) {
+			assign(tcdName, tempCalibTransformDataset(tempCalibDataset), pos=.ap2) 
+		}
+		if (!exists("aquagramPSettings",  where=.ap2)) {
+			assign("aquagramPSettings", readInAquagramPSettings(), pos=.ap2)
+		}
+		univAucTableName <- paste0(tempFile, "_univAucTable")
+		if (!exists(univAucTableName, where=.ap2)) {
+			aut <-  calcUnivAucTable(smoothN=.ap2$stn$aqg_smoothCalib, ot=getOvertoneCut(.ap2$stn$aqg_OT), tcdName)
+			assign(univAucTableName, aut, pos=.ap2)
+		}
+	} # end !is.null(tempCalibDataset)
 } # EOF
 
 ## gets called inside the aquagram
-aq_makeGlobals <- function(dataset, TCalib, Texp, ot, smoothN) {
+aq_makeGlobals <- function(TCalib, Texp, ot, smoothN, tempFile) {
+	univAucTableName <- paste0(tempFile, "_univAucTable")
+	#
+	dataset <- get(paste0(tempFile, "_tcd"), pos=.ap2)
 	assign("tempCalibFCtable", tempCalibMakeTable(dataset, TCalib, ot), pos=.ap2)	# probably only used for mode "sfc"	
-	assign("aucEx", getAUCcalibExtrema(.ap2$univAucTable, TCalib), pos=.ap2)
-	assign("tempNormAUCPerc", getTempNormAUCPercTable(.ap2$univAucTable, Texp, .ap2$aucEx), pos=.ap2)
+	assign("aucEx", getAUCcalibExtrema(get(univAucTableName, pos=.ap2), TCalib), pos=.ap2)
+	assign("tempNormAUCPerc", getTempNormAUCPercTable(get(univAucTableName, pos=.ap2), Texp, .ap2$aucEx), pos=.ap2)
 } # EOF
 
 #########
@@ -579,33 +582,39 @@ getOvertoneColnames <- function(otNumberChar) {
 } # EOF
 ##########################
 ##########################
-aq_checkTempCalibRangeFromUnivFile <- function(TCalibRange) {
-	temp <- as.numeric(rownames(.ap2$univAucTable))
+aq_checkTempCalibRangeFromUnivFile <- function(TCalibRange, tempFile) {
+	temp <- as.numeric(rownames(get(paste0(tempFile, "_univAucTable"), pos=.ap2)))
 	if (all(TCalibRange >= min(temp)) & all(TCalibRange <= max(temp)) ) { ## to check if we are in the temperature-range of the calibration file
 		return(TCalibRange)
 	} else {
-		message <- paste("Please observe that the current available temperature range for calibration data is between", min(temp), "and", max(temp), "degrees celsius.\n", sep=" ")
+		message <- paste0("The requested temperature calibration range (", paste(TCalibRange, collapse=" to "), " deg.C.) is out of range of the available temperature data. \nPlease observe that the available temperature range in the selected temperature data file '", tempFile, "' in the AQUAP2SH folder is between ", min(temp), " and ", max(temp), " degrees celsius.")
 		stop(message, call.=FALSE)
 	}
 } # EOF
 
-aq_getTCalibRange <- function(ap) {
-	TCalib <- ap$aquagr$TCalib
-	Texp <- ap$aquagr$Texp
-	# we did extensive checks before, so now everything should be correct
-	if (is.character(TCalib)) {
-		if (grepl("symm@", TCalib)) {
-			a <- as.numeric(strsplit(TCalib, "@")[[1]][2])
-			TCalib <- aq_checkTempCalibRangeFromUnivFile(c(Texp-a, Texp+a))
-		} else {
-			if (!is.null(TCalib)) {
-				TCalib <- aq_checkTempCalibRangeFromUnivFile(TCalib)
+aq_getTCalibRange <- function(ap, tempFile) {
+	if (!is.null(ap$aquagr)) {	
+		TCalib <- ap$aquagr$TCalib
+		Texp <- ap$aquagr$Texp
+		# we did extensive checks before, so now everything should be correct
+		if (is.character(TCalib)) {
+			if (grepl("symm@", TCalib)) {
+				a <- as.numeric(strsplit(TCalib, "@")[[1]][2])
+				TCalib <- aq_checkTempCalibRangeFromUnivFile(c(Texp-a, Texp+a), tempFile)
+			} else {
+				if (!is.null(TCalib)) {
+					TCalib <- aq_checkTempCalibRangeFromUnivFile(TCalib, tempFile)
+				}
 			}
 		}
-	}
-#	stop("Please provide either: \n -) a character 'symm@x' (with x being a number) for automatic symmetric picking of the calibration range x degrees plus and minus from 'Texp', the temperature of the experiment; \n -) or a numeric length two [c(x1,x2)] for manual input of the temperature calibration range \nin the 'TCalib' argument. Thank you.", call.=FALSE)
-	ap$aquagr$TCalib <- TCalib
-	return(ap)
+		ap$aquagr$TCalib <- TCalib
+		return(ap)
+	} # end if !is.null
+} # EOF
+
+aq_checkTCalibRange <- function(ap, tempFile) {
+	aq_getTCalibRange(ap, tempFile)
+	return(NULL)
 } # EOF
 
 aq_cleanOutAllZeroRows <- function(dataset) {  
@@ -734,3 +743,143 @@ calcAquagramSingle <- function(dataset, md, ap, classVar, idString) {
 	aqRes@subtrSpec <- subtrSpec
 	return(aqRes)
 } # EOF
+##########################
+##########################
+
+
+#' @title Generate temperature recording experiment
+#' @description Generate the folder structure for a new experiment and populate 
+#' it with the metadata suggested for recording then the temperature 
+#' calibration-spectra used e.g. in the aquagram (see argument \code{aqg.TCalib} 
+#' and \code{aqg.Texp} in \code{\link{calc_aqg_args}}).
+#' @details This generates the folder structure for a standard experiment and is 
+#' adapting the metadata to record spectra at various temperatures in each 3 
+#' consecutive scans. For a possible workflow please see examples.
+#' @param Tcenter Numeric length one. The temperature at which usually the 
+#' measurements are performed. The final temperature will range from 
+#' Tcenter-Tdelta to Tcenter+Tdelta, in steps given by argument 'stepsBy'. 
+#' @param Tdelta Numeric length one, defaults to 5. The temperature range below 
+#' and above 'Tcenter'.
+#' @param stepBy Numeric length one, defaults to 1. The temperature step between 
+#' each single temperature in the range from Tcenter-Tdelta to Tcenter+Tdelta.
+#' @param repls Numeric length one. How many replicates of each single temperature 
+#' to record. Defaults to 4.
+#' @section Important: When exporting the sample list via \code{\link{esl}}, make 
+#' sure to export it \strong{non randomized} - please see examples.
+#' @section Warning: Do not change the name of the columns in the sample list 
+#' before importing the dataset; if the numerical column \code{waterTemp} is not 
+#' present, the temperature calibration data can not be used.
+#' @family Temperature procedures
+#' @examples
+#' \dontrun{
+#' genTempCalibExp(Tcenter=30) # generate the folder structure in the current 
+#' working directory
+#' esl(rnd=FALSE) # export a *non* randomized sample list
+#' #### now record the temperature-spectra #### (move sample list to folder 'sl_in')
+#' gfd <- gfd() # imports temperature raw-data and saves an R-data file in the 
+#' # R-data folder, from where you take it and move it into your 
+#' # AQUAP2SH folder
+#' }
+#' @seealso \code{\link{tempCalib_procedures}}, \code{\link{genFolderStr}}, 
+#' \code{\link{genNoiseRecExp}} 
+#' @family Helper Functions
+#' @family Temperature calibration procedures
+#' @export
+genTempCalibExp <- function(Tcenter=NULL, Tdelta=5, stepBy=1, repls=4) {
+	if(is.null(Tcenter)) {
+		stop("Please provide a numeric value for 'Tcenter'.", call.=FALSE)
+	}
+	genFolderStr()
+	fn_metadata <- .ap2$stn$fn_metadata # folder name for metadata
+	fn_mDataDefFile <- .ap2$stn$fn_mDataDefFile
+	deleteCol <- .ap2$stn$p_deleteCol
+	clPref <- .ap2$stn$p_ClassVarPref
+	yPref <- .ap2$stn$p_yVarPref
+	#
+	temps <- as.character(Tcenter + seq(-Tdelta, Tdelta, by=stepBy))
+	temps <- rep(temps, each=repls)
+	temps <- paste(temps, collapse="\",\"")
+	#
+	pathMd <- paste(fn_metadata, fn_mDataDefFile, sep="/")
+	con <- file(pathMd, open="rt")
+	txt <- readLines(con)
+	close(con)
+	txt <- mod_md_txt("expName", .ap2$stn$pv_initialTempCalibFilename, txt)
+	txt <- mod_md_logic("TimePoints", FALSE, txt)
+	txt <- mod_md_logic("spacing", FALSE, txt)
+	txt <- mod_md_txt("columnNamesL1", paste0(yPref, .ap2$stn$pv_YcolumnNameWaterTemp), txt)
+	txt <- mod_md_txt("columnNamesL2", paste0(clPref, "DELETE"), txt)
+	txt[grep("L1  <-", txt)] <- paste0("\tL1  <- list(list(\"", temps, "\"))")
+	txt[grep("L2  <-", txt)] <- paste0("\tL2  <- list(list(\"", temps, "\"))")
+	txt <- mod_md_num("Repls", 1, txt)
+	txt <- mod_md_num("nrConScans", 3, txt)
+	txt <- mod_md_txt("Group", "no", txt)
+	con <- file(pathMd, open="wt")
+	writeLines(txt, con)
+	close(con)
+	return(invisible(NULL))
+} # EOF
+
+
+
+#' @title Record and use temperature calibration data
+#' @description Record a special temperature dataset and use these data as a 
+#' kind of calibration data for all of the aquagram calculations except the 
+#' 'classic' and 'sfc' modes. In other words, you need the temperature dataset 
+#' in order to be able to calculate Aquagrams of the 'auc'modes. It is strongly 
+#' recommended that you do generate the temperature data and so can also use 
+#' the advanced features of these AUC (area under curve) stabilized Aquagrams.
+#' @details For generating a new experiment with all the necessary defaults to 
+#' record the temperature data, please use \code{\link{genTempCalibExp}} (see 
+#' examples there). After having recorded the spectra in their resp. temperature, 
+#' import the raw data (\code{\link{gfd}}) and move the resulting R-data file 
+#' into your \code{AQUAP2SH} folder. Now in the metadata of any experiment 
+#' (parameter \code{tempCalibFileName}) or in the corresponding parameter in the 
+#' settings file (\code{aqg_tempCalib_Filename}) provide the name of the R-data 
+#' object that you moved into the \code{AQUAP2SH} folder. Whenever now an Aquagram 
+#' is calculated, first and only once per R-session this temperate data file is 
+#' read in and used to calculate the necessary data enabling the calculation of 
+#' 'auc' Aquagrams. These temperature-datafile specific objects are stored in 
+#' the environment \code{.ap2} (\code{ls(.ap2)}), starting with the name of the 
+#' temperature data file followed by an '_' underscore.
+#' @section Procedure: The procedure to work with a temperature-data file (or 
+#' more of them of course) and use it to calculate area-under-curve 'auc' 
+#' stabilized Aquagrams is as follows: 
+#' \describe{
+#' \item{Record temperature spectra}{Use the function 
+#' \code{\link{genTempCalibExp}} to generate a folder structure for an experiment, 
+#' export the sample list \strong{non randomized}, then record the 
+#' temperature-spectra. Finally, use \code{\link{gfd}} to import the raw-data 
+#' and create the R-data file (in the folder 'R-data' in the working directory 
+#' of the experiment).}
+#' \item{Move R-data file}{Move the resulting R-data file containing the 
+#' temperature-data from the R-data folder into your \code{AQUAP2SH} folder, 
+#' i.e. the folder also containing e.g. the settings.r file.}
+#' \item{Specify temperature-data file}{In your actual experiment, specify the 
+#' name of the file (residing in the folder \code{AQUAP2SH}) containing the 
+#' temperature-spectra either in the metadata or at the argument \code{tempFile} in the function 
+#' \code{\link{gdmm}} - see examples.}
+#' \item{Choose to calculate an Aquagram}{In your actual experiment, choose to 
+#' actually calculate an Aquagram and specify all the necessary parameters in the 
+#' analysis procedure. You can override the values for the Aquagram-calculations 
+#' via the \code{...} argument in the function \code{\link{getap}} in \code{\link{gdmm}} - please 
+#' see examples and \code{\link{calc_aqg_args}}.}
+#' }
+#' @examples 
+#' \dontrun{
+#' fd <- gfd()
+#' cube <- gdmm(fd)
+#' cube <- gdmm(fd, tempFile="def") # to use the default from the settings file, 
+#' # same as above
+#' cube <- gdmm(fd, tempFile="FooBar") # use the temperature-data file 'FooBar'
+#' # residing in the AQUAP2SH folder
+#' cube <- gdmm(fd, getap(do.aqg=TRUE))
+#' cube <- gdmm(fd, getap(do.aqg=TRUE, aqg.bootCI=TRUE))
+#' cube <- gdmm(fd, getap(aqg.mod="aucs.dce"))
+#' cube <- gdmm(fd, getap(aqg.mod="aucs.dce-diff", aqg.minus="C_Cont"), tempFile="FooBar2") 
+#' }
+#' @family Temperature procedures
+#' @family Aquagram documentation
+#' @seealso \code{\link{genTempCalibExp}}
+#' @name tempCalib_procedures
+NULL

@@ -393,14 +393,11 @@ aq_checkTrippleDotsCalc <- function(...) {
 #' @export
 plot_aqg <- function(cube, aps="def", ...) {
   	autoUpS()
+  	if (class(cube) != "aquap_cube") {
+  		stop("Please provide an object of class 'aquap_cube' to the argument 'cube'", call.=FALSE)
+  	}
   	aq_checkTrippleDotsCalc(...) # to prevent the user to provide a calculation argument to the plotting function
-	aps <- checkApsChar(aps)
-	if (aps == "cube") {
-		ap <- getap(.lafw_fromWhere="cube", cube=cube, ...)			 # the ... are here used for additionally modifying (if matching arguments) the analysis procedure obtained from the cube
-	} else {
-		check_apDefaults(fn=aps)
-		ap <- getap(fn=aps, ...) # load from file, possibly modify via ...
-	}
+	ap <- doApsTrick(aps, cube, ...)
   	ap <- ap_cleanZeroValuesCheckExistenceDefaults(ap, dataset=getDataset(cube[[1]]), haveExc=FALSE) # just take the first dataset, as we mainly need the header (and the wavelengths are already checked.. )
   	apCube <- getap(.lafw_fromWhere="cube", cube=cube)	
   	if (is.null(ap$aquagr)) {

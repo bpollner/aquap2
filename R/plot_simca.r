@@ -171,15 +171,9 @@ checkSimcaPlottingValues <- function(sim.distType, sim.icdRan) {
 ### CORE ###
 plot_simca_cube <- function(cube, aps="def", sim.distType="od", sim.icdRan="def", ...) {
 	autoUpS()
-	aps <- checkApsChar(aps)
 	distType <- icdRan <- NULL
 	checkSimcaPlottingValues(sim.distType, sim.icdRan) # !! is assigning here: distType, icdRan
-	if (aps == "cube") {
-		ap <- getap(.lafw_fromWhere="cube", cube=cube, ...)			 # the ... are here used for additionally modifying (if matching arguments) the analysis procedure obtained from the cube
-	} else {
-		check_apDefaults(fn=aps)
-		ap <- getap(fn=aps, ...) # load from file, possibly modify via ...
-	}
+	ap <- doApsTrick(aps, cube, ...)
 	ap <- ap_cleanZeroValuesCheckExistenceDefaults(ap, dataset=getDataset(cube[[1]]), haveExc=FALSE) # just take the first dataset, as we mainly need the header (and the wavelengths are already checked.. )
 	if (is.null(ap$simca)) {
 		return(cat("*** SIMCA model not available or not selected for plotting \n"))

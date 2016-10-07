@@ -671,7 +671,6 @@ makeFlatDataFrame <- function(dataset, groupBy, fusionGroupBy=NULL) {
 #' @param cube An object as created by \code{\link{gdmm}}.
 #' @param index The index of the dataset to be obtained. See the leftmost
 #' rowname of the 'cube' object.
-#' @family Helper Functions
 #' @return A standard dataset as e.g. produced by the function \code{\link{gfd}}.
 #' @examples 
 #' \dontrun{
@@ -683,6 +682,7 @@ makeFlatDataFrame <- function(dataset, groupBy, fusionGroupBy=NULL) {
 #' str(dataset_3)
 #' }
 #' @seealso \code{\link{do_msc}}, \code{\link{do_avg}}
+#' @family Helper Functions
 #' @family Extract Elements
 #' @export
 getcd <- function(cube, index) {
@@ -713,6 +713,7 @@ getcd <- function(cube, index) {
 #' str(fd_2_pls)
 #' }
 #' @seealso \code{\link{do_emsc}}, \code{\link{dpt_modules}}
+#' @family Helper Functions
 #' @family Extract Elements
 #' @export
 getcm <- function(cube, index, what="pca") {

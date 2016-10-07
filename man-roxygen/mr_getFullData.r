@@ -111,11 +111,14 @@
 #' as detected in the scope of the complete dataset will be added to the dataset.
 #' @seealso \code{\link{readSpectra}}, \code{\link{readHeader}}, 
 #' \code{\link{aquap_data-methods}}
-#' @return An object of class 'aquap_data' containing a data frame and one slot:
+#' @return An object of class 'aquap_data' containing a data frame and four slots:
 #' \itemize{
-#'  \item dataframe Consists of 'header', 'colRep' and 'NIR'.
+#' \item dataframe Consists of 'header', 'colRep' and 'NIR'.
+#' \item metadata A list with the metadata of the experiment
+#' \item anproc Possibly a list with an analysis procedure
 #'  \item ncpwl Numeric length one, the number of characters before the wavelength 
 #'  in the column names of the NIR spectra.
+#' \item version A length one character noting the version of the dataset.
 #' }
 #' @examples
 #' \dontrun{
@@ -134,4 +137,3 @@
 #'  fd <- getFullData(md) # load a rawdata-file called "bar"
 #' }
 #' @family Core functions
-
