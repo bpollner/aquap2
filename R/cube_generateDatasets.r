@@ -1300,6 +1300,7 @@ gdmm <- function(dataset, ap=getap(), noiseFile="def", tempFile="def") {
 	if (class(dataset) != "aquap_data") {
 		stop("Please provide an object of class 'aquap_data' to the argument 'dataset'.", call.=FALSE)
 	}
+	checkDatasetVersion(dataset)
 	createOutlierFlagList() # needed to collect the flags and flag-data from the first block to the second
 	ap <- ap_cleanZeroValuesCheckExistenceDefaults(ap, dataset, haveExc=TRUE)
 	md <- getMetadata(dataset)

@@ -22,12 +22,25 @@ stn_expandFillInLocalTxt <- function(missTxt, missInd, ftLocal) {
 } # EOF
 
 getParamName <- function(rowString) {
-	check <- grep("=", rowString)
+	sep <- "="
+	if (!grepl(sep, rowString)) {
+		if (grepl("<-", rowString)) {
+			sep <- "<-"
+		} else { # so none of both is present!
+		#	stop("Sorry, a problem in updating one of the input files occurred.", call.=FALSE)
+			return(NULL)
+		}
+	}
+	if (grepl("=", rowString) & grepl("<-", rowString)) {
+	#	stop("There are '=' and '<-' at the same time in one row in one of the input-files.\nThis can cause problems, sorry.", call.=FALSE)
+		return(NULL)
+	}
+	check <- grep(sep, rowString)
 	if (length(check) == 0) {
 	#	message("Warning no good name (no equal)")
 		return(NULL)
 	}
-	a <- strsplit(rowString, "=")[[1]][1] # get everything before the "="
+	a <- strsplit(rowString, sep)[[1]][1] # get everything before the separator sep
 	b <- strsplit(a, "\t")[[1]] # split by eventual tabs
 	b <- b[length(b)] # get the last element
 	return(trimws(b))
@@ -81,38 +94,41 @@ modifyIndexFrame <- function(indF) {
 
 stn_expandFillInLocalTxt <- function(ftPack, ftLocal, missNames) {	
 	if (!is.null(missNames)) {
-	mi <- NULL # the missIndex, indexing the whole row
-	for (i in 1: length(missNames)) {
-		ind <- getMissingNameIndex(missNames[i], ftPack) # the index of the missing item in the package-txt
-		mi <- c(mi, ind) # collect them all
-	} # end for i		
-	# get the anchor, that is the first lower indexed existing name in ftLocal and pair it with ..
-	indF <- as.data.frame(matrix(NA, ncol=3, nrow=length(mi))) # for collecting the results
-	colnames(indF) <- c("MissInd", "lookBack", "nextLocalInd")
-	for (i in 1: length(mi)) {
-		found <- FALSE
-		lookBack <- 1
-		while(!found) {
-			si <- mi[i] - lookBack # si: search index
-			a <- getParamName(ftPack[si])
-			locInd <- lookForParamNameInLocalFile(a, ftLocal)
-			if (is.null(locInd)) {
-				lookBack <- lookBack+1
-			} else {
-				indF[i,] <- c(mi[i], lookBack, locInd)
-				found <- TRUE
-			}
-		} # end while
-	} # end for i
-	indF <- modifyIndexFrame(indF) # sorting and adapting following to previous inserts, i.e. adding the correction vector
-	if (is.null(indF)) { # gets returned NULL if one parameter is at the start of a new block !
-		return(NULL)
-	}
-	newTxt <- rep(TRUE, (length(ftLocal)+length(missNames)))
-	newValInd <- apply(indF[,-1, drop=FALSE], 1, sum) # gives the position in the expanded file where the new values will be placed
-	newTxt[newValInd] <- FALSE
-	newTxt[newTxt==TRUE] <- ftLocal  # fill in the user´s local text in the expanded vector
-	newTxt[newValInd] <- ftPack[indF[,1]] # get the rows from the package text
+		mi <- NULL # the missIndex, indexing the whole row
+		for (i in 1: length(missNames)) {
+			ind <- getMissingNameIndex(missNames[i], ftPack) # the index of the missing item in the package-txt
+			mi <- c(mi, ind) # collect them all
+		} # end for i	
+		# get the anchor, that is the first lower indexed existing name in ftLocal and pair it with ..
+		indF <- as.data.frame(matrix(NA, ncol=3, nrow=length(mi))) # for collecting the results
+		colnames(indF) <- c("MissInd", "lookBack", "nextLocalInd")
+		for (i in 1: length(mi)) {
+			found <- FALSE
+			lookBack <- 1
+			while(!found) {
+				si <- mi[i] - lookBack # si: search index
+				a <- getParamName(ftPack[si])
+				locInd <- lookForParamNameInLocalFile(a, ftLocal)
+				if (is.null(locInd)) {
+					lookBack <- lookBack+1
+				} else {
+					indF[i,] <- c(mi[i], lookBack, locInd)
+					found <- TRUE
+				}
+			} # end while
+		} # end for i
+		print(indF)
+		indF <- modifyIndexFrame(indF) # sorting and adapting following to previous inserts, i.e. adding the correction vector
+		print(indF)
+
+		if (is.null(indF)) { # gets returned NULL if one parameter is at the start of a new block !
+			return(NULL)
+		}
+		newTxt <- rep(TRUE, (length(ftLocal)+length(missNames)))
+		newValInd <- apply(indF[,-1, drop=FALSE], 1, sum) # gives the position in the expanded file where the new values will be placed
+		newTxt[newValInd] <- FALSE
+		newTxt[newTxt==TRUE] <- ftLocal  # fill in the user´s local text in the expanded vector
+		newTxt[newValInd] <- ftPack[indF[,1]] # get the rows from the package text
 	} else { # so we have nothing to add
 		newTxt <- ftLocal
 	}
@@ -276,7 +292,22 @@ updateSettings <- function(packageName="aquap2", silent=FALSE) {
 	}
 } # EOF
 
-autoUpS <- function() { # stops if somethings goes wrong
+checkForExperimentFolderStructure <- function() {
+	aa <- .ap2$stn$fn_exports
+	aaa  <- .ap2$stn$fn_rcode
+	bb <- .ap2$stn$fn_rawdata
+	bbb  <- .ap2$stn$fn_rdata
+	cc <- .ap2$stn$fn_metadata
+	ccc <- .ap2$stn$fn_results
+	dd  <- .ap2$stn$fn_sampleList
+	folderNames <- c(aa, aaa, bb, bbb, cc, ccc, dd)
+	#
+	if(!all(folderNames %in% list.files()) ) {
+		stop(paste0("Sorry, it appears the current working directory is not within the required standard folder structure.\nPlease change the working directory or use 'genFolderStr()' to create an appropriate folder structure in the current working directory."), call.=FALSE)
+	}
+} # EOF
+
+autoUpS <- function(cfs=TRUE) { # stops if somethings goes wrong
 	res <- 1
 	if (exists(".ap2$stn")) {
 		autoUpS <- .ap2$stn$autoUpdateSettings
@@ -288,8 +319,11 @@ autoUpS <- function() { # stops if somethings goes wrong
 			res <- updateSettings(packageName="aquap2", silent=TRUE)
 		}
 	}
+	if (cfs) {	
+		checkForExperimentFolderStructure()
+	}
 	if (is.null(res)) {
-	stop(call.=FALSE)
+		stop(call.=FALSE)
 	}
 } # EOF
 
@@ -306,7 +340,7 @@ autoUpS <- function() { # stops if somethings goes wrong
 #' \code{\link{genNoiseRecExp}} 
 #' @export
 genFolderStr <- function() {
-	autoUpS()
+	autoUpS(cfs=FALSE) # no checking of folder structure here!
 	fn_analysisData <- .ap2$fn_analysisData 
 	fn_exports <- .ap2$stn$fn_exports
 	fn_rcode <- .ap2$stn$fn_rcode 
