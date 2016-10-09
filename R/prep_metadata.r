@@ -97,58 +97,24 @@ copyMetadataFile <- function(fromPath, toPath) {
 	if (ok) { cat("A fresh template of the metadata file has been copied from the package.\n")}			
 } # EOF
 
-check_mdVersion_I <- function(localEnv) {
-	le <- localEnv
-	mdPacPath <- paste(path.package("aquap2"), "/templates/metadata.r", sep="")
-	pathSH <- Sys.getenv("AQUAP2SH")
-	pe <- new.env()
-	sys.source(mdPacPath, envir=pe)
-	locNames <- ls(le)
-	pacNames <- ls(pe)
-	if (!identical(locNames, pacNames)) {
-		okInd <- which(pacNames %in% locNames)
-		miss <- pacNames[-okInd]
-		delInd <- which(locNames %in% pacNames)
-		del <- locNames[-delInd]
-		msgNew <- "The new variables are:"
-		msgDel <- "The following variables have been deleted:"
-		#
-		message("There appears to be a newer version of the template for the metadata file in the package \"aquap2\".")
-		if (length(miss) != 0 & length(del) == 0) {
-			message(msgNew) ;   message(paste(miss, collapse=", "))
-		} else {
-			if (length(miss) == 0 & length(del) != 0) {
-				message(msgDel); 	message(paste(del, collapse=", "))
-			} else {
-				message(msgNew) ;   message(paste(miss, collapse=", "))
-				message(msgDel); 	message(paste(del, collapse=", "))
-			}
-		}
-		message(paste("Do you want to copy it now into \n\"", pathSH, "\" \nas a template to modify the metadata-files in your experiment accordingly? \n( y / n )", sep=""))
-		a <- readLines(n=1)
-		if (a != "y" & a != "Y") {
-			message("Please be aware that the package will not work properly if your metadata files are not up to date.")
-			out <- FALSE
-		} else {
-			copyMetadataFile(mdPacPath, pathSH)
-			out <- FALSE
-		}
-	} else { # so we are identical, everything ok
-		out <- TRUE
-	}
+check_mdVersion_I <- function(folderLocal, nameLocal) {
+	aa <- paste(path.package("aquap2"), "/templates/metadata.r", sep="")
+	pathToLocal <- paste(folderLocal, nameLocal, sep="/")
+	out <- checkFileVersionPossiblyModify(pathToPack=aa, pathToLocal, folderLocal, nameLocal)
 	if (out == FALSE) {
-		stop("Please update the metadata files in your experiments according to the latest template.", call.=FALSE)
+	#	stop("Please update the metadata files in your experiments according to the latest template.", call.=FALSE)
+		stop(call.=FALSE)
 	}
 } # EOF
 
-check_mdVersion <- function(localEnv) {
+check_mdVersion <- function(folderLocal, nameLocal) {
 	if (is.null(.ap2$.devMode)) {
-		check_mdVersion_I(localEnv)
+		check_mdVersion_I(folderLocal, nameLocal)
 	}
 } # EOF
 
 getmd_core <- function(fn="def") {
-	check_mdDefaults(fn)
+	check_mdDefaults(fn) # is assigning
 	#
 	clPref <- .ap2$stn$p_ClassVarPref
 	yPref <- .ap2$stn$p_yVarPref
@@ -168,11 +134,10 @@ getmd_core <- function(fn="def") {
 #	conSNrCol <- paste(yPref, .ap2$stn$p_conSNrCol, sep="")
 #	deleteCol <- paste(clPref, .ap2$stn$p_deleteCol, sep="")
 	### the above 4 are not used here
-	path <- .ap2$stn$fn_metadata
-	path <- paste(path, fn, sep="/")
+	foldLoc <-  .ap2$stn$fn_metadata
+	check_mdVersion(folderLocal=foldLoc, nameLocal=fn) 	### Version check here !!
 	e <- new.env()
-	sys.source(path, envir=e)
-	check_mdVersion(localEnv=e) 	### Version check here !!
+	sys.source(paste(foldLoc, fn, sep="/"), envir=e)
 	noSplitLabel <- ECLabel <- RMLabel <- filetype <- noiseFileName <- tempCalibFileName <- NULL # gets assigned below
 	check_mdDefaultValues(localEnv=e) ### checking and assigning
 	##
@@ -262,64 +227,29 @@ copyAnProcFile <- function(fromPath, toPath) {
 	if (ok) { cat("A fresh template of the analysis procedure file has been copied from the package.\n")}			
 } # EOF
 
-check_apVersion_I <- function(localEnv) {
-	le <- localEnv
-	apPacPath <- paste(path.package("aquap2"), "/templates/anproc.r", sep="")
-	pathSH <- Sys.getenv("AQUAP2SH")
-	pe <- new.env()
-	sys.source(apPacPath, envir=pe)
-	locNames <- ls(le)
-	pacNames <- ls(pe)
-	if (!identical(locNames, pacNames)) {
-		okInd <- which(pacNames %in% locNames)
-		miss <- pacNames[-okInd]
-		delInd <- which(locNames %in% pacNames)
-		del <- locNames[-delInd]
-		msgNew <- "The new variables are:"
-		msgDel <- "The following variables have been deleted:"
-		#
-		message("There appears to be a newer version of the template for the analysis procedure file in the package \"aquap2\".")
-		if (length(miss) != 0 & length(del) == 0) {
-			message(msgNew) ;   message(paste(miss, collapse=", "))
-		} else {
-			if (length(miss) == 0 & length(del) != 0) {
-				message(msgDel); 	message(paste(del, collapse=", "))
-			} else {
-				message(msgNew) ;   message(paste(miss, collapse=", "))
-				message(msgDel); 	message(paste(del, collapse=", "))
-			}
-		}
-		message(paste("Do you want to copy it now into \n\"", pathSH, "\" \nas a template to modify the analysis procedure files in your experiment accordingly? \n( y / n )", sep=""))
-		a <- readLines(n=1)
-		if (a != "y" & a != "Y") {
-			message("Please be aware that the package will not work properly if your analysis procedure files are not up to date.")
-			out <- FALSE
-		} else {
-			copyAnProcFile(apPacPath, pathSH)
-			out <- FALSE
-		}
-	} else { # so we are identical, everything ok
-		out <- TRUE
-	}
+check_apVersion_I <- function(folderLocal, nameLocal) {
+	aa <- paste(path.package("aquap2"), "/templates/anproc.r", sep="")
+	pathToLocal <- paste(folderLocal, nameLocal, sep="/")
+	out <- checkFileVersionPossiblyModify(pathToPack=aa, pathToLocal, folderLocal, nameLocal)
 	if (out == FALSE) {
-		stop("Please update the analysis procedure files in your experiments according to the latest template.", call.=FALSE)
+	#	stop("Please update the analysis procedure files in your experiments according to the latest template.", call.=FALSE)
+		stop(call.=FALSE)
 	}
 } # EOF
 
-check_apVersion <- function(localEnv) {
+check_apVersion <- function(folderLocal, nameLocal) {
 	if (is.null(.ap2$.devMode)) {
-		check_apVersion_I(localEnv)
+		check_apVersion_I(folderLocal, nameLocal)
 	}
 } # EOF
 
 getap_core_file <- function(fn="def") {
-	check_apDefaults(fn)
+	check_apDefaults(fn) # is assigning
 	##
-	path <- .ap2$stn$fn_metadata
-	path <- paste(path, fn, sep="/")
+	foldLoc <- .ap2$stn$fn_metadata
+	check_apVersion(folderLocal=foldLoc, nameLocal=fn) 	### Version check here !!
 	e <- new.env()
-	sys.source(path, envir=e)
-	check_apVersion(localEnv=e) 	### Version check here !!
+	sys.source(paste(foldLoc, fn, sep="/"), envir=e)
 	##
 	ucl <- list(splitClasses=e$spl.var, splitWl=e$spl.wl)
 	if (e$spl.do.csAvg == FALSE) {e$spl.csAvg.raw <- TRUE} # just to be sure that one is true

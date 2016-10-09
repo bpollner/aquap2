@@ -7,20 +7,6 @@ showPathToAquap2 <- function() {
 	invisible(path)
 } # EOF
 
-copySettingsFile <- function(fromPath, toPath) {
-	a <- paste(toPath, "settings.r", sep="/")
-	b <- paste(toPath, "settings_OLD.r", sep="/")
-	if (file.exists(a)) {
-		file.rename(a, b)
-	}
-	ok <- file.copy(fromPath, toPath, overwrite=TRUE)
-	if (ok) { cat("A fresh version of the settings.r file has been copied from the package.\n")}			
-} # EOF
-
-stn_expandFillInLocalTxt <- function(missTxt, missInd, ftLocal) {
-	
-} # EOF
-
 getParamName <- function(rowString) {
 	sep <- "="
 	if (!grepl(sep, rowString)) {
@@ -92,7 +78,7 @@ modifyIndexFrame <- function(indF) {
 	return(out)
 } # EOF
 
-stn_expandFillInLocalTxt <- function(ftPack, ftLocal, missNames) {	
+expandFillInLocalTxt <- function(ftPack, ftLocal, missNames) {	
 	if (!is.null(missNames)) {
 		mi <- NULL # the missIndex, indexing the whole row
 		for (i in 1: length(missNames)) {
@@ -117,10 +103,7 @@ stn_expandFillInLocalTxt <- function(ftPack, ftLocal, missNames) {
 				}
 			} # end while
 		} # end for i
-		print(indF)
 		indF <- modifyIndexFrame(indF) # sorting and adapting following to previous inserts, i.e. adding the correction vector
-		print(indF)
-
 		if (is.null(indF)) { # gets returned NULL if one parameter is at the start of a new block !
 			return(NULL)
 		}
@@ -135,9 +118,122 @@ stn_expandFillInLocalTxt <- function(ftPack, ftLocal, missNames) {
 	return(newTxt)
 } # EOF
 
+copySettingsFile <- function(fromPath, toPath) {
+	a <- paste(toPath, "settings.r", sep="/")
+	b <- paste(toPath, "settings_OLD.r", sep="/")
+	if (file.exists(a)) {
+		file.rename(a, b)
+	}
+	ok <- file.copy(fromPath, toPath, overwrite=TRUE)
+	if (ok) { cat("A fresh version of the settings.r file has been copied from the package.\n")}			
+} # EOF
+
+copyFreshTemplate <- function(pathToPack, folderLocal, fileName) {
+	suff <- pv_suffixForTemplates
+	#
+	toPath <- paste0(folderLocal, "/", fileName, suff, ".r")
+	ok <- file.copy(pathToPack, toPath, overwrite=TRUE)
+	if (ok) { 
+		cat("A fresh template of the ", fileName, " file has been copied from the package.\n")
+	} else {
+		stop(paste0("Sorry, an error while copying the template for the '", fileName, "' file has occurred."), call.=FALSE)
+	}			
+} # EOF
+
+checkFileVersionPossiblyModify <- function(pathToPack, pathToLocal, folderLocal, nameLocal, pm=NULL) {
+	loc <- pathToLocal
+	pac <- pathToPack
+	#
+	if (is.null(pm)) {
+		pm <- ""
+	} else {
+		pm <- paste0("$", pm)
+	}
+	lenv <- new.env()
+	sys.source(loc, envir=lenv)
+	txt <- paste0("sort(names(lenv", pm, "))")
+	locNames <- eval(parse(text=txt))
+	penv <- new.env()
+	sys.source(pac, envir=penv)
+	txt <- paste0("sort(names(penv", pm, "))")
+	pacNames <- eval(parse(text=txt))
+	if (!identical(locNames, pacNames)) {
+		okInd <- which(pacNames %in% locNames)
+		miss <- pacNames[-okInd]
+		delInd <- which(locNames %in% pacNames)
+		del <- locNames[-delInd]
+		if (length(miss) == 0) {miss <- NULL}
+		if (length(del) == 0) {del <- NULL}
+		msgNew <- "The new variables are:"
+		msgDel <- "The following variables have been deleted:"
+		#
+		fconPack <- file(pac, open="r")
+		ftPack <- readLines(fconPack) # the full settings.r text from the package
+		close(fconPack)
+		fconLocal <- file(loc, open="r")
+		ftLocal <- readLines(fconLocal) # the full settings.r text fromt the local file
+		close(fconLocal)
+		## add the missing parameters
+		newTxt <- try(expandFillInLocalTxt(ftPack, ftLocal, missNames=miss), silent=TRUE) # returns the unchanged local text if there is nothing to add
+		if(class(newTxt) == "try-error") { 
+			newTxt <- NULL
+		}
+		## now delete the obsolete parameters
+		if (!is.null(del) & (!is.null(newTxt))) {
+			delInd <- NULL
+			for (i in 1: length(del)) {
+				ind <- getMissingNameIndex(del[i], newTxt) # the index of the items to be deleted
+				delInd <- c(delInd, ind) # collect them all
+			} # end for i
+			newTxt <- newTxt[-delInd]
+		}
+		#
+		if (!is.null(newTxt)) { # so we maybe had to add something (what went well), and we maybe also had to delete some parameters
+			fconLocal <- file(loc, open="w")
+			writeLines(newTxt, fconLocal) # write the new file to settings.r in pathSH
+			close(fconLocal)
+			msg <- paste0("Your '", nameLocal, "' file in the folder \n", folderLocal, "\nhas been updated.\n***Everything is ok.***")
+			doCopyMove <- FALSE
+		} else { # so we could NOT modify the local file
+			msg <- paste0("There appears to be a newer version of the '", nameLocal, "' file in the package 'aquap2'.")
+			doCopyMove <- TRUE
+		}
+		message(msg) # actually display here a message !!
+		fillLeft <- "   " # to have some space from the left side
+		if ((!is.null(miss)) & is.null(del)) {
+			message(msgNew) ;   message(paste0(fillLeft, paste(miss, collapse=", "))) # "The new variables are:"
+		} else {
+			if (is.null(miss) & (!is.null(del)) ) {
+				message(msgDel); 	message(paste0(fillLeft, paste(del, collapse=", ")))  #"The following variables have been deleted:"
+			} else {
+				message(msgNew) ;   message(paste0(fillLeft, paste(miss, collapse=", ")))
+				message(msgDel); 	message(paste0(fillLeft, paste(del, collapse=", ")))
+			}
+		}
+		if (doCopyMove) {
+			message(paste0("Do you want to copy it now into the folder \n'", folderLocal, "'\n as a template ('", nameLocal, pv_suffixForTemplates, ".r') for modifying the existing '", nameLocal, "' file?\n( y / n )"))
+			a <- readLines(n=1)
+			if (a != "y" & a != "Y") {
+				message("Please be aware that the package will not work properly if your '", nameLocal, "' file is not up to date.")
+				return(FALSE)
+			} else {
+				copyFreshTemplate(pathToPack, folderLocal, nameLocal)
+				message(paste0("Please update your '", nameLocal, "' file according to the template."))
+				return(FALSE)
+			}	
+		} else { ## if (doCopyMove) == FALSE
+			return(TRUE) # so we successfully copied / deleted the parameter(s) and wrote the new file via writeLines; no copying of the file.
+		}
+	} else { 	# so the variable names in the two settings files are identical
+		return(TRUE)
+	} 
+	stop(paste0("Sorry, there is an unexpected error in file check (", nameLocal, ")")) # theoretically this should never happen...
+} # EOF
+
 checkSettings <- function() {
-	pspath <- paste(path.package("aquap2"), "/settings.r", sep="")
+	sFile <- "settings.r"
 	pathSH <- Sys.getenv("AQUAP2SH")
+	pspath <- paste(path.package("aquap2"), sFile, sep="/")
 	if (nchar(pathSH) == 0) { 			## so the variable is *not* defined in .Renviron
 		homePath <- "user/home"
 		hp <- try(path.expand("~"), silent=TRUE)
@@ -150,12 +246,11 @@ checkSettings <- function() {
 		return(FALSE)
 	} else { ## so we have something defined under AQUAP2SH
 		if (!file.exists(pathSH)) {
-			msg <- paste("The folder \"", pathSH, "\" does not seem to exist. Please check the path defined in the '.Renviron' file. Thanks.", sep="")
+			msg <- paste0("The folder \"", pathSH, "\" does not seem to exist. Please check the path defined in the '.Renviron' file. Thanks.")
 			message(msg)
 			return(FALSE)
 		}
-		sFile <- "/settings.r"
-		pathToSettings <- paste(pathSH, sFile, sep="")
+		pathToSettings <- paste(pathSH, sFile, sep="/")
 		if (!file.exists(pathToSettings)) {
 			msg <- paste("The required settings.r file does not seem to exist in the provided directory \n\"", pathSH, "\".\nWould like to copy a factory-fresh version of the settings.r file there now? \n( y / n)", sep="")
 			message(msg)
@@ -169,81 +264,7 @@ checkSettings <- function() {
 				return(TRUE)
 			}
 		} else { ## so the file does exist
-			loc <- pathToSettings
-			pac <- pspath
-			fenv <- new.env()
-			source(loc, local=fenv)
-			locNames <- sort(names(fenv$stn))
-			source(pac, local=fenv)
-			pacNames <- sort(names(fenv$stn))
-			if (!identical(locNames, pacNames)) {
-				okInd <- which(pacNames %in% locNames)
-				miss <- pacNames[-okInd]
-				delInd <- which(locNames %in% pacNames)
-				del <- locNames[-delInd]
-				if (length(miss) == 0) {miss <- NULL}
-				if (length(del) == 0) {del <- NULL}
-				msgNew <- "The new variables are:"
-				msgDel <- "The following variables have been deleted:"
-				#
-				fconPack <- file(pac, open="r")
-				ftPack <- readLines(fconPack) # the full settings.r text from the package
-				close(fconPack)
-				fconLocal <- file(loc, open="r")
-				ftLocal <- readLines(fconLocal) # the full settings.r text fromt the local file
-				close(fconLocal)
-				## add the missing parameters
-				newTxt <- try(stn_expandFillInLocalTxt(ftPack, ftLocal, missNames=miss), silent=TRUE) # returns the unchanged local text if there is nothing to add
-				if(class(newTxt) == "try-error") { 
-					newTxt <- NULL
-				}
-				## now delete the obsolete parameters
-				if (!is.null(del) & (!is.null(newTxt))) {
-					delInd <- NULL
-					for (i in 1: length(del)) {
-						ind <- getMissingNameIndex(del[i], newTxt) # the index of the items to be deleted
-						delInd <- c(delInd, ind) # collect them all
-					} # end for i
-					newTxt <- newTxt[-delInd]
-				}
-				#
-				if (!is.null(newTxt)) { # so we maybe had to add something (what went well), and we maybe also had to delete some parameters
-					fconLocal <- file(loc, open="w")
-					writeLines(newTxt, fconLocal) # write the new file to settings.r in pathSH
-					close(fconLocal)
-					msg <- paste("Your settings.r file in\n", pathSH, "\nhas been updated.\n***Everything is ok.***", sep="")
-					doCopyMove <- FALSE
-				} else {
-					msg <- "There appears to be a newer version of the settings.r file in the package \"aquap2\"."
-					doCopyMove <- TRUE
-				}
-				message(msg) # actually display here a message !!
-				if ((!is.null(miss)) & is.null(del)) {
-					message(msgNew) ;   message(paste(miss, collapse=", ")) # "The new variables are:"
-				} else {
-					if (is.null(miss) & (!is.null(del)) ) {
-						message(msgDel); 	message(paste(del, collapse=", "))  #"The following variables have been deleted:"
-					} else {
-						message(msgNew) ;   message(paste(miss, collapse=", "))
-						message(msgDel); 	message(paste(del, collapse=", "))
-					}
-				}
-				if (doCopyMove) {
-					message(paste("Do you want to copy it now into \n\"", pathSH, "\" ? \nThe existing file will remain in place but will be renamed to 'settings_OLD.r' \n( y / n )", sep=""))
-					a <- readLines(n=1)
-					if (a != "y" & a != "Y") {
-						message("Please be aware that the package will not work properly if your settings.r file is not up to date.")
-						return(FALSE)
-					} else {
-						copySettingsFile(pspath, pathSH)
-						return(TRUE)
-					}	
-				} else { ## if (doCopyMove) == FALSE
-					return(TRUE) # so we successfully copied / deleted the parameter(s) and wrote the new file via writeLines; no copying of the file.
-				}
-			} else { 	# so the variable names in the two settings files are identical
-				return(TRUE)
-			} 	
+			return(checkFileVersionPossiblyModify(pathToPack=pspath, pathToLocal=pathToSettings, folderLocal=pathSH, nameLocal=sFile, pm="stn"))  # returns TRUE or FALSE
 		} # end else file exists
 	} # end else nchar == 0
 } # EOF
@@ -277,7 +298,7 @@ checkSettings <- function() {
 updateSettings <- function(packageName="aquap2", silent=FALSE) { 
 	ok <- checkSettings() # makes sure that we have the latest version of the settings.r file in the settings-home directory defined in .Renviron
 	if (ok) {
-		pathSettings <- paste(Sys.getenv("AQUAP2SH"), "/settings.r", sep="")
+		pathSettings <- paste0(Sys.getenv("AQUAP2SH"), "/settings.r")
 		sys.source(pathSettings, envir=.GlobalEnv$.ap2)
 	#	if (any(grepl(".ap2", search(), fixed=TRUE))) {
 	#		detach(.ap2)
@@ -286,9 +307,9 @@ updateSettings <- function(packageName="aquap2", silent=FALSE) {
 		if (!silent) {
 			cat(paste(packageName, "settings updated\n"))
 		}
-		invisible(.ap2$stn)
+		return(invisible(.ap2$stn))
 	} else { # so if the settings check was not ok
-	return(invisible(NULL))
+		return(invisible(NULL))
 	}
 } # EOF
 

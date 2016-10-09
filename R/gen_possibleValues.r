@@ -60,6 +60,8 @@ pv_versionDataset <- "0.1.4"   # change this only!! if the structure of the data
 pv_initialTempCalibFilename <- "TempCalib"
 pv_YcolumnNameWaterTemp <- "waterTemp"
 
+pv_suffixForTemplates <- "_TEMPLATE"
+
 #########################################################
 ## Globals
 pv_noiseDistPrefix <- "nd_"
