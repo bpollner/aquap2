@@ -135,7 +135,11 @@ setGeneric("getItemIndex", function(object) standardGeneric("getItemIndex"))
 setMethod("getItemIndex", "aqg_calc", function(object) object@itemIndex)
 
 setGeneric("getWavelengths", function(object) standardGeneric("getWavelengths"))
+#' @rdname getWavelengths
+#' @export
 setMethod("getWavelengths", "aquap_data", definition=getWavelengths_dataset)
+#' @rdname getWavelengths
+#' @export
 setMethod("getWavelengths", "aquap_set", definition=getWavelengths_set)
 
 setGeneric("getNIR", function(object) standardGeneric("getNIR"))

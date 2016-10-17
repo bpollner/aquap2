@@ -182,7 +182,7 @@ stn <- list(
 	plsr_rv_customColor = NULL, 			## the custom color for coloring the plsr regression vector. Set to NULL for not using custom colors. Provide a color for using it to color the regression vector.
 	plsr_rv_customLinetype = NULL,			## the custom linetype for plotting the plsr regression vector. Provide an integer to use it as linetype for the regression vector.
 	plsr_indepPred_printPairingMsg = TRUE,	## if a message with the pairing of model and independent variable for validation should be displayed
-	plsr_indepPred_tolerance_nm = 10, 		## the tolerance in nm that is accepted for the independent dataset to be out of wavelength-range at the minimum and maxium wavelength from the cube-dataset (at independent plsr predictions) In development. 
+	plsr_indepPred_tolerance_nm = 10, 		## the tolerance in nm that is accepted for the independent dataset to be out of wavelength-range at the minimum and maxium wavelength from the cube-dataset (at independent plsr predictions). In development. 
 	plsr_indepPred_exportToExcel = TRUE, 	## if an excel file with the results of an independent prediction should be produced.
 
 

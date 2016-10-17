@@ -55,6 +55,7 @@ str(fd_2_pls)
 \code{\link{do_emsc}}, \code{\link{dpt_modules}}
 
 Other Extract Elements: \code{\link{getHeader}},
+  \code{\link{getWavelengths,aquap_data-method}},
   \code{\link{getcd}}, \code{\link{siWl}}
 
 Other Helper Functions: \code{\link{genFolderStr}},

@@ -351,6 +351,13 @@ The default name for the analysis procedure file can be set in
  override the values in the file with the provided values. See examples at 
  \code{\link{gdmm}} and \code{\link{plot}}.
 }
+\section{Important}{
+ As the AUC-mods of the Aquagram compare the actual data to 
+your previously recoreded temperature calibration data (see 
+\code{\link{genTempCalibExp}} and \code{\link{tempCalib_procedures}}), the 
+application of some data-treatment functions (see e.g. \code{\link{do_gapDer}}) 
+can lead to unexpected and distorted results in the Aquagram.
+}
 \seealso{
 \code{\link{getap}}, \code{\link{gdmm}}
 

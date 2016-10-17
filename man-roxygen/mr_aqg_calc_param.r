@@ -67,3 +67,8 @@
 #' should be performed.
 #' @param aqg.reference Only used in the 'classic' and 'sfc' modes. An optional
 #' numerical vector (loadings, etc..) used for MSC.
+#' @section Important: As the AUC-mods of the Aquagram compare the actual data to 
+#' your previously recoreded temperature calibration data (see 
+#' \code{\link{genTempCalibExp}} and \code{\link{tempCalib_procedures}}), the 
+#' application of some data-treatment functions (see e.g. \code{\link{do_gapDer}}) 
+#' can lead to unexpected and distorted results in the Aquagram.

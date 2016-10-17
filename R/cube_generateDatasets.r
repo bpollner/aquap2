@@ -914,9 +914,35 @@ performDPT_Core <- function(dataset, dptSeq) {
 					## have osc here soon 
 					message("Sorry, no osc yet!")
 			} # end osc
+		###########
 			if (first[i] == pvMod[6]) { # deTr
-					## have deTrend here soon 	
-					message("Sorry, no de-Trend yet")
+				if (!grepl("@", dptSeq[i])) {
+					dataset <- do_detrend(dataset) # takes the full range as source and target
+				} else {
+					trg <- "src"
+					#
+					infoChar <- strsplit(dptSeq[i], "@")[[1]][[2]] # get only the second part of the module containing the numbers (still as character!)
+					charSep <- unlist(strsplit(infoChar, "-")) # the single elements
+					options(warn=-1)
+					src <- as.numeric(charSep)
+					options(warn=0) 
+					indNa <- which(is.na(src))
+					if (length(indNa) != 0 ) { # so we have a character present
+						trg <- charSep[indNa]
+						src <- src[-indNa] # clean out the characters
+					} else { # so we have no character present
+						if (length(src) == 4) {
+							trg <- src[3:4]
+							src <- src[1:2]
+						} else {
+							if (length(src) == 3) {
+								trg <- src[3]
+								src <- src[1:2]
+							}
+						} # end else
+					} # end else
+					dataset <- do_detrend(dataset, src, trg) # checking is inside here
+				} # end else
 			} # end deTrend
 		###########
 			if (first[i] == pvMod[7]) { # gap Derivative

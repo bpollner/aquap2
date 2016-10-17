@@ -1,3 +1,27 @@
+#' @title Get Wavelengths
+#' @description Get a numeric vector containing the wavelengths of a given 
+#' dataset.
+#' @details The wavelengths are simply extracted from the column names of the 
+#' NIR-data.
+#' @param object An object of class 'aquap_data' as produced e.g. by 
+#' \code{\link{gfd}}.
+#' @return A numeric vector containing the wavelengths of the NIR-data of the 
+#' object.
+#' @examples
+#' \dontrun{
+#' fd <- gfd()
+#' wls <- getWavelengths(fd)
+#' ####
+#' cu <- gdmm(fd)
+#' wls <- getWavelengths(cu[[1]]) # extract the wavelengths from the dataset 
+#' # of the first set in the cube
+#' }
+#' @family Extract Elements
+#' @name getWavelengths
+NULL
+
+
+
 #' @title Extract Elements
 #' @description Extract single elements of a dataset or of a set, i.e. a single 
 #' list element of a cube.

@@ -116,8 +116,9 @@ plot_aquagram_inner <- function(aquCalc, selWls=.ap2$stn$aqg_wlsAquagram, onSub,
 		caxislabels <- dfpList$Labels
 		if(where != "pdf" & Sys.getenv("RSTUDIO") != 1)  {dev.new(height=height, width=width)}
 		fmsb::radarchart(dataForPlotting, axistype=4, maxmin=T, axislabcol=1, seg=4, pty=32, caxislabels=caxislabels, pcol=Color, plty=ltPlot, cglwd=0.5, plwd=pLineWi, centerzero=T, cglty=3, sub=onSub, title=onMain)
-		legend("topright", cex=0.8, xjust=0.5, yjust=0.5, legend=legText, col=legColor, lty=ltLeg, lwd=4)
-		legend("bottomleft", cex=0.8, xjust=0.5, yjust=0.5, legend=legTextMod)
+		legBgCol <- rgb(255,255,255, alpha=.ap2$stn$col_alphaForLegends, maxColorValue=255) # is a white with alpha to be determined in the settings
+		legend("topright", cex=0.8, xjust=0.5, yjust=0.5, legend=legText, col=legColor, lty=ltLeg, lwd=4, bg=legBgCol)
+		legend("bottomleft", cex=0.8, xjust=0.5, yjust=0.5, legend=legTextMod, bg=legBgCol)
 		mtext(mText, 1)
 	} # EOIF
 	## 
@@ -294,9 +295,10 @@ aq_getMinusText <- function(minus, mod) {
 	return(minusText)
 } # EOF
 
-plotAquagram_single <- function(aquCalc, classVarRanges, where, onSub, onMain, customColor, plotSpectra, adPeakPlot, adLines, discrim, clt, mod, TCalib, Texp, selWls, nrCorr, bootCI, minus, fsa, fss, R, ncpwl) {
+plotAquagram_single <- function(aquCalc, classVarRanges, where, onSub, onMain, customColor, plotSpectra, adPeakPlot, adLines, discrim, clt, mod, TCalib, Texp, selWls, nrCorr, bootCI, minus, fsa, fss, R, ncpwl, setIdString, ap) {
 #	classVarRanges: a list with one element for each kind of range throughout the whole set (within a singel classVar)
-	idString <- getIdString(aquCalc)
+#	idString <- getIdString(aquCalc)
+	idString <- adaptIdStringForDpt(ap, setIdString)
 	classVar <- getClassVar(aquCalc)
 	itemIndex <- getItemIndex(aquCalc)
 	onMain <- paste(onMain, ", ", idString, sep="")
@@ -428,7 +430,7 @@ plot_aqg <- function(cube, aps="def", ...) {
 	b <- ap$genPlot
 	for (va in 1: length(ap$aquagr$vars)) {
 		for (cu in 1: length(cube)) {
-			plotAquagram_single(getAqgResList(cube[[cu]])[[va]], cube@aqgRan[[va]], where, b$onSub, b$onMain, a$ccol, a$spectra, a$pplot, a$plines, a$discr, a$clt, aC$mod, aC$TCalib, aC$Texp, aC$selWls, aC$nrCorr, aC$bootCI, aC$minus, a$fsa, a$fss, aC$R, ncpwl)
+			plotAquagram_single(getAqgResList(cube[[cu]])[[va]], cube@aqgRan[[va]], where, b$onSub, b$onMain, a$ccol, a$spectra, a$pplot, a$plines, a$discr, a$clt, aC$mod, aC$TCalib, aC$Texp, aC$selWls, aC$nrCorr, aC$bootCI, aC$minus, a$fsa, a$fss, aC$R, ncpwl, getIdString(cube[[cu]]), ap=apCube)
 		} # end for i
 	} # end for va
 	if (where == "pdf") {dev.off()}

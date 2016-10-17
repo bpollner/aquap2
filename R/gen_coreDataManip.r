@@ -286,3 +286,143 @@ do_gapDer <- function(dataset, m=1, w=1, s=1, deltaW) {
 	dataset$NIR <- I(NIR)
 	return(dataset)
 } # EOF
+
+checkDeTrendSrcTrgInput <- function(dataset, src=NULL, trg="src") {
+	addInfo <- "\n(For the latter, please see ?dpt_modules for further information.)"
+	checkNumLengthTwo <- function(arg) {
+		argName <- deparse(substitute(arg))
+		if (!all(is.numeric(arg)) | length(arg) != 2) {
+		stop(paste0("Please provide a numeric length two to the argument '", argName, "' resp. in the de-trend argument in the analysis procedure / your input.", addInfo), call.=FALSE)
+		}
+	} # EOIF
+	##
+	checkWls <- function(arg, allWls= getWavelengths(dataset)) {
+		argName <- deparse(substitute(arg))
+		if (min(arg) < min(allWls) | max(arg) > max(allWls)) {
+			stop(paste0("Sorry, the range in the argument '", argName, "' is not within the wavelength-range of the provided dataset [", min(allWls) , " to ", max(allWls), "]. Please check your input at the argument '", argName, "' resp. in the de-trend argument in the analysis procedure / your input.", addInfo), call.=FALSE)
+		} 
+	} # EOIF
+	checkRange <- function(arg) {
+		argName <- deparse(substitute(arg))
+		if (diff(arg) <= 0) {
+			stop(paste0("Please provide a wavelength range greater than zero for the argument '", argName, "' resp. in the de-trend argument in the analysis procedure / your input.", addInfo), call.=FALSE)
+		}	
+	}
+	if (!is.null(src)) {
+		checkNumLengthTwo(src)
+		checkWls(src)
+		checkRange(src)
+	}
+	if (any(is.character(trg))) {
+		if (!trg %in% c("src", "all")) {
+			stop(paste0("Please provide one of 'src', 'all' or a numeric length two to the argument 'trg' resp. in the de-trend argument in the analysis procedure / your input.", addInfo), call.=FALSE)
+		}
+	}
+	if (all(trg == "src")) {
+		trg <- src
+	}
+	if (all(trg == "all")) {
+		trg <- range(getWavelengths(dataset))
+	}
+	if (!is.null(trg)) {
+		checkNumLengthTwo(trg)
+		checkWls(trg)
+		checkRange(trg)
+	}
+	assign("trg", trg, pos=parent.frame(n=1))
+	##
+} # EOF
+
+#' @title Perform De-Trend
+#' @description Perform de-trending of the given dataset. For each observation, 
+#' the linear model \code{lm(absorbance ~ wavelength)} is calculated. The 
+#' coefficients of the resulting model are then used to modify the absorbance 
+#' values after the formula 
+#' \code{newAbsorbance = absorbance - intercept - k*wavelength}. It is possible 
+#' to separately specify the source and the target of the  de-trend operation. 
+#' @details Via the arguments \code{src} ('source') and \code{trg} ('target') 
+#' it is possible to specify separately from which wavelength-range the values 
+#' for the de-trend should be taken resp. to which wavelength-range the 
+#' resulting de-trend should be applied. Please see documentation for the 
+#' arguments \code{src} and \code{trg} for further details. If the target 
+#' wavelengths are only a part of the whole wavelength-range in the dataset, 
+#' the de-trend will be applied only to this wavelengths, and the rest of the 
+#' wavelengths will remain unchanged. Abrupt steps in the resulting spectra can 
+#' be the result of this. If both arguments \code{src} and \code{trg} are left 
+#' at their defaults, the full range of wavelengths in the dataset is used for 
+#' calculating the de-trend values, i.e. the linear models, and the resulting 
+#' de-trend is also applied to the full range of wavelengths present in the 
+#' dataset.
+#' @param dataset An object of class 'aquap_data' as produced e.g. by 
+#' \code{\link{gfd}}.
+#' @param src 'source'; the wavelength-range from where the values for de-trend 
+#' should be calculated (i.e. the linear models). Leave at the default NULL 
+#' to use the full range of wavelengths in the provided dataset, or provide 
+#' a numeric length two to use this wavelength range for calculating the values 
+#' for de-trend.
+#' @param trg 'target'; character length one or numeric length two. The wavelengths
+#' where the de-trend should be applied. If left at the default 'src' the same 
+#' wavelength as specified in \code{src} is used. Possible values are: 
+#' \describe{
+#' \item{src}{Apply the de-trend to the same wavelength-range as specified in 
+#' argument \code{src} (the default).}
+#' \item{all}{Apply the de-trend to all the wavelengths in the provided dataset.}
+#' \item{Numeric length two}{Provide a numeric length two to the argument 
+#' \code{trg} to apply the de-trend only to this wavelength range.}
+#' }
+#' @return The transformed dataset
+#' @examples 
+#' \dontrun{
+#' fd <- gfd()
+#' fdDT <- do_detrend(fd) # use the whole wavelength range of 'fd' as source and
+#' # target for the de-trend
+#' plot(fd)
+#' plot(fdDT)
+#' ###
+#' fdc <- selectWls(fd, 1300, 1600)
+#' plot(fdc)
+#' plot(do_detrend(fdc)) # whole range as source and target
+#' plot(do_detrend(fdc, src=c(1400, 1500))) # same target as soruce
+#' plot(do_detrend(fdc, src=c(1400, 1500), trg="all")) # apply to full range
+#' plot(do_detrend(fdc, src=c(1400, 1500), trg=c(1300, 1600))) # same as above 
+#' plot(do_detrend(fdc, src=c(1300, 1400), trg=c(1380, 1580))) 
+#' }
+#' @family Data pre-treatment functions 
+#' @family dpt modules documentation
+#' @export
+do_detrend<- function(dataset, src=NULL, trg="src") { 
+	checkDeTrendSrcTrgInput(dataset, src, trg) # is assigning trg
+	# source
+	if (is.null(src)) {
+		absSrc <- getNIR(dataset)
+		wlsSrc <- getWavelengths(dataset)
+	} else {
+		ds <-  selectWls(dataset, src[1], src[2])
+		absSrc <- getNIR(ds)
+		wlsSrc <- getWavelengths(ds)
+	}
+	mods <- apply(absSrc, 1, function(x) lm(x ~ wlsSrc)$coefficients)  ### calculate the models !! one for every observation ### gives back a matrix with two rows and one column for every observation
+	# target
+	if (is.null(trg)) {
+		nirTrg <- getNIR(dataset)
+		wlsTrg <- getWavelengths(dataset)
+	} else {
+		if (is.numeric(trg)) {
+			ds <- selectWls(dataset, trg[1], trg[2])
+			nirTrg <- getNIR(ds)
+			wlsTrg <- getWavelengths(ds)
+		} else {
+			
+		}
+	}	
+#	NIR <- matrix(NA, nrow(nirTrg), ncol(nirTrg))
+#	for (i in 1: nrow(nirTrg)) {
+#		NIR[i,] <- as.numeric(nirTrg[i,]) - mods[1,i] - mods[2,i]*wlsTrg
+#	}
+	NIRnew <- t(sapply(1:nrow(nirTrg), function(i) as.numeric(nirTrg[i,]) - mods[1,i] - mods[2,i]*wlsTrg))
+	colnames(NIRnew) <- cnsNew <- colnames(nirTrg)
+	cnsOld <- colnames(dataset$NIR)
+	indHere <- which(cnsOld %in% cnsNew)
+	dataset$NIR[, indHere] <- NIRnew
+	return(dataset)	
+} # EOF

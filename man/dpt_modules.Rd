@@ -52,7 +52,32 @@ with one or two loadings or with one regression vector. See also
 
 \item{osc}{Not yet implemented.}
 
-\item{deTr}{Not yet implemented.}
+\item{deTr}{Transform the dataset by calling the de-Trend 
+function \code{\link{do_detrend}}. Provide only the character 
+"deTr" to use the standard values for \code{src} and \code{trg} 
+which are 'NULL' and 'src', meaning that the whole wavelength range of 
+the current dataset is used for calculating the de-trend values, which in turn 
+also get applied to the whole range of wavelengths. Use a string in one of the 
+following formats to modify the values for source and target in the de-trend 
+function:
+\describe{
+\item{@S1-S2}{Format: 
+"deTr@S1-S2", set the source wavelength-range 
+for calculating the de-trend values from S1 to S2, with S1 and S2 being 
+existing wavelengths in the current dataset, and leave the 
+target at its default, i.e. use the same target as the source.}
+\item{@S1-S2-all}{Format: 
+"deTr@S1-S2-all", set the source wavelength 
+from S1 to S2, with S1 and S2 being existing wavelengths in the current dataset,
+and apply the resulting de-trend to \strong{all} of the wavelenghts present in 
+the current dataset.}
+\item{@S1-S2-T1-T2}{Format: 
+"deTr@S1-S2-T1-T2", set the source wavelengths 
+from S1 to S2 and the target wavelengths from T1 to T2, with S1, S2, T1, and 
+T2 being existing wavelengths in the current dataset.}
+}
+Note that the single values have to be separated by a 'minus' ('-'). Please 
+see examples and \code{\link{do_detrend}} for additional information.}
 
 \item{gsd}{Transform the dataset using gap-segment 
 derivatives by calling internally the function \code{\link{do_gapDer}} (what 
@@ -60,7 +85,7 @@ in turn is relying on \code{\link[prospectr]{gapDer}}). Provide only the
 character "gsd" to use the standard values for m, w, s and 
 deltaW, what are all 1. Use a string in the format 
 "gsd@m-w-s-d", with m, w, s and d being integers to modify 
-the behaviour of \code{\link{do_gapDer}} by supplying your own values;'w' has 
+the behaviour of \code{\link{do_gapDer}} by supplying your own values; 'w' has 
 to be odd. The single integers have to be separated by a 'minus' ('-'). Please 
 not that the gap-derivative function will truncate your data at the first and 
 last wavelengths, depending on the provided values.}
@@ -106,6 +131,12 @@ dpt.post <- "msc@myDS" # with 'myDS' being the name of a standard dataset
 dpt.post <- c("sgol@2-51-0", "emsc@myDF") # with 'myDF' being the name of a 
 ## data frame containing one or two loading vectors or one regression vector
 dpt.post <- "gsd@1-11-13-1"
+dpt.post <- "deTr" # use whole wavelength range as source and target
+dpt.post <- "deTr@1300-1600" # same target as source
+dpt.pre <- c("sgol", "deTr@1300-1600-all") # apply de-trend calculated from 
+# 1300nm to 1600nm to all wavelengths
+####
+cube <- gdmm(fd, getap(dpt.pre=c("sgol", "snv"))) # modify via gdmm function
 }
 }
 \seealso{
@@ -115,13 +146,14 @@ dpt.post <- "gsd@1-11-13-1"
 \code{\link{getcm}} for extracting a specific model from a 'cube' object.
 
 Other Data pre-treatment functions: \code{\link{[,aquap_data-method}},
-  \code{\link{do_avg}}, \code{\link{do_emsc}},
-  \code{\link{do_gapDer}}, \code{\link{do_msc}},
-  \code{\link{do_sgolay}}, \code{\link{selectWls}},
-  \code{\link{ssc}}
+  \code{\link{do_avg}}, \code{\link{do_detrend}},
+  \code{\link{do_emsc}}, \code{\link{do_gapDer}},
+  \code{\link{do_msc}}, \code{\link{do_sgolay}},
+  \code{\link{selectWls}}, \code{\link{ssc}}
 
-Other dpt modules documentation: \code{\link{do_emsc}},
-  \code{\link{do_gapDer}}, \code{\link{do_msc}},
-  \code{\link{do_sgolay}}, \code{\link{do_snv}}
+Other dpt modules documentation: \code{\link{do_detrend}},
+  \code{\link{do_emsc}}, \code{\link{do_gapDer}},
+  \code{\link{do_msc}}, \code{\link{do_sgolay}},
+  \code{\link{do_snv}}
 }
 

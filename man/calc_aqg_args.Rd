@@ -102,6 +102,13 @@ For a list of all parameters that can be used in the \code{...}
 argument in \code{\link{getap}} and in the \code{\link{plot}} functions 
 please see \code{\link{anproc_file}}.
 }
+\section{Important}{
+ As the AUC-mods of the Aquagram compare the actual data to 
+your previously recoreded temperature calibration data (see 
+\code{\link{genTempCalibExp}} and \code{\link{tempCalib_procedures}}), the 
+application of some data-treatment functions (see e.g. \code{\link{do_gapDer}}) 
+can lead to unexpected and distorted results in the Aquagram.
+}
 \examples{
 \dontrun{
  dataset <- gfd()

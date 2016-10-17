@@ -231,17 +231,32 @@ checkFileVersionPossiblyModify <- function(pathToPack, pathToLocal, folderLocal,
 } # EOF
 
 checkSettings <- function() {
+	addInfo <- "\nRestart R for the changes to become effective. \nSee the help for '?updateSettings' for additional information"
 	sFile <- "settings.r"
 	pathSH <- Sys.getenv("AQUAP2SH")
 	pspath <- paste(path.package("aquap2"), sFile, sep="/")
-	if (nchar(pathSH) == 0) { 			## so the variable is *not* defined in .Renviron
+	if (nchar(pathSH) == 0) { 			## so the variable is *not* defined in .Renviron, or maybe we do not even have an .Renviron file
 		homePath <- "user/home"
 		hp <- try(path.expand("~"), silent=TRUE)
 		if (class(hp) != "try-Error") {
 			homePath <- hp
 		}
-		homePath <- paste(homePath, "/.Renviron", sep="")
-		msg <- paste("It appears you did not yet define the path to your aquap2 settings.r home directory in the '.Renviron' file. \nPlease do this by going to the .Renviron file (in your home directory '", homePath, "') and there define the variable 'AQUAP2SH' as the path to a folder of your liking. \nIf you do not have a '.Renviron' file you have to create one. (You can do this conveniently e.g. with R-Studio by creating a new R-script and saving it under '", homePath, "')\nRestart R for the changes to become effective. \nSee the help for '?updateSettings' for additional information", sep="")
+		homePath <- paste(homePath, ".Renviron", sep="/")
+		if (!file.exists(homePath)) {
+			ok <- file.create(homePath, showWarnings=FALSE)
+			if (ok) {
+				fcon <- file(homePath, open="w")
+				writeLines(pv_defaultFillForRenviron, fcon)
+				close(fcon)
+				creMsg <- paste0("The '.Renviron' file in '", homePath, "' has been created for you. Please open it (e.g. using R-Studio) and modify the variable 'AQUAP2SH' so that it points to a folder of your liking.", addInfo)
+			} else { # file creation did NOT work
+				creMsg <- paste0("Sorry, it was not possible to create the '.Renviron' file for you. Please do this manually by going to your home-directory and there saving a new plain text file under the name '.Renviron'. Open the file and define the variable 'AQUAP2SH' as the path to a folder of your liking.", addInfo)
+			}
+			message(creMsg)
+			return(FALSE)
+		} else { # so the .Renviron file is existing
+		msg <- paste0("It appears you did not yet define the path to your aquap2 settings.r home directory in the '.Renviron' file. \nPlease do this by going to the .Renviron file in your home directory and there define the variable 'AQUAP2SH' as the path to a folder of your liking.", addInfo)
+		}
 		message(msg)
 		return(FALSE)
 	} else { ## so we have something defined under AQUAP2SH

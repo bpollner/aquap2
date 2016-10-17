@@ -65,3 +65,5 @@ pv_suffixForTemplates <- "_TEMPLATE"
 #########################################################
 ## Globals
 pv_noiseDistPrefix <- "nd_"
+
+pv_defaultFillForRenviron <- "\n\n#### please provide below a valid path to a folder of your liking \nAQUAP2SH = /Users/XXX/path/to/your/settingsHomeFolder/aquap2SH"
