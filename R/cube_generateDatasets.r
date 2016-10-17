@@ -848,7 +848,7 @@ performDPT_Core <- function(dataset, dptSeq) {
 		for (i in 1: length(first)) {
 		###########
 			if (first[i] == pvMod[1]) { # sgolay
-				## XXX have also the option to NOT add additional parameters to sgol
+				## to have also the option to NOT add additional parameters to sgol
 				if (!grepl("@", dptSeq[i])) {
 					dataset <- do_sgolay(dataset)
 				} else { # so, yes, we have an '@' present	

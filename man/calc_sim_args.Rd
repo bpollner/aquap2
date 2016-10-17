@@ -34,7 +34,7 @@ please see \code{\link{anproc_file}}.
 \section{Note}{
  Calculation of SIMCA models is done with the function 
 \code{\link[rrcovHD]{RSimca}} /  \code{\link[rrcovHD]{CSimca}} and with code 
-adapted from the manual-page of the Chemometrics-software "Pirouette" XXX.
+adapted from the manual-page of the Chemometrics-software "Pirouette".
 }
 \examples{
 \dontrun{

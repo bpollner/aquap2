@@ -313,7 +313,7 @@ NULL
 #' 
 #' @section Note: Calculation of SIMCA models is done with the function 
 #' \code{\link[rrcovHD]{RSimca}} /  \code{\link[rrcovHD]{CSimca}} and with code 
-#' adapted from the manual-page of the Chemometrics-software "Pirouette" XXX. 
+#' adapted from the manual-page of the Chemometrics-software "Pirouette". 
 #' @template mr_details_allParams
 #' @template mr_sim_calc_param
 #' @seealso \code{\link{gdmm}}

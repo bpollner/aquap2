@@ -466,7 +466,7 @@ plot_plsr_checkDefaultsParams <- function(rv.bandwidth, rv.adLine, rv.col, rv.lt
 		ccol <- .ap2$stn$pca_ld_customColor
 	}
 	if (!is.null(ccol)) {
-		# XXX ? how to check for existence, validity of the provided colors ?
+		# XXX ?check for existence, validity of the provided colors ?
 	}
 	assign("rv.col", ccol, pos=parent.frame(n=1))
 	##

@@ -35,7 +35,6 @@ do_sgolay <- function(dataset, p=2, n=21, m=0) {
 #' @title Calculate Standard Normal Variation SNV
 #' @description Calculate the standard normal variation (SNV) by autoscaling the 
 #' transformed NIR-data
-# @details XXX
 #' @inheritParams do_sgolay
 #' @return Returns the dataset with the transformed NIR data.
 #' @examples

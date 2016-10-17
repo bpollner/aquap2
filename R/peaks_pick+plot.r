@@ -188,7 +188,7 @@ plotPickResults <- function (pickResults, onMain="", onSub="", pcaVariances=NULL
 	abline(0,0, col="gray")
 	## legend see below, so that the text is not being overplotted on the legend!!
 #	legBgCol <- rgb(255,255,255, alpha=.ap2$stn$col_alphaForLegends, maxColorValue=255) # is a white with alpha to be determined in the settings
-#	legend("topright", legend=legendText, lty=clt, col=ColorYea, lwd=2.5, bg=legBgCol) 	#### XXX legend problem here
+#	legend("topright", legend=legendText, lty=clt, col=ColorYea, lwd=2.5, bg=legBgCol) 	#### legend problem here
 	#
 #	colPosDynamic <- colNegDynamic <- vector("integer", (nrow(positionTable)/2))
 	for (i in 1: nrow(positionTable)) {
