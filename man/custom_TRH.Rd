@@ -54,6 +54,7 @@ There need to be two and only to objects in this file, having the names
 \seealso{
 Other Development Functions: \code{\link{custom_import}},
   \code{\link{imp_searchAskColumns}},
-  \code{\link{readHeader}}, \code{\link{readSpectra}}
+  \code{\link{readHeader}}, \code{\link{readSpectra}},
+  \code{\link{ttap}}
 }
 

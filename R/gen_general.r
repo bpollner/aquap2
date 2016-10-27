@@ -682,7 +682,7 @@ getUniqLevelColor <- function(nrc) {
 } # EOF
 
 # color_data, color_unique, color_legend, txt, txtE, sumPart, dataGrouping, pch_data, pch_legend
-extractColorLegendValues <- function(dataset, groupBy) { # returns a list
+extractColorLegendValues <- function(dataset, groupBy, minPart=NULL) { # returns a list
 	colInd <- which(colnames(dataset$colRep) == groupBy)
 	color_data <- dataset$colRep[, colInd]
 	ind <- which(colnames(dataset$header) == groupBy)
@@ -702,9 +702,25 @@ extractColorLegendValues <- function(dataset, groupBy) { # returns a list
 	color_unique <- getUniqLevelColor(color_data)  # here read out in levels !!!
 #	color_legend <- color_unique[lto] # the old version, appears to be not always correct
 	ind <- which(colnames(dataset$colRep) == groupBy) # get once the index of our grouping variable in the colRep
-	color_legend <- sapply(legendText, function(x, cri, ds, grby) ssc_s(ds, grby, x)$colRep[1,cri], cri=ind, ds=dataset, grby=groupBy) # look through each of the elements of the legend text and extract and extract the corresponding color from the colRep
+	color_legend <- sapply(legendText, function(x, cri, ds, grby) ssc_s(ds, grby, x)$colRep[1,cri], cri=ind, ds=dataset, grby=groupBy) # look through each of the elements of the legend text and extract the corresponding color from the colRep
 	pch_data <- makePchSingle(grouping)
 	pch_legend <- as.numeric(levels(as.factor(pch_data)))[lto]
+	#
+	groupingRed <- legendTextRed <- color_legendRed <- NULL
+	if (!is.null(minPart)) {
+		aa <- rle(sort(as.character(grouping)))
+		ind <- which(aa$lengths < minPart)
+		if (length(ind) > 0 ) {
+			values <- aa$values[ind]
+			outInds <- sapply(values, function(x) which(grouping == x))
+			groupingRed <- grouping[-outInds]
+			outIndsLeg <- sapply(values, function(x) which(legendText == x))
+			legendTextRed <- legendText[-outIndsLeg]
+			legendTextExtendedRed <- legendTextExtendedRed[-outIndsLeg]
+			color_legendRed <- color_legend[-outIndsLeg]
+			pch_legendRed <- pch_legend[-outIndsLeg]
+		}
+	} # end !is.null(minPart)
 	#
 	return(list(color_data=color_data,  color_unique=color_unique, color_legend=color_legend, txt=legendText, txtE=legendTextExtended, sumPart=sum(partN), dataGrouping=grouping, pch_data=pch_data, pch_legend=pch_legend))
 } # EOF
