@@ -52,6 +52,6 @@ written rawdata import functions. (see \code{\link{custom_import}})
 Other Development Functions: \code{\link{custom_TRH}},
   \code{\link{custom_import}},
   \code{\link{imp_searchAskColumns}},
-  \code{\link{readHeader}}
+  \code{\link{readHeader}}, \code{\link{ttap}}
 }
 

@@ -736,7 +736,7 @@ generateHeatMapColorCoding <- function(whatColors, numbers) {
 	out <- as.character(colorChar[numbers])
 } # EOF
 
-extractClassesForColRep <- function(header) { ## does not need "NIR" present in the data frame
+extractClassesForColRep_old <- function(header) { ## does not need "NIR" present in the data frame
 	tempCol <- .ap2$stn$p_tempCol ## depends on "grepl" or not
 	RHCol <- .ap2$stn$p_RHCol
 	absTimeCol <- .ap2$stn$p_absTime
@@ -778,6 +778,58 @@ extractClassesForColRep <- function(header) { ## does not need "NIR" present in 
 				}
 			} # end else
 			names(a) <- colnames(header[i])
+			out <- data.frame(out,a)
+		} # end if is factor 
+	} # end for i
+	return(out[-1])		# cut off the first column containing only the NAs
+} # EOF 
+
+extractClassesForColRep <- function(header) { ## does not need "NIR" present in the data frame
+	tempCol <- .ap2$stn$p_tempCol ## depends on "grepl" or not
+	RHCol <- .ap2$stn$p_RHCol
+	absTimeCol <- .ap2$stn$p_absTime
+	chronCol <- .ap2$stn$p_chron
+	TRHColors <- .ap2$stn$col_RampForTRH
+	TimesColors <- .ap2$stn$col_RampForTimes
+	userRampColors <- .ap2$stn$col_userDefinedRamps # is a list
+	userColnames <- .ap2$stn$p_userDefinedSpecialColnames # is a vector
+	out <- data.frame(matrix(NA, nrow=nrow(header)))
+	for (i in 1: ncol(header)) {
+		if (is.factor(header[,i])) {
+			fac <- header[,i]
+			options(warn=-1)
+			nums <- as.numeric(levels(fac))
+			options(warn=0)
+			if (any(is.na(nums))) {	# so we have a character
+				a <- data.frame( as.numeric(unclass(header[,i]))) ##
+			} else { # so we have a numeric
+				nrs <- as.numeric(fac)
+				ord <- order(as.numeric(levels(fac)))
+				a <- as.numeric(sapply(nrs, function(x, Ord) which(Ord==x), Ord=ord)) # re-list them by their index, so to say... !! we have to keep in integers ! (Problem with level ordering!)
+				a <- data.frame(a)
+			}
+			levelsA <- unique(a[,1])
+			cn <- colnames(header[i])
+			if (grepl(tempCol, cn) | grepl(RHCol, cn)) {
+	#			print("TRH we have"); print(cn); print("-----")
+				a[1] <- generateHeatMapColorCoding(TRHColors, a[,1])
+	#			print(str(a))
+			} else {
+				if (grepl(absTimeCol, cn) | grepl(chronCol, cn)) {
+					a[1] <- generateHeatMapColorCoding(TimesColors, a[,1])
+				} else {
+					ind <- which(lapply(userColnames, function(x) grep(x, cn)) == TRUE)
+					if (length(ind) != 0) { # so there is a user defined special colname character in the colname cn
+						a[1] <- generateHeatMapColorCoding(userRampColors[[ind]], a[,1])
+					} else {
+						if (length(levelsA) > 8) { # so we have none of the special cases and more than 8 levels (we only have 8 standard integer representations for colors)
+							a[1] <- transformNrsIntoColorCharacters(a[,1])
+						} # end if
+					} # end else	
+				} # end else
+			} # end else
+			names(a) <- colnames(header[i])
+	#		print("the final is:"); print(str(a))
 			out <- data.frame(out,a)
 		} # end if is factor 
 	} # end for i
