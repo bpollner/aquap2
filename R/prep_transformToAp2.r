@@ -3,21 +3,24 @@
 #' @description Transform a given object into the aquap2 data structure.
 #' @details Class and Numeric prefixes in the column names are expected
 #' @param obj The object to be converted
-#' @param expName An experiment name
+#' @param md The metadata; an object of class 'aquap_md'. expName can be
+#' changed.
+#' @param dol Logical. If outliers should be detected.
 #' @param ncpwl The numbers of characters before the wavelength.
 #' @param reduceTRH Logical. If Temp and RelHum values should be reduced.
-#' @param md The metadata; an object of class 'aquap_md'.
+#' @param stf Logical, if the resulting file should be saved in the r-data folder.
 #' @return An object of class 'aquap_data'
-#' @family Development Functions
 #' @family Integration Functions
 #' @export
-ttap <- function(obj,  expName="", ncpwl=1, reduceTRH=FALSE, md=getmd()) {
+ttap <- function(obj, md=getmd(), dol=TRUE, ncpwl=1, reduceTRH=FALSE, stf=TRUE) {
 	autoUpS(cfs=FALSE)
 	#
-	md$meta$expName <- expName
-	#
+	objName <- deparse(substitute(obj))
+	if (!.ap2$stn$allSilent) { cat(paste0("Transforming ", nrow(obj), " scans in '", objName, "' to aquap2 structure ... \n")) }
 	header <- obj$header
 	class(header) <- "data.frame"
+	outliers <- flagOutliers_allScope(obj$NIR, detectOutliers=dol)
+	header <- cbind(header, outliers)
 	header <- copyYColsAsClass(header)
 	if (reduceTRH) {
 		header <- remakeTRHClasses_sys(header)
@@ -30,5 +33,9 @@ ttap <- function(obj,  expName="", ncpwl=1, reduceTRH=FALSE, md=getmd()) {
 	fullData@metadata <- md
 	fullData@anproc <- NULL # the ap not yet here of course
 	fullData@ncpwl <- ncpwl
+	if (stf) {
+		saveAQdata(fullData, md)
+	}
+#	if (!.ap2$stn$allSilent) { cat("Done.\n")}
 	return(fullData)
 } # EOF

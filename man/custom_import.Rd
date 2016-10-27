@@ -102,7 +102,6 @@ spectralImport <- function(dataFile) {
 \seealso{
 Other Development Functions: \code{\link{custom_TRH}},
   \code{\link{imp_searchAskColumns}},
-  \code{\link{readHeader}}, \code{\link{readSpectra}},
-  \code{\link{ttap}}
+  \code{\link{readHeader}}, \code{\link{readSpectra}}
 }
 

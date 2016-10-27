@@ -4,18 +4,22 @@
 \alias{ttap}
 \title{Transform into aquap2 structure}
 \usage{
-ttap(obj, expName = "", ncpwl = 1, reduceTRH = FALSE, md = getmd())
+ttap(obj, md = getmd(), dol = TRUE, ncpwl = 1, reduceTRH = FALSE,
+  stf = TRUE)
 }
 \arguments{
 \item{obj}{The object to be converted}
 
-\item{expName}{An experiment name}
+\item{md}{The metadata; an object of class 'aquap_md'. expName can be
+changed.}
+
+\item{dol}{Logical. If outliers should be detected.}
 
 \item{ncpwl}{The numbers of characters before the wavelength.}
 
 \item{reduceTRH}{Logical. If Temp and RelHum values should be reduced.}
 
-\item{md}{The metadata; an object of class 'aquap_md'.}
+\item{stf}{Logical, if the resulting file should be saved in the r-data folder.}
 }
 \value{
 An object of class 'aquap_data'
@@ -25,11 +29,5 @@ Transform a given object into the aquap2 data structure.
 }
 \details{
 Class and Numeric prefixes in the column names are expected
-}
-\seealso{
-Other Development Functions: \code{\link{custom_TRH}},
-  \code{\link{custom_import}},
-  \code{\link{imp_searchAskColumns}},
-  \code{\link{readHeader}}, \code{\link{readSpectra}}
 }
 

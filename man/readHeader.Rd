@@ -64,6 +64,6 @@ by a "-in" and then the file extension.
 Other Development Functions: \code{\link{custom_TRH}},
   \code{\link{custom_import}},
   \code{\link{imp_searchAskColumns}},
-  \code{\link{readSpectra}}, \code{\link{ttap}}
+  \code{\link{readSpectra}}
 }
 
