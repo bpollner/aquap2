@@ -786,7 +786,6 @@ calcAquagramSingle <- function(dataset, md, ap, classVar, idString) {
 #' @family Temperature calibration procedures
 #' @export
 genTempCalibExp <- function(Tcenter=NULL, Tdelta=5, stepBy=1, repls=4) {
-	autoUpS(cfs=FALSE)
 	if(is.null(Tcenter)) {
 		stop("Please provide a numeric value for 'Tcenter'.", call.=FALSE)
 	}
@@ -805,10 +804,10 @@ genTempCalibExp <- function(Tcenter=NULL, Tdelta=5, stepBy=1, repls=4) {
 	con <- file(pathMd, open="rt")
 	txt <- readLines(con)
 	close(con)
-	txt <- mod_md_txt("expName", .ap2$stn$pv_initialTempCalibFilename, txt)
+	txt <- mod_md_txt("expName", pv_initialTempCalibFilename, txt)
 	txt <- mod_md_logic("TimePoints", FALSE, txt)
 	txt <- mod_md_logic("spacing", FALSE, txt)
-	txt <- mod_md_txt("columnNamesL1", paste0(yPref, .ap2$stn$pv_YcolumnNameWaterTemp), txt)
+	txt <- mod_md_txt("columnNamesL1", paste0(yPref, pv_YcolumnNameWaterTemp), txt)
 	txt <- mod_md_txt("columnNamesL2", paste0(clPref, "DELETE"), txt)
 	txt[grep("L1  <-", txt)] <- paste0("\tL1  <- list(list(\"", temps, "\"))")
 	txt[grep("L2  <-", txt)] <- paste0("\tL2  <- list(list(\"", temps, "\"))")
