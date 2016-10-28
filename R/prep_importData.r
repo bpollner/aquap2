@@ -1112,6 +1112,7 @@ readHeader <- function(md=getmd(), slType="def", multiplyRows="def") {
 #' }
 #' @export
 imp_searchAskColumns <- function(allC_var, allY_var, slType=.ap2$.slType) {
+	autoUpS()
 	yPref <- .ap2$stn$p_yVarPref
 	cPref <- .ap2$stn$p_ClassVarPref
 	sampleNrColn <- .ap2$stn$p_sampleNrCol

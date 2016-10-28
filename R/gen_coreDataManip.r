@@ -264,6 +264,7 @@ do_scale_fc <- function(dataset, calibAvgTable) { # used in aquagram norm foreig
 #' @family dpt modules documentation
 #' @export
 do_gapDer <- function(dataset, m=1, w=1, s=1, deltaW) {
+	autoUpS()
 	nir <- getNIR(dataset)
 	NIR <- prospectr::gapDer(nir, m=m, w=w, s=s, delta.wav=deltaW) # gives back a matrix with one columne less at the beginning and end, so in total two wavelengths missing !!
 #	NIR <- as.matrix(NIR)
@@ -390,6 +391,7 @@ checkDeTrendSrcTrgInput <- function(dataset, src=NULL, trg="src") {
 #' @family dpt modules documentation
 #' @export
 do_detrend<- function(dataset, src=NULL, trg="src") { 
+	autoUpS()
 	checkDeTrendSrcTrgInput(dataset, src, trg) # is assigning trg
 	# source
 	if (is.null(src)) {

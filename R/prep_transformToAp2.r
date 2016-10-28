@@ -13,7 +13,7 @@
 #' @family Integration Functions
 #' @export
 ttap <- function(obj, md=getmd(), dol=TRUE, ncpwl=1, reduceTRH=FALSE, stf=TRUE) {
-	autoUpS(cfs=FALSE)
+	autoUpS(cfs=TRUE)
 	#
 	objName <- deparse(substitute(obj))
 	if (!.ap2$stn$allSilent) { cat(paste0("Transforming ", nrow(obj), " scans in '", objName, "' to aquap2 structure ... \n")) }
