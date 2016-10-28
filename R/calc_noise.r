@@ -222,6 +222,41 @@ noi_performNoise <- function(dataset, noiseFile)	{ # is working on a single data
 } # EOF
 
 
+#' @title Add Noise to Dataset
+#' @description Manually add noise to a provided dataset.
+#' @details Select the noise-mode in the settings.r file (parameter 
+#' \code{noi_addMode}). You need to have an R-data file with noise-spectra in 
+#' your settings-home folder, please refer to \code{\link{noise_procedures}} for 
+#' further information.
+#' @inheritParams gdmm
+#' @param md The metadata from where the name of the noise-file is taken.
+#' @return The dataset with added noise.
+#' @examples 
+#' \dontrun{
+#' fd <- gfd()
+#' fdNoise <- do_addNoise(fd)
+#' }
+#' @seealso \code{\link{noise_procedures}}
+#' @family Noise procedures
+#' @family Data pre-treatment functions 
+#' @export
+do_addNoise <- function(dataset, noiseFile="def", md=getmd()) {
+	autoUpS()
+	ap <- getap()
+	ap$dpt$noise$useNoise <- TRUE
+	dsName <- deparse(substitute(dataset))
+	#
+	noiMode <- .ap2$stn$noi_addMode 
+	if (!.ap2$stn$allSilent) {cat(paste0("Adding ", noiMode, " noise to dataset '", dsName, "'... "))}
+	#
+	noiseDataset <- checkLoadNoiseFile(dataset$header, max(dataset$NIR), ap, md, noiseFile) # only if noise is added; if not returns NULL; is assigning noiseFile !!
+	noi_calculateNoiseDistribution(noiseDataset, noiseFile) # only if noise: calculate noise distribution, save as global variable in .ap2
+	noiDat <- noi_performNoise(dataset, noiseFile)
+	if (!.ap2$stn$allSilent) {cat("ok.\n")}
+	return(noiDat)
+} # EOF 
+
+
 #' @title Generate noise recording experiment
 #' @description Generate the folder structure for a new experiment and populate 
 #' it with the metadata suggested for recording then the noise-spectra.

@@ -35,6 +35,7 @@ Other Helper Functions: \code{\link{genFolderStr}},
   \code{\link{printStdColnames}}, \code{\link{saveAQdata}},
   \code{\link{updateAquap}}, \code{\link{updateSettings}}
 
-Other Noise procedures: \code{\link{noise_procedures}}
+Other Noise procedures: \code{\link{do_addNoise}},
+  \code{\link{noise_procedures}}
 }
 
