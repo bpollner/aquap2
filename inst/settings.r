@@ -209,14 +209,19 @@ stn <- list(
 	aqg_tempCalib_forceOutlExcl = TRUE, 	## if the exclusion of outliers in the temperature calibration dataset should be forced or not.
 	
 
-	## plotting PDFs
+	## plotting, PDFs
 	pdf_Height_ws = 5,						## when plotting to pdf, the settings for the format
 	pdf_Width_ws = 8.9,						## ws for widescreen (e.g. regressionvector, loading plots, raw)
 	pdf_Height_sq = 9,						## sq for square (e.g. scoreplots)
 	pdf_Width_sq = 9, 
+	plt_lengthLegend_limToCols = 20, 		## the limit of the length of the legend text determining when the legend text should be displayed in more than 1 column
+	plt_lengthLegend_truncate = 60, 		## the limit of the length of the legend text determining when the legend text should be truncated (displaying then the first 3, the middle 3, and the last 3 legend elements)
+	plt_legendMoreCols = 3, 				## the number of columns to display the legend in if the length of the legend is higher than the number specified in 'plt_lengthLegend_limToCols' above
+	plt_legend_standardCex = 0.85, 			## the standard character expansion for the legend
+	plt_legend_smallerCex = 0.7, 			## the character expansion for the legend if there are more than 'plt_lengthLegend_limToCols', but less than 'plt_lengthLegend_truncate' elements present.
 
 
-	## DelGiudice Areas, humidity, WAMACs
+	## DelGiudice Areas (tentative), humidity, WAMACs
 	dga_dga1 = c(1340, 1440),				## corresponding to the "single" coherent domain
 	dga_dga2 = c(1444, 1493),				## corresponding to the gaseous phase in between domains (originally they meet at 1494)
 	dga_dga3 = c(1495, 1594),				## corresponding to the meta-domain consisting of coherent single domains	

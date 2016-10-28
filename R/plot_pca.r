@@ -47,20 +47,10 @@ makePCAScorePlots <- function(cube, ap, comps=c(1:5), pcs=c(1,2), onMain="", onS
 			legendTextExt <- aa$txtE
 			sumPart <- aa$sumPart
 			grouping <- aa$dataGrouping
-			#
-			le <- length(legendTextExt)
-			if (le > limitForColumnsInLegend & le < maxLengLegTxt) {
-				cexLegend <- 0.7
-				colsLegend <- 3
-			}
-			if (le >= maxLengLegTxt) {
-				half <- round(le/2, 0)
-				inds <- c(1, 2, 3, half-1, half, half+1, le-2, le-1, le) # gets the first, the middle and the last index of things
-				colorLegend <- colorLegend[inds]
-				legendTextExt <- legendTextExt[inds]
-			}
+			legCex <- aa$legCex
+			legNrCols <- aa$legNrCols
 			###
-			trLegend1 <- list(border=TRUE, points=list(pch=16, col=colorLegend), text=list(legendTextExt), background=trKeyBGCol, alpha.background=trAlphaBG, title=classList[i], cex.title=1, cex=cexLegend, columns=colsLegend)
+			trLegend1 <- list(border=TRUE, points=list(pch=16, col=colorLegend), text=list(legendTextExt), background=trKeyBGCol, alpha.background=trAlphaBG, title=classList[i], cex.title=0.92, cex=legCex, columns=legNrCols)
 			subText <- paste("color by ", classList[i], onSubFill, " (total N=", sumPart, ")", sep="")
 			trSub <- list(label=subText, fontface=1)
 			trLegend_i <- list(inside=list(fun=lattice::draw.key(trLegend1), corner=c(1,1)))
@@ -69,15 +59,8 @@ makePCAScorePlots <- function(cube, ap, comps=c(1:5), pcs=c(1,2), onMain="", onS
 					lattice::panel.xyplot(x, y, ...) # plot the data
 		    	    lattice::panel.abline(h=0, v=0, lty=2, col="gray")
 					if (!is.null(trElci)) {
-						aa <- rle(sort(as.character(grouping)))
-						ind <- which(aa$lengths < 3)
-						if (length(ind) > 0 ) {
-							values <- aa$values[ind]
-							outInds <- sapply(values, function(x) which(grouping == x))
-							grouping <- grouping[-outInds]
-							colorLegend <- colorLegend[-outInds]
-						}
-						latticeExtra::panel.ellipse(x, y, col=colorLegend, center.pch=trCenterPch, robust=trRobust, groups=grouping, scales="free", level=trElci, lwd=trLwd, lty=trLty, subscripts=TRUE)
+						elc <- extractColorLegendValues(getDataset(set), classList[i], minPart=3)
+						latticeExtra::panel.ellipse(x, y, col=elc$color_legend, center.pch=trCenterPch, robust=trRobust, groups=elc$dataGrouping, scales="free", level=trElci, lwd=trLwd, lty=trLty, subscripts=TRUE)
 					}
 				}
 			) # end of call to trelPlot1
@@ -91,8 +74,10 @@ makePCAScorePlots <- function(cube, ap, comps=c(1:5), pcs=c(1,2), onMain="", onS
 				grouping_el <- bb$dataGrouping
 				pch_data_el <- bb$pch_data
 				pch_legend_el <- bb$pch_legend
+				legCex_el <- bb$legCex		
+				legNrCols_el <- bb$legNrCols
 				###
-				trLegend2 <- list(border=TRUE, points=list(pch=pch_legend_el, col="black"), lines=list(lwd=1, col=colorLegend_el, lty=trLty), text=list(legendTextExt_el), title=el2colorBy[i], cex.title=1, cex=0.85, columns=1, background=trKeyBGCol, alpha.background=trAlphaBG)
+				trLegend2 <- list(border=TRUE, points=list(pch=pch_legend_el, col="black"), lines=list(lwd=1, col=colorLegend_el, lty=trLty), text=list(legendTextExt_el), title=el2colorBy[i], cex.title=0.92, cex=legCex_el, columns=legNrCols_el, background=trKeyBGCol, alpha.background=trAlphaBG)
 				trSub2 <- list(label=paste(subText, ", CI ellipses by ", el2colorBy[i], sep=""), fontface=1)
 				trAllLegends <- list(inside=list(fun=lattice::draw.key(trLegend1), corner=c(1,1)), inside=list(fun=lattice::draw.key(trLegend2), corner=c(0,0)))
 				trelPlot2 <- lattice::xyplot(y ~ x, sub=trSub2, main=mainText, xlab=xlab, ylab=ylab, col=colorData, pch=pch_data_el, cex=0.85, legend=trAllLegends, 
@@ -100,16 +85,9 @@ makePCAScorePlots <- function(cube, ap, comps=c(1:5), pcs=c(1,2), onMain="", onS
 						lattice::panel.xyplot(x, y, ...) # plot the data
 		    	    	lattice::panel.abline(h=0, v=0, lty=2, col="gray")
 		    	    	#
-		    	    	aa <- rle(sort(as.character(grouping_el)))
-						ind <- which(aa$lengths < 3)
-						if (length(ind) > 0 ) {
-							values <- aa$values[ind]
-							outInds <- sapply(values, function(x) which(grouping_el == x))
-							grouping_el <- grouping[-outInds]
-							colorLegend_el <- colorLegend[-outInds] # wrong for the legend colors !!!
-						}
-		    	    	#
-						latticeExtra::panel.ellipse(x, y, col=colorLegend_el, center.pch=trCenterPch, robust=trRobust, groups=grouping_el, scales="free", level=trElci, lwd=trLwd, lty=trLty, subscripts=TRUE)
+						elc <- extractColorLegendValues(getDataset(set), el2colorBy[i], minPart=3)
+						latticeExtra::panel.ellipse(x, y, col=elc$color_legend, center.pch=trCenterPch, robust=trRobust, groups=elc$dataGrouping, scales="free", level=trElci, lwd=trLwd, lty=trLty, subscripts=TRUE)
+		#				latticeExtra::panel.ellipse(x, y, col=colorLegend_el, center.pch=trCenterPch, robust=trRobust, groups=grouping_el, scales="free", level=trElci, lwd=trLwd, lty=trLty, subscripts=TRUE)
 					}
 				) # end of call to trelPlot2
 				print(trelPlot2)

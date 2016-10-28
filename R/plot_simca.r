@@ -26,6 +26,8 @@ simca_plotClassDistances <- function(SimcaPredObj, SimcaModel, distMat, where=""
 	legendText <- aa$txtE
 	legendColors <- aa$color_legend
 	sumPart <- aa$sumPart
+	legCex <- aa$legCex
+	legNrCols <- aa$legNrCols
 	###
 	mainText <- paste0("grp: ", grouping, "   ", onMain)
 	for (i in 1:(m-1)) {
@@ -38,7 +40,7 @@ simca_plotClassDistances <- function(SimcaPredObj, SimcaModel, distMat, where=""
 				plot(score[,i], score[,k], col=classColors, xlab=xLab, ylab=yLab, main=mainText, sub=subText)
 				abline(h=1, v=1, col="gray")
 				legBgCol <- rgb(255,255,255, alpha=.ap2$stn$col_alphaForLegends, maxColorValue=255) # is a white with alpha to be determined in the settings
-				legend("topright", legend=legendText, pch=1, col=legendColors, bg=legBgCol)
+				legend("topright", legend=legendText, pch=1, col=legendColors, bg=legBgCol, cex=legCex, ncol=legNrCols)
 		} # end for k
 	} # end for i
 } # EOF

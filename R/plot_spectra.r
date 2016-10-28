@@ -41,6 +41,8 @@ plotSpectra_inner <- function(dataset, singleColorBy, onMain, onSub, idString=""
 		colorLegend <- aa$color_legend
 		legendTextExt <- aa$txtE
 		sumPart <- aa$sumPart
+		legCex <- aa$legCex
+		legNrCols <- aa$legNrCols
 		partNMsg <- paste0("  (all N=", sumPart, ")")
 	} # end else
 	dptInfo <- adaptIdStringForDpt(getAnproc(dataset), idString)
@@ -54,13 +56,7 @@ plotSpectra_inner <- function(dataset, singleColorBy, onMain, onSub, idString=""
 #		legPosition <- getCheckLegendPosition(as.numeric(matrix(rep(wls, ncol(t(dataset$NIR))), nrow=1)), as.numeric(matrix(t(dataset$NIR), nrow=1, byrow=TRUE)))
 		legPosition <- "topright"
 #		print(legPosition)
-		Cex <- 0.8
-		nlc <- 1
-		if (length(legendTextExt) > 18) {
-			Cex <- 0.5
-			nlc <- 2
-		}
-		legend(legPosition, legend=legendTextExt, col=colorLegend, lty=1, bg=legBgCol, cex=Cex, ncol=nlc)
+		legend(legPosition, legend=legendTextExt, col=colorLegend, lty=1, bg=legBgCol, cex=legCex, ncol=legNrCols)
 	}
 } # EOF
 

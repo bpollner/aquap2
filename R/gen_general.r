@@ -682,7 +682,13 @@ getUniqLevelColor <- function(nrc) {
 } # EOF
 
 # color_data, color_unique, color_legend, txt, txtE, sumPart, dataGrouping, pch_data, pch_legend
-extractColorLegendValues <- function(dataset, groupBy, minPart=NULL) { # returns a list
+extractColorLegendValues_old <- function(dataset, groupBy) { # returns a list
+	legColLim <- .ap2$stn$plt_lengthLegend_limToCols	# the number when we switch to columns
+	maxLengLeg <- .ap2$stn$plt_lengthLegend_truncate	# the maximum legend length
+	legMoreColNr <- .ap2$stn$plt_legendMoreCols			# the number of columns in the legend if more than 1
+	legCex <- .ap2$stn$plt_legend_standardCex			# the standard cex for the legend
+	legDimCex <- .ap2$stn$plt_legend_smallerCex			# the legend cex if smaller
+	#
 	colInd <- which(colnames(dataset$colRep) == groupBy)
 	color_data <- dataset$colRep[, colInd]
 	ind <- which(colnames(dataset$header) == groupBy)
@@ -723,6 +729,86 @@ extractColorLegendValues <- function(dataset, groupBy, minPart=NULL) { # returns
 	} # end !is.null(minPart)
 	#
 	return(list(color_data=color_data,  color_unique=color_unique, color_legend=color_legend, txt=legendText, txtE=legendTextExtended, sumPart=sum(partN), dataGrouping=grouping, pch_data=pch_data, pch_legend=pch_legend))
+} # EOF
+
+# color_data, color_unique, color_legend, txt, txtE, sumPart, dataGrouping, pch_data, pch_legend
+extractColorLegendValues <- function(dataset, groupBy, minPart=NULL, minDistinctVals=NULL) { # returns a list
+	legColLim <- .ap2$stn$plt_lengthLegend_limToCols	# the number when we switch to columns
+	maxLengLeg <- .ap2$stn$plt_lengthLegend_truncate	# the maximum legend length
+	legNrCols_more <- .ap2$stn$plt_legendMoreCols			# the number of columns in the legend if more than 1
+	legCex <- .ap2$stn$plt_legend_standardCex			# the standard cex for the legend
+	legCexDim <- .ap2$stn$plt_legend_smallerCex			# the legend cex if smaller
+	#
+	legNrCols <- 1
+	#
+	colInd <- which(colnames(dataset$colRep) == groupBy)
+	color_data <- dataset$colRep[, colInd]
+	ind <- which(colnames(dataset$header) == groupBy)
+	grouping <- dataset$header[, ind]
+	legendText <- as.character(levels(grouping))
+	options(warn=-1)
+	nrs <- as.numeric(legendText)
+	options(warn=0)
+	if (any(is.na(nrs))) {
+		lto <- order(legendText) # should be straight from 1 to n, because "level" already gives out characters in alphabetical order
+	} else {
+		lto <- order(nrs) # so if the legend text is coming from all numbers *and* they are higher than 9 we get the real order to sort later
+	}		
+	partN <- sapply(levels(grouping), function(x, grAll) length(which(grAll==x)), grAll=grouping)
+	sumPart <- sum(partN)
+	legendText <- legendText[lto]
+	legendTextExtended <- paste(legendText, "   N=", partN[lto], "", sep="") # have it in every line			
+	color_unique <- getUniqLevelColor(color_data)  # here read out in levels !!!
+#	color_legend <- color_unique[lto] # the old version, appears to be not always correct
+	ind <- which(colnames(dataset$colRep) == groupBy) # get once the index of our grouping variable in the colRep
+	color_legend <- sapply(legendText, function(x, cri, ds, grby) ssc_s(ds, grby, x)$colRep[1,cri], cri=ind, ds=dataset, grby=groupBy) # look through each of the elements of the legend text and extract the corresponding color from the colRep
+	pch_data <- makePchSingle(grouping)
+	pch_legend <- as.numeric(levels(as.factor(pch_data)))[lto]
+	###
+	####### have minimum participants
+	if (!is.null(minPart)) {
+		aa <- rle(sort(as.character(grouping)))
+		ind <- which(aa$lengths < minPart)
+		outIndsCol <- outIndLegCol <- NULL
+		if (length(ind) > 0 ) {
+			for (i in 1: length(ind)) { # because we could have more!!!!
+				values <- aa$values[ind[i]]
+		#		cat(paste0("kicked out: ", values, "\n"))
+				outInds <- sapply(values, function(x) which(grouping == x))
+				outIndsLeg <- sapply(values, function(x) which(legendText == x))
+				outIndsCol <- c(outIndsCol, outInds)
+				outIndLegCol <- c(outIndLegCol, outIndsLeg)
+			} # end for i
+			outInds <- outIndsCol
+			outIndsLeg <- outIndLegCol
+			grouping[outInds] <- NA
+			grouping <- as.factor(as.character(grouping))
+			color_data[outInds] <- NA
+			pch_data[outInds] <- NA
+			legendText[outIndsLeg] <- NA
+			legendTextExtended[outIndsLeg] <- NA
+			color_legend[outIndsLeg] <- NA
+			pch_legend[outIndsLeg] <- NA
+		}
+	} # end !is.null(minPart)
+	####
+	##### cutting down (truncating) the legend
+	le <- length(legendText)
+	if (le > legColLim & le < maxLengLeg) {
+		legCex <- legCexDim
+		legNrCols <- legNrCols_more
+	}
+	if (le >= maxLengLeg) { # in this case the standared legCex and standard legNrCols stays in place
+		half <- round(le/2, 0)
+		inds <- c(1, 2, 3, 4, half-1, half, half+1, le-3, le-2, le-1, le) # gets the first, the middle and the last index of things
+		color_legend <- color_legend[inds]
+		aa <- legendText
+		legendText <- c(aa[c(1,2,3)], "...", aa[c(half-1, half, half+1)], "...", aa[c(le-2, le-1, le)])
+		aa <- legendTextExtended
+		legendTextExtended <- c(aa[c(1,2,3)], "...", aa[c(half-1, half, half+1)], "...", aa[c(le-2, le-1, le)])
+	}	
+	####
+	return(list(color_data=color_data,  color_unique=color_unique, color_legend=color_legend, txt=legendText, txtE=legendTextExtended, sumPart=sumPart, dataGrouping=grouping, pch_data=pch_data, pch_legend=pch_legend, legCex=legCex, legNrCols=legNrCols))
 } # EOF
 
 countDecimals <- function(x, nrDec=25) {

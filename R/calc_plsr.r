@@ -553,10 +553,9 @@ makeIndepPlsrValidationPlots_inner <- function(cube, indepDataset, predResults, 
 					legPch <- c(rep(NA, 3), rep(legPchSec, 2), rep(pchPrim, 2))
 				}
 				legBgCol <- rgb(255,255,255, alpha=.ap2$stn$col_alphaForLegends, maxColorValue=255) # is a white with alpha to be determined in the settings	
-				legCex <- 0.8
-				legend("topleft", legend=legendText, text.col=legTxtCol, bg=legBgCol, cex=legCex, pch=legPch)	
+				legend("topleft", legend=legendText, text.col=legTxtCol, bg=legBgCol, cex=0.8, pch=legPch)	
 				if (colLegend) {
-					legend("bottomright", legend=clv$txtE, col=clv$color_legend, pch=pchPrim, bg=legBgCol, cex=legCex)
+					legend("bottomright", legend=clv$txtE, col=clv$color_legend, pch=pchPrim, bg=legBgCol, cex=clv$legCex, ncol=clv$legNrCols)
 				}
 			} # end else
 		} # end for k

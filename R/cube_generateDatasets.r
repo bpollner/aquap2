@@ -563,6 +563,11 @@ ap_check_plsr_Input <- function(ap, header) {
 			stop("Please provide either 'TRUE' or 'FALSE' to the argument 'pls.rdp' in the analysis procedure / your input", call.=FALSE)
 		}
 		##
+		cns <- colnames(header)
+		cns <- cns[grep(cPref, cns)]
+		if (!e$colorBy %in% cns) {
+			stop(paste0("Sorry, the class-variable '", e$colorBy, "' for coloring in the plsr-plot seems not to exist in the provided dataset.\nPlease check your input at the argument 'pls.colorBy' or in the analysis procedure. \nPossible values are: '", paste(cns, collapse="', '"), "."), call.=FALSE)
+		}		
 	} # end if !is.null
 	return(ap)
 } # EOF
