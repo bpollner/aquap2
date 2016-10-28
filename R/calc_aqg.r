@@ -786,7 +786,7 @@ calcAquagramSingle <- function(dataset, md, ap, classVar, idString) {
 #' @family Temperature calibration procedures
 #' @export
 genTempCalibExp <- function(Tcenter=NULL, Tdelta=5, stepBy=1, repls=4) {
-	autoUpS()
+	autoUpS(cfs=FALSE)
 	if(is.null(Tcenter)) {
 		stop("Please provide a numeric value for 'Tcenter'.", call.=FALSE)
 	}

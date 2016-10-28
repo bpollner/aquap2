@@ -243,7 +243,7 @@ noi_performNoise <- function(dataset, noiseFile)	{ # is working on a single data
 #' @family Noise procedures
 #' @export
 genNoiseRecExp <- function() {
-	autoUpS()
+	autoUpS(cfs=FALSE)
 	genFolderStr()
 	fn_metadata <- .ap2$stn$fn_metadata # folder name for metadata
 	fn_mDataDefFile <- .ap2$stn$fn_mDataDefFile
