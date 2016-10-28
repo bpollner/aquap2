@@ -589,6 +589,14 @@ checkDatasetVersion <- function(dataset, dsName=NULL) {
 	}
 } # EOF
 
+checkForPresenceOfData <- function() {
+	rawFolder <- .ap2$stn$fn_rawdata
+	aa <- list.files(rawFolder)
+	if (length(aa) == 0) {
+		stop(paste0("Sorry, it appears there are no data in the current '", rawFolder, "' folder."), call.=FALSE)
+	}
+} # EOF
+
 # get full data ---------------------------------------------------------------
 #' @template mr_getFullData
 #' @export
@@ -606,6 +614,7 @@ getFullData <- function(md=getmd(), filetype="def", naString="NA", slType="def",
 		return(invisible(dataset)) # returns the dataset and we exit here
 	}
   	# import starts 
+  	checkForPresenceOfData()
   	if(!.ap2$stn$allSilent) {cat("Importing data...\n")}	
 	gfd_check_trhLog_defaults(trhLog)
 	headerFilePath <- NULL # gets assigned in readHeader()

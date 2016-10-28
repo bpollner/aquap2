@@ -58,7 +58,7 @@ pv_dptModules <- c("sgol", "snv", "msc", "emsc", "osc", "deTr", "gsd")
 pv_versionDataset <- "0.1.4"   # change this only!! if the structure of the dataset has been changed !! XXX
 
 pv_initialTempCalibFilename <- "TempCalib"
-pv_YcolumnNameWaterTemp <- "waterTemp"
+pv_YcolumnNameSampleTemp <- "smpTemp"
 
 pv_suffixForTemplates <- "_TEMPLATE"
 

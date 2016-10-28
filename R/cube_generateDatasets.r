@@ -1257,7 +1257,7 @@ checkTempCalibFile <- function(tempFile, ap, md) {
 		## check temperature plausibility
 		if (TRUE) {
 			cns <- colnames(tempDataset$header)
-			waterCn <- paste0(yPrev, pv_YcolumnNameWaterTemp)
+			waterCn <- paste0(yPrev, pv_YcolumnNameSampleTemp)
 			if (! waterCn %in% cns) {
 				stop(paste0("It seems to be unlikely that the data in the R-data file '", tempFile, "' in your AQUAP2SH-folder actually are temperature calibration data, as the column '", waterCn, "' containing the sample temperature is missing. \nPlease check the temperature calibration dataset resp. experiment, possibly re-import the raw data using 'gfd' and move the resulting R-data file to your AQUAP2SH folder."), call.=FALSE)
 			}

@@ -328,7 +328,7 @@ calc_minus_avg_aquagram_spectra <- function(avgAquagrSpectra, minus) {
 tempCalibTransformDataset <- function(tempCalibDataset) {
 	if (!.ap2$stn$allSilent) {cat(" * Reading in temperature data... ")}
 	yPref <- .ap2$stn$p_yVarPref
-	wtcn <- paste0(yPref, pv_YcolumnNameWaterTemp)
+	wtcn <- paste0(yPref, pv_YcolumnNameSampleTemp)
 	header <- data.frame(sample=rep("RM", nrow(tempCalibDataset)), temp_W=as.numeric(tempCalibDataset$header[,wtcn])) # we already checked for the existence of the water temp column
 	nir <- getNIR(tempCalibDataset)
 	out <- cbind(header, nir)
@@ -767,7 +767,7 @@ calcAquagramSingle <- function(dataset, md, ap, classVar, idString) {
 #' @section Important: When exporting the sample list via \code{\link{esl}}, make 
 #' sure to export it \strong{non randomized} - please see examples.
 #' @section Warning: Do not change the name of the columns in the sample list 
-#' before importing the dataset; if the numerical column \code{waterTemp} is not 
+#' before importing the dataset; if the numerical column \code{smpTemp} is not 
 #' present, the temperature calibration data can not be used.
 #' @family Temperature procedures
 #' @examples
@@ -807,7 +807,7 @@ genTempCalibExp <- function(Tcenter=NULL, Tdelta=5, stepBy=1, repls=4) {
 	txt <- mod_md_txt("expName", pv_initialTempCalibFilename, txt)
 	txt <- mod_md_logic("TimePoints", FALSE, txt)
 	txt <- mod_md_logic("spacing", FALSE, txt)
-	txt <- mod_md_txt("columnNamesL1", paste0(yPref, pv_YcolumnNameWaterTemp), txt)
+	txt <- mod_md_txt("columnNamesL1", paste0(yPref, pv_YcolumnNameSampleTemp), txt)
 	txt <- mod_md_txt("columnNamesL2", paste0(clPref, "DELETE"), txt)
 	txt[grep("L1  <-", txt)] <- paste0("\tL1  <- list(list(\"", temps, "\"))")
 	txt[grep("L2  <-", txt)] <- paste0("\tL2  <- list(list(\"", temps, "\"))")

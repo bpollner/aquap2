@@ -38,7 +38,7 @@ sure to export it \strong{non randomized} - please see examples.
 
 \section{Warning}{
  Do not change the name of the columns in the sample list 
-before importing the dataset; if the numerical column \code{waterTemp} is not 
+before importing the dataset; if the numerical column \code{smpTemp} is not 
 present, the temperature calibration data can not be used.
 }
 \examples{
