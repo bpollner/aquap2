@@ -564,11 +564,11 @@ ap_check_plsr_Input <- function(ap, header) {
 		}
 		##
 		if (!is.null(e$colorBy)) {
-			if (length(e$colorBy != 1)) {
-				stop(paste0("Please provide only a single class variable for coloring in the plsr-plot.\nPlease check your input at the argument 'pls.colorBy' or in the analysis procedure. \nPossible values are: '", paste(cns, collapse="', '"), "."), call.=FALSE)
-			}
 			cns <- colnames(header)
 			cns <- cns[grep(cPref, cns)]
+			if (length(e$colorBy) != 1) {
+				stop(paste0("Please provide only a single class variable for coloring in the plsr-plot.\nPlease check your input at the argument 'pls.colorBy' or in the analysis procedure. \nPossible values are: '", paste(cns, collapse="', '"), "."), call.=FALSE)
+			}
 			if (!e$colorBy %in% cns) {
 				stop(paste0("Sorry, the class-variable '", e$colorBy, "' for coloring in the plsr-plot seems not to exist in the provided dataset.\nPlease check your input at the argument 'pls.colorBy' or in the analysis procedure. \nPossible values are: '", paste(cns, collapse="', '"), "."), call.=FALSE)
 			}		
