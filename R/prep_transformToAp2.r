@@ -16,7 +16,7 @@ ttap <- function(obj, md=getmd(), dol=TRUE, ncpwl=1, reduceTRH=FALSE, stf=TRUE) 
 	autoUpS(cfs=TRUE)
 	#
 	objName <- deparse(substitute(obj))
-	if (!.ap2$stn$allSilent) { cat(paste0("Transforming ", nrow(obj), " scans in '", objName, "' to aquap2 structure ... \n")) }
+	if (!.ap2$stn$allSilent) { cat(paste0("Transforming ", nrow(obj), " scans in '", objName, "' to aquap2 structure... \n")) }
 	header <- obj$header
 	class(header) <- "data.frame"
 	outliers <- flagOutliers_allScope(obj$NIR, detectOutliers=dol)
