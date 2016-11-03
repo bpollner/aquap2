@@ -825,6 +825,11 @@ performExcludeOutliers <- function(dataset, siExOut, ap) {
 			ind <- ncol(header)-1
 		}
 		headerPre <- header[, 1:ind]
+		# ! check for a possible double column that can appear if the user decides to do the SAME outlier-checking as has been done already automatically in the beginning
+		inDo <- which(colnames(headerPre) == colnames(flagsFacDf)) # the index of a possible double column in the header, that can happen if the user chooses to exclude outliers in all-scope and that has already been done at the time of the import !!
+		if (length(inDo) > 0 ) {
+			headerPre <- headerPre[, -inDo]
+		}
 		headerPost <- header[, (ind+1):ncol(header)]
 		headerNew <- cbind(headerPre, flagsFacDf, headerPost)
 		colRepNew <- extractClassesForColRep(headerNew)		## the color representation of the factors
@@ -1363,7 +1368,6 @@ gdmm <- function(dataset, ap=getap(), noiseFile="def", tempFile="def") {
 	csAvg <- cpt@csAvg # is a vector
 	noise <- cpt@noise # is a vector
 	exOut <- cpt@exOut # is a vector
-	
 	### generate datasets
 	if (!.ap2$stn$allSilent) {cat("Generating Datasets...\n")}
 	for (i in 1:len) {
@@ -1372,7 +1376,6 @@ gdmm <- function(dataset, ap=getap(), noiseFile="def", tempFile="def") {
 	} # end for i
 	if (!.ap2$stn$allSilent) {cat("Done.\n")}
 	###
-	
 	### clean out the NULL-datasets
 #	nullInd <- which(unlist(lapply(cubeList, is.null))) # which one of the split by variable resulted in zero rows (has been returned as NULL in ssc_s)
 	nullInd <- which(cubeList == "nixnox")
