@@ -157,7 +157,7 @@ stn <- list(
 	##PLSR
 	plsr_calcInParallel = TRUE, 			## if the calculation of the plsr models should be done in parallel
 	plsr_calc_CV_consecsTogether = TRUE, 	## if for crossvalidation the consecutive scans (i.e. the scans with the same sample number) should always be excluded or included together
-	plsr_calc_typeOfCrossvalid = 10, 		## the default way to perform crossvalidation. Provide either 'LOO' for a leave-one-out crossvalidation, or a number for performing this n-fold crossvalidation.
+	plsr_calc_typeOfCrossvalid = 10, 		## the default way to perform crossvalidation. Provide 'LOO' for a leave-one-out crossvalidation, a number for performing this n-fold crossvalidation, or 'def' to get the default value from the settings file (parameter 'plsr_calc_typeOfCrossvalid'); a number to perform this n-fold crossvalidation, 'LOO' for a leave-one-out crossvalidation, or a valid name of a class variable for performing a crossvalidation based on the grouping defined by this variable.
 	plsr_plotDataInSwarm = TRUE, 			## set to FALSE to only use the classical (with possibly several points overlapping on a single line) way to plot the training, crossvalidation and prediction plots.
 	plsr_plot_secondaryData = TRUE, 		## if the secondary data, i.e. the calibration data for the cross-validation resp. the cross-validation data for the prediction data should be plotted as well.
 	plsr_usePureRangeX = FALSE, 			## (recommended value is FALSE) Set to TRUE to use the pure range of the extreme x-swarms to determine the range of the swarm-plot. --> If there are problems with the range of the plots, try setting 'plsr_usePureRangeX' to TRUE.
@@ -166,7 +166,7 @@ stn <- list(
 	plsr_addComps = c(3, 5, 8), 			## how many components should be added to the error plot beyond the calculated best nr. of components in the above specified boundaries
 	plsr_percentObservAsMaxNcomp = 30,		## the percentage of the available number of observations indicating the maximally allowed number of components for the test-runs to determine the optimal number of components
 	plsr_nrCompsSwitchToNrObserv = 12,		## the number of maximum allowed number of components below which to the number of observations for defining the max. nr. of allowed components for the test-runs to determine the optimal number of components is switched     XXX explain better !!
-	plsr_nrTestIterations = 10, 			## how many repetitions should be calculated when getting the optimal number of components. Not the lowest number of components is chosen, but the one that comes up most often as the lowest.
+	plsr_nrTestIterations = 12, 			## how many repetitions should be calculated when getting the optimal number of components. Not the lowest number of components is chosen, but the one that comes up most often as the lowest.
 	plsr_nrDigitsRMSEx = 4,					## rounding for the error values
 	plsr_colorForBestNumberComps = "blue",	## the color for the vertical line in the error plot showing the best number of components
 	plsr_color_lm_training = "blue", 		## the color for the line showing the linear model of predicted vs. actual data at the training
