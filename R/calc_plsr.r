@@ -74,6 +74,8 @@ makePLSRModel_inner <- function(dataset, Y_Class, niter=5, ncomp=NULL, valid, st
 	addComps <- stnLoc$plsr_addComps
 	acb <- stnLoc$plsr_addCompsBoundaries
 	facObs <- stnLoc$plsr_percentObservAsMaxNcomp / 100
+	univMaxNcomp <- stnLoc$plsr_univMaxNcomp
+	#
 	header <- getHeader(dataset)
 	dataset <- data.frame(yvar=header[,Y_Class], allData=dataset$NIR ) ### here make a new "flat" dataset
 	typeValid <- "CV"
@@ -88,6 +90,9 @@ makePLSRModel_inner <- function(dataset, Y_Class, niter=5, ncomp=NULL, valid, st
 			maxNcomp <- round( (nrow(header)*facObs), 0)
 			if (maxNcomp == nrow(header)) {
 				maxNcomp <- nrow(header) -1
+			}
+			if (maxNcomp > univMaxNcomp) { # is limiting the number of components to a maximum value defined in the settings
+				maxNcomp <- univMaxNcomp
 			}
 			if (maxNcomp <= nrSwitch) {			## so if we have very few rows -- now we do not want to give any nr of comps at all
 				for (i in 1: niter) {
