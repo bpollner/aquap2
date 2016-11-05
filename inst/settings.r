@@ -170,6 +170,7 @@ stn <- list(
 	plsr_nrCompsSwitchToNrObserv = 12,		## the number of maximum allowed number of components below which to the number of observations for defining the max. nr. of allowed components for the test-runs to determine the optimal number of components is switched     XXX explain better !!
 	plsr_nrTestIterations = 12, 			## how many repetitions should be calculated when getting the optimal number of components. Not the lowest number of components is chosen, but the one that comes up most often as the lowest.
 	plsr_nrDigitsRMSEx = 4,					## rounding for the error values
+	plsr_nrDigitsPercentage = 1, 			## rounding for the display of percentage of total nr. of observations in the dataset after NAs have been removed
 	plsr_colorForBestNumberComps = "blue",	## the color for the vertical line in the error plot showing the best number of components
 	plsr_color_lm_training = "blue", 		## the color for the line showing the linear model of predicted vs. actual data at the training
 	plsr_color_lm_crossvalid = "red", 		## the color for the line showing the linear model of predicted vs. actual data at the crossvalidation

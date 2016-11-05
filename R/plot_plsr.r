@@ -55,8 +55,11 @@ convertToRDP <- function(errorValue, ClassVar, header) {	# the dataset with all 
 # plotting ----------------------------------------
 plot_plsr_error <- function(plsModel, plsPlusModel, dataset, ClassVar, onMain="", onSub="", inRDP=FALSE) { # ClassVar = regrOn
 	modCorrCol <- .ap2$stn$plsr_colorForBestNumberComps
+	percRound <- .ap2$stn$plsr_nrDigitsPercentage
 	#
+	nro <- nrow(dataset)
 	dataset <- dataset[which(!is.na(dataset$header[ClassVar]))]
+	perc <- round((nrow(dataset)*100)/nro, percRound)
 	#
 	header <- getHeader(dataset)
 	## the correct model
@@ -95,7 +98,14 @@ plot_plsr_error <- function(plsModel, plsPlusModel, dataset, ClassVar, onMain=""
 	}	
 	regrOnMsg <- paste0("   regr. on: ", ClassVar, "   ")
 	ncompMsg <- paste0("   ", plsModel$ncomp, " comps.")
-	Nmsg <- paste0("   N=", nrow(header))
+	if (perc == 100) {
+		percAdd <- ""
+		NmsgAdd <- ""
+	} else {
+		percAdd <- paste0(" (", perc, "%)")
+		NmsgAdd <- paste0(" of ", nro)
+	}
+	Nmsg <- paste0("   N = ", nrow(header), NmsgAdd, percAdd)
 	subText <- paste0(onSub, regrOnMsg, ncompMsg, ncompAdd, Nmsg)
 	xax <- 0:plsPlusModel$ncomp
 	yax <- vecsPlus
@@ -199,8 +209,11 @@ plot_plsr_calibValidSwarm <- function(plsModel, dataset, regrOn, classFCol, onMa
 	secAlpha <- .ap2$stn$plsr_color_alpha_secondaryData
 	pchPrim <- .ap2$stn$plsr_color_pch_primaryData
 	pchSec <- .ap2$stn$plsr_color_pch_secondaryData
+	percRound <- .ap2$stn$plsr_nrDigitsPercentage
 	#
+	nro <- nrow(dataset)
 	dataset <- dataset[which(!is.na(dataset$header[regrOn]))] # kick out possible NAs, as we did the same in the calculations
+	perc <- round((nrow(dataset)*100)/nro, percRound)
 	#
 	header <- getHeader(dataset)
 	if (is.null(classFCol)) {
@@ -235,7 +248,14 @@ plot_plsr_calibValidSwarm <- function(plsModel, dataset, regrOn, classFCol, onMa
 	#
 	regrOnMsg <- paste("   regr. on: ", regrOn, "   ",sep="")
 	ncompMsg <- paste("   ", ncomp, " comps.", sep="")
-	Nmsg <- paste("   N=", nrow(header), sep="")
+	if (perc == 100) {
+		percAdd <- ""
+		NmsgAdd <- ""
+	} else {
+		percAdd <- paste0(" (", perc, "%)")
+		NmsgAdd <- paste0(" of ", nro)
+	}
+	Nmsg <- paste0("   N = ", nrow(header), NmsgAdd, percAdd)
 	mainText <- paste0(onMain, " (valid. ", valid, ")")
 	subText <- paste0(onSub, regrOnMsg, colorMsg, classFCol, ncompMsg, ncompAdd, Nmsg)
 	#
@@ -341,15 +361,18 @@ plot_plsr_errorBars <- function(errorFrame, groupBy=FALSE, whichB="R2CV", onMain
 ####
 makePLSRRegressionVectorPlots_inner <- function(plsModels, regrOn, onMain, onSub, dataset, idString, inRDP, bw, adLines, ccol, clty) { # is cycling through all the regrOn of a single set;
 	discrim <- .ap2$stn$plsr_regressionVector_discrim
+	percRound <- .ap2$stn$plsr_nrDigitsPercentage
 	bandwidth <- bw
 	##
 	wls <- getWavelengths(dataset)
 	mainTxt <- paste(onMain, idString)
 #	header <- getHeader(dataset)
+	nro <- nrow(dataset)
 	##
 	for (i in 1: length(plsModels)) { 
 		#
 		dataset <- dataset[which(!is.na(dataset$header[regrOn[[i]]]))]
+		perc <- round((nrow(dataset)*100)/nro, percRound)
 		header <- getHeader(dataset)
 		#
 		RMSECV <- getRMSECV(plsModels[[i]])
@@ -367,7 +390,15 @@ makePLSRRegressionVectorPlots_inner <- function(plsModels, regrOn, onMain, onSub
 		} else {
 			ncompAdd <- ""
 		}
-		subText <- paste0(onSub, " regr. on: ", regrOn[[i]], ncompAdd, "   ", legendText)
+		if (perc == 100) {
+			percAdd <- ""
+			NmsgAdd <- ""
+		} else {
+			percAdd <- paste0(" (", perc, "%)")
+			NmsgAdd <- paste0(" of ", nro)
+		}
+		Nmsg <- paste0("   N = ", nrow(header), NmsgAdd, percAdd)
+		subText <- paste0(onSub, " regr. on: ", regrOn[[i]], Nmsg, ncompAdd, "   ", legendText)
 		##	
 		pickResults <- pickPeaks(plsModels[[i]], bandwidth, comps=NULL, discrim, wavelengths=wls)
 		plotPeaks(pickResults, onMain=mainTxt, onSub=subText, adLines, pcaVariances=NULL, customColor=ccol, ylim=NULL, wavelengths=wls, clty)		### !! here the plotting !!!	
