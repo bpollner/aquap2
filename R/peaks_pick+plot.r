@@ -184,7 +184,7 @@ plotPickResults <- function (pickResults, onMain="", onSub="", pcaVariances=NULL
 		clt <- clty
 	}
 	#
-	matplot(wavelengths, t(pickResults$rawVector), type="l", ylab="Coefficient", main=onMain, sub=onSubText, col=ColorYea, ylim=ylim, lty=clt) #### here the matplot
+	matplot(wavelengths, t(pickResults$rawVector), type="l", ylab="Coefficient", main=onMain, sub=onSubText, col=ColorYea, ylim=ylim, lty=clt, cex.sub=0.8) #### here the matplot
 	abline(0,0, col="gray")
 	## legend see below, so that the text is not being overplotted on the legend!!
 #	legBgCol <- rgb(255,255,255, alpha=.ap2$stn$col_alphaForLegends, maxColorValue=255) # is a white with alpha to be determined in the settings
@@ -218,7 +218,7 @@ plotPickResults <- function (pickResults, onMain="", onSub="", pcaVariances=NULL
 		} # end else
 	} # end for i
 	legBgCol <- rgb(255,255,255, alpha=.ap2$stn$col_alphaForLegends, maxColorValue=255) # is a white with alpha to be determined in the settings
-	legend("topright", legend=legendText, lty=clt, col=ColorYea, lwd=2.5, bg=legBgCol) 	#### XXX legend problem here
+	legend("topright", legend=legendText, lty=clt, col=ColorYea, lwd=2.5, bg=legBgCol, cex=0.8) 	#### XXX legend problem here
 	return(list(customColor=ColorYea))
 }# EOF
 

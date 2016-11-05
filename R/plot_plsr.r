@@ -55,6 +55,9 @@ convertToRDP <- function(errorValue, ClassVar, header) {	# the dataset with all 
 # plotting ----------------------------------------
 plot_plsr_error <- function(plsModel, plsPlusModel, dataset, ClassVar, onMain="", onSub="", inRDP=FALSE) { # ClassVar = regrOn
 	modCorrCol <- .ap2$stn$plsr_colorForBestNumberComps
+	#
+	dataset <- dataset[which(!is.na(dataset$header[ClassVar]))]
+	#
 	header <- getHeader(dataset)
 	## the correct model
 	vecRMSEC <- getVecRMSEC(plsModel)
@@ -84,10 +87,16 @@ plot_plsr_error <- function(plsModel, plsPlusModel, dataset, ClassVar, onMain=""
 		ylab <- "error value [RDP]"
 		legPos <- "topleft"
 	}
-	regrOnMsg <- paste("   regr. on: ", ClassVar, "   ",sep="")
-	ncompMsg <- paste("   ", plsModel$ncomp, " comps.", sep="")
-	Nmsg <- paste("   N=", nrow(header), sep="")
-	subText <- paste(onSub, regrOnMsg, ncompMsg, Nmsg, sep="")
+	levs <- unique(dataset$header[,ClassVar]) 
+	if (length(levs) ==  plsModel$ncomp) {
+		ncompAdd <- pv_plsr_levelLimitMsg
+	} else {
+		ncompAdd <- ""
+	}	
+	regrOnMsg <- paste0("   regr. on: ", ClassVar, "   ")
+	ncompMsg <- paste0("   ", plsModel$ncomp, " comps.")
+	Nmsg <- paste0("   N=", nrow(header))
+	subText <- paste0(onSub, regrOnMsg, ncompMsg, ncompAdd, Nmsg)
 	xax <- 0:plsPlusModel$ncomp
 	yax <- vecsPlus
 #	xax <- 0:plsModel$ncomp
@@ -191,6 +200,8 @@ plot_plsr_calibValidSwarm <- function(plsModel, dataset, regrOn, classFCol, onMa
 	pchPrim <- .ap2$stn$plsr_color_pch_primaryData
 	pchSec <- .ap2$stn$plsr_color_pch_secondaryData
 	#
+	dataset <- dataset[which(!is.na(dataset$header[regrOn]))] # kick out possible NAs, as we did the same in the calculations
+	#
 	header <- getHeader(dataset)
 	if (is.null(classFCol)) {
 		color <- 1
@@ -203,6 +214,12 @@ plot_plsr_calibValidSwarm <- function(plsModel, dataset, regrOn, classFCol, onMa
 		colLegend <- TRUE
 	}
 	ncomp <- plsModel$ncomp
+	levs <- unique(dataset$header[,regrOn]) 
+	if (length(levs) == ncomp) {
+		ncompAdd <- pv_plsr_levelLimitMsg
+	} else {
+		ncompAdd <- ""
+	}
 	#
 	RMSEC <- getRMSEC(plsModel)
 	RMSEC_rdp <- convertToRDP(RMSEC, regrOn, header)
@@ -220,7 +237,7 @@ plot_plsr_calibValidSwarm <- function(plsModel, dataset, regrOn, classFCol, onMa
 	ncompMsg <- paste("   ", ncomp, " comps.", sep="")
 	Nmsg <- paste("   N=", nrow(header), sep="")
 	mainText <- paste0(onMain, " (valid. ", valid, ")")
-	subText <- paste(onSub, regrOnMsg, colorMsg, classFCol, ncompMsg, Nmsg, sep="")
+	subText <- paste0(onSub, regrOnMsg, colorMsg, classFCol, ncompMsg, ncompAdd, Nmsg)
 	#
 	datCV <- data.frame(xval=yvar, yval=yvarFittedCV)
 	datCalib <- data.frame(xval=yvar, yval=yvarFittedCalib)
@@ -328,9 +345,13 @@ makePLSRRegressionVectorPlots_inner <- function(plsModels, regrOn, onMain, onSub
 	##
 	wls <- getWavelengths(dataset)
 	mainTxt <- paste(onMain, idString)
-	header <- getHeader(dataset)
+#	header <- getHeader(dataset)
 	##
 	for (i in 1: length(plsModels)) { 
+		#
+		dataset <- dataset[which(!is.na(dataset$header[regrOn[[i]]]))]
+		header <- getHeader(dataset)
+		#
 		RMSECV <- getRMSECV(plsModels[[i]])
 		RMSECV_rdp <- convertToRDP(RMSECV, regrOn[[i]], header)
 		R2CV <- getR2CV(plsModels[[i]])
@@ -339,7 +360,14 @@ makePLSRRegressionVectorPlots_inner <- function(plsModels, regrOn, onMain, onSub
 		} else {
 			legendText <- paste("   RMSECV: ", RMSECV, ", R2CV: ", R2CV, sep="")
 		}
-		subText <- paste(onSub, " regr. on: ", regrOn[[i]], "   ", legendText, sep="")
+		ncomp <- plsModels[[i]]$ncomp
+		levs <- unique(dataset$header[,regrOn[[i]]]) 
+		if (length(levs) == ncomp) {
+			ncompAdd <- pv_plsr_levelLimitMsg
+		} else {
+			ncompAdd <- ""
+		}
+		subText <- paste0(onSub, " regr. on: ", regrOn[[i]], ncompAdd, "   ", legendText)
 		##	
 		pickResults <- pickPeaks(plsModels[[i]], bandwidth, comps=NULL, discrim, wavelengths=wls)
 		plotPeaks(pickResults, onMain=mainTxt, onSub=subText, adLines, pcaVariances=NULL, customColor=ccol, ylim=NULL, wavelengths=wls, clty)		### !! here the plotting !!!	
@@ -387,7 +415,7 @@ makePLSRErrorPlots_inner <- function(plsModels, plsPlusModels, regrOn, onMain, o
 		validChar <- plsModels[[i]]$validation$method
 		foldnes <- length(plsModels[[i]]$validation$segments)
 		valid <- paste(validChar, " ", foldnes, "", sep="")
-		if (foldnes == nrow(dataset)) {
+		if (foldnes == nrow(dataset)) { ## XXX had problems here ??
 			valid <- "LOO"
 		}
 		if (is.character(finalValid)) {

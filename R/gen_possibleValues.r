@@ -16,10 +16,10 @@ pv_pca_what <- c("both", "scores", "loadings")
 pv_simca_calc_sampling <- c("random", "interleaved")
 pv_warningIcDistRange <- 12
 
-## PLSR calculation
+## PLSR calculation & plotting
 pv_plsr_crossvalidation <- c("CV", "LOO")
 pv_plsr_what <- c("both", "errors", "regression")
-
+pv_plsr_levelLimitMsg <- " (nc.level.lim.) "
 
 ## Noise
 pv_noiseAddModes <- c("sdNorm", "sdUnif", "extrema", "static")

@@ -75,9 +75,13 @@ makePLSRModel_inner <- function(dataset, Y_Class, niter=5, ncomp=NULL, valid, st
 	acb <- stnLoc$plsr_addCompsBoundaries
 	facObs <- stnLoc$plsr_percentObservAsMaxNcomp / 100
 	univMaxNcomp <- stnLoc$plsr_univMaxNcomp
+	limitMaxToLevels <- stnLoc$plsr_limitNcompToLevels
+	#
+	dataset <- dataset[which(!is.na(dataset$header[Y_Class]))] # kick out all the NAs in the dataset, otherwise we have problems in generating the segments
 	#
 	header <- getHeader(dataset)
 	dataset <- data.frame(yvar=header[,Y_Class], allData=dataset$NIR ) ### here make a new "flat" dataset
+	levs <- unique(dataset$yvar) # because the max. nr of comps. should not be higher than the number of distinct levels
 	typeValid <- "CV"
 	if (valid == "LOO") {
 		valid <- nrow(dataset) # because otherwise the plsr function throws an error (bug??)
@@ -94,19 +98,23 @@ makePLSRModel_inner <- function(dataset, Y_Class, niter=5, ncomp=NULL, valid, st
 			if (maxNcomp > univMaxNcomp) { # is limiting the number of components to a maximum value defined in the settings
 				maxNcomp <- univMaxNcomp
 			}
+			if (limitMaxToLevels & maxNcomp > length(levs)) {
+				maxNcomp <- length(levs)
+				nrSwitch <- maxNcomp -1  # just so that we are sure to use this maxNcomp
+			}
 			if (maxNcomp <= nrSwitch) {			## so if we have very few rows -- now we do not want to give any nr of comps at all
 				for (i in 1: niter) {
 					segms <- createPlsrSegments(header, valid)
-					testModel <- pls::plsr(yvar ~ allData, data=dataset, validation=typeValid, segments=segms)
+					testModel <- pls::plsr(yvar ~ allData, data=dataset, validation=typeValid, segments=segms, na.action = "na.omit")
 					a <- pls::RMSEP(testModel, intercept=FALSE, estimate="adjCV")$val
 					ind <- which.min(a)
 		#			if ( (!allow1C) & (ind == 1)) { ind <- order(a)[2] }
 					minErrorVec[i] <-  ind
 				} # end for i niter		
-			} else {						## so if we have a lot of rows !!!
+			} else {						## so if we have a lot of rows (and maxNcomp is > than nrSwitch) !!!
 				for (i in 1: niter) {
 					segms <- createPlsrSegments(header, valid)
-					testModel <- pls::plsr(yvar ~ allData, data=dataset, validation=typeValid, ncomp=maxNcomp, segments=segms)
+					testModel <- pls::plsr(yvar ~ allData, data=dataset, validation=typeValid, ncomp=maxNcomp, segments=segms, na.action = "na.omit")
 					a <- pls::RMSEP(testModel, intercept=FALSE, estimate="adjCV")$val
 					ind <- which.min(a)
 		#			if ( (!allow1C) & (ind == 1)) { ind <- order(a)[2] }

@@ -165,6 +165,7 @@ stn <- list(
 	plsr_addCompsBoundaries = c(7, 20),		## The number of components demarking three regions (below the first number, between first and second, and above the second number) of number of components where the numbers of components listed below are added. (For showing an error plot going beyond the actual number of components)
 	plsr_addComps = c(3, 5, 8), 			## how many components should be added to the error plot beyond the calculated best nr. of components in the above specified boundaries
 	plsr_univMaxNcomp = 200,				## the universal upper limit of possible components
+	plsr_limitNcompToLevels = TRUE, 		## if the max. nr of components (when determining the optimal number of components) should be limited to the number of levels in the y-variable to regress on, i.e. the uniques (excluding NAs)
 	plsr_percentObservAsMaxNcomp = 25,		## the percentage of the available number of observations indicating the maximally allowed number of components for the test-runs to determine the optimal number of components
 	plsr_nrCompsSwitchToNrObserv = 12,		## the number of maximum allowed number of components below which to the number of observations for defining the max. nr. of allowed components for the test-runs to determine the optimal number of components is switched     XXX explain better !!
 	plsr_nrTestIterations = 12, 			## how many repetitions should be calculated when getting the optimal number of components. Not the lowest number of components is chosen, but the one that comes up most often as the lowest.
