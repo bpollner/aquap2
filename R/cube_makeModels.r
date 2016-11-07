@@ -111,5 +111,6 @@ makeAllModels <- function(set, md, ap, tempFile) {
 	newSet@aquagr <- calculateAquagram(getDataset(set), md, ap, getIdString(set), tempFile)
 	newSet@dataset <- getDataset(set)
 	newSet@idString <- set@idString
+	newSet@extraModels <- set@extraModels
 	return(newSet)
 } # EOF

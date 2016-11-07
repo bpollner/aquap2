@@ -4,7 +4,7 @@
 \alias{do_emsc}
 \title{Perform EMSC}
 \usage{
-do_emsc(dataset, vecLoad = NULL)
+do_emsc(dataset, vecLoad = NULL, exportModel = FALSE)
 }
 \arguments{
 \item{dataset}{An object of class 'aquap_data" as produced by 
@@ -13,6 +13,9 @@ do_emsc(dataset, vecLoad = NULL)
 
 \item{vecLoad}{A data frame x (\code{ncol(x) <= 2}) with one or two loading 
 vectors or one regression vector.}
+
+\item{exportModel}{Logical. If a possible model should be stored in the set,
+(leave at \code{FALSE}).}
 }
 \value{
 Returns the dataset with the transformed NIR data.

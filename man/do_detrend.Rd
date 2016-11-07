@@ -4,7 +4,7 @@
 \alias{do_detrend}
 \title{Perform De-Trend}
 \usage{
-do_detrend(dataset, src = NULL, trg = "src")
+do_detrend(dataset, src = NULL, trg = "src", exportModel = FALSE)
 }
 \arguments{
 \item{dataset}{An object of class 'aquap_data' as produced e.g. by 
@@ -26,6 +26,9 @@ argument \code{src} (the default).}
 \item{Numeric length two}{Provide a numeric length two to the argument 
 \code{trg} to apply the de-trend only to this wavelength range.}
 }}
+
+\item{exportModel}{Logical. If a possible model should be stored in the set,
+(leave at \code{FALSE}).}
 }
 \value{
 The transformed dataset

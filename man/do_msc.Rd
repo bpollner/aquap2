@@ -4,7 +4,7 @@
 \alias{do_msc}
 \title{Perform MSC}
 \usage{
-do_msc(dataset, ref = NULL)
+do_msc(dataset, ref = NULL, exportModel = FALSE)
 }
 \arguments{
 \item{dataset}{An object of class 'aquap_data" as produced by 
@@ -15,6 +15,9 @@ do_msc(dataset, ref = NULL)
 i.e. a single row (as e.g. produced by \code{\link{do_avg}}, or by 
 subscripting via '[]'). If no reference is provided, the average of all spectra 
 of the provided dataset is used as a reference for the baseline correction.}
+
+\item{exportModel}{Logical. If a possible model should be stored in the set,
+(leave at \code{FALSE}).}
 }
 \value{
 Returns the dataset with the transformed NIR data.

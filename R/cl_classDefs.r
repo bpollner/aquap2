@@ -14,11 +14,10 @@ setClass("aquap_data", slots=c(metadata="list", anproc="apNull", ncpwl="numeric"
 setClass("aquap_cpt", slots=c(splitVars="list", wlSplit="list", csAvg="logical", noise="logical", exOut="logical", len="numeric"))
 setClass("aqg_calc", slots = c(ID="character", classVar="character", itemIndex="numeric", avg="matrix", colRep="numChar", possN="numeric", selInds="numeric", bootRes="matNull", rawSpec="dfNull", avgSpec="dfNull", subtrSpec="dfNull"))
 #setClass("aqg_cr", slots = c(res="list", ran="listNull"))
-#setClassUnion(name="aqgCrNull", members =c("aqg_cr", "NULL"))
-setClass("aquap_set", slots=c(dataset="aquap_data", idString="character", pca="listNull", plsr="listNull", simca="listNull", aquagr="listNull")) 
+#setClass("aquap_extMod", slots=c(type="character", mod="listNull"))
+setClass("aquap_set", slots=c(dataset="aquap_data", idString="character", pca="listNull", plsr="listNull", simca="listNull", aquagr="listNull", extraModels="listNull")) 
 setClass("aquap_cube", slots=c(metadata="aquap_md", anproc="aquap_ap", cp="data.frame", cpt="aquap_cpt", aqgRan="listNull"), contains="list")
 # setClass("aquap_noiseDist", slots=c(timestamp="POSIXct", version="character"), contains="matrix")
-
 
 # methods ----------------------------------------
 setMethod("show", signature(object = "aquap_data"), definition = show_aquap_data )

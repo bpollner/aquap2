@@ -4,7 +4,7 @@
 \alias{do_gapDer}
 \title{Perform gap-segment derivatives}
 \usage{
-do_gapDer(dataset, m = 1, w = 1, s = 1, deltaW)
+do_gapDer(dataset, m = 1, w = 1, s = 1, deltaW, exportModel = FALSE)
 }
 \arguments{
 \item{dataset}{An object of class 'aquap_data" as produced by 
@@ -23,6 +23,9 @@ points are averaged.Default is 1.}
 
 \item{deltaW}{Numeric length one. The sampling interval / band spacing. Default 
 is 1.}
+
+\item{exportModel}{Logical. If a possible model should be stored in the set,
+(leave at \code{FALSE}).}
 }
 \description{
 Performs gap-segment derivatives on the provided dataset. The 

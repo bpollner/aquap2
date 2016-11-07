@@ -9,6 +9,8 @@
 #' @param n Numeric length one, the filter length, must be odd. Default = 21.
 #' @param m Numeric length one, Return the m-th derivative of the filter 
 #' coefficients. Default = 0.
+#' @param exportModel Logical. If a possible model should be stored in the set,
+#' (leave at \code{FALSE}).
 #' @return Returns the dataset with the NIR-data smoothed or transformed.
 #' @examples
 #' \dontrun{
@@ -20,11 +22,12 @@
 #' @family Data pre-treatment functions 
 #' @family dpt modules documentation
 #' @export
-do_sgolay <- function(dataset, p=2, n=21, m=0) {
+do_sgolay <- function(dataset, p=2, n=21, m=0, exportModel=FALSE) {
 	autoUpS()
  	cns <- colnames(dataset$NIR)
 	rns <- rownames(dataset$NIR)
 	NIR <- t(apply(dataset$NIR, 1, signal::sgolayfilt, p=p, n=n, m=m))
+	exportAdditionalModelToAp2Env(doExport=exportModel, thisMod=NULL, thisType=pv_dptModules[1]) # sgol
 	colnames(NIR) <- cns
 	rownames(NIR) <- rns
 	dataset$NIR <- I(NIR)
@@ -47,9 +50,10 @@ do_sgolay <- function(dataset, p=2, n=21, m=0) {
 #' @family Data pre-treatment function
 #' @family dpt modules documentation
 #' @export
-do_snv <- function(dataset) {
+do_snv <- function(dataset, exportModel=FALSE) {
 	autoUpS()
 	NIR <- t(scale(t(dataset$NIR),center=TRUE,scale=TRUE))
+	exportAdditionalModelToAp2Env(doExport=exportModel, thisMod=NULL, thisType=pv_dptModules[2]) # snv
 	colnames(NIR) <- colnames(dataset$NIR)
 	rownames(NIR) <- rownames(dataset$NIR)
 	dataset$NIR <- I(NIR)
@@ -88,7 +92,7 @@ do_snv <- function(dataset) {
 #' @family Data pre-treatment functions 
 #' @family dpt modules documentation
 #' @export
-do_msc <- function(dataset, ref=NULL) {
+do_msc <- function(dataset, ref=NULL, exportModel=FALSE) {
 	autoUpS()
 	if (!is.null(ref)) {
 		if (class(ref) != "aquap_data") {
@@ -105,6 +109,7 @@ do_msc <- function(dataset, ref=NULL) {
 		refInput <- NULL
 	}
  	NIR <- pls::msc(dataset$NIR, refInput)
+	exportAdditionalModelToAp2Env(doExport=exportModel, thisMod=NIR, thisType=pv_dptModules[3]) # msc
 	colnames(NIR) <- colnames(dataset$NIR)
 	rownames(NIR) <- rownames(dataset$NIR)
 	dataset$NIR <- I(NIR)
@@ -199,7 +204,7 @@ calc_emsc <- function(dataset, input) { ## this one possibly used "external"
 #' @family Data pre-treatment functions 
 #' @family dpt modules documentation
 #' @export
-do_emsc <- function(dataset, vecLoad=NULL) {
+do_emsc <- function(dataset, vecLoad=NULL, exportModel=FALSE) {
 	autoUpS()
 	input <- as.data.frame(vecLoad)
 	if (ncol(input) > 2) {
@@ -209,6 +214,7 @@ do_emsc <- function(dataset, vecLoad=NULL) {
 		stop("Please provide a data frame with one or two loading vectors or one regression vector to the argument 'vecLoad' (do_emsc).", call.=FALSE)
 	}
 	NIR <- as.matrix(calc_emsc(dataset, input))
+	exportAdditionalModelToAp2Env(doExport=exportModel, thisMod=NULL, thisType=pv_dptModules[4]) # emsc
 	rownames(NIR) <- rownames(dataset)
 	colnames(NIR) <- colnames(dataset$NIR)
 	dataset$NIR <- I(NIR)
@@ -263,7 +269,7 @@ do_scale_fc <- function(dataset, calibAvgTable) { # used in aquagram norm foreig
 #' @family Data pre-treatment functions 
 #' @family dpt modules documentation
 #' @export
-do_gapDer <- function(dataset, m=1, w=1, s=1, deltaW) {
+do_gapDer <- function(dataset, m=1, w=1, s=1, deltaW, exportModel=FALSE) {
 	autoUpS()
 	nir <- getNIR(dataset)
 	NIR <- prospectr::gapDer(nir, m=m, w=w, s=s, delta.wav=deltaW) # gives back a matrix with one columne less at the beginning and end, so in total two wavelengths missing !!
@@ -283,6 +289,7 @@ do_gapDer <- function(dataset, m=1, w=1, s=1, deltaW) {
 #	colnames(NIR) <- colnames(dataset$NIR)
 #	rownames(NIR) <- rownames(dataset$NIR)
 #	NIR <- as.matrix(NIR) # because otherwise the "AsIs" is behaving strange
+	exportAdditionalModelToAp2Env(doExport=exportModel, thisMod=NULL, thisType=pv_dptModules[7]) # gapDer
 	dataset$NIR <- I(NIR)
 	return(dataset)
 } # EOF
@@ -353,6 +360,7 @@ checkDeTrendSrcTrgInput <- function(dataset, src=NULL, trg="src") {
 #' calculating the de-trend values, i.e. the linear models, and the resulting 
 #' de-trend is also applied to the full range of wavelengths present in the 
 #' dataset.
+#' @inheritParams do_sgolay
 #' @param dataset An object of class 'aquap_data' as produced e.g. by 
 #' \code{\link{gfd}}.
 #' @param src 'source'; the wavelength-range from where the values for de-trend 
@@ -390,7 +398,7 @@ checkDeTrendSrcTrgInput <- function(dataset, src=NULL, trg="src") {
 #' @family Data pre-treatment functions 
 #' @family dpt modules documentation
 #' @export
-do_detrend<- function(dataset, src=NULL, trg="src") { 
+do_detrend<- function(dataset, src=NULL, trg="src", exportModel=FALSE) { 
 	autoUpS()
 	checkDeTrendSrcTrgInput(dataset, src, trg) # is assigning trg
 	# source
@@ -421,6 +429,7 @@ do_detrend<- function(dataset, src=NULL, trg="src") {
 #		NIR[i,] <- as.numeric(nirTrg[i,]) - mods[1,i] - mods[2,i]*wlsTrg
 #	}
 	NIRnew <- t(sapply(1:nrow(nirTrg), function(i) as.numeric(nirTrg[i,]) - mods[1,i] - mods[2,i]*wlsTrg))
+	exportAdditionalModelToAp2Env(doExport=exportModel, thisMod=NULL, thisType=pv_dptModules[6]) # deTrend
 	colnames(NIRnew) <- cnsNew <- colnames(nirTrg)
 	cnsOld <- colnames(dataset$NIR)
 	indHere <- which(cnsOld %in% cnsNew)

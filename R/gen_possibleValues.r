@@ -53,6 +53,7 @@ pv_filetypes <- c("vision_NSAS.da", "tabDelim.txt", "Pirouette.pir")
 
 ## Data pre-treatment moduls
 pv_dptModules <- c("sgol", "snv", "msc", "emsc", "osc", "deTr", "gsd")
+pv_extraMods <- "extraMods"
 
 ## the version of the dataset
 pv_versionDataset <- "0.1.4"   # change this only!! if the structure of the dataset has been changed !! XXX

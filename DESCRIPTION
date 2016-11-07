@@ -31,6 +31,7 @@ Imports:
     rrcovHD,
     prospectr,
     plotrix,
+    pracma,
     beeswarm
 Suggests:
     knitr
@@ -68,6 +69,7 @@ Collate:
     'prep_SampleList.r'
     'prep_importData.r'
     'prep_importData_specific.r'
+    'prep_interpolate.r'
     'prep_metadata.r'
     'prep_transformToAp2.r'
     'prep_writeMfiles.r'

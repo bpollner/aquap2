@@ -4,7 +4,7 @@
 \alias{do_sgolay}
 \title{Perform Smoothing and / or m-th Derivative}
 \usage{
-do_sgolay(dataset, p = 2, n = 21, m = 0)
+do_sgolay(dataset, p = 2, n = 21, m = 0, exportModel = FALSE)
 }
 \arguments{
 \item{dataset}{An object of class 'aquap_data" as produced by 
@@ -17,6 +17,9 @@ do_sgolay(dataset, p = 2, n = 21, m = 0)
 
 \item{m}{Numeric length one, Return the m-th derivative of the filter 
 coefficients. Default = 0.}
+
+\item{exportModel}{Logical. If a possible model should be stored in the set,
+(leave at \code{FALSE}).}
 }
 \value{
 Returns the dataset with the NIR-data smoothed or transformed.

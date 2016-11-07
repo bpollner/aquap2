@@ -851,7 +851,7 @@ performExcludeOutliers <- function(dataset, siExOut, ap) {
 	return(dataset)
 } # EOF
 
-performDPT_Core <- function(dataset, dptSeq) {
+performDPT_Core <- function(dataset, dptSeq, allExportModels=TRUE) {
 # dptSeq is the pre or post charcter string coming from ap$dpt$dptModules
 # pv_dptModules <- c("sgol", "snv", "msc", "emsc", "osc", "deTr", "gapDe")
 # the modules itself are already checked
@@ -867,7 +867,7 @@ performDPT_Core <- function(dataset, dptSeq) {
 			if (first[i] == pvMod[1]) { # sgolay
 				## to have also the option to NOT add additional parameters to sgol
 				if (!grepl("@", dptSeq[i])) {
-					dataset <- do_sgolay(dataset)
+					dataset <- do_sgolay(dataset,  exportModel=allExportModels)
 				} else { # so, yes, we have an '@' present	
 #		stop("You must have the parameters of the Savitzky-Golay operation defined via the character 'sgol@p-n-m', with p, n, m being integers; n has to be odd.\nDefault values could be e.g. 2-21-0 for a mild smoothing. Please check the analysis procedure / your input.", call.=FALSE)
 					infoChar <- strsplit(dptSeq[i], "@")[[1]][[2]] # get only the second part of the module containing the numbers (still as character!)
@@ -880,12 +880,12 @@ performDPT_Core <- function(dataset, dptSeq) {
 					if (length(nums) != 3) {
 						stop("Please provide exactly three integers as arguments to the Savitzky-Golay operation, e.g. ", pvMod[1], "@2-21-0. \n Please check the analysis procedure / your input.", call.=FALSE)
 					}
-					dataset <- do_sgolay(dataset, p=nums[1], n=nums[2], m=nums[3])  # arguments: p=2, n=21, m=0)
+					dataset <- do_sgolay(dataset, p=nums[1], n=nums[2], m=nums[3], exportModel=allExportModels)  # arguments: p=2, n=21, m=0)
 				}  # end else
 			} # end sgolay
 		###########
 			if (first[i] == pvMod[2]) { # snv
-				dataset <- do_snv(dataset)  # no additional arguments here
+				dataset <- do_snv(dataset, exportModel=allExportModels)  # no additional arguments here
 			} # end snv
 			if (first[i] == pvMod[3]) { # msc
 				vec <- NULL
@@ -902,7 +902,7 @@ performDPT_Core <- function(dataset, dptSeq) {
 					}
 					vec <- eval(parse(text=ords)) # now get the provided object from workspace into 'vec'
 				} # end if grepl @ element			
-				dataset <- do_msc(dataset, vec) # one reference (a one-lined dataset)
+				dataset <- do_msc(dataset, vec, exportModel=allExportModels) # one reference (a one-lined dataset)
 			} # end msc
 		###########
 			if (first[i] == pvMod[4]) { # emsc
@@ -924,7 +924,7 @@ performDPT_Core <- function(dataset, dptSeq) {
 				if (nrow(lvObj) != ncol(dataset$NIR) ) {
 					stop(paste(pvMod[4], "@", loadvecObjChar, ":The length (nrow) of the provided dataframe/matrix is ", nrow(lvObj), ", while the current dataset has ", ncol(dataset$NIR), " wavelengths.\nThe length of the loading/regression vector and the number of wavelengths in the NIR-data must be the same.\nPlease provide a loading / regression vector with the right length fitting *all* the datasets in your 'cube', or re-think your (possible) data-splitting procedure when generating the 'cube' object. \nPlease see ?dpt_modules and ?do_emsc for further details.", sep=""), call.=FALSE)
 				}				
-				dataset <- do_emsc(dataset, vecLoad = lvObj) # a data frame with max 2 columns (loadings or a regression vector)
+				dataset <- do_emsc(dataset, vecLoad = lvObj, exportModel=allExportModels) # a data frame with max 2 columns (loadings or a regression vector)
 			} # end emsc
 		###########
 			if (first[i] == pvMod[5]) { # osc
@@ -934,7 +934,7 @@ performDPT_Core <- function(dataset, dptSeq) {
 		###########
 			if (first[i] == pvMod[6]) { # deTr
 				if (!grepl("@", dptSeq[i])) {
-					dataset <- do_detrend(dataset) # takes the full range as source and target
+					dataset <- do_detrend(dataset, exportModel=allExportModels) # takes the full range as source and target
 				} else {
 					trg <- "src"
 					#
@@ -958,13 +958,13 @@ performDPT_Core <- function(dataset, dptSeq) {
 							}
 						} # end else
 					} # end else
-					dataset <- do_detrend(dataset, src, trg) # checking is inside here
+					dataset <- do_detrend(dataset, src, trg, exportModel=allExportModels) # checking is inside here
 				} # end else
 			} # end deTrend
 		###########
 			if (first[i] == pvMod[7]) { # gap Derivative
 				if (!grepl("@", dptSeq[i])) {
-					dataset <- do_gapDer(dataset)
+					dataset <- do_gapDer(dataset, exportModel=allExportModels)
 				} else { # so, yes, we have an '@' present	meaning we are providing values
 					infoChar <- strsplit(dptSeq[i], "@")[[1]][[2]] # get only the second part of the module containing the numbers (still as character!)
 					options(warn=-1)
@@ -976,7 +976,7 @@ performDPT_Core <- function(dataset, dptSeq) {
 					if (length(nums) != 4) {
 						stop("Please provide exactly four integers as arguments to the gap-derivative operation, e.g. ", pvMod[7], "@1-11-13-1. \n Please check the analysis procedure / your input.", call.=FALSE)
 					}
-					dataset <- do_gapDer(dataset, m=nums[1], w=nums[2], s=nums[3], deltaW=nums[4])  # arguments: p=2, n=21, m=0)
+					dataset <- do_gapDer(dataset, m=nums[1], w=nums[2], s=nums[3], deltaW=nums[4], exportModel=allExportModels)  # arguments: p=2, n=21, m=0)
 				}  # end else
 			} # end gap Derivative	
 		###########			
@@ -1045,12 +1045,18 @@ makeIdString <- function(siClass, siValue, siWlSplit, siCsAvg, siNoise, siExOut,
 	return(easy)
 } # EOF
 
+initializeExtraModelsList <- function() {
+	aa <- list(type=NULL, mod=NULL)
+	assign(pv_extraMods, aa, pos=.ap2)
+} # EOF
+
 processSingleRow_CPT <- function(dataset, siClass, siValue, siWlSplit, siCsAvg, siNoise, siExOut, ap, noiseFile) { # si for single
 	keepEC <- .ap2$stn$gd_keepECs
 	newDataset <- ssc_s(dataset, siClass, siValue, keepEC) 
 	if (is.null(newDataset)) { # character "nixnox" is returned if a variable combination yields no data. That is because returning NULL introduced a bug if it was on the end of the list... probably...
 		return("nixnox")
 	}
+	initializeExtraModelsList() ### upper end
 	newDataset <- selectWls(newDataset, siWlSplit[1], siWlSplit[2])
 	newDataset <- performDpt_Pre(newDataset, ap)
 	newDataset <- performConSAvg(newDataset, siCsAvg)
@@ -1060,7 +1066,12 @@ processSingleRow_CPT <- function(dataset, siClass, siValue, siWlSplit, siCsAvg, 
 	##
 	idString <- makeIdString(siClass, siValue, siWlSplit, siCsAvg, siNoise, siExOut, ap)
 	newDataset@anproc <- ap
-	out <- new("aquap_set", dataset=newDataset, idString=idString)
+	exMod <- get(pv_extraMods, pos=.ap2)
+#	exMod <- new("aquap_extMod", type=exMod$type, mod=exMod$mod)
+	exMod <- list(type=exMod$type, mod=exMod$mod)
+	out <- new("aquap_set", dataset=newDataset, idString=idString, extraModels=exMod) 
+	rm(list=(pv_extraMods), pos=.ap2) ### lower end (happens every time we are done with a single cube-element)
+#	print(str(out@extraModels)); wait()
 	return(out)
 } # EOF
 
@@ -1401,6 +1412,7 @@ gdmm <- function(dataset, ap=getap(), noiseFile="def", tempFile="def") {
 	maybeGeneratePlsrCluster(ap)
 	for (i in 1: cpt@len) {
 		if (!.ap2$stn$allSilent & (stat$cnt != 0)) {cat(paste("   Working on dataset #", i, " of ", cpt@len, " (", getIdString(cubeList[[i]]), ") \n", sep=""))}
+
 		cubeList[[i]] <- makeAllModels(cubeList[[i]], md, ap, tempFile) ###### CORE #########  CORE ############ CORE ##############
 	} # end for i
 	maybeStopPlsrCluster()

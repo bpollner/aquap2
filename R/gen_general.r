@@ -430,8 +430,7 @@ genFolderStr <- function() {
 #'  }
 #' @export
 updateAquap <- function(branch="master") {
-	github_pat <- "c4818f3957df95d831de2bd36ac7ce46ad3ad340"
-	devtools::install_github(repo="bpollner/aquap2", ref=branch, auth_token=github_pat, build_vignettes=TRUE)
+	devtools::install_github(repo="bpollner/aquap2", ref=branch, auth_token=NULL, build_vignettes=TRUE)
 } # EOF
 
 
@@ -449,8 +448,7 @@ updateAquap <- function(branch="master") {
 #'  }
 #' @export
 loadAquapDatapackage <- function(branch="master") {
-	github_pat <- "26728e1a8199df859170a83fc4025f8a34deb25b"
-	devtools::install_github(repo="bpollner/aquapData", ref=branch, auth_token=github_pat)
+	devtools::install_github(repo="bpollner/aquapData", ref=branch, auth_token=NULL)
 } # EOF
 
 getStdColnames <- function() {
@@ -1025,4 +1023,21 @@ makeColorsTransparent <- function(colVec, alpha=100) {
 	mat[4,] <- alpha
 	colVec <- apply(mat, 2, function(x) rgb(x[1], x[2], x[3], x[4], maxColorValue=255))
 	return(colVec)
+} # EOF
+
+exportAdditionalModelToAp2Env <- function(doExport, thisMod, thisType) {
+#	print("----------"); print(str(thisMod)); print(thisType); print(doExport); wait()
+	if (doExport) {
+		# the initial list is initialized in processSingleRow_CPT
+		if (is.null(thisMod)) {
+			thisMod <- list(NULL)
+		}
+		modColName <- pv_extraMods # global variable
+		existing <- get(modColName, pos=.ap2)
+		typeCol <- c(existing$type, thisType)
+		modCol <- c(existing$mod, list(thisMod)) # add the model to the list
+		out <- list(type=typeCol, mod=modCol)
+ 		assign(modColName, out, pos=.ap2) # if from gdmm: we do that in each set
+	} # end if do export
+	return(invisible(NULL))
 } # EOF

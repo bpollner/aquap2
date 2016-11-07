@@ -4,12 +4,15 @@
 \alias{do_snv}
 \title{Calculate Standard Normal Variation SNV}
 \usage{
-do_snv(dataset)
+do_snv(dataset, exportModel = FALSE)
 }
 \arguments{
 \item{dataset}{An object of class 'aquap_data" as produced by 
 \code{\link{gfd}} or as can be extracted from a 'cube' via 
 \code{\link{getcd}}.}
+
+\item{exportModel}{Logical. If a possible model should be stored in the set,
+(leave at \code{FALSE}).}
 }
 \value{
 Returns the dataset with the transformed NIR data.
