@@ -105,7 +105,7 @@ makePLSRModel_inner <- function(dataset, Y_Class, niter=5, ncomp=NULL, valid, st
 			if (maxNcomp <= nrSwitch) {			## so if we have very few rows -- now we do not want to give any nr of comps at all
 				for (i in 1: niter) {
 					segms <- createPlsrSegments(header, valid)
-					testModel <- pls::plsr(yvar ~ allData, data=dataset, validation=typeValid, segments=segms, na.action = "na.omit")
+					testModel <- pls::plsr(yvar ~ allData, data=dataset, validation=typeValid, segments=segms, na.action="na.omit")
 					a <- pls::RMSEP(testModel, intercept=FALSE, estimate="adjCV")$val
 					ind <- which.min(a)
 		#			if ( (!allow1C) & (ind == 1)) { ind <- order(a)[2] }
@@ -114,7 +114,7 @@ makePLSRModel_inner <- function(dataset, Y_Class, niter=5, ncomp=NULL, valid, st
 			} else {						## so if we have a lot of rows (and maxNcomp is > than nrSwitch) !!!
 				for (i in 1: niter) {
 					segms <- createPlsrSegments(header, valid)
-					testModel <- pls::plsr(yvar ~ allData, data=dataset, validation=typeValid, ncomp=maxNcomp, segments=segms, na.action = "na.omit")
+					testModel <- pls::plsr(yvar ~ allData, data=dataset, validation=typeValid, ncomp=maxNcomp, segments=segms, na.action="na.omit")
 					a <- pls::RMSEP(testModel, intercept=FALSE, estimate="adjCV")$val
 					ind <- which.min(a)
 		#			if ( (!allow1C) & (ind == 1)) { ind <- order(a)[2] }

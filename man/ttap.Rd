@@ -2,10 +2,13 @@
 % Please edit documentation in R/prep_transformToAp2.r
 \name{ttap}
 \alias{ttap}
+\alias{ttapM}
 \title{Transform into aquap2 structure}
 \usage{
 ttap(obj, md = getmd(), dol = TRUE, ncpwl = 1, reduceTRH = FALSE,
   stf = TRUE)
+
+ttapM(obj)
 }
 \arguments{
 \item{obj}{The object to be converted}
@@ -28,6 +31,7 @@ An object of class 'aquap_data'
 Transform a given object into the aquap2 data structure.
 }
 \details{
-Class and Numeric prefixes in the column names are expected
+Class and Numeric prefixes in the column names are expected. 
+Function \code{ttapM} is a reduced function for internal use only.
 }
 

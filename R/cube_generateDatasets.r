@@ -851,7 +851,7 @@ performExcludeOutliers <- function(dataset, siExOut, ap) {
 	return(dataset)
 } # EOF
 
-performDPT_Core <- function(dataset, dptSeq, allExportModels=TRUE) {
+performDPT_Core <- function(dataset, dptSeq, extraModelList=NULL, allExportModels=TRUE) {
 # dptSeq is the pre or post charcter string coming from ap$dpt$dptModules
 # pv_dptModules <- c("sgol", "snv", "msc", "emsc", "osc", "deTr", "gapDe")
 # the modules itself are already checked
@@ -887,6 +887,7 @@ performDPT_Core <- function(dataset, dptSeq, allExportModels=TRUE) {
 			if (first[i] == pvMod[2]) { # snv
 				dataset <- do_snv(dataset, exportModel=allExportModels)  # no additional arguments here
 			} # end snv
+		###########
 			if (first[i] == pvMod[3]) { # msc
 				vec <- NULL
 				if (grepl("@", dptSeq[i])) {
@@ -901,8 +902,17 @@ performDPT_Core <- function(dataset, dptSeq, allExportModels=TRUE) {
 						stop(paste("For successful ", pvMod[3], ", the provided dataset has to have only one row, while the dataset in object \"", ords, "\" is containing ", nrow(ords), " rows. \nPlease check the analysis procedure / your input (part data pre / post treatment)", sep=""), call.=FALSE)
 					}
 					vec <- eval(parse(text=ords)) # now get the provided object from workspace into 'vec'
-				} # end if grepl @ element			
-				dataset <- do_msc(dataset, vec, exportModel=allExportModels) # one reference (a one-lined dataset)
+				} # end if grepl @ element
+				if (!is.null(extraModelList)) {
+					if (!is.null(extraModelList[[i]][[1]])) { # we need the second bracket [[1]] because we have lists having NULL in the empty places!
+						eMo <- extraModelList[[i]]
+					} else {
+						eMo <- NULL
+					}
+				} else {
+					eMo <- NULL
+				}
+				dataset <- do_msc(dataset, ref=vec, extMscModel=eMo, exportModel=allExportModels) # one reference (a one-lined dataset)
 			} # end msc
 		###########
 			if (first[i] == pvMod[4]) { # emsc
@@ -1068,7 +1078,7 @@ processSingleRow_CPT <- function(dataset, siClass, siValue, siWlSplit, siCsAvg, 
 	newDataset@anproc <- ap
 	exMod <- get(pv_extraMods, pos=.ap2)
 #	exMod <- new("aquap_extMod", type=exMod$type, mod=exMod$mod)
-	exMod <- list(type=exMod$type, mod=exMod$mod)
+	exMod <- list(type=exMod$type, mod=exMod$mod) # this should not be necessary !
 	out <- new("aquap_set", dataset=newDataset, idString=idString, extraModels=exMod) 
 	rm(list=(pv_extraMods), pos=.ap2) ### lower end (happens every time we are done with a single cube-element)
 #	print(str(out@extraModels)); wait()

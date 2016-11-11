@@ -1,4 +1,5 @@
 show_aquap_data <- function(object) {
+	autoUpS(cfs=FALSE)
 	cns <- colnames(object$NIR)
 	nr <- nrow(object$header)
 	nNIRcols <- nnc <- ncol(object$NIR)

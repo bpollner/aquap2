@@ -73,6 +73,8 @@ do_snv <- function(dataset, exportModel=FALSE) {
 #' i.e. a single row (as e.g. produced by \code{\link{do_avg}}, or by 
 #' subscripting via '[]'). If no reference is provided, the average of all spectra 
 #' of the provided dataset is used as a reference for the baseline correction.
+#' @param extMscModel Provide an external msc model to use this for predicting 
+#' the data instead of running msc on the data. Experimental feature.
 #' @return Returns the dataset with the transformed NIR data.
 #' @seealso \code{\link{ssc}} for sub-selecting in a datset using a specific 
 #' criterion.
@@ -92,7 +94,7 @@ do_snv <- function(dataset, exportModel=FALSE) {
 #' @family Data pre-treatment functions 
 #' @family dpt modules documentation
 #' @export
-do_msc <- function(dataset, ref=NULL, exportModel=FALSE) {
+do_msc <- function(dataset, ref=NULL, extMscModel=NULL, exportModel=FALSE) {
 	autoUpS()
 	if (!is.null(ref)) {
 		if (class(ref) != "aquap_data") {
@@ -108,7 +110,11 @@ do_msc <- function(dataset, ref=NULL, exportModel=FALSE) {
 	} else {
 		refInput <- NULL
 	}
- 	NIR <- pls::msc(dataset$NIR, refInput)
+	if (is.null(extMscModel)) {
+	 	NIR <- pls::msc(dataset$NIR, refInput)
+	} else {
+		NIR <- predict(extMscModel, as.matrix(dataset$NIR))
+	}
 	exportAdditionalModelToAp2Env(doExport=exportModel, thisMod=NIR, thisType=pv_dptModules[3]) # msc
 	colnames(NIR) <- colnames(dataset$NIR)
 	rownames(NIR) <- rownames(dataset$NIR)
@@ -435,4 +441,21 @@ do_detrend<- function(dataset, src=NULL, trg="src", exportModel=FALSE) {
 	indHere <- which(cnsOld %in% cnsNew)
 	dataset$NIR[, indHere] <- NIRnew
 	return(dataset)	
+} # EOF
+
+#' @title Perform Data-Pretreatment Sequence
+#' @description Manually perform a sequence of data pre-treatments defined in a 
+#' string.
+#' @details For internal use.
+#' @param dataset An object of class 'aquap_data'.
+#' @param dptSeq A character holding at least one valid string for data pre-treatment.
+#' @param extraModelList A list of possible external models to hand over to the 
+#' data pre-treatment process.
+#' @param silent Logical. If status info should be printed or not.
+#' @return The transformed dataset.
+#' @export
+do_dptSeq <- function(dataset, dptSeq, extraModelList=NULL, silent=TRUE) {
+	autoUpS(cfs=FALSE)
+	.ap2$stn$allSilent <- silent
+	return(performDPT_Core(dataset, dptSeq, extraModelList, allExportModels=FALSE))
 } # EOF

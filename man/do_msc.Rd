@@ -4,7 +4,7 @@
 \alias{do_msc}
 \title{Perform MSC}
 \usage{
-do_msc(dataset, ref = NULL, exportModel = FALSE)
+do_msc(dataset, ref = NULL, extMscModel = NULL, exportModel = FALSE)
 }
 \arguments{
 \item{dataset}{An object of class 'aquap_data" as produced by 
@@ -15,6 +15,9 @@ do_msc(dataset, ref = NULL, exportModel = FALSE)
 i.e. a single row (as e.g. produced by \code{\link{do_avg}}, or by 
 subscripting via '[]'). If no reference is provided, the average of all spectra 
 of the provided dataset is used as a reference for the baseline correction.}
+
+\item{extMscModel}{Provide an external msc model to use this for predicting 
+the data instead of running msc on the data. Experimental feature.}
 
 \item{exportModel}{Logical. If a possible model should be stored in the set,
 (leave at \code{FALSE}).}
