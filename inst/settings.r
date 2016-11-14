@@ -51,6 +51,7 @@ stn <- list(
 	## General behaviour & settings
 	allSilent = FALSE,						## if false, "status" messages will be displayed
 	autoUpdateSettings = TRUE, 				## if the settings should be automatically updated when calling a function from package 'aquap2'. Recommended value is TRUE.
+	defCfs = TRUE,							## if, when calling any resp. most functions, it should be checked if we are within the required default folder structure of an aquap2 experiment.
 	gen_showExtendedCube = TRUE, 			## if set to TRUE, the number of rows and the number of wavelengths in each element of a cube will be displayed as well.
 	gen_useParallel = FALSE, 				## if parallel computing should be used where applicable and implemented
 	gen_numberOfCPUs = NA, 					## the number of CPUs used for parallel computing; leave at 'NA' for automatically using the system defaults
@@ -158,7 +159,7 @@ stn <- list(
 	plsr_calcInParallel = TRUE, 			## if the calculation of the plsr models should be done in parallel
 	plsr_calc_CV_consecsTogether = TRUE, 	## if for crossvalidation the consecutive scans (i.e. the scans with the same sample number) should always be excluded or included together
 	plsr_calc_typeOfCrossvalid = 10, 		## the default way to perform crossvalidation. Provide 'LOO' for a leave-one-out crossvalidation, a number for performing this n-fold crossvalidation, or 'def' to get the default value from the settings file (parameter 'plsr_calc_typeOfCrossvalid'); a number to perform this n-fold crossvalidation, 'LOO' for a leave-one-out crossvalidation, or a valid name of a class variable for performing a crossvalidation based on the grouping defined by this variable.
-	plsr_plotDataInSwarm = TRUE, 			## set to FALSE to only use the classical (with possibly several points overlapping on a single line) way to plot the training, crossvalidation and prediction plots.
+	plsr_plotDataInSwarm = FALSE, 			## set to FALSE to only use the classical (with possibly several points overlapping on a single line) way to plot the training, crossvalidation and prediction plots.
 	plsr_plot_secondaryData = TRUE, 		## if the secondary data, i.e. the calibration data for the cross-validation resp. the cross-validation data for the prediction data should be plotted as well.
 	plsr_usePureRangeX = FALSE, 			## (recommended value is FALSE) Set to TRUE to use the pure range of the extreme x-swarms to determine the range of the swarm-plot. --> If there are problems with the range of the plots, try setting 'plsr_usePureRangeX' to TRUE.
 	plsr_cexForSwarm = 1, 					## the character expansion --> space between the dots in the swarm plots. Set to lower than 1 (~0.88) for the dots moving closer together.

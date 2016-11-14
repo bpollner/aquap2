@@ -449,9 +449,9 @@ makePLSRErrorPlots_inner <- function(plsModels, plsPlusModels, regrOn, onMain, o
 		if (foldnes == nrow(dataset)) { ## XXX had problems here ??
 			valid <- "LOO"
 		}
-		if (is.character(finalValid)) {
-			if (finalValid %in% colnames(dataset$header)) {
-				valid <- paste0(valid, " by ", finalValid)
+		if (is.character(finalValid[i])) {
+			if (finalValid[i] %in% colnames(dataset$header)) {
+				valid <- paste0(valid, " by ", finalValid[i])
 			}
 		}
 		onMain <- paste(onMainOrig, idString)

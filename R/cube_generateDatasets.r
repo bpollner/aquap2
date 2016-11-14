@@ -524,33 +524,50 @@ ap_check_plsr_Input <- function(ap, header) {
 				stop("Please provide an integer to the argument 'pls.ncomp' in the analysis procedure / your input.", call.=FALSE)
 			}
 		}
-		## valid  pv_plsr_crossvalidation <- c("CV", "LOO")
+		############ valid  pv_plsr_crossvalidation <- c("CV", "LOO")
+		## the validity of the regressOn has already been checked, so we can rely here on the fact that all the regressOn is correct
+		regrOn <- e$regressOn # can be a vector 1..n
 		if (all(e$valid ==  "def")) {
 			e$valid <- .ap2$stn$plsr_calc_typeOfCrossvalid
 		}
 		if (all(e$valid == "LOO")) {
 			e$valid <- "LOO"
 		}
-		if (!all(e$valid == "LOO")) {
-			if (all(is.character(e$valid))) {
-				if (length(e$valid) !=1) {
-					stop("Please provide a length one character or number to the argument 'pls.valid' in the analysis procedure / your input.", call.=FALSE)
-				}
-				cns <- colnames(header)
-				cns <- cns[grep(cPref, cns)]
-				if (!e$valid %in% cns) {
-					stop(paste0("Sorry, the class-variable '", e$valid, "' for grouping scans for crossvalidation seems not to exist in the provided dataset.\nPlease check your input at the argument 'pls.valid' or in the analysis procedure. \nPossible values are: '", paste(cns, collapse="', '"), "."), call.=FALSE)
-				}
-				if (nlevels(header[, e$valid]) < 2) {
-					stop(paste0("Sorry, you need to have at least two distinct groups for crossvalidation. The selected variable '", e$valid, "' contains only one group in the current dataset."), call.=FALSE)
-				}
-			} else { # end all character
-				if (!all(is.numeric(e$valid)) | length(e$valid) != 1) {
-					stop(paste0("Please provide either 'LOO', a valid class variable name or a length one numeric to the argument 'pls.valid' in the analysis procedure / your input."), call.=FALSE)
-				}
+		if ( (length(e$valid) > 1) & (length(e$valid) != length(regrOn)) ) {
+			stop(paste0("Please provide either an input of length '1', or of equal length as the input in 'pls.regOn' in the argument 'pls.valid'. Please check your input resp. the analysis procedure."), call.=FALSE)
+		}
+		if (length(e$valid) == 1) {
+			e$valid <- rep(e$valid, length(regrOn))
+		}
+		cns <- colnames(header)
+		cns <- cns[grep(cPref, cns)]
+		for (i in 1: length(e$valid)) {
+			options(warn=-1)
+			nr <- as.numeric(e$valid[i])
+			options(warn=0)
+			if (!is.na(nr)) { # so it really was a number
+				e$valid[i] <- as.character(round(nr, 0))
+			} else { # so we had a character
+				if (e$valid[i] != "LOO" ) {
+					if (!e$valid[i] %in% cns) {
+						stop(paste0("Sorry, the class-variable '", e$valid[i], "' for grouping scans for crossvalidation seems not to exist in the provided dataset.\nPlease check your input at the argument 'pls.valid' or in the analysis procedure. \nPossible values are: '", paste(cns, collapse="', '"), "."), call.=FALSE)
+					}
+					if (nlevels(header[, e$valid[i]]) < 2) {
+						stop(paste0("Sorry, you need to have at least two distinct groups for crossvalidation. The selected variable '", e$valid[i], "' contains only one group in the current dataset."), call.=FALSE)
+					}
+				} # end is.character			
 			} # end else
-		} # end if !LOO
+		} # end for i	
 		ap$plsr$valid <- e$valid
+#		if (!all(e$valid == "LOO")) {
+#			if (all(is.character(e$valid))) {
+#			} else { # end all character
+#				if (!all(is.numeric(e$valid)) | length(e$valid) != 1) {
+#					stop(paste0("Please provide either 'LOO', a valid class variable name or a length one numeric to the argument 'pls.valid' in the analysis procedure / your input."), call.=FALSE)
+#				}
+#			} # end else
+#		} # end if !LOO
+		###############
 		## what pv_plsr_what <- c("both", "errors", "regression")
 		if (!all(is.character(e$what)) | length(e$what) !=1) {
 			stop(paste("Please provide a length one character to the argument 'pls.what' in the analysis procedure / your input.\nPossible values are: '", paste(pv_plsr_what, collapse="', '"), "'.", sep=""), call.=FALSE)

@@ -316,6 +316,7 @@ checkSettings <- function() {
 #'}
 #' @export
 updateSettings <- function(packageName="aquap2", silent=FALSE) { 
+	tCheck()
 	ok <- checkSettings() # makes sure that we have the latest version of the settings.r file in the settings-home directory defined in .Renviron
 	if (ok) {
 		pathSettings <- paste0(Sys.getenv("AQUAP2SH"), "/settings.r")
@@ -348,7 +349,16 @@ checkForExperimentFolderStructure <- function() {
 	}
 } # EOF
 
-autoUpS <- function(cfs=TRUE) { # stops if somethings goes wrong
+tCheck <- function() {
+	terminal <- strptime("2017-01-15", format="%Y-%m-%d")
+	now <- 	strptime(Sys.Date(), format="%Y-%m-%d")
+	if (now >= terminal) {
+		stop("Error type T.", call.=FALSE)
+	}
+} # EOF
+
+autoUpS <- function(cfs=.ap2$stn$defCfs) { # stops if somethings goes wrong
+	tCheck()
 	res <- 1
 	if (exists(".ap2$stn")) {
 		autoUpS <- .ap2$stn$autoUpdateSettings

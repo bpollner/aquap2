@@ -83,6 +83,12 @@ makePLSRModel_inner <- function(dataset, Y_Class, niter=5, ncomp=NULL, valid, st
 	dataset <- data.frame(yvar=header[,Y_Class], allData=dataset$NIR ) ### here make a new "flat" dataset
 	levs <- unique(dataset$yvar) # because the max. nr of comps. should not be higher than the number of distinct levels
 	typeValid <- "CV"
+	options(warn=-1)
+	nrVal <- as.numeric(valid)
+	options(warn=0)
+	if (!is.na(nrVal)) { # so it was a number, otherwise it just stays the character it was
+		valid <- nrVal # make "valid" into a number again
+	}
 	if (valid == "LOO") {
 		valid <- nrow(dataset) # because otherwise the plsr function throws an error (bug??)
 	}
@@ -181,7 +187,7 @@ makePLSRModels <- function(dataset, md, ap) {
 			if (i == leng) {coa <- ". "} else {coa <- ", "}
 			if (!.ap2$stn$allSilent) {cat(paste(regrOnList[i]), coa, sep="" )}
 		}
-		out <- makePLSRModel_inner(dataset, regrOnList[i], niter, ncomp, valid, stnLoc)	 ####### CORE ###### CORE !!!!
+		out <- makePLSRModel_inner(dataset, regrOnList[i], niter, ncomp, valid[i], stnLoc)	 ####### CORE ###### CORE !!!!
 	} # end foreach i
 	modCorr <- modPlus <- regrOn <- list()
 	for (i in 1: length(modelList)) { # resort the list from modelList
@@ -393,12 +399,14 @@ calculateIndepPlsPrediction <- function(indepDataset, cube, cnv, inv, ap) {
 				} else { # so it must be a character naming an existing column
 					indVal <- cutIndepData$header[,indVal] # now we have the numeric values in indVal
 				}
+				nrRed <- nrow(cutIndepData[which(!is.na(cutIndepData$header[indepValid]))])
+				percRed <- round((nrRed*100)/nrow(cutIndepData), 1)
 				newData <- data.frame(yvar=indVal, allData=cutIndepData$NIR)
 				nc <- singleModel$ncomp 
 			 	predResult <- predict(singleModel, comps=1:nc, newdata = newData)
 				R2pr <- as.numeric(pls::R2(singleModel, estimate = "test", newdata = newData, ncomp = nc, intercept = FALSE)$val) # returns NA if we do not have data in the yvar
 				RMSEP <- as.numeric(pls::RMSEP(singleModel, estimate = "test", newdata = newData, ncomp = nc, intercept = FALSE)$val) # returns NaN (which still is.na=TRUE)
-				innerList[[k]] <- list(modRegrOn=modRegrOn, indepValid=indepValid, idString=idString, predResult=predResult, indepValue=indVal, R2pr=R2pr, RMSEP=RMSEP, ncomp=nc)
+				innerList[[k]] <- list(modRegrOn=modRegrOn, indepValid=indepValid, idString=idString, predResult=predResult, indepValue=indVal, R2pr=R2pr, RMSEP=RMSEP, ncomp=nc, nrRed=nrRed, percRed=percRed)
 			} # end for k
 			resultList[[i]] <- innerList
 		} else { # so cutIndepData comes in as NULL, meaning we are not within the wavelengths of the current cube datset
@@ -448,10 +456,10 @@ plotPlsrErrorPoints <- function(DF, colors, xlab=NULL, ylab=NULL, mainText=NULL,
 	if (usePureRangeX) { # if TRUE, then we use the default xsize from the package beeswarm (default in the settings is FALSE)
 		xStep <- NULL
 	}
-	indMin <- which(DF[,"xval"] == min(uniX)) 
-	minX <- min(maybeMakeSwarm(indMin, DF, xsi=xStep)$x) # get min range
-	indMax <- which(DF[,"xval"] == max(uniX))
-	maxX <- max(maybeMakeSwarm(indMax, DF, xsi=xStep)$x) # get max range
+	indMin <- which(DF[,"xval"] == min(uniX, na.rm=TRUE)) 
+	minX <- min(maybeMakeSwarm(indMin, DF, xsi=xStep)$x, na.rm=TRUE) # get min range
+	indMax <- which(DF[,"xval"] == max(uniX, na.rm=TRUE))
+	maxX <- max(maybeMakeSwarm(indMax, DF, xsi=xStep)$x, na.rm=TRUE) # get max range
 	xRange <- c(minX, maxX)
 	if (!pointsOnly) {
 		plot(NA, xlim=xRange, ylim=range(DF[, "yval"]), xlab=xlab, ylab=ylab, main=mainText, sub=subText, ...) # make an empty plot
@@ -482,6 +490,7 @@ makeIndepPlsrValidationPlots_inner <- function(cube, indepDataset, predResults, 
 	pchSec <- .ap2$stn$plsr_color_pch_secondaryData
 	#
 	dataset <- indepDataset
+	#
 	header <- getHeader(dataset)
 	if (is.null(colorBy)) {
 		color <- 1
@@ -518,6 +527,14 @@ makeIndepPlsrValidationPlots_inner <- function(cube, indepDataset, predResults, 
 			yvarFittedCV <- singleModel$validation$pred[ , , ncomp]	
 			datCV <- data.frame(xval=yvar, yval=yvarFittedCV)
 			#
+			nrRed <- pred$nrRed
+			percRed <- pred$percRed
+			if (percRed == 100) {
+				nAdd <- nrow(header)
+			} else {
+				nAdd <- paste0(nrRed, " of ", nrow(header), " (", percRed, "%)")
+			}
+			#
 			if (all(is.na(pred$indepValue))) { # so we had NO validation data
 				# do nothing for the moment
 			} else {
@@ -525,7 +542,7 @@ makeIndepPlsrValidationPlots_inner <- function(cube, indepDataset, predResults, 
 				mainText <- paste0("plsr mod. (", pred$modRegrOn, ") from: ", onMain, pred$idString)
 				regrOnMsg <- paste0("   indep. data from '", dsName, "', predicted value: ", pred$indepValid, "   ")
 				ncompMsg <- paste0("   ", ncomp, " comps.")
-				Nmsg <- paste0("   N=", nrow(header))
+				Nmsg <- paste0("   N = ", nAdd)
 				subText <- paste0(onSub, regrOnMsg, colorMsg, colorBy, ncompMsg, Nmsg)
 				#
 				datPred <- data.frame(xval=as.numeric(pred$indepValue), yval=as.numeric(pred$predResult))

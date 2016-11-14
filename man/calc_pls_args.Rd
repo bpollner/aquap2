@@ -30,6 +30,13 @@ number of components in the PLSR.}
   scans, please see below.
   \item "LOO" for a leave-one-out crossvalidation
 }
+If a vector with the same length as the vector in \code{pls.regOn} is 
+provided, each element of \code{pls.valid} is used for crossvalidating the 
+corresponding element in \code{pls.regOn}. Any of the above mentioned input 
+types can be mixed, so the input could be e.g. 
+\code{pls.valid <- c("C_FooBar", 10, "C_BarFoo", 10)}. The corresponding 
+\code{pls.regOn} input for this would then be e.g. 
+\code{pls.regOn <- c("Y_FooBar", "Y_FooBar", "Y_BarFoo", "Y_BarFoo")}.
 Please note that via the parameter \code{plsr_calc_CV_consecsTogether} in 
 the settings file you can select if for crossvalidation the 
 \strong{consecutive scans} (i.e. the scans with the same sample number) should 
