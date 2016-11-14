@@ -832,7 +832,7 @@ pls_outlier_makeIndices <- function(cube, boxResList) {
 		for (k in 1: length(boxResList[[i]])) {
 			aa <- boxResList[[i]][[k]]
 			siBoxRes <- aa$boxRes
-			regrOn <- aa$regrOn
+			regrOn <- aa$regrOn[[1]]
 			outNames <- names(siBoxRes$out)
 			outInd <- !rns %in% outNames
 			outList[[k]] <- list(outInd=outInd, regrOn=regrOn)
