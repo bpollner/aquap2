@@ -800,3 +800,56 @@ plot_pls_indepPred <- function(indepDataset, cube, cnv=NULL, inv=NULL, psd="def"
 	###
 	return(invisible(predList))
 } # EOF
+
+########################### Zoltans plsr outlier detection ###############
+pls_outlier_makeList <- function(cube, detRange=0.5) {
+	outListCube <- vector("list", length(cube))
+	for (i in 1: length(cube)) {
+		models <- cube[[i]]@plsr$model
+		outList <- vector("list", length(models))
+		for (k in 1: length(models)) {
+			siMod <- models[[k]] # a single model
+#			print(str(siMod))
+			LV <- siMod$ncomp
+			CvY <- siMod$validation$pred[,,LV]
+			Yvar <- siMod$model$yvar
+			boxRes <- boxplot(CvY ~ Yvar, range=detRange, plot = F)
+			outList[[k]] <- boxRes
+		} # end for k
+		outListCube[[i]] <- outList
+	} # end for i  
+	return(outListCube)
+} # EOF
+
+pls_outlier_makeIndices <- function(cube, boxResList) {
+	outListCube <- vector("list", length(boxResList))
+	for (i in 1: length(boxResList)) { # same as cube length
+		dataset <- getDataset(cube[[i]])
+		rns <- rownames(dataset$header)
+		outList <- vector("list", length(boxResList[[i]]))
+		for (k in 1: length(boxResList[[i]])) {
+			siBoxRes <- boxResList[[i]][[k]]
+			outNames <- names(siBoxRes$out)
+			outInd <- !rns %in% outNames
+			outList[[k]] <- outInd
+		} # end for k
+		outListCube[[i]] <- outList
+	} # end for i
+	return(outListCube)
+} # EOF
+
+#' @title PLSR based Outlier Detection
+#' @description Obtain the indices of outliers based on a boxplot of plsr data.
+#' @details Function in development, for internal use only.
+#' @param cube The standard cube.
+#' @param detRange The detection range in multiples of interquartile distance.
+#' @return A list with logical values marking outliers for each plsr model in 
+#' each cube element.
+#' @family Internal functions
+#' @export
+pls_outlier_getIndices <- function(cube, detRange=0.5) {
+	outlierList <- pls_outlier_makeList(cube, detRange)
+	indices <- pls_outlier_makeIndices(cube, outlierList)
+	return(indices)
+} # EOF
+##########################################################################
