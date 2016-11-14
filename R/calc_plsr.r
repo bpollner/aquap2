@@ -806,15 +806,17 @@ pls_outlier_makeList <- function(cube, detRange=0.5) {
 	outListCube <- vector("list", length(cube))
 	for (i in 1: length(cube)) {
 		models <- cube[[i]]@plsr$model
+		regrOns <- cube[[i]]@plsr$regrOn
 		outList <- vector("list", length(models))
 		for (k in 1: length(models)) {
 			siMod <- models[[k]] # a single model
+			regrOn <- regrOns[k]
 #			print(str(siMod))
 			LV <- siMod$ncomp
 			CvY <- siMod$validation$pred[,,LV]
 			Yvar <- siMod$model$yvar
 			boxRes <- boxplot(CvY ~ Yvar, range=detRange, plot = F)
-			outList[[k]] <- boxRes
+			outList[[k]] <- list(boxRes=boxRes, regrOn=regrOn)
 		} # end for k
 		outListCube[[i]] <- outList
 	} # end for i  
@@ -828,10 +830,12 @@ pls_outlier_makeIndices <- function(cube, boxResList) {
 		rns <- rownames(dataset$header)
 		outList <- vector("list", length(boxResList[[i]]))
 		for (k in 1: length(boxResList[[i]])) {
-			siBoxRes <- boxResList[[i]][[k]]
+			aa <- boxResList[[i]][[k]]
+			siBoxRes <- aa$boxRes
+			regrOn <- aa$regrOn
 			outNames <- names(siBoxRes$out)
 			outInd <- !rns %in% outNames
-			outList[[k]] <- outInd
+			outList[[k]] <- list(outInd=outInd, regrOn=regrOn)
 		} # end for k
 		outListCube[[i]] <- outList
 	} # end for i
