@@ -69,7 +69,7 @@ createPlsrSegments <- function(header, valid=10) { # gives back a number or a li
 	return(out)
 } # EOF
 
-makePLSRModel_inner <- function(dataset, Y_Class, niter=5, ncomp=NULL, valid, stnLoc) {
+makePLSRModel_inner <- function(dataset, Y_Class, niter=5, ncomp=NULL, valid, stnLoc, exOut) {
 	nrSwitch <- stnLoc$plsr_nrCompsSwitchToNrObserv		## from the local settings
 	addComps <- stnLoc$plsr_addComps
 	acb <- stnLoc$plsr_addCompsBoundaries
@@ -80,8 +80,8 @@ makePLSRModel_inner <- function(dataset, Y_Class, niter=5, ncomp=NULL, valid, st
 	dataset <- dataset[which(!is.na(dataset$header[Y_Class]))] # kick out all the NAs in the dataset, otherwise we have problems in generating the segments
 	#
 	header <- getHeader(dataset)
-	dataset <- data.frame(yvar=header[,Y_Class], allData=dataset$NIR ) ### here make a new "flat" dataset
-	levs <- unique(dataset$yvar) # because the max. nr of comps. should not be higher than the number of distinct levels
+	flatDataset <- data.frame(yvar=header[,Y_Class], allData=dataset$NIR ) ### here make a new "flat" dataset
+	levs <- unique(flatDataset$yvar) # because the max. nr of comps. should not be higher than the number of distinct levels
 	typeValid <- "CV"
 	options(warn=-1)
 	nrVal <- as.numeric(valid)
@@ -90,7 +90,7 @@ makePLSRModel_inner <- function(dataset, Y_Class, niter=5, ncomp=NULL, valid, st
 		valid <- nrVal # make "valid" into a number again
 	}
 	if (valid == "LOO") {
-		valid <- nrow(dataset) # because otherwise the plsr function throws an error (bug??)
+		valid <- nrow(flatDataset) # because otherwise the plsr function throws an error (bug??)
 	}
 	if (niter == 1) {niter <- 2} # otherwise we never get out of the while loop !!!
 	if (is.null(ncomp)) {
@@ -111,7 +111,7 @@ makePLSRModel_inner <- function(dataset, Y_Class, niter=5, ncomp=NULL, valid, st
 			if (maxNcomp <= nrSwitch) {			## so if we have very few rows -- now we do not want to give any nr of comps at all
 				for (i in 1: niter) {
 					segms <- createPlsrSegments(header, valid)
-					testModel <- pls::plsr(yvar ~ allData, data=dataset, validation=typeValid, segments=segms, na.action="na.omit")
+					testModel <- pls::plsr(yvar ~ allData, data=flatDataset, validation=typeValid, segments=segms, na.action="na.omit")
 					a <- pls::RMSEP(testModel, intercept=FALSE, estimate="adjCV")$val
 					ind <- which.min(a)
 		#			if ( (!allow1C) & (ind == 1)) { ind <- order(a)[2] }
@@ -120,7 +120,7 @@ makePLSRModel_inner <- function(dataset, Y_Class, niter=5, ncomp=NULL, valid, st
 			} else {						## so if we have a lot of rows (and maxNcomp is > than nrSwitch) !!!
 				for (i in 1: niter) {
 					segms <- createPlsrSegments(header, valid)
-					testModel <- pls::plsr(yvar ~ allData, data=dataset, validation=typeValid, ncomp=maxNcomp, segments=segms, na.action="na.omit")
+					testModel <- pls::plsr(yvar ~ allData, data=flatDataset, validation=typeValid, ncomp=maxNcomp, segments=segms, na.action="na.omit")
 					a <- pls::RMSEP(testModel, intercept=FALSE, estimate="adjCV")$val
 					ind <- which.min(a)
 		#			if ( (!allow1C) & (ind == 1)) { ind <- order(a)[2] }
@@ -135,7 +135,7 @@ makePLSRModel_inner <- function(dataset, Y_Class, niter=5, ncomp=NULL, valid, st
 		bestNC <- ncomp
 	} # end if is.null(ncomp)
 	segms <- createPlsrSegments(header, valid)
-	plsModelCorrect <- pls::plsr(yvar ~ allData, ncomp=bestNC, data=dataset, validation=typeValid, segments=segms)	#### here it happens !!
+	plsModelCorrect <- pls::plsr(yvar ~ allData, ncomp=bestNC, data=flatDataset, validation=typeValid, segments=segms)	#### here it happens !!
 	bn <- bestNC
 	if(bn <= acb[1] ){
 		add <- addComps[1]
@@ -146,9 +146,25 @@ makePLSRModel_inner <- function(dataset, Y_Class, niter=5, ncomp=NULL, valid, st
 	if (bn > acb[2]) {
 		add <- addComps[3]
 	} 
-	plsModelPlus <-  pls::plsr(yvar ~ allData, ncomp=bestNC+add, data=dataset, validation=typeValid, segments=segms)	#### here it happens !!
-	out <- list(modelsCorr=plsModelCorrect, modelsPlus=plsModelPlus, regrOn=Y_Class)
+	plsModelPlus <-  pls::plsr(yvar ~ allData, ncomp=bestNC+add, data=flatDataset, validation=typeValid, segments=segms)	#### here it happens !!
+	dataset$NIR <- dataset@anproc <- NULL # we only need the header and the colRep from this in the plotting. I hope.
+	dataset@metadata <- list(NULL)
+	out <- list(modelsCorr=plsModelCorrect, modelsPlus=plsModelPlus, regrOn=Y_Class, usedDataset=dataset, exOut=exOut)
 	return(out)
+} # EOF
+
+excludePlsrOutliers <- function(dataset, origMods, stnLoc) {
+	detRange <- stnLoc$plsr_calc_exOutDetectionRange
+	#
+	mod <- origMods$modelsCorr
+	LV <- mod$ncomp
+	CvY <- mod$validation$pred[,,LV]
+	Yvar <- mod$model$yvar
+	boxRes <- boxplot(CvY ~ Yvar, range=detRange, plot = FALSE) ## CORE ##
+	rns <- rownames(dataset$header)
+	outNames <- names(boxRes$out)
+	inInd <- !rns %in% outNames # we get a logical vector 
+	return(dataset[inInd,])
 } # EOF
 
 makePLSRModels <- function(dataset, md, ap) {
@@ -159,6 +175,7 @@ makePLSRModels <- function(dataset, md, ap) {
 	regrOnList <- ap$plsr$regressOn				## from the analysis procedure
 	ncomp <- ap$plsr$ncomp
 	valid <- ap$plsr$valid
+	exOut <- ap$plsr$exOut
 	colorBy <- ap$plsr$colorBy
 	#
 	leng <- length(regrOnList)
@@ -187,15 +204,21 @@ makePLSRModels <- function(dataset, md, ap) {
 			if (i == leng) {coa <- ". "} else {coa <- ", "}
 			if (!.ap2$stn$allSilent) {cat(paste(regrOnList[i]), coa, sep="" )}
 		}
-		out <- makePLSRModel_inner(dataset, regrOnList[i], niter, ncomp, valid[i], stnLoc)	 ####### CORE ###### CORE !!!!
+		if (exOut[i]) { # is logical vector, determining whether we want to do the plsr specific outlier detection or not
+			origMods <- makePLSRModel_inner(dataset, regrOnList[i], niter, ncomp, valid[i], stnLoc, exOut[i])
+			dataset <- excludePlsrOutliers(dataset, origMods, stnLoc) # we make a custom dataset for each element in the regress on list
+		}
+		out <- makePLSRModel_inner(dataset, regrOnList[i], niter, ncomp, valid[i], stnLoc, exOut[i])	 ####### CORE ###### CORE !!!!
 	} # end foreach i
-	modCorr <- modPlus <- regrOn <- list()
+	modCorr <- modPlus <- regrOn <- usedDataset <- exOut <- list()
 	for (i in 1: length(modelList)) { # resort the list from modelList
 		modCorr <- c(modCorr, list(modelList[[i]]$modelsCorr))
 		modPlus <- c(modPlus, list(modelList[[i]]$modelsPlus))
 		regrOn <- c(regrOn, list(modelList[[i]]$regrOn))
+		usedDataset <- c(usedDataset, list(modelList[[i]]$usedDataset))
+		exOut <- c(exOut, list(modelList[[i]]$exOut))
 	} # end for i	
-	out <- list(plsr=modCorr, plsrPlus=modPlus, regrOn=regrOn, valid=valid)
+	out <- list(plsr=modCorr, plsrPlus=modPlus, regrOn=regrOn, valid=valid, usedDS=usedDataset, exOut=exOut)
 	return(out)
 } # EOF
 

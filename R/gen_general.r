@@ -350,11 +350,15 @@ checkForExperimentFolderStructure <- function() {
 } # EOF
 
 tCheck <- function() {
-	terminal <- strptime("2017-01-15", format="%Y-%m-%d")
-	now <- 	strptime(Sys.Date(), format="%Y-%m-%d")
-	if (now >= terminal) {
-		stop("Error type T.", call.=FALSE)
-	}
+	do <- TRUE
+#	do <- FALSE
+	if (do) {
+		terminal <- strptime("2017-01-15", format="%Y-%m-%d")
+		now <- 	strptime(Sys.Date(), format="%Y-%m-%d")
+		if (now >= terminal) {
+			stop("Error type T.", call.=FALSE)
+		}
+	}	
 } # EOF
 
 autoUpS <- function(cfs=.ap2$stn$defCfs) { # stops if somethings goes wrong

@@ -17,7 +17,7 @@ calculatePLSR <- function(dataset, md, ap) {
 		aa <- makePLSRModels(dataset, md, ap)
 #		print(str(aa)); wait()
 	if (!.ap2$stn$allSilent) {cat(" ok\n")}
-	return(list(model=aa$plsr, modelPlus=aa$plsrPlus, regrOn=aa$regrOn, valid=aa$valid))
+	return(list(model=aa$plsr, modelPlus=aa$plsrPlus, regrOn=aa$regrOn, valid=aa$valid, usedDS=aa$usedDS, exOut=aa$exOut))
 } # EOF
 
 calculateSIMCA <- function(dataset, md, ap) { # is working on a single set. i.e. element of a cube, with this specific dataset

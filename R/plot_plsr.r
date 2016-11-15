@@ -53,7 +53,7 @@ convertToRDP <- function(errorValue, ClassVar, header) {	# the dataset with all 
 } # EOF
 
 # plotting ----------------------------------------
-plot_plsr_error <- function(plsModel, plsPlusModel, dataset, ClassVar, onMain="", onSub="", inRDP=FALSE) { # ClassVar = regrOn
+plot_plsr_error <- function(plsModel, plsPlusModel, dataset, ClassVar, onMain="", onSub="", inRDP=FALSE, exOut) { # ClassVar = regrOn
 	modCorrCol <- .ap2$stn$plsr_colorForBestNumberComps
 	percRound <- .ap2$stn$plsr_nrDigitsPercentage
 	#
@@ -106,7 +106,12 @@ plot_plsr_error <- function(plsModel, plsPlusModel, dataset, ClassVar, onMain=""
 		NmsgAdd <- paste0(" of ", nro)
 	}
 	Nmsg <- paste0("   N = ", nrow(header), NmsgAdd, percAdd)
-	subText <- paste0(onSub, regrOnMsg, ncompMsg, ncompAdd, Nmsg)
+	if (exOut) {
+		exOutChar <- " exOut "
+	} else {
+		exOutChar <- ""
+	}
+	subText <- paste0(onSub, regrOnMsg, ncompMsg, ncompAdd, Nmsg, exOutChar)
 	xax <- 0:plsPlusModel$ncomp
 	yax <- vecsPlus
 #	xax <- 0:plsModel$ncomp
@@ -200,7 +205,7 @@ plot_plsr_validation_classic <- function(plsModel, dataset, regrOn, classFCol, o
 	}
 } # EOF
 
-plot_plsr_calibValidSwarm <- function(plsModel, dataset, regrOn, classFCol, onMain="", onSub="", inRDP=FALSE, valid="", psd) { ##### CORE ###
+plot_plsr_calibValidSwarm <- function(plsModel, dataset, regrOn, classFCol, onMain="", onSub="", inRDP=FALSE, valid="", psd, exOut) { ##### CORE ###
 	colLmTrain <- .ap2$stn$plsr_color_lm_training
 	colLmCV <- .ap2$stn$plsr_color_lm_crossvalid
 	ltTarg <- .ap2$stn$plsr_linetypeTargetLine
@@ -256,8 +261,13 @@ plot_plsr_calibValidSwarm <- function(plsModel, dataset, regrOn, classFCol, onMa
 		NmsgAdd <- paste0(" of ", nro)
 	}
 	Nmsg <- paste0("   N = ", nrow(header), NmsgAdd, percAdd)
+	if (exOut) {
+		exOutChar <- " exOut "
+	} else {
+		exOutChar <- ""
+	}
 	mainText <- paste0(onMain, " (valid. ", valid, ")")
-	subText <- paste0(onSub, regrOnMsg, colorMsg, classFCol, ncompMsg, ncompAdd, Nmsg)
+	subText <- paste0(onSub, regrOnMsg, colorMsg, classFCol, ncompMsg, ncompAdd, Nmsg, exOutChar)
 	#
 	datCV <- data.frame(xval=yvar, yval=yvarFittedCV)
 	datCalib <- data.frame(xval=yvar, yval=yvarFittedCalib)
@@ -438,11 +448,12 @@ plsr_plotRegressionVectors <- function(cube, ap, bw, adLines, ccol, clty) {
 	if (!.ap2$stn$allSilent & (where == "pdf" )) {cat("ok\n") }
 } # EOF
 
-makePLSRErrorPlots_inner <- function(plsModels, plsPlusModels, regrOn, onMain, onSub, classForColoring, dataset, inRDP, idString, psd, finalValid) { # is cycling through all the regrOn of a single set; has the data from a single set; all models(plus) and the regrOn are a list with 1 to n elements !
+makePLSRErrorPlots_inner <- function(plsModels, plsPlusModels, regrOn, onMain, onSub, classForColoring, usedDatasets, inRDP, idString, psd, finalValid, exOuts) { # is cycling through all the regrOn of a single set; has the data from a single set; all models(plus) and the regrOn are a list with 1 to n elements !; usedDS is a list of the datasets that have, finally, been used in generating the  models (are custom because of a possible exclusion of outliers!)
 	plotSwarm <- .ap2$stn$plsr_plotDataInSwarm
 	#
 	onMainOrig <- onMain
 	for (i in 1: length(plsModels)) { # just take the 'plsModels', as they all have the same length
+		dataset <- usedDatasets[[i]]
 		validChar <- plsModels[[i]]$validation$method
 		foldnes <- length(plsModels[[i]]$validation$segments)
 		valid <- paste(validChar, " ", foldnes, "", sep="")
@@ -456,8 +467,8 @@ makePLSRErrorPlots_inner <- function(plsModels, plsPlusModels, regrOn, onMain, o
 		}
 		onMain <- paste(onMainOrig, idString)
 		#
-		plot_plsr_calibValidSwarm(plsModels[[i]], dataset, regrOn[[i]], classForColoring, onMain, onSub, inRDP, valid, psd)
-		plot_plsr_error(plsModels[[i]], plsPlusModels[[i]], dataset, regrOn[[i]], onMain, onSub, inRDP)
+		plot_plsr_calibValidSwarm(plsModels[[i]], dataset, regrOn[[i]], classForColoring, onMain, onSub, inRDP, valid, psd, exOuts[[i]])
+		plot_plsr_error(plsModels[[i]], plsPlusModels[[i]], dataset, regrOn[[i]], onMain, onSub, inRDP, exOuts[[i]])
 		if (FALSE) { # abandoned !!
 			plot_plsr_calibration_classic(plsModels[[i]], dataset, regrOn[[i]], classForColoring, onMain, onSub, inRDP)
 			plot_plsr_validation_classic(plsModels[[i]], dataset, regrOn[[i]], classForColoring, onMain, onSub, inRDP, valid)
@@ -470,9 +481,9 @@ makePLSRErrorPlots <- function(cube, ap, onMain, onSub, where, inRDP, psd) { # i
 	##
 	for (i in 1: length(cube)) {
 		aa <- getPLSRObjects(cube[[i]])
-		dataset <- getDataset(cube[[i]])
+#		dataset <- getDataset(cube[[i]])
 		idString <- adaptIdStringForDpt(ap, getIdString(cube[[i]]))
-		makePLSRErrorPlots_inner(aa$model, aa$modelPlus, aa$regrOn, onMain, onSub, classForColoring, dataset, inRDP, idString, psd, aa$valid) #### handing down data from a single set; model, modelPlus and RegrOn are each a list having 1 to n elements !!
+		makePLSRErrorPlots_inner(aa$model, aa$modelPlus, aa$regrOn, onMain, onSub, classForColoring, usedDatasets=aa$usedDS, inRDP, idString, psd, aa$valid, aa$exOut) #### handing down data from a single set; model, modelPlus and RegrOn are each a list having 1 to n elements !!
 	} # end for i
 } # EOF
 

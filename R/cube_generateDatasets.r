@@ -559,14 +559,23 @@ ap_check_plsr_Input <- function(ap, header) {
 			} # end else
 		} # end for i	
 		ap$plsr$valid <- e$valid
-#		if (!all(e$valid == "LOO")) {
-#			if (all(is.character(e$valid))) {
-#			} else { # end all character
-#				if (!all(is.numeric(e$valid)) | length(e$valid) != 1) {
-#					stop(paste0("Please provide either 'LOO', a valid class variable name or a length one numeric to the argument 'pls.valid' in the analysis procedure / your input."), call.=FALSE)
-#				}
-#			} # end else
-#		} # end if !LOO
+		###############
+		# exclude outliers
+		regrOn <- e$regressOn # can be a vector 1..n
+		exOut <- e$exOut
+		if (all(exOut ==  "def")) {
+			exOut <- .ap2$stn$plsr_calc_excludePlsrOutliers
+		}
+		if ( (length(exOut) > 1) & (length(exOut) != length(regrOn)) ) {
+			stop(paste0("Please provide either an input of length '1', or of equal length as the input in 'pls.regOn' in the argument 'pls.exOut'. Please check your input resp. the analysis procedure."), call.=FALSE)
+		}
+		if (length(exOut) == 1) {
+			exOut <- rep(exOut, length(regrOn))
+		}
+		if (!all(is.logical(exOut))) {
+			stop(paste0("Please provide either logical TRUE or logical FALSE (not as character) for the argument 'pls.exOut'. Please check your input resp. the analysis procedure."), call.=FALSE)
+		}
+		ap$plsr$exOut <- exOut
 		###############
 		## what pv_plsr_what <- c("both", "errors", "regression")
 		if (!all(is.character(e$what)) | length(e$what) !=1) {

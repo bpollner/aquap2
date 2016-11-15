@@ -61,9 +61,10 @@ sim.K <- 0								## The number of components. In mode "robust", leave at 0 for 
 #########################
 ### PLSR
 do.pls <- FALSE							## if PLSR models of the given datasets should be calculated
-pls.regOn <- NULL						## which variables should be used to regress on? Leave empty c() or set to NULL for using all numerical variables, or provide a character vector with valid numerical variable names to regress on these variables; e.g. "Y_Temp", or c("Y_Temp", "Y_FooBar", ...)
 pls.ncomp <- NULL						## number of components, leave at NULL for automatic detection of optimal number of components
-pls.valid <- "def"						## 'def' to get the default value from the settings file (parameter 'plsr_calc_typeOfCrossvalid'); a number to perform this n-fold crossvalidation, 'LOO' for a leave-one-out crossvalidation, or a valid name of a class variable for performing a crossvalidation based on the grouping defined by this variable.
+pls.regOn <- NULL						## which variables should be used to regress on? Leave empty c() or set to NULL for using all numerical variables, or provide a character vector with valid numerical variable names to regress on these variables; e.g. "Y_Temp", or c("Y_Temp", "Y_FooBar", ...)
+pls.valid <- "def"						## 'def' to get the default value from the settings file (parameter 'plsr_calc_typeOfCrossvalid'); a number to perform this n-fold crossvalidation, 'LOO' for a leave-one-out crossvalidation, or a valid name of a class variable for performing a crossvalidation based on the grouping defined by this variable. Can be of equal length as the vector in 'pls.regOn' to perform the corresponding type of CV for each element in 'pls.regOn'.
+pls.exOut <- "def"						## 'def' to get the default value from the settings file (parameter 'plsr_calc_excludePlsrOutliers'); TRUE or FALSE for deciding whether to perform a plsr-specific outlier-detection algorithm or not.  Can be of equal length as the vector in 'pls.regOn' to perform the corresponding outlier-detection (or not) for each element in 'pls.regOn'.
 
 # plotting
 pls.colorBy <- NULL						## What class-variable should be used for coloring in the RMSEP and RMSECV plots? Leave empty c() or set to NULL for no coloring, or provide a character length one with a valid class variable name to color along this variable; e.g. "C_Group"

@@ -30,10 +30,14 @@ setMethod("[", signature(x = "aquap_data"), definition = function(x, i) {
 			drop=FALSE
 			header <- x$header[i, , drop=drop]
 			colRep <- x$colRep[i, , drop=drop]
-			NIR <- x$NIR[i, , drop=drop]
-			rownames(NIR) <- rownames(x$NIR)[i]
-			colnames(NIR) <- colnames(x$NIR)
-			fd <- reFactor(data.frame(I(header), I(colRep), I(NIR)))
+			if (!is.null(x$NIR)) {
+				NIR <- x$NIR[i, , drop=drop]
+				rownames(NIR) <- rownames(x$NIR)[i]
+				colnames(NIR) <- colnames(x$NIR)
+				fd <- reFactor(data.frame(I(header), I(colRep), I(NIR)))
+			} else {
+				fd <- reFactor(data.frame(I(header), I(colRep)))				
+			}
 			return(new("aquap_data", fd, ncpwl=x@ncpwl, metadata=x@metadata, anproc=x@anproc, version=x@version))
 		} ) # end set method
 

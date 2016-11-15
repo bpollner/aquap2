@@ -42,6 +42,21 @@ the settings file you can select if for crossvalidation the
 \strong{consecutive scans} (i.e. the scans with the same sample number) should 
 always be excluded or included together. The default is to always exclude resp. 
 include the consecutive scans of a single sample together.}
+
+\item{pls.exOut}{Logical. If a plsr-specific box-plot based outlier-detection 
+algorithm should be used on the data of a first plsr model to determine the 
+outliers that then will be excluded in the final plsr model. Possible values 
+are:
+\itemize{
+\item "def" Read in the default value from settings.r (parameter 
+\code{plsr_calc_excludePlsrOutliers})
+\item TRUE for excluding plsr specific outliers
+\item FALSE for not performing the plsr specific outlier exclusion
+}
+If a vector with the same length as the vector in \code{pls.regOn} is 
+provided, each element of \code{pls.exOut} is used to perform the
+corresponding outlier-detection (or not) for each element in 
+\code{pls.regOn}.}
 }
 \description{
 The following parameters can be used in the \code{...} argument in 
