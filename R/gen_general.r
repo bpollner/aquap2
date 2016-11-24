@@ -422,15 +422,15 @@ genFolderStr <- function() {
 #' @details Always downloads and installs the latest available version, also 
 #'  if the same up-to-date version is already installed.
 #' @param branch Character, the name of the branch to downlaod. Defaults to 
-#'  "master".
+#'  "latestPublic".
 #' @family Helper Functions
 #' @examples
 #'  \dontrun{
 #'  updateAquap()
 #'  }
-########### @export
-updateAquap <- function(branch="master") {
-#	devtools::install_github(repo="bpollner/aquap2", ref=branch, auth_token=NULL, build_vignettes=TRUE)
+#' @export
+updateAquap <- function(branch="latestPublic") {
+	devtools::install_github(repo="bpollner/aquap2", ref=branch, auth_token=NULL, build_vignettes=TRUE)
 } # EOF
 
 

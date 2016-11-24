@@ -16,7 +16,7 @@ makePCAScorePlots <- function(cube, ap, comps=c(1:5), pcs=c(1,2), onMain="", onS
 			el2colorBy <- rep(el2colorBy, length(classList))
 		}
 	}
-	if (onSub == "") {
+	if (onSub == "") { 
 		onSubFill <- " "
 	} else {
 		onSubFill <- paste(" ", onSub, " ", sep="")
@@ -51,6 +51,7 @@ makePCAScorePlots <- function(cube, ap, comps=c(1:5), pcs=c(1,2), onMain="", onS
 			linesFill <- NULL
 			if (!is.null(trElci)) {
 				elc <- extractColorLegendValues(getDataset(set), classList[i], minPart=minPartElipse, ltyIn=trLty)
+				trLtyUse <- trLty
 				if (length(elc$color_legend) == 1) { # otherwise we have a second legend element with only a line and no data
 					trLtyUse <-trLty[1]
 				}

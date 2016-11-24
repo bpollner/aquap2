@@ -4,7 +4,7 @@
 \alias{updateAquap}
 \title{Update the aquap2-package.}
 \usage{
-updateAquap(branch = "master")
+updateAquap(branch = "latestPublic")
 }
 \arguments{
 \item{branch}{Character, the name of the branch to downlaod. Defaults to 
