@@ -201,8 +201,16 @@ calc_aquagr_CORE <- function(dataset, smoothN, reference, msc, selIndsWL, colInd
 ##############
 
 calc_aquagr_bootCI <- function(dataset, smoothN, reference, msc, selIndsWL, colInd, useMC, R, mod, minus, TCalib, Texp) {
-	path <- paste(.ap2$stn$fn_analysisData, "bootResult", sep="/")
+	fnAnD <- .ap2$stn$fn_analysisData
 	saveBootResult <- .ap2$stn$aqg_saveBootRes
+	path <- paste(fnAnD, "bootResult", sep="/")
+	#
+	if (!dir.exists(fnAnD)) {
+		ok <- dir.create(fnAnD)
+		if (!ok) {
+			saveBootResult <- FALSE
+		}
+	}
 	innerWorkings <- function(x, ind) {
 		out <- as.matrix(calc_aquagr_CORE(x[ind,], smoothN, reference, msc, selIndsWL, colInd, mod, minus, TCalib, Texp))
 	} # EOIF

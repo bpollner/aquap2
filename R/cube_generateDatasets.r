@@ -406,7 +406,7 @@ ap_checkAquagramDefaults <- function(ap, header) {
 			discr <- .ap2$stn$aqg_discrim
 		}
 		if (!all(is.logical(discr)) | length(discr) != 1) {
-			stop("Please provide either 'def' or TRUE or FALSE to the argument 'aqg.discr'", call.=FALSE)
+	#		stop("Please provide either 'def' or TRUE or FALSE to the argument 'aqg.discr'", call.=FALSE)
 		}
 		ap$aquagr$discr <- discr		
 		###
@@ -607,7 +607,7 @@ ap_check_plsr_Input <- function(ap, header) {
 	return(ap)
 } # EOF
 
-ap_checExistence_Defaults <- function(ap, dataset, haveExc) {
+ap_checExistence_Defaults <- function(ap, dataset, haveExc, checkWlsRange) {
 	cPref <- .ap2$stn$p_ClassVarPref
 	yPref <- .ap2$stn$p_yVarPref
 	if (haveExc) {	
@@ -664,20 +664,22 @@ ap_checExistence_Defaults <- function(ap, dataset, haveExc) {
 			checkEx(ap$aquagr$vars, "Aquagram", cPref)		
 		}
 	}
-	wls <- getWavelengths(dataset)
-	wlsTolerance <- 10  # XXX improve this !!
-	splitWl <- ap$ucl$splitWl
-	for (i in 1: length(splitWl)) {
-		options(warn=-1)
-		nums <- as.numeric(strsplit(splitWl[i], "-to-")[[1]])
-		options(warn=0)
-		if (any(is.na(nums))) {
-			stop(paste("Please check the analysis procedure / your input at the wavelength-split; provide the wavelength split in the format like e.g. '1300-to-1600'."), call.=FALSE)
-		}
-		if (min(nums) < (min(wls)-wlsTolerance) | max(nums) > (max(wls)+wlsTolerance) ) {
-			stop(paste("Sorry, the specified wavelengths \"", splitWl[i], "\" are out of the available range.", sep=""), call.=FALSE)
-		}
-	} # end for i
+	if (checkWlsRange) {
+		wls <- getWavelengths(dataset)
+		wlsTolerance <- 10  # XXX improve this !!
+		splitWl <- ap$ucl$splitWl
+		for (i in 1: length(splitWl)) {
+			options(warn=-1)
+			nums <- as.numeric(strsplit(splitWl[i], "-to-")[[1]])
+			options(warn=0)
+			if (any(is.na(nums))) {
+				stop(paste("Please check the analysis procedure / your input at the wavelength-split; provide the wavelength split in the format like e.g. '1300-to-1600'."), call.=FALSE)
+			}
+			if (min(nums) < (min(wls)-wlsTolerance) | max(nums) > (max(wls)+wlsTolerance) ) {
+				stop(paste("Sorry, the specified wavelengths \"", splitWl[i], "\" are out of the available range.", sep=""), call.=FALSE)
+			}
+		} # end for i
+	} # end if checkWlsRange
 	####
 	ap <- ap_checkAquagramDefaults(ap, dataset$header)
 	ap <- ap_check_pca_defaults(ap, dataset$header)
@@ -688,9 +690,9 @@ ap_checExistence_Defaults <- function(ap, dataset, haveExc) {
 	return(ap)
 } # EOF
 
-ap_cleanZeroValuesCheckExistenceDefaults <- function(ap, dataset, haveExc) {
+ap_cleanZeroValuesCheckExistenceDefaults <- function(ap, dataset, haveExc, checkWlsRange=FALSE) {
 	ap <- ap_cleanOutZeroValues(ap, dataset)
-	ap <- ap_checExistence_Defaults(ap, dataset, haveExc)
+	ap <- ap_checExistence_Defaults(ap, dataset, haveExc, checkWlsRange)
 	return(ap)
 } # EOF
 
@@ -1394,7 +1396,7 @@ gdmm <- function(dataset, ap=getap(), noiseFile="def", tempFile="def") {
 	}
 	checkDatasetVersion(dataset)
 	createOutlierFlagList() # needed to collect the flags and flag-data from the first block to the second
-	ap <- ap_cleanZeroValuesCheckExistenceDefaults(ap, dataset, haveExc=TRUE)
+	ap <- ap_cleanZeroValuesCheckExistenceDefaults(ap, dataset, haveExc=TRUE, checkWlsRange=TRUE)
 	md <- getMetadata(dataset)
 	mdF <- getmd() # the name of the noise file could be different(?)
 	if (md$meta$noiseFile != mdF$meta$noiseFile) {
