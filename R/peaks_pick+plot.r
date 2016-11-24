@@ -41,7 +41,7 @@ pickPeaks_RW <- function(x, span) {
 pickPeaksInner <- function(vectorToBePickedFrom, bandwidth, discrim, wavelengths) { 
 	vectorToBePickedFrom <- t(vectorToBePickedFrom)
 	vecInput <- vectorToBePickedFrom
-	seqHalfBandwidth<-seq(1, bandwidth/2)
+	seqHalfBandwidth <- seq(1, bandwidth/2)
 	positivePeakPosition <- matrix(NA , ncol=length(wavelengths), nrow=nrow(vectorToBePickedFrom))
 	positivePeakHeight <- negativePeakPosition <- negativePeakHeight <- positivePeakPosition
 	rownames(positivePeakPosition) <- paste(rownames(vectorToBePickedFrom), "Pos_PosP", sep="-")
@@ -92,6 +92,7 @@ pickPeaksInner <- function(vectorToBePickedFrom, bandwidth, discrim, wavelengths
 	picks <-  list(pickWindow = bandwidth, pickResult = pickResults)
 	return(list(rawVector=vecInput, picks=picks)) ## pick results have the wavelength in the column !!!!
 } # EOF
+
 
 ## Master
 ## the universal input, checking for the class of the input-object

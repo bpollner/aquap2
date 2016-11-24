@@ -258,12 +258,13 @@ plotSubtrAvgSpectra <- function(subtrSpectra, onSub, onMain, nrCorr, possNrParti
 	legend("bottomleft", legend=legendText, bg=legBgCol)
 	mtext(mText, 4)
 	if (adPeakPlot) {
+		bw <- .ap2$stn$pp_bandwidth
 		NIRnice <- as.data.frame(matrix(subtrSpectra$NIR, nrow=nrow(subtrSpectra$NIR)))
 		colnames(NIRnice) <- colnames(subtrSpectra$NIR)
 		rownames(NIRnice) <- rownames(subtrSpectra)
 		NIR <- as.data.frame(t(NIRnice))
-		pickResults <- pickPeaks(NIR, bandwidth=25, comps=1:4, discrim)
-		plotPeaks(pickResults, onMain, onSub, adLines, pcaVariances=NULL, customColor=Color, ylim=ranSubtrSpec)
+		pickResults <- pickPeaks(NIR, bandwidth=bw, comps=NULL, discrim, wavelengths=wls)
+		plotPeaks(pickResults, onMain, onSub, adLines, pcaVariances=NULL, customColor=Color, ylim=ranSubtrSpec, wavelengths=wls, clty=NULL)
 	}
 } # EOF
 

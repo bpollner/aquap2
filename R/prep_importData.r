@@ -985,6 +985,7 @@ check_sl_existence <- function(filename, ext) {
 check_conScanColumn <- function(header, headerFilePath, spectraFilePath, slType, filetype) {
 	custImp <- grepl("custom@", filetype)
 	a <- paste(.ap2$stn$p_yVarPref, .ap2$stn$p_conSNrCol, sep="")
+	lookHelp <- ""
 	if (!any(a %in% colnames(header))) {
 		if (is.null(slType)) {
 			from <- paste(" in the file \n\"", spectraFilePath, "\" containing the spectral data.", sep="")
@@ -1056,7 +1057,13 @@ readHeader <- function(md=getmd(), slType="def", multiplyRows="def") {
 	if (slType == "xls") {
 		ext <- "-in.xlsx"
 		check_sl_existence(filename, ext)
-		rawHead <- openxlsx::read.xlsx(paste(slInFolder, filename, ext, sep=""))
+		rawHead <- openxlsx::read.xlsx(paste(slInFolder, filename, ext, sep="")) # ! character imports are NOT factors yet !!
+		for (i in 1: ncol(rawHead)) {
+			if (all(is.character(rawHead[,i]))) {
+				rawHead[,i] <- as.factor(rawHead[,i])
+			}
+		}
+		
 	}
 	assign("headerFilePath", paste(slInFolder, filename, ext, sep=""), pos=parent.frame(n=1))
 	###

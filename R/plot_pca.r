@@ -51,10 +51,15 @@ makePCAScorePlots <- function(cube, ap, comps=c(1:5), pcs=c(1,2), onMain="", onS
 			linesFill <- NULL
 			if (!is.null(trElci)) {
 				elc <- extractColorLegendValues(getDataset(set), classList[i], minPart=minPartElipse, ltyIn=trLty)
-				linesFill <- list(lwd=1, col=elc$color_legend, lty=trLty)
+				if (length(elc$color_legend) == 1) { # otherwise we have a second legend element with only a line and no data
+					trLtyUse <-trLty[1]
+				}
+				linesFill <- list(lwd=1, col=elc$color_legend, lty=trLtyUse)
+			trLegend1 <- list(border=TRUE, points=list(pch=16, col=colorLegend), lines=linesFill, text=list(legendTextExt), background=trKeyBGCol, alpha.background=trAlphaBG, title=classList[i], cex.title=0.92, cex=legCex, columns=legNrCols)
+			} else {
+				trLegend1 <- list(border=TRUE, points=list(pch=16, col=colorLegend), text=list(legendTextExt), background=trKeyBGCol, alpha.background=trAlphaBG, title=classList[i], cex.title=0.92, cex=legCex, columns=legNrCols)
 			}
 			###
-			trLegend1 <- list(border=TRUE, points=list(pch=16, col=colorLegend), lines=linesFill, text=list(legendTextExt), background=trKeyBGCol, alpha.background=trAlphaBG, title=classList[i], cex.title=0.92, cex=legCex, columns=legNrCols)
 			subText <- paste("color by ", classList[i], onSubFill, " (total N=", sumPart, ")", sep="")
 			trSub <- list(label=subText, fontface=1)
 			trLegend_i <- list(inside=list(fun=lattice::draw.key(trLegend1), corner=c(1,1)))

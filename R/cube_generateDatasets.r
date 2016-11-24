@@ -254,8 +254,10 @@ ap_checkAquagramDefaults <- function(ap, header) {
 		}
 		###
 		TCalib <- a$TCalib
-		if (all(TCalib=="def")) {
-			TCalib <- .ap2$stn$aqg_calibTRange
+		if (!is.null(TCalib)) {
+			if (all(TCalib == "def")) {
+				TCalib <- .ap2$stn$aqg_calibTRange
+			}
 		}
 		if (!is.null(TCalib)) {
 			if (!any(grepl("symm@", TCalib)) ) {
@@ -1407,7 +1409,7 @@ gdmm <- function(dataset, ap=getap(), noiseFile="def", tempFile="def") {
 	##
 	tempCalibDataset <- checkTempCalibFile(tempFile, ap, md) # only if we are calculating an aquagram; if not returns NULL; is assigning tempFile
 	aq_loadGlobalAquagramCalibData(tempCalibDataset, tempFile) # only if aquagram: calculate AUC etc., save as global variable in .ap2
-	aq_checkTCalibRange(ap, tempFile) # only if Aquagram: is stopping if the temperatuer range is out of reach
+	ap <- aq_checkTCalibRange(ap, tempFile) # only if Aquagram: is stopping if the temperatuer range is out of reach
 	##
 	a <- makeCompPattern(dataset$header, md, ap)
 	cp <- a$cp
