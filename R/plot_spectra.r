@@ -48,6 +48,11 @@ plotSpectra_inner <- function(dataset, singleColorBy, onMain, onSub, idString=""
 	dptInfo <- adaptIdStringForDpt(getAnproc(dataset), idString)
 	onMain <- paste(onMain, dptInfo, sep="")
 	wls <- getWavelengths(dataset)
+	#
+#	NIR <- getNIR(dataset)
+#	pickResult <- pickPeaks(as.data.frame(t(NIR)), bandwidth=.ap2$stn$pp_bandwidth, wavelengths=wls)
+#	plotPeaks(pires, onMain="", onSub="", adLines=TRUE, pcaVariances=NULL, customColor=NULL, ylim=NULL, wls, clty=NULL)
+	#
 	onSub <- paste(onSub, msg, partNMsg, sep=" ")
 	matplot(wls, t(dataset$NIR), type="l", xlab="Wavelengths", ylab="Absorbance", main=onMain, sub=onSub, col=colorData, lty=1)
 	abline(h=0, col="gray")
