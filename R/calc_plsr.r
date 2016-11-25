@@ -1,7 +1,7 @@
-createSegmentList <- function(header, nrSegs=10) { # gives back a list that can be given to "segments" in the plsr
-	yPref <- .ap2$stn$p_yVarPref
-	snCol <- .ap2$stn$p_sampleNrCol
-	csnCol <- .ap2$stn$p_conSNrCol
+createSegmentList <- function(header, nrSegs=10, stnLoc) { # gives back a list that can be given to "segments" in the plsr
+	yPref <- stnLoc$p_yVarPref
+	snCol <- stnLoc$p_sampleNrCol
+	csnCol <- stnLoc$p_conSNrCol
 	nrSegsSwitch <- 2
 	## first see how many consecutive scans there are within each sample number (some (outlier) could have been removed)	
 	snName <- paste0(yPref, snCol)
@@ -51,7 +51,7 @@ createCustomGroupList <- function(header, groupBy) {
 	return(grList)
 } # EOF
 
-createPlsrSegments <- function(header, valid=10) { # gives back a number or a list
+createPlsrSegments <- function(header, valid=10, stnLoc) { # gives back a number or a list
 	if (is.numeric(valid)) {
 		if (valid == nrow(header)) {
 			return(valid)
@@ -60,8 +60,8 @@ createPlsrSegments <- function(header, valid=10) { # gives back a number or a li
 			return(nrow(header))
 		}
 		out <- valid
-		if (.ap2$stn$plsr_calc_CV_consecsTogether) {
-			out <- createSegmentList(header, nrSegs=valid)
+		if (stnLoc$plsr_calc_CV_consecsTogether) {
+			out <- createSegmentList(header, nrSegs=valid, stnLoc)
 		}
 	} else { # so it must be a valid variable name
 		out <- createCustomGroupList(header, groupBy=valid)
@@ -110,7 +110,7 @@ makePLSRModel_inner <- function(dataset, Y_Class, niter=5, ncomp=NULL, valid, st
 			}
 			if (maxNcomp <= nrSwitch) {			## so if we have very few rows -- now we do not want to give any nr of comps at all
 				for (i in 1: niter) {
-					segms <- createPlsrSegments(header, valid)
+					segms <- createPlsrSegments(header, valid, stnLoc)
 					testModel <- pls::plsr(yvar ~ allData, data=flatDataset, validation=typeValid, segments=segms, na.action="na.omit")
 					a <- pls::RMSEP(testModel, intercept=FALSE, estimate="adjCV")$val
 					ind <- which.min(a)
@@ -119,7 +119,7 @@ makePLSRModel_inner <- function(dataset, Y_Class, niter=5, ncomp=NULL, valid, st
 				} # end for i niter		
 			} else {						## so if we have a lot of rows (and maxNcomp is > than nrSwitch) !!!
 				for (i in 1: niter) {
-					segms <- createPlsrSegments(header, valid)
+					segms <- createPlsrSegments(header, valid, stnLoc)
 					testModel <- pls::plsr(yvar ~ allData, data=flatDataset, validation=typeValid, ncomp=maxNcomp, segments=segms, na.action="na.omit")
 					a <- pls::RMSEP(testModel, intercept=FALSE, estimate="adjCV")$val
 					ind <- which.min(a)
@@ -134,7 +134,7 @@ makePLSRModel_inner <- function(dataset, Y_Class, niter=5, ncomp=NULL, valid, st
 	} else {		## so if a value for ncomp was provided
 		bestNC <- ncomp
 	} # end if is.null(ncomp)
-	segms <- createPlsrSegments(header, valid)
+	segms <- createPlsrSegments(header, valid, stnLoc)
 	plsModelCorrect <- pls::plsr(yvar ~ allData, ncomp=bestNC, data=flatDataset, validation=typeValid, segments=segms)	#### here it happens !!
 	bn <- bestNC
 	if(bn <= acb[1] ){
@@ -202,7 +202,7 @@ makePLSRModels <- function(dataset, md, ap) {
 	modelList <- foreach(i= 1:leng) %dopar% { ### !!!! in parallel !!!! (possibly)
 		if (!dopare) {	
 			if (i == leng) {coa <- ". "} else {coa <- ", "}
-			if (!.ap2$stn$allSilent) {cat(paste(regrOnList[i]), coa, sep="" )}
+			if (!stnLoc$allSilent) {cat(paste(regrOnList[i]), coa, sep="" )}
 		}
 		if (exOut[i]) { # is logical vector, determining whether we want to do the plsr specific outlier detection or not
 			origMods <- makePLSRModel_inner(dataset, regrOnList[i], niter, ncomp, valid[i], stnLoc, exOut[i])
