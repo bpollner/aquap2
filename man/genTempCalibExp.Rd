@@ -60,7 +60,7 @@ Other Helper Functions: \code{\link{genFolderStr}},
   \code{\link{genNoiseRecExp}}, \code{\link{getcd}},
   \code{\link{getcm}}, \code{\link{instAquap2Examples}},
   \code{\link{printStdColnames}}, \code{\link{saveAQdata}},
-  \code{\link{updateAquap}}, \code{\link{updateSettings}}
+  \code{\link{updateAquap2}}, \code{\link{updateSettings}}
 
 Other Temperature procedures: \code{\link{tempCalib_procedures}}
 }

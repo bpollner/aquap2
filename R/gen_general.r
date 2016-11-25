@@ -415,22 +415,22 @@ genFolderStr <- function() {
 	} 
 } # EOF
 
-
 #' @title Update the aquap2-package.
 #' @description Download and install the latest version of package 'aquap2' 
-#'  from its github repository
+#' from its github repository
 #' @details Always downloads and installs the latest available version, also 
-#'  if the same up-to-date version is already installed.
-#' @param branch Character, the name of the branch to downlaod. Defaults to 
-#'  "latestPublic".
+#' if the same up-to-date version is already installed.
+#' @section Note: If an "error 404" is returned, then the repository is not 
+#' (yet) public (any more). Please be patient resp. contact us at 
+#' \code{bernhard.pollner@@mac.com}.
 #' @family Helper Functions
 #' @examples
-#'  \dontrun{
-#'  updateAquap()
-#'  }
+#' \dontrun{
+#' updateAquap2()
+#' }
 #' @export
-updateAquap <- function(branch="latestPublic") {
-	devtools::install_github(repo="bpollner/aquap2", ref=branch, auth_token=NULL, build_vignettes=TRUE)
+updateAquap2 <- function() {
+	devtools::install_github(repo="bpollner/aquap2", ref="latestPublic", build_vignettes=TRUE)
 } # EOF
 
 

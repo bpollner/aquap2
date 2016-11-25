@@ -31,7 +31,8 @@ Imports:
     prospectr,
     plotrix,
     pracma,
-    beeswarm
+    beeswarm,
+    devtools
 Suggests:
     knitr
 VignetteBuilder: knitr
