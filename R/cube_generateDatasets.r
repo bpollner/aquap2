@@ -817,7 +817,7 @@ performExcludeOutliers <- function(dataset, siExOut, ap) {
 			fusionFac <- as.factor(apply(header[indOut], 1, function(x) paste(x, collapse="_"))) # extract the selected columns from the header and paste each row together
 			flatDf <- makeFlatDataFrame(dataset, fusionGroupBy=fusionFac)
 			if (!.ap2$stn$allSilent) {cat("      detecting & flagging outliers... ")}
-			simcaMod <- rrcovHD::RSimca.formula(grouping ~ ., data=flatDf, kmax=kmax, tol=tol)  ## k=0 does not work ??, but still calculating k
+			simcaMod <- rrcovHD::RSimca(grouping ~ ., data=flatDf, kmax=kmax, tol=tol)  ## k=0 does not work ??, but still calculating k
 			singleFlags <- paste(unlist(lapply(simcaMod@pcaobj, function(x) length(which(x@flag == FALSE)))), collapse="|")
 			flags <- as.logical(simcaMod@flag) #  having FALSE for outliers
 			nrOutliers <- length(which(flags == FALSE)) 
