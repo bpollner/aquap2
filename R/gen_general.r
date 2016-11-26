@@ -428,7 +428,7 @@ genFolderStr <- function() {
 #' @export
 updateAquap2 <- function(force=FALSE) {
 	buildVig <- FALSE
-	#
+	# 
 	devtools::install_github(repo="bpollner/aquap2", ref="latestPublic", build_vignettes=buildVig, force=force)
 } # EOF
 
