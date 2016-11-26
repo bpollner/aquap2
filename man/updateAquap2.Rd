@@ -4,20 +4,15 @@
 \alias{updateAquap2}
 \title{Update the aquap2-package.}
 \usage{
-updateAquap2()
+updateAquap2(force = FALSE)
+}
+\arguments{
+\item{force}{Logical, if the package should be downloaded even if no newer 
+version is available. Defaults to \code{FALSE}.}
 }
 \description{
 Download and install the latest version of package 'aquap2' 
 from its github repository
-}
-\details{
-Always downloads and installs the latest available version, also 
-if the same up-to-date version is already installed.
-}
-\section{Note}{
- If an "error 404" is returned, then the repository is not 
-(yet) public (any more). Please be patient resp. contact us at 
-\code{bernhard.pollner@mac.com}.
 }
 \examples{
 \dontrun{

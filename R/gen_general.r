@@ -418,16 +418,18 @@ genFolderStr <- function() {
 #' @title Update the aquap2-package.
 #' @description Download and install the latest version of package 'aquap2' 
 #' from its github repository
-#' @details Always downloads and installs the latest available version, also 
-#' if the same up-to-date version is already installed.
+#' @param force Logical, if the package should be downloaded even if no newer 
+#' version is available. Defaults to \code{FALSE}.
 #' @family Helper Functions
 #' @examples
 #' \dontrun{
 #' updateAquap2()
 #' }
 #' @export
-updateAquap2 <- function() {
-	devtools::install_github(repo="bpollner/aquap2", ref="latestPublic", build_vignettes=TRUE)
+updateAquap2 <- function(force=FALSE) {
+	buildVig <- FALSE
+	#
+	devtools::install_github(repo="bpollner/aquap2", ref="latestPublic", build_vignettes=buildVig, force=force)
 } # EOF
 
 
