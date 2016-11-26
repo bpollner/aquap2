@@ -420,9 +420,6 @@ genFolderStr <- function() {
 #' from its github repository
 #' @details Always downloads and installs the latest available version, also 
 #' if the same up-to-date version is already installed.
-#' @section Note: If an "error 404" is returned, then the repository is not 
-#' (yet) public (any more). Please be patient resp. contact us at 
-#' \code{bernhard.pollner@@mac.com}.
 #' @family Helper Functions
 #' @examples
 #' \dontrun{
