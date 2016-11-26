@@ -561,7 +561,7 @@ flagOutliers_allScope <- function(NIR, detectOutliers) {
 		flatDf <- cbind(flatDf, as.data.frame(NIR))
 #		kmax <- 10
 		if (!.ap2$stn$allSilent) {cat("   detecting outliers... ")}
-		simcaMod <- rrcovHD::RSimca.formula(grouping ~ ., data=flatDf, kmax=kmax, tol=tol)  ## k=0 does not work ??, but still calculating k
+		simcaMod <- rrcovHD::RSimca(grouping ~ ., data=flatDf, kmax=kmax, tol=tol)  ## k=0 does not work ??, but still calculating k
 		flags <- as.factor(!simcaMod@flag) # to invert them and tranform to factor, having TRUE for the outliers
 		nrOutliers <- length(which(flags == TRUE))
 		usedK <- simcaMod@k

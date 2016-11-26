@@ -6,20 +6,20 @@ makeSimcaModel_inner <- function(dataset, groupBy, k=0, version, stnLoc) {
 	grp <- flatDf[,1] # only the grouping
 	if (version == "classic") {
 		if (k == 0) {
-			simcaMod <- rrcovHD::CSimca.formula(grouping ~ ., data=flatDf, kmax=kmax, tol=tol) ## k=0 does not work, kmax does not work
+			simcaMod <- rrcovHD::CSimca(grouping ~ ., data=flatDf, kmax=kmax, tol=tol) ## k=0 does not work, kmax does not work
 #			simcaMod <- rrcovHD::CSimca(X, grp, kmax=kmax, tol=tol)  ## k=0 does not work, kmax does not work
 		} else {
-			simcaMod <- rrcovHD::CSimca.formula(grouping ~ ., data=flatDf, k=k, kmax=kmax, tol=tol)
+			simcaMod <- rrcovHD::CSimca(grouping ~ ., data=flatDf, k=k, kmax=kmax, tol=tol)
 #			simcaMod <- rrcovHD::CSimca(X, grp, k=k, kmax=kmax, tol=tol) 		
 		}
 	} else {
 		if (version == "robust") {
 			if (k == 0) {	
-				simcaMod <- rrcovHD::RSimca.formula(grouping ~ ., data=flatDf, kmax=kmax, tol=tol)  ## k=0 does not work, but still calculating k
+				simcaMod <- rrcovHD::RSimca(grouping ~ ., data=flatDf, kmax=kmax, tol=tol)  ## k=0 does not work, but still calculating k
 #				simcaMod <- rrcovHD::RSimca(X, grp, kmax=kmax, tol=tol)   ## k=0 does not work, but still calculating k
 
 			} else {
-				simcaMod <- rrcovHD::RSimca.formula(grouping ~ ., data=flatDf, k=k, kmax=kmax, tol=tol)
+				simcaMod <- rrcovHD::RSimca(grouping ~ ., data=flatDf, k=k, kmax=kmax, tol=tol)
 #				simcaMod <- rrcovHD::RSimca(X, grp, k=k, kmax=kmax, tol=tol)  			
 			}
 		} else {
