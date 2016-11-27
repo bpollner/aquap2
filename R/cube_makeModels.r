@@ -83,7 +83,9 @@ calculateAquagram <- function(dataset, md, ap, idString, tempFile) {
 	message <- paste(message, bootTxtCorr)
 	if (!.ap2$stn$allSilent) {cat(message)}
 	ap <- aq_getTCalibRange(ap, tempFile) 	# checks with the calibration file if the temperature range is ok
-	aq_makeGlobals(TCalib=ap$aquagr$TCalib, Texp=ap$aquagr$Texp, ot=getOvertoneCut(.ap2$stn$aqg_OT), smoothN=.ap2$stn$aqg_smoothCalib, tempFile) ## generate the global variables with TCalib and Texp
+	if (!haveClassicAqg(ap)) {
+		aq_makeGlobals(TCalib=ap$aquagr$TCalib, Texp=ap$aquagr$Texp, ot=getOvertoneCut(.ap2$stn$aqg_OT), smoothN=.ap2$stn$aqg_smoothCalib, tempFile) ## generate the global variables with TCalib and Texp
+	}
 	##
 	vars <- ap$aquagr$vars
 	aquCalcRes  <- list()
