@@ -601,30 +601,37 @@ aq_checkTempCalibRangeFromUnivFile <- function(TCalibRange, tempFile) {
 } # EOF
 
 aq_getTCalibRange <- function(ap, tempFile) {
-	if (!is.null(ap$aquagr)) {	
-		TCalib <- ap$aquagr$TCalib # ! can still be NULL
-		Texp <- ap$aquagr$Texp
-		# we did extensive checks before, so now everything should be correct
-		if (!is.null(TCalib)) {
-			if (is.character(TCalib)) {
-				if (grepl("symm@", TCalib)) {
-					a <- as.numeric(strsplit(TCalib, "@")[[1]][2])
-					TCalib <- aq_checkTempCalibRangeFromUnivFile(c(Texp-a, Texp+a), tempFile)
+	if (!is.null(ap$aquagr)) { 
+		if (!haveClassicAqg(ap)) { 
+			TCalib <- ap$aquagr$TCalib # ! can still be NULL
+			Texp <- ap$aquagr$Texp
+			# we did extensive checks before, so now everything should be correct
+			if (!is.null(TCalib)) {
+				if (is.character(TCalib)) {
+					if (grepl("symm@", TCalib)) {
+						a <- as.numeric(strsplit(TCalib, "@")[[1]][2])
+						TCalib <- aq_checkTempCalibRangeFromUnivFile(c(Texp-a, Texp+a), tempFile)
+					} else {
+					#	TCalib <- aq_checkTempCalibRangeFromUnivFile(TCalib, tempFile)
+					}
 				} else {
-				#	TCalib <- aq_checkTempCalibRangeFromUnivFile(TCalib, tempFile)
+					TCalib <- aq_checkTempCalibRangeFromUnivFile(TCalib, tempFile)
 				}
-			} else {
-				TCalib <- aq_checkTempCalibRangeFromUnivFile(TCalib, tempFile)
+			} else { # so TCalib is null
+				if (!haveClassicAqg(ap)) { 
+					temp <- as.numeric(rownames(get(paste0(tempFile, "_univAucTable"), pos=.ap2)))
+					TCalib <- range(temp)
+				} 
 			}
-		} else { # so TCalib is null
-			temp <- as.numeric(rownames(get(paste0(tempFile, "_univAucTable"), pos=.ap2)))
-			TCalib <- range(temp)
+			ap$aquagr$TCalib <- TCalib
+			return(ap)
+		} else {
+			return(ap)
 		}
-		ap$aquagr$TCalib <- TCalib
-		return(ap)
 	} else { # end if !is.null
 		return(ap)
 	}
+	# yes, I know, this function is kind of messy, always just adapted and fixed. Sorry. :-)
 } # EOF
 
 aq_checkTCalibRange <- function(ap, tempFile) {
