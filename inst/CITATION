@@ -1,0 +1,32 @@
+citHeader("To cite the 'aquap2' package in publications use:")
+
+year <- sub(".*(2[[:digit:]]{3})-.*", "\\1", meta$Date, perl = TRUE)
+vers <- paste("R package version", meta$Version)
+
+packTitle <- meta$Title
+jpTitle <- "aquap2: Multivariate Data Analysis Tools for R including Aquaphotomics Methods"
+
+confTitle <- "Aquaphotomics: Understanding Water in Biology - 2nd International Symposium"
+confLocation <- "Kobe, Japan"
+confDate <- "2016"
+
+citEntry(entry="Manual",
+         title = packTitle,
+         author = personList(as.person("Bernhard Pollner"),
+                             as.person("Zoltan Kovacs")),
+         year = year,
+         note = vers,
+
+         textVersion =
+         paste("Bernhard Pollner and Zoltan Kovacs (", year, "). ", packTitle, ". ", vers, ". ", sep="")
+         )
+
+citEntry(entry="Proceedings",
+         title = jpTitle,
+         author = personList(as.person("Bernhard Pollner"),
+                             as.person("Zoltan Kovacs")),
+         year = confDate,
+         note = vers,
+         textVersion =
+         paste("Bernhard Pollner and Zoltan Kovacs (", confDate, "). ", jpTitle, ". ", confTitle, ", ", confLocation, ", ", confDate, ". ", sep="")
+         )

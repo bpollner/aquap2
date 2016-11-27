@@ -1,16 +1,16 @@
 Package: aquap2
 Type: Package
-Title: Aquaphotomics NIRS Analysis
+Title: Multivariate Data Analysis Tools for R including Aquaphotomics Methods
 Version: 0.1.7
-Date: 2015-12-01
+Date: 2016-11-26
 Author: Bernhard Pollner, Zoltan Kovacs
 Maintainer: Bernhard Pollner <bernhard.pollner@mac.com>
-Description: Methods and tools to analyse NIRS data from an Aquaphotomics
-    perspective.
+Description: Methods and tools for multivariate data analysis in R, with an 
+	additional focus on specialized Aquaphotomics procedures and methods.
 License: GPL (>=2)
 LazyLoad: yes
 Depends:
-    R (>= 2.8.0)
+    R (>= 3.3.2)
 Imports:
     methods,
     foreach,
