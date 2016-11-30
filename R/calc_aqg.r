@@ -691,6 +691,46 @@ calcSpectra <- function(dataset, classVar, selInds, minus, plotSpectra) {
 	return(list(rawSpec=rawSpec, avgSpec=avgSpec, subtrSpec=subtrSpec))
 } # EOF
 
+aq_calculateCItable <- function(bootRes, groupAvg) {
+	if (!is.null(bootRes)) {
+		doSingleCol <- function(x, m, rNames) {
+			sigOut <- NULL
+			rnOut <- NULL
+			for (i in 1:(m-1)) {
+				for (k in (i+1):m) {
+					siRn <- paste0(rNames[i], "~", rNames[k])
+					first <- c(x[(i*2+1)-2], x[(i*2+2)-2])
+					second <- c(x[(k*2+1)-2], x[(k*2+2)-2])
+					if (min(first) > max(second) | max(first) < min(second)) {
+						sig <- "*"	
+					} else {
+						sig <- ""
+					}
+					sigOut <- c(sigOut, sig)
+					rnOut <- c(rnOut, siRn)
+				} # end for k
+			} # end for i
+			out <- data.frame(sigOut)
+			rownames(out) <- rnOut
+			return(out)
+		} # EOIF
+		###
+		bootResRed <- bootRes[-(seq(1, nrow(bootRes), by=3)),] # first kick out the avg value
+		mm <- nrow(groupAvg)
+		rns <- rownames(groupAvg)
+		allColSigsList <- apply(bootResRed, 2, doSingleCol, m=mm, rNames=rns)
+		outTable <- data.frame(rep(NA, nrow(allColSigsList[[1]])))
+		for (i in 1: length(allColSigsList)) {
+			outTable <- cbind(outTable, allColSigsList[[i]])
+		}
+		outTable <- outTable[,-1] # get rid of the NAs
+		colnames(outTable) <- colnames(bootRes)
+		return(outTable)	
+		} else {
+			return(NULL)
+	} # end !is.null(bootRes)	
+} # EOF
+
 calcAquagramSingle <- function(dataset, md, ap, classVar, idString) {
 	##
 	a <- ap$aquagr
@@ -751,6 +791,9 @@ calcAquagramSingle <- function(dataset, md, ap, classVar, idString) {
 		bootRes <- NULL
 	} # end calc boot
 #	aqRes <- new("aquCalc", ID, classVar, avg, numRep, possN, selInds, bootRes, rawSpec, avgSpec, subtrSpec) # ? does not work ?? 
+	## now make a nice CI table comparing all groups against each other, for each WAMAC
+	ciTable <- aq_calculateCItable(bootRes, groupAverage)
+	##
 	aqRes <- new("aqg_calc")
 	aqRes@ID <- idString
 	aqRes@classVar <- classVar
@@ -760,6 +803,7 @@ calcAquagramSingle <- function(dataset, md, ap, classVar, idString) {
 	aqRes@possN <- possibleNrPartic
 	aqRes@selInds <- selInds
 	aqRes@bootRes <- bootRes
+	aqRes@ciTable <- ciTable
 	aqRes@rawSpec <- rawSpec
 	aqRes@avgSpec <- avgSpec
 	aqRes@subtrSpec <- subtrSpec
