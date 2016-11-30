@@ -46,7 +46,7 @@ Other Helper Functions: \code{\link{genFolderStr}},
   \code{\link{genNoiseRecExp}},
   \code{\link{genTempCalibExp}}, \code{\link{getcd}},
   \code{\link{getcm}}, \code{\link{instAquap2Examples}},
-  \code{\link{printStdColnames}},
+  \code{\link{printStdColnames}}, \code{\link{reColor}},
   \code{\link{updateAquap2}}, \code{\link{updateSettings}}
 }
 

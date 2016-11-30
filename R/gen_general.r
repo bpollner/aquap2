@@ -1040,3 +1040,25 @@ exportAdditionalModelToAp2Env <- function(doExport, thisMod, thisType) {
 	} # end if do export
 	return(invisible(NULL))
 } # EOF
+
+#' @title Re-Color a dataset
+#' @description Recalculate all the colors contained in \code{colRep} in a 
+#' dataset.
+#' @details This can be useful if, for example, a subset of data taken from 
+#' a rather big dataset where a possible color-gradient was very wide, only 
+#' presents itself as having more or less the same color.
+#' @param dataset An object of class 'aquap_data' as produced e.g. by 
+#' \code{\link{gfd}}.
+#' @return The dataset with recalculated color representation.
+#' @examples
+#' \dontrun{
+#' fd <- gfd()
+#' fd2 <- reColor(fd)
+#' }
+#' @family Helper Functions
+#' @export
+reColor <- function(dataset) {
+	colRep <- extractClassesForColRep(dataset$header)
+	dataset$colRep <- I(colRep)
+	return(dataset)
+} # EOF

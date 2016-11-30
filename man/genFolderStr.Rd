@@ -26,7 +26,8 @@ You can change the defaults for the folder names in the settings file.
 Other Helper Functions: \code{\link{genNoiseRecExp}},
   \code{\link{genTempCalibExp}}, \code{\link{getcd}},
   \code{\link{getcm}}, \code{\link{instAquap2Examples}},
-  \code{\link{printStdColnames}}, \code{\link{saveAQdata}},
-  \code{\link{updateAquap2}}, \code{\link{updateSettings}}
+  \code{\link{printStdColnames}}, \code{\link{reColor}},
+  \code{\link{saveAQdata}}, \code{\link{updateAquap2}},
+  \code{\link{updateSettings}}
 }
 

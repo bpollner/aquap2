@@ -1,5 +1,5 @@
 # old above ---------------------------------
-aq_makeNicePlottingFrame <- function(aquCalcResult, selWls, masterScale) {
+aq_makeNicePlottingFrame_circ <- function(aquCalcResult, selWls, masterScale) {
 	nrDigits <- .ap2$stn$aqg_nrDigitsAquagram
 	dataForPlotting <- aquCalcResult
 	colnames(dataForPlotting) <- as.character(selWls)
@@ -19,6 +19,51 @@ aq_makeNicePlottingFrame <- function(aquCalcResult, selWls, masterScale) {
 	dataForPlotting <- data.frame( dataForPlotting[,c(1, ncol(dataForPlotting):2)] ) ## re-arrange and make clock-wise
 	colnames(dataForPlotting) <- substr(colnames(dataForPlotting), 2, nchar(colnames(dataForPlotting)))
 	out <- list(Data=dataForPlotting, Labels=caxislabels)
+} # EOF
+
+aq_makeNicePlottingFrame_linear <- function(aquCalcResult, onMain, onSub, mod, Texp, customColor, clt, R, minus, inBoot=FALSE) {
+	settingsLT <- .ap2$stn$aqg_linetypes
+	ltyCI <- .ap2$stn$aqg_plot_ltyCIs
+	##
+	if (is.numeric(clt)) {
+		ltPlot <- ltLeg <- clt
+	} else {
+		ltPlot <- ltLeg <- settingsLT
+	}	
+	##
+	if (grepl("dce", mod)) {
+		TexpLine <- Texp
+	} else {
+		TexpLine  <- 0
+	}	
+	##
+	legTitle <- aquCalcResult@classVar
+	dataColor <- legendColor <- aq_checkColors(aquCalcResult@colRep, customColor)
+	plotData <- aquCalcResult@avg
+	possN <- aquCalcResult@possN
+#	if (grepl("diff", mod)) {
+#		indOut <- which(rownames(plotData) == minus)
+#		legendColor <- legendColor[-indOut]
+#		legTextExt <- legTextExt[-indOut]
+#		possN <- possN[-indOut]
+#	}	
+	groups <- rownames(plotData)
+	legTextExt <- paste0(groups, " N=", possN)
+	lwd <- 1
+	##
+	if (inBoot) {
+		if (!is.null(aquCalcResult@bootRes)) {
+			plotData <- aquCalcResult@bootRes
+			dataColor <- rep(dataColor, each=3)
+			ltPlot <- c(1, ltyCI, ltyCI) # otherwise could be: ltPlot <- c(ltPlot, 3, 3)
+			ltLeg <- 1		## ( the legend text stays the same as above)
+			lwd <- c(1, 0.5, 0.5)
+			onSub <- paste(onSub, "   95% CI based on", R, "bootstrap replicates (bca)")	
+		} else {
+			plotData <- NULL
+		} 
+	}
+	return(list(plotData=plotData, onMain=onMain, onSub=onSub, yLab=mod, TexpLine=TexpLine, legTextExt=legTextExt, legTitle=legTitle, dataColor=dataColor, legendColor=legendColor, ltPlot=ltPlot, ltLeg=ltLeg, lwd=lwd))
 } # EOF
 
 aq_makeGraphicsTexts <- function(onSub, aqCalcPossNrPart, nrCorr) {
@@ -53,7 +98,7 @@ aq_checkColors <- function(numRepColor, customColor) {
 	} else {
 		Color <- numRepColor
 	}
-	Color
+	return(Color)
 } # EOF
 
 aq_checkLegendTextMod <- function(mod, minus, TCalib, Texp) {
@@ -100,18 +145,58 @@ aq_checkSelWls <- function(mod, selWls) {
 	out
 } # EOF
 
+aq_checkPlotType <- function(mod) {
+	plotType <- .ap2$stn$aqg_plottingType
+	if (grepl(pv_AquagramModes[1], mod)) {
+		plotType <- "circular"
+	}
+	if (!any(c("circular", "linear") %in% plotType)) {
+		stop("Please provide either 'linear' or 'circular' to the argument 'aqg_plottingType' in the settings file.", call.=FALSE)
+	}
+	return(plotType)
+}
+
+aq_makePolygons <- function(plotData, legendColor) {
+	if (!is.null(plotData)) {
+		alpha <- .ap2$stn$aqg_plot_color_alpha_CIfill
+		#
+		xfwd <- seq(1, ncol(plotData))
+		xrev <- rev(xfwd)
+		xx <- c(xfwd, xrev)
+		for (i in 1: (nrow(plotData)/3) ) {
+			rind <- c(i*3+1, i*3+2, i*3+3) - 3 # always get the 3er groups
+			curr <- plotData[rind,]
+			lower <- curr[2,]
+			upper <- curr[3, ]
+			polygon(xx, c(lower, rev(upper)), col=makeColorsTransparent(legendColor[i], alpha), border=FALSE)
+		} # end for i
+	} # end !is.null(plotData)
+} # EOF
+
 plot_aquagram_inner <- function(aquCalc, selWls=.ap2$stn$aqg_wlsAquagram, onSub, onMain, where, customColor, nrCorr, bootCI, mod, TCalib, minus, Texp, masterScaleAQ, masterScaleBoot, clt=NULL, R) {
 	if (!is.numeric(selWls)) {
 		stop("Please provide a numerical vector as input for the wavelengths. Thank you.", call.=FALSE)
 	}
-	height <- .ap2$stn$pdf_Height_sq
-	width <- .ap2$stn$pdf_Width_ws
+	plotType <- aq_checkPlotType(mod)
+	pdfSizeAdd <- .ap2$stn$aqg_plot_pdfSizeAdd
+	height <- .ap2$stn$pdf_Height_sq + pdfSizeAdd
+	width <- .ap2$stn$pdf_Width_ws + pdfSizeAdd
+	xAxisTitle <- .ap2$stn$aqg_linearXaxisTitle
+	legCex <- .ap2$stn$aqg_plot_linear_legendCex
+	plotWamacsLines <- .ap2$stn$aqg_plotWamacsLines
+	alwaysPlotAvgAqg <- .ap2$stn$aqg_alwaysPlotAvgAqg
+	doPlotAvg <- TRUE
+	#
+	if (bootCI & !is.null(aquCalc@bootRes) & !alwaysPlotAvgAqg) { 
+		doPlotAvg <- FALSE
+	}
+	onSubLinear <- onSub
 	Color <- aq_checkColors(aquCalc@colRep, customColor)
 	a <- aq_makeGraphicsTexts(onSub, aquCalc@possN, nrCorr)
 		onSub <- a$onSub
 		mText <- a$mText
-	##
-	aq_plotCore <- function(dfpList) {
+	########
+	aq_plotCore_circ <- function(dfpList) {
 		dataForPlotting <- dfpList$Data
 		caxislabels <- dfpList$Labels
 		if(where != "pdf" & Sys.getenv("RSTUDIO") != 1)  {dev.new(height=height, width=width)}
@@ -122,34 +207,74 @@ plot_aquagram_inner <- function(aquCalc, selWls=.ap2$stn$aqg_wlsAquagram, onSub,
 		mtext(mText, 1)
 	} # EOIF
 	## 
+	aq_plotCore_linear <- function(linData, legTextMod, curYlim, inBoot=FALSE) { #### CORE ####
+		yLabMod <- linData$yLab
+		onMain <- linData$onMain
+		onSub <- linData$onSub
+		TexpLine <- linData$TexpLine
+		plotData <- linData$plotData
+		dataColor <- linData$dataColor
+		legendColor <- linData$legendColor
+		legTxt <- linData$legTextExt
+		legTitle <- linData$legTitle
+		ltPlot <- linData$ltPlot
+		ltLeg <- linData$ltLeg
+		lwd <- linData$lwd
+		if(where != "pdf" & Sys.getenv("RSTUDIO") != 1)  {dev.new(height=height, width=width)}
+		matplot(t(plotData), type="l", xaxt="n", lty=ltPlot, col=dataColor, ylab=yLabMod, xlab=xAxisTitle, ylim=curYlim, main=onMain, sub=onSub, cex.main=0.8, cex.sub=0.8, lwd=lwd) # masterScaleAQ can be NULL
+		axis(1, at=seq(1, ncol(plotData)), labels=colnames(plotData))
+		if (inBoot) {	
+			aq_makePolygons(plotData, legendColor)
+		}
+		abline(h=TexpLine, col="gray", lwd=0.6) 
+		if (plotWamacsLines) {
+			abline(v=seq(1, ncol(plotData)), col="lightgray", lwd=0.4)
+		}
+		legBgCol <- rgb(255,255,255, alpha=.ap2$stn$col_alphaForLegends, maxColorValue=255) # is a white with alpha to be determined in the settings
+		legend("topright", legend=legTxt, title=legTitle, cex=legCex, col=legendColor, lty=ltLeg, bg=legBgCol)
+		legend("bottomleft", legend=legTextMod, cex=legCex, bg=legBgCol)
+	} # EOIF		
+	########
 	## here always plot the selected aquagram, no fancy CI
-	selWls <- aq_checkSelWls(mod, selWls)
 	legTextMod <- aq_checkLegendTextMod(mod, minus, TCalib, Texp)
-	standardData <- aq_makeNicePlottingFrame(aquCalc@avg, selWls, masterScaleAQ)
-	if (is.numeric(clt)) {
-		ltPlot <- ltLeg <- clt
-	} else {
-		ltPlot <- ltLeg <- .ap2$stn$aqg_linetypes
-	}
-	legText <- rownames(standardData$Data)[-c(1,2)]
-	pLineWi <- 2.3
 	legColor <- Color
-	aq_plotCore(standardData)
+	if (doPlotAvg) {
+		if (plotType == "circular") {
+		if (is.numeric(clt)) {
+			ltPlot <- ltLeg <- clt
+		} else {
+			ltPlot <- ltLeg <- .ap2$stn$aqg_linetypes
+		}
+		selWls <- aq_checkSelWls(mod, selWls)
+		standardData <- aq_makeNicePlottingFrame_circ(aquCalc@avg, selWls, masterScaleAQ)
+		legText <- rownames(standardData$Data)[-c(1,2)]
+		pLineWi <- 2.3
+	 	aq_plotCore_circ(standardData)
+	} else { # so we want to plot linear !! :-)
+		linData <- aq_makeNicePlottingFrame_linear(aquCalc, onMain, onSubLinear, mod, Texp, customColor, clt, R, minus, inBoot=FALSE)
+		aq_plotCore_linear(linData, legTextMod, curYlim=masterScaleAQ, inBoot=FALSE)
+	}
+	} # end if doPlotAvg
 	##
 	if (bootCI) {
 		if (!is.null(aquCalc@bootRes)) {
-			ciData <- aq_makeNicePlottingFrame(aquCalc@bootRes, selWls, masterScaleBoot)
-			if (mod == "aucs-diff" | mod == "sfc-diff" | mod == "classic-diff") {
-				Color <- Color[ -(which(rownames(aquCalc@avg) == minus)) ]
+			if (plotType == "circular") {
+				if (mod == "aucs-diff" | mod == "sfc-diff" | mod == "classic-diff") {
+					Color <- Color[ -(which(rownames(aquCalc@avg) == minus)) ]
+				}
+				Color <- rep(Color, each=3)
+				ltPlot <- c(1,3,2)
+				ltLeg <- 1		## ( the legend text stays the same as above)
+				pLineWi <- c(1.8, 1.2, 1.2)
+				onSub <- paste(onSub, " 95% CI based on", R, "bootstrap replicates (bca)")			
+				ciData <- aq_makeNicePlottingFrame_circ(aquCalc@bootRes, selWls, masterScaleBoot)
+			 	aq_plotCore_circ(ciData)
+			} else { # so we want to plot linear !! :-)
+				linData <- aq_makeNicePlottingFrame_linear(aquCalc, onMain, onSubLinear, mod, Texp, customColor, clt, R, minus, inBoot=TRUE)
+				aq_plotCore_linear(linData, legTextMod, curYlim=masterScaleBoot, inBoot=TRUE)
 			}
-			Color <- rep(Color, each=3)
-			ltPlot <- c(1,3,2)
-			ltLeg <- 1		## ( the legend text stays the same as above)
-			pLineWi <- c(1.8, 1.2, 1.2)
-			onSub <- paste(onSub, " 95% CI based on", R, "bootstrap replicates (bca)")
-			aq_plotCore(ciData)
-		}
-	}	
+		} # end if !is.null bootRes
+	} # end if bootCI	
 } # EOF
 
 plotRawSpectra <- function(rawSpectra, onSub, onMain, nrCorr, possNrPartic, ncpwl) {
@@ -410,10 +535,17 @@ plot_aqg <- function(cube, aps="def", ...) {
   	fns <- ap$genPlot$fns
  	#
   	aq <- ap$aquagr
+  	plotType <- aq_checkPlotType(aq$mod) # stops if plot type is neither circular nor linear
   	if (!is.logical(ap$aquagr$spectra)) {add <- "+spectra"; suffix <- "aquagr+Spect" } else {add <- ""; suffix <- "aquagr"}
   	if (!.ap2$stn$allSilent & (where == "pdf" )) {cat(paste("Plotting Aquagrams", add, "... ", sep="")) }
-  	height <-.ap2$stn$pdf_Height_sq
-  	width <- .ap2$stn$pdf_Width_sq
+	pdfSizeAdd <- .ap2$stn$aqg_plot_pdfSizeAdd
+ 	if (plotType == "circular") {
+ 	 	height <-.ap2$stn$pdf_Height_sq
+  		width <- .ap2$stn$pdf_Width_sq
+  	} else {
+ 	 	height <-.ap2$stn$pdf_Height_ws + pdfSizeAdd
+  		width <- .ap2$stn$pdf_Width_ws + pdfSizeAdd
+  	}
   	path <- .ap2$stn$fn_results
   	expName <- getExpName(cube)
   	minusText <- aq_getMinusText(aq$minus, aq$mod)	

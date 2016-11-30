@@ -59,7 +59,7 @@ stn <- list(
 	gen_versionCheckDataset = TRUE,			## if it should be checked if the dataset was created with an older version of package aquap2. Recommended value is TRUE.
 	gen_plot_anprocSource = "defFile", 		## the default way to obtain the analysis procedure when *PLOTTING*. Possible values are "cube" to take the analysis procedure from within the cube, "defFile" to load instead the default filename of the analysis procedure file, or provide a custom analysis procedure filename. (Ending in ".r")
 	gen_plot_pgWhereDefault = "pdf",		## the default setting for the general plotting parameter 'pg.where'. If set to 'pdf', all graphics will be saved as a pdf. If anything but a pdf is provided, the graphics will be plotted to the graphics device.
-	gen_plot_maxNrDptInfoOnMain = 4, 		## the maximum number of data-pre-treatment modules info elements in the main of a title
+	gen_plot_maxNrDptInfoOnMain = 5, 		## the maximum number of data-pre-treatment modules info elements in the main of a title
 	gen_plot_legendPosition = "auto", 		## the default position of the legend in a plot. Leave at the default 'auto' for automatically detecting the best corner for the legend, provide one of "bottomright", "bottomleft", "topright" or "topleft" for choosing the resp. corner.
 	gen_calc_allowSubtrDiffHead = FALSE, 	## if subtractions of datasets having a different header structure should be allowed.
 	gen_calc_allowSubtrDiffWavels = TRUE,	## if subtractions of datasets having different sets of wavelengths should be allowed. If TRUE, this is only successful if the smaller set of wavelengths is completely within the bigger set of wavelengths. In this case, the bigger set is virtually cut down to the size of the smaller set. This can be necessary when function do_gapDer was used.
@@ -94,7 +94,7 @@ stn <- list(
 	col_RampForTRH = c("blue", "red", "yellow2"), 	## used for color-coding any column that contains the characters defined as names for the temperature and rel. humidity column. Provide at least two colors.
 	col_RampForTimes = c("black", "green"), ## used for color-coding any column that contains the characters defined as names for the absTime and the chron, the chronological order of scans. Provide at least two colors.
 	col_userDefinedRamps = list(c("green", "red"), c("blue", "yellow2")), 	## used for coloring the in "p_userDefinedSpecialColnames" defined special column names.   XXX make nicer colors here
-	col_alphaForLegends = 220, 				## the value of the alpha channel to be used for the background of most legend boxes. Values can range from 1 to 255, with 1 being completely transparent, and 255 resulting in a completely intransparent white.
+	col_alphaForLegends = 210, 				## the value of the alpha channel to be used for the background of most legend boxes. Values can range from 1 to 255, with 1 being completely transparent, and 255 resulting in a completely intransparent white.
 
 
 	### smoothing ###
@@ -195,7 +195,15 @@ stn <- list(
 	## Aquagram 
 	aqg_defaultMod = "aucs.dce", 			## the default mode for the Aquagram
 	aqg_wlsAquagram = c(1342, 1364, 1374, 1384, 1412, 1426, 1440, 1452, 1462, 1476, 1488, 1512), 	## the wavelengths for the classic aquagram (argument aqg.selWls)
-	aqg_nrDigitsAquagram = 2,				## the number of digits displayed in the standard aquagram
+	aqg_plottingType = "linear", 			## the plotting type of the Aquagram: can be either "linear" for a linear (x~y) orientation of the Aquagram, or "circular" for a radar resp. spider-plot layout of the Aquagram. The classic modes will always be plotted circular.
+	aqg_alwaysPlotAvgAqg = FALSE, 			## Logical. If, should a bootstrapped Aquagram be available, also the basic "average-only" Aquagram should be plotted.
+	aqg_plot_linear_legendCex = 0.7, 		## the cex for the legend in the linear Aquagram
+	aqg_plot_pdfSizeAdd = 2.5, 				## increase the size of a possible Aquagram pdf output (linear Aquagram plotting type only) by this value in each x and y axis
+	aqg_plot_ltyCIs = 3, 					## the line-types for the confidence intervals in linear Aquagrams
+	aqg_plot_color_alpha_CIfill = 15, 		## The alpha-value, i.t. transparency for the color-fill of the confidence intervals in the linear Aquagram. Values between 1 and 255, with 1 being completely transparent 
+	aqg_plotWamacsLines = TRUE, 			## logical, if vertical lines for the WAMACs should be plotted. (Only applies to the linear Aquagram.)
+	aqg_linearXaxisTitle = "WAMACs", 		## the title for the X-axis in the linear type of Aquagram
+	aqg_nrDigitsAquagram = 2,				## the number of digits displayed in the standard Aquagram
 	aqg_linetypes = c(1,2,3),				## the default vector for the line-types to be used in the aquagram. Gets recycled.
 	aqg_correctNrOfObs = FALSE,				## if the number of observations in each spectral pattern should be corrected (if necessary by random sampling) so that all the spectral pattern are calculated out from the same number of observations
 	aqg_adPeakPlot = TRUE,					## if, should subtraction spectra be plotted, an additional plot with picked peaks should be added
