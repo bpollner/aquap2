@@ -32,7 +32,9 @@ Imports:
     plotrix,
     pracma,
     beeswarm,
-    devtools
+    devtools,
+    grid,
+    gridExtra
 Suggests:
     knitr
 VignetteBuilder: knitr

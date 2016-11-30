@@ -197,6 +197,7 @@ stn <- list(
 	aqg_wlsAquagram = c(1342, 1364, 1374, 1384, 1412, 1426, 1440, 1452, 1462, 1476, 1488, 1512), 	## the wavelengths for the classic aquagram (argument aqg.selWls)
 	aqg_plottingType = "linear", 			## the plotting type of the Aquagram: can be either "linear" for a linear (x~y) orientation of the Aquagram, or "circular" for a radar resp. spider-plot layout of the Aquagram. The classic modes will always be plotted circular.
 	aqg_alwaysPlotAvgAqg = TRUE, 			## Logical. If, should a bootstrapped Aquagram be available, also the basic "average-only" Aquagram should be plotted.
+	aqg_plotSigTable = TRUE, 				## Logical. If, should a bootstrapped Aquagram be available, the corresponding table indicating significant differences between groups should be plotted as well.
 	aqg_plot_linear_legendCex = 0.7, 		## the cex for the legend in the linear Aquagram
 	aqg_plot_pdfSizeAdd = 2.5, 				## increase the size of a possible Aquagram pdf output (linear Aquagram plotting type only) by this value in each x and y axis
 	aqg_plot_ltyCIs = 3, 					## the line-types for the confidence intervals in linear Aquagrams

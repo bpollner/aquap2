@@ -49,6 +49,18 @@ aq_makeNicePlottingFrame_linear <- function(aquCalcResult, onMain, onSub, mod, T
 #	}	
 	groups <- rownames(plotData)
 	legTextExt <- paste0(groups, " N=", possN)
+	#
+	options(warn=-1)
+	grNrs <- as.numeric(groups)
+	options(warn=0)
+	if (!any(is.na(grNrs))){ # so we have, indeed, all numbers
+		ord <- order(grNrs)
+	} else {
+		ord <- order(groups)
+	}
+	legTextExt <- legTextExt[ord]
+	legendColor <- legendColor[ord]
+	#
 	lwd <- 1
 	##
 	if (inBoot) {
@@ -173,6 +185,38 @@ aq_makePolygons <- function(plotData, legendColor) {
 	} # end !is.null(plotData)
 } # EOF
 
+aq_plotCore_sigTable <- function(aquCalc) {
+	plotSig <- .ap2$stn$aqg_plotSigTable
+	#
+	if (plotSig & !is.null(aquCalc@ciTable)) {
+		sigTable <- aquCalc@ciTable
+		cns <- colnames(sigTable)
+		rnsSig <- rownames(sigTable)
+		for (i in 1: ncol(sigTable)) {
+			sigTable[,i] <- as.character(sigTable[,i])
+		}
+		colnames(sigTable) <- cns
+		rownames(sigTable) <- rnsSig
+		#
+		avgTable <- as.data.frame(round(aquCalc@avg, 2))
+		rnsAvg <- rownames(avgTable)
+		for (i in 1: ncol(avgTable)) {
+			avgTable[,i] <- as.character(avgTable[,i])
+		}
+		colnames(avgTable) <- cns
+		rownames(avgTable) <- rnsAvg
+		#
+		sep <- sigTable[1,,drop=FALSE]
+		sep[1,] <- rep("---", ncol(avgTable))
+		rownames(sep) <- ""
+		colnames(sep) <- colnames(sigTable)
+		plotThis <- rbind(sigTable, sep, avgTable)
+		# now please plot it !!
+		plot.new() # to make a new page
+		gridExtra::grid.table(plotThis, theme=gridExtra::ttheme_default(base_size=8, padding=grid::unit(c(4,2), "mm")))
+	}
+} # EOF
+
 plot_aquagram_inner <- function(aquCalc, selWls=.ap2$stn$aqg_wlsAquagram, onSub, onMain, where, customColor, nrCorr, bootCI, mod, TCalib, minus, Texp, masterScaleAQ, masterScaleBoot, clt=NULL, R) {
 	if (!is.numeric(selWls)) {
 		stop("Please provide a numerical vector as input for the wavelengths. Thank you.", call.=FALSE)
@@ -271,9 +315,11 @@ plot_aquagram_inner <- function(aquCalc, selWls=.ap2$stn$aqg_wlsAquagram, onSub,
 				onSub <- paste(onSub, " 95% CI based on", R, "bootstrap replicates (bca)")			
 				ciData <- aq_makeNicePlottingFrame_circ(aquCalc@bootRes, selWls, masterScaleBoot)
 			 	aq_plotCore_circ(ciData)
+			 	aq_plotCore_sigTable(aquCalc)
 			} else { # so we want to plot linear !! :-)
 				linData <- aq_makeNicePlottingFrame_linear(aquCalc, onMain, onSubLinear, mod, Texp, customColor, clt, R, minus, inBoot=TRUE)
 				aq_plotCore_linear(linData, legTextMod, curYlim=masterScaleBoot, inBoot=TRUE)
+			 	aq_plotCore_sigTable(aquCalc)
 			}
 		} # end if !is.null bootRes
 	} # end if bootCI	
