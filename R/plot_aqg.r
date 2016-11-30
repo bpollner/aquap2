@@ -237,23 +237,25 @@ plot_aquagram_inner <- function(aquCalc, selWls=.ap2$stn$aqg_wlsAquagram, onSub,
 	########
 	## here always plot the selected aquagram, no fancy CI
 	legTextMod <- aq_checkLegendTextMod(mod, minus, TCalib, Texp)
+	## for circular only
 	legColor <- Color
+	selWls <- aq_checkSelWls(mod, selWls)
+	standardData <- aq_makeNicePlottingFrame_circ(aquCalc@avg, selWls, masterScaleAQ)
+	legText <- rownames(standardData$Data)[-c(1,2)]	
+	## \end for circ only
 	if (doPlotAvg) {
 		if (plotType == "circular") {
-		if (is.numeric(clt)) {
-			ltPlot <- ltLeg <- clt
-		} else {
-			ltPlot <- ltLeg <- .ap2$stn$aqg_linetypes
-		}
-		selWls <- aq_checkSelWls(mod, selWls)
-		standardData <- aq_makeNicePlottingFrame_circ(aquCalc@avg, selWls, masterScaleAQ)
-		legText <- rownames(standardData$Data)[-c(1,2)]
-		pLineWi <- 2.3
-	 	aq_plotCore_circ(standardData)
-	} else { # so we want to plot linear !! :-)
-		linData <- aq_makeNicePlottingFrame_linear(aquCalc, onMain, onSubLinear, mod, Texp, customColor, clt, R, minus, inBoot=FALSE)
-		aq_plotCore_linear(linData, legTextMod, curYlim=masterScaleAQ, inBoot=FALSE)
-	}
+			if (is.numeric(clt)) {
+				ltPlot <- ltLeg <- clt
+			} else {
+				ltPlot <- ltLeg <- .ap2$stn$aqg_linetypes
+			}
+			pLineWi <- 2.3
+	 		aq_plotCore_circ(standardData)
+		} else { # so we want to plot linear !! :-)
+			linData <- aq_makeNicePlottingFrame_linear(aquCalc, onMain, onSubLinear, mod, Texp, customColor, clt, R, minus, inBoot=FALSE)
+			aq_plotCore_linear(linData, legTextMod, curYlim=masterScaleAQ, inBoot=FALSE)
+		} # end else
 	} # end if doPlotAvg
 	##
 	if (bootCI) {
