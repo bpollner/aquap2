@@ -214,7 +214,7 @@ aq_plotCore_sigTable <- function(aquCalc) {
 		# now please plot it !!
 		plot.new() # to make a new page
 		gridExtra::grid.table(plotThis, theme=gridExtra::ttheme_default(base_size=8, padding=grid::unit(c(4,2), "mm")))
-	}
+	} # end if plot Sig
 } # EOF
 
 plot_aquagram_inner <- function(aquCalc, selWls=.ap2$stn$aqg_wlsAquagram, onSub, onMain, where, customColor, nrCorr, bootCI, mod, TCalib, minus, Texp, masterScaleAQ, masterScaleBoot, clt=NULL, R) {
