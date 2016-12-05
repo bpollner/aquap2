@@ -1,0 +1,13 @@
+Version 0.1.8
+New:	
+	Added possibility to plot Aquagrams linear instead of circular. Factory-default is linear; 
+		parameter "aqg_plottingType" in the settings file.
+	Added output of table indicating significant differences between groups and the corresponding values.
+	Added some more Aquagram specific options to the settings file.
+	Resampling of data to new wavelengths (core data manipulation function).
+Improve:
+	If exact temperature is present in temperature calibration data, "loess" is not used any more.
+Bugfix:
+	Classic Aquagram can now be produced without having a temperature calibration file.
+	Outlier-detection using the package rrcovHD should now work on all systems.
+	Now correct detection of range in universal AUC table.

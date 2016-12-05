@@ -356,11 +356,12 @@ tempCalibMakeTable <- function(fdata, TRange=NULL, ot=c(1300, 1600)) {
 	rownames(fdata) <- make.unique(as.character(fdata$temp_W))
 	spect <- fdata[ , -c(1,2)]
 	wls <- as.numeric(substr(colnames(spect), 2, nchar(colnames(spect)) ))
-	b <- which(wls %in% ot)
+#	b <- which(wls %in% ot)
+	b <- range(which(wls >= ot[1] & wls <= ot[2])) # is an index !!
 	spectOt <- spect[, b[1]:b[2]]
 	wlsOt <- wls[b[1]:b[2]]
 	colnames(spectOt) <- paste("w", wlsOt, sep="")
-	spectOt
+	return(spectOt)
 } # EOF
 
 tempCalibMakeAvgTable <- function(fdata, smoothN=17, TRange=NULL, ot=c(1300, 1600)) {
@@ -374,7 +375,8 @@ tempCalibMakeAvgTable <- function(fdata, smoothN=17, TRange=NULL, ot=c(1300, 160
 	colnames(spect) <- colnames(fdata)[-c(1,2)]
 	wls <- as.numeric(substr(colnames(spect), 2, nchar(colnames(spect)) ))
 	OverTone <- ot
-	a <- which(wls %in% OverTone) # XXX modify this for better safety !!! XXXMODXXX
+#	a <- which(wls %in% OverTone) # XXX modify this for better safety !!! XXXMODXXX
+	a <- range(which(wls >= OverTone[1] & wls <= OverTone[2])) # is an index !!
 	spectOt <- spect[, a[1]:a[2]]
 	wlsOt <- wls[a[1]:a[2]]
 	Tnames <- fdata$temp_W
@@ -418,7 +420,8 @@ calcAUCtable <- function(NIRdata) {
 		for (k in 1: nrow(Call)) {
 			pp1 <- Call[k, 1] * funkyLM$coefficients[2] + funkyLM$coefficients[1]
 			pp2 <- Call[k, 2] * funkyLM$coefficients[2] + funkyLM$coefficients[1]
-			a <- which(wls %in% Call[k,]) ## indices of the boundaries of the wavelength of the current coordinate
+	#		a <- which(wls %in% Call[k,]) ## indices of the boundaries of the wavelength of the current coordinate
+			a <- range(which(wls >= Call[k,][1] & wls <= Call[k,][2]))
 			wlsCoord <- wls[a[1]:a[2]]
 			spectValCoord <- as.numeric(singleSpect[a[1]:a[2]])	
 			areaCordx <- c( wlsCoord, wls[a[2]], wls[a[1]], wls[a[1]])
@@ -487,6 +490,12 @@ getAUCcalibExtrema <- function(univAucTable, TCalib) {
 	if (is.null(TCalib)) {
 		TCalib <- c(min(temp), max(temp))
 	}
+	if (all(TCalib %in% temp)) { # so we already have the exact temperature, we do not need the interpolate the auc
+		ind <- which(temp %in% TCalib)
+		out <- aucd[ind,]
+		return(calcAUCextrema(list(aucd=out)))
+	}
+	## now we do NOT find the exact calibration temperature, we have to interpolate it using loess
 	out <- NULL
 	for (i in 1: ncol(aucd)) {
 		loessMod <- loess(aucd[,i] ~ temp, family ="symmetric") # loess here to have *every* auc, also in the "between points" available
@@ -497,11 +506,18 @@ getAUCcalibExtrema <- function(univAucTable, TCalib) {
 	rownames(out) <- as.character(TCalib)
 	a <- list(aucd=out) 	# because the next one needs a list as input (a bit silly... yes..)
 	aucEx <- calcAUCextrema(a)
+	return(aucEx)
 } # EOF
 
 getTempNormAUCPercTable <- function(univAucTable, Texp, aucExtrema) {
 	aucd <- univAucTable
 	temp <- as.numeric(rownames(aucd))
+	if (Texp %in% temp) {
+		ind <- which(temp == Texp)
+		out <- matrix(aucd[ind,], nrow=1)
+		return(calcAUCPercent(out, aucExtrema))
+	}
+	## now we do NOT have the exact temp. of the experiment, we have to interpolate using loess
 	out <- NULL
 	for (i in 1: ncol(aucd)) {
 		loessMod <- loess(aucd[,i] ~ temp, family ="symmetric")
@@ -509,6 +525,7 @@ getTempNormAUCPercTable <- function(univAucTable, Texp, aucExtrema) {
 		out <- cbind(out, a)
 	}
 	normPerc <- calcAUCPercent(out, aucExtrema)
+	return(normPerc)
 } # EOF
 
 ## gets called once in gdmm only if we will calculate an aquagram, so if tempCalibDataset does NOT come in as NULL
@@ -691,6 +708,46 @@ calcSpectra <- function(dataset, classVar, selInds, minus, plotSpectra) {
 	return(list(rawSpec=rawSpec, avgSpec=avgSpec, subtrSpec=subtrSpec))
 } # EOF
 
+aq_calculateCItable <- function(bootRes, groupAvg) {
+	if (!is.null(bootRes)) {
+		doSingleCol <- function(x, m, rNames) {
+			sigOut <- NULL
+			rnOut <- NULL
+			for (i in 1:(m-1)) {
+				for (k in (i+1):m) {
+					siRn <- paste0(rNames[i], "~", rNames[k])
+					first <- c(x[(i*2+1)-2], x[(i*2+2)-2])
+					second <- c(x[(k*2+1)-2], x[(k*2+2)-2])
+					if (min(first) > max(second) | max(first) < min(second)) {
+						sig <- "*"	
+					} else {
+						sig <- ""
+					}
+					sigOut <- c(sigOut, sig)
+					rnOut <- c(rnOut, siRn)
+				} # end for k
+			} # end for i
+			out <- data.frame(sigOut)
+			rownames(out) <- rnOut
+			return(out)
+		} # EOIF
+		###
+		bootResRed <- bootRes[-(seq(1, nrow(bootRes), by=3)),] # first kick out the avg value
+		mm <- nrow(groupAvg)
+		rns <- rownames(groupAvg)
+		allColSigsList <- apply(bootResRed, 2, doSingleCol, m=mm, rNames=rns)
+		outTable <- data.frame(rep(NA, nrow(allColSigsList[[1]])))
+		for (i in 1: length(allColSigsList)) {
+			outTable <- cbind(outTable, allColSigsList[[i]])
+		}
+		outTable <- outTable[,-1] # get rid of the NAs
+		colnames(outTable) <- colnames(bootRes)
+		return(outTable)	
+		} else {
+			return(NULL)
+	} # end !is.null(bootRes)	
+} # EOF
+
 calcAquagramSingle <- function(dataset, md, ap, classVar, idString) {
 	##
 	a <- ap$aquagr
@@ -751,6 +808,9 @@ calcAquagramSingle <- function(dataset, md, ap, classVar, idString) {
 		bootRes <- NULL
 	} # end calc boot
 #	aqRes <- new("aquCalc", ID, classVar, avg, numRep, possN, selInds, bootRes, rawSpec, avgSpec, subtrSpec) # ? does not work ?? 
+	## now make a nice CI table comparing all groups against each other, for each WAMAC
+	ciTable <- aq_calculateCItable(bootRes, groupAverage)
+	##
 	aqRes <- new("aqg_calc")
 	aqRes@ID <- idString
 	aqRes@classVar <- classVar
@@ -760,6 +820,7 @@ calcAquagramSingle <- function(dataset, md, ap, classVar, idString) {
 	aqRes@possN <- possibleNrPartic
 	aqRes@selInds <- selInds
 	aqRes@bootRes <- bootRes
+	aqRes@ciTable <- ciTable
 	aqRes@rawSpec <- rawSpec
 	aqRes@avgSpec <- avgSpec
 	aqRes@subtrSpec <- subtrSpec

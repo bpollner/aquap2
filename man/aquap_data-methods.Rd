@@ -71,8 +71,8 @@ Please see \code{\link{siWl}} for generating such a dataset. }
 Other Data pre-treatment functions: \code{\link{do_addNoise}},
   \code{\link{do_avg}}, \code{\link{do_detrend}},
   \code{\link{do_emsc}}, \code{\link{do_gapDer}},
-  \code{\link{do_msc}}, \code{\link{do_sgolay}},
-  \code{\link{dpt_modules}}, \code{\link{selectWls}},
-  \code{\link{ssc}}
+  \code{\link{do_msc}}, \code{\link{do_resampleNIR}},
+  \code{\link{do_sgolay}}, \code{\link{dpt_modules}},
+  \code{\link{selectWls}}, \code{\link{ssc}}
 }
 

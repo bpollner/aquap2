@@ -459,3 +459,45 @@ do_dptSeq <- function(dataset, dptSeq, extraModelList=NULL, silent=TRUE) {
 	.ap2$stn$allSilent <- silent
 	return(performDPT_Core(dataset, dptSeq, extraModelList, allExportModels=FALSE))
 } # EOF
+
+
+#' @title Resample data to new Wavelengths
+#' @description Resample the data in the provided dataset to new, possibly 
+#' evenly spaced, wavelengths.
+#' @details If nothing is provided for the argument \code{targetWls}, an evenly 
+#' spaced vector from the lowest to the highest available wavelength 
+#' is automatically generated as the target wavelengths to be resampled to.
+#' @param dataset An object of class 'aquap_data' as produced e.g. by 
+#' \code{\link{gfd}}.
+#' @param targetWls Numeric vector, the target wavelengths. If left at the 
+#' default \code{NULL}, an evenly spaced vector from the lowest to the 
+#' highest available wavelength is automatically generated as the target 
+#' wavelengths to be resampled to.
+#' @param tby Numeric length one, the spacing in nm of the automatically 
+#' generated target wavelength. Only applies if \code{targetWls} is left at 
+#' \code{NULL}.
+#' @param method The resampling method. For details see 
+#' \code{\link[pracma]{interp1}}.
+#' @return The resampled dataset.
+#' @examples
+#' \dontrun{
+#' fd <- gfd()
+#' fdR <- do_resampleNIR(fd)
+#' }
+#' @family Data pre-treatment functions 
+#' @export
+do_resampleNIR <- function(dataset, targetWls=NULL, tby=0.5, method="linear") {
+	ncpwl <- dataset@ncpwl
+	charPrevWls <- substr(colnames(dataset$NIR)[1], 1, (ncpwl))
+	#
+    x <- getWavelengths(dataset)
+	if (is.null(targetWls)) {
+    	xNew <- seq(ceiling(x[1]/2) * 2, floor(x[length(x)]/2) * 2, tby)
+	} else {
+		xNew <- targetWls
+	}	
+	NIR <- t(apply(dataset$NIR, 1, pracma::interp1, x = x, xi = xNew, method = method))
+    colnames(NIR) <- paste0(charPrevWls, xNew)
+    dataset$NIR <- NIR
+    return(dataset)
+} # EOF
