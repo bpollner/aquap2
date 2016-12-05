@@ -1,7 +1,7 @@
 resampleNIR_inner <- function(NIR, targetWls=NULL, method="linear") {
     x <- getWavelengths(NIR)
 	if (is.null(targetWls)) {
-    	xNew <- seq(ceiling(x[1]/2) * 2, floor(x[length(x)]/2) * 2, 2)
+    	xNew <- seq(ceiling(x[1]/2) * 2, floor(x[length(x)]/2) * 2, 0.5)
 	} else {
 		xNew <- targetWls
 	}
