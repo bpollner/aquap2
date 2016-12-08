@@ -748,12 +748,12 @@ aq_calculateCItable <- function(bootRes, groupAvg) {
 	} # end !is.null(bootRes)	
 } # EOF
 
-calcAquagramSingle <- function(dataset, md, ap, classVar, idString) {
+calcAquagramSingle <- function(dataset, md, ap, classVar, minus, idString) {
 	##
 	a <- ap$aquagr
 	nrCorr <- a$nrCorr
 	plotSpectra <- a$spectra
-	minus <- a$minus
+#	minus <- a$minus
 	mod <- a$mod
 	TCalib <- a$TCalib
 	Texp <- a$Texp

@@ -232,18 +232,24 @@ ap_checkAquagramDefaults <- function(ap, header) {
 		ap$aquagr$mod <- mod
 		###
 		minus <- a$minus
+		groupingVars <- a$vars
 		if (!is.null(minus)) {
-			if (!all(is.character(minus)) | length(minus) != 1) {
-				stop("Please provide a character length one for the argument 'aqg.minus'", call.=FALSE)
+			if (!all(is.character(minus)) ) {
+				stop("Please provide only characters for the argument 'aqg.minus'", call.=FALSE)
 			}
-			groupingVars <- a$vars
+			if (length(minus) > length(groupingVars)) {
+				stop("Please provide a character vector not longer as the character vector in 'aqg.vars' for the argument 'aqg.minus'", call.=FALSE)
+			}
+			if (length(minus) == 1 & length(groupingVars) > 1 ) {
+				minus <- rep(minus, length(groupingVars))
+			}
 			for (i in 1: length(groupingVars)) {
 				ind <- which(colnames(header) == groupingVars[i])
 				levelsChar <- levels(header[,ind])
-				if ((!minus %in% levelsChar) & grepl("diff", mod) ) {
-					stop(paste("Sorry, it appears that the provided value \"", minus, "\" for the argument 'aqg.minus' is not present in the Aquagram grouping variable \"", groupingVars[i], "\". \nPlease check your input at 'aqg.minus' and 'aqg.vars'", sep=""), call.=FALSE)
+				if ((!minus[i] %in% levelsChar) & grepl("diff", mod) ) {
+					stop(paste("Sorry, it appears that the provided value \"", minus[i], "\" for the argument 'aqg.minus' is not present in the Aquagram grouping variable \"", groupingVars[i], "\". \nPlease check your input at 'aqg.minus' and 'aqg.vars'", sep=""), call.=FALSE)
 				}
-				if ((!minus %in% levelsChar) & any(spectra %in% pvSubSpectra)) {
+				if ((!minus[i] %in% levelsChar) & any(spectra %in% pvSubSpectra)) {
 					stop(paste("Sorry, you have to provide a value for 'aqg.minus' in order to plot subtracted spectra"), call.=FALSE)
 				}
 			} # end for i

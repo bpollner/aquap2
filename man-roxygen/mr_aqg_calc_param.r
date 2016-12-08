@@ -2,9 +2,8 @@
 #' calculated with a given dataset.
 #' @param aqg.vars NULL or character vector. Which class variables 
 #' should be used for grouping the data for the Aquagram. Provide a character 
-#' vector with the column names of class variables for grouping data and generate 
-#' an Aquagram for every one of them, or set to NULL if you are providing the 
-#' Aquagram class-variable later when calculating and plotting the Aquagram.
+#' vector with the column names of one or more class variables for grouping data 
+#' and generate an Aquagram for every one of them.
 #' @param aqg.nrCorr Character or Logical. If the number of observations in each
 #' spectral pattern should be corrected (if necessary by random sampling) so
 #' that all the spectral pattern are calculated out from the same number of
@@ -20,11 +19,17 @@
 #'  \item "subtr" for subtractions in the averaged spectra (see \code{"minus"} below)
 #'  \item "all" for all of the aforementioned
 #' }
-#' @param aqg.minus Character or NULL. Which of the levels present in the variable 
-#' provided in \code{aqg.vars} should be used for subtractions -- the average of 
-#' this 'minus' gets subtracted from all the other averages. 'aqg.minus' is used for 
-#' the subtractions in the raw spectra as well as for the subtractions within the
-#' Aquagram, should you choose any of the -diff modes.
+#' @param aqg.minus Character length one, character vector or NULL. Which of the 
+#' levels present in each of the class-variables provided in \code{aqg.vars} 
+#' should be used for subtractions -- the average of this 'minus' gets subtracted 
+#' from all the other averages. \code{aqg.minus} is used for the subtractions in 
+#' the raw spectra as well as for the subtractions within the Aquagram, should you 
+#' choose any of the -diff modes. If a vector with the same length as the vector 
+#' in \code{aqg.vars} is provided, each element of \code{aqg.minus} is used to 
+#' perform the corresponding subtraction for each element in \code{aqg.vars}. If 
+#' a character length one is provided and the input in \code{aqg.vars} is longer 
+#' than one, the single value in \code{aqg.minus} gets recycled and is used in 
+#' each element in \code{aqg.vars} for subtractions.
 #' @param aqg.mod Character. What mode, what kind of Aquagram should be calculated?
 #' Possible values are: <%=r_listize(pv_AquagramModes)%>, and 'def' for reading in 
 #' the default from settings.r. Please see \code{\link{calc_aqg_modes}} for an 
