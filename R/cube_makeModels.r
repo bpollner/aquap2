@@ -88,6 +88,7 @@ calculateAquagram <- function(dataset, md, ap, idString, tempFile) {
 	}
 	##
 	vars <- ap$aquagr$vars
+	minus <- ap$aquagr$minus
 	aquCalcRes  <- list()
 	length(aquCalcRes) <- lec <- length(vars)
 	if (ap$aquagr$bootCI) {
@@ -96,7 +97,7 @@ calculateAquagram <- function(dataset, md, ap, idString, tempFile) {
 		registerDoSEQ() # XXX new !
 	}
 	for (i in 1: length(vars)) {
-		aquCalcRes[[i]] <- calcAquagramSingle(dataset, md, ap, vars[i], idString)
+		aquCalcRes[[i]] <- calcAquagramSingle(dataset, md, ap, vars[i], minus[i], idString)
 	} # end for i
 	
 	if (!.ap2$stn$allSilent) {cat(bootTxtClosingAdd)}

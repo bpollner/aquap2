@@ -703,6 +703,9 @@ extractColorLegendValues <- function(dataset, groupBy, minPart=NULL, minDistinct
 		lto <- order(nrs) # so if the legend text is coming from all numbers *and* they are higher than 9 we get the real order to sort later
 	}		
 	partN <- sapply(levels(grouping), function(x, grAll) length(which(grAll==x)), grAll=grouping)
+	if (class(partN) == "list" & length(partN) == 0) {
+		stop(paste0("Sorry, a problem occurred when trying to count the levels in the class-variable '", groupBy, "'. \nProbably there are no data in this class-variable. A solution could be to remove '", groupBy, "' from your analysis / your input."), call.=FALSE)
+	}
 	sumPart <- sum(partN)
 	legendText <- legendText[lto]
 	legendTextExtended <- paste(legendText, "   N=", partN[lto], "", sep="") # have it in every line			

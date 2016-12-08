@@ -609,9 +609,9 @@ plot_aqg <- function(cube, aps="def", ...) {
 	a <- ap$aquagr
 	aC <- apCube$aquagr # to make it impossible to change the calculated values, the info depending on the calculation etc.
 	b <- ap$genPlot
-	for (va in 1: length(ap$aquagr$vars)) {
+	for (va in 1: length(aC$vars)) { # was length(ap$aquagr$vars)
 		for (cu in 1: length(cube)) {
-			plotAquagram_single(getAqgResList(cube[[cu]])[[va]], cube@aqgRan[[va]], where, b$onSub, b$onMain, a$ccol, a$spectra, a$pplot, a$plines, a$discr, a$clt, aC$mod, aC$TCalib, aC$Texp, aC$selWls, aC$nrCorr, aC$bootCI, aC$minus, a$fsa, a$fss, aC$R, ncpwl, getIdString(cube[[cu]]), ap=apCube)
+			plotAquagram_single(getAqgResList(cube[[cu]])[[va]], cube@aqgRan[[va]], where, b$onSub, b$onMain, a$ccol, a$spectra, a$pplot, a$plines, a$discr, a$clt, aC$mod, aC$TCalib, aC$Texp, aC$selWls, aC$nrCorr, aC$bootCI, aC$minus[va], a$fsa, a$fss, aC$R, ncpwl, getIdString(cube[[cu]]), ap=apCube)
 		} # end for i
 	} # end for va
 	if (where == "pdf") {dev.off()}
