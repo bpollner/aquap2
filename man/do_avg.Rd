@@ -4,23 +4,33 @@
 \alias{do_avg}
 \title{Average spectra in a dataset}
 \usage{
-do_avg(dataset)
+do_avg(dataset, clv = NULL, inParallel = TRUE)
 }
 \arguments{
 \item{dataset}{An object of class 'aquap_data" as produced by 
 \code{\link{gfd}} or as can be extracted from a 'cube' via 
 \code{\link{getcd}}.}
+
+\item{clv}{Character vector, one or more valid class-variables defining the 
+subsets of the dataset to be averaged.}
+
+\item{inParallel}{Logical, if the averaging of spectra should be done in 
+parallel. Defaults to TRUE.}
 }
 \value{
-A standard dataset with a single row.
+The transformed dataset.
 }
 \description{
 Calculate the average spectrum of all the given spectra in a 
-dataset.
+dataset, or define groups to be averaged by providing one or more 
+class-variable.
 }
 \details{
-The average spectrum is returned in a single row with the 
-header-data taken from the first row of the original dataset.
+The total and group-wise average spectrum is returned each in a 
+single row with the header-data taken from the first row of the subset of 
+the original dataset as defined by the grouping. If parameter \code{clv} is 
+left at the default NULL, all the spectra in the dataset will be averaged 
+together into a single row.
 }
 \examples{
 \dontrun{
@@ -30,6 +40,10 @@ fd_avg <- do_avg(fd)
 fd_avg2 <- do_avg(ssc(fd, C_water=="MQ")) # assumes the existence of column "C_water"
 plot(fd_avg, pg.where="", pg.main="| averaged")
 plot(fd - fd_avg, pg.where="", pg.main="| avg subtracted")
+#######
+fd_avg_group <- do_avg(fd, "C_Group") # averaging within groups
+fd_avg_time_group <- do_avg(fd, c("C_Time", "C_Group")) # averaging within a 
+# subset defined by "C_Time" and "C_Group"
 }
 }
 \seealso{
