@@ -124,11 +124,19 @@ do_msc <- function(dataset, ref=NULL, extMscModel=NULL, exportModel=FALSE) {
 
 #' @title Average spectra in a dataset
 #' @description Calculate the average spectrum of all the given spectra in a 
-#' dataset.
-#' @details The average spectrum is returned in a single row with the 
-#' header-data taken from the first row of the original dataset.
+#' dataset, or define groups to be averaged by providing one or more 
+#' class-variable.
+#' @details The total and group-wise average spectrum is returned each in a 
+#' single row with the header-data taken from the first row of the subset of 
+#' the original dataset as defined by the grouping. If parameter \code{clv} is 
+#' left at the default NULL, all the spectra in the dataset will be averaged 
+#' together into a single row.
 #' @inheritParams do_sgolay
-#' @return A standard dataset with a single row.
+#' @param clv Character vector, one or more valid class-variables defining the 
+#' subsets of the dataset to be averaged.
+#' @param inParallel Logical, if the averaging of spectra should be done in 
+#' parallel. Defaults to TRUE.
+#' @return The transformed dataset.
 #' @examples
 #' \dontrun{
 #' fd <- gfd() # get the full dataset
@@ -137,17 +145,70 @@ do_msc <- function(dataset, ref=NULL, extMscModel=NULL, exportModel=FALSE) {
 #' fd_avg2 <- do_avg(ssc(fd, C_water=="MQ")) # assumes the existence of column "C_water"
 #' plot(fd_avg, pg.where="", pg.main="| averaged")
 #' plot(fd - fd_avg, pg.where="", pg.main="| avg subtracted")
+#' #######
+#' fd_avg_group <- do_avg(fd, "C_Group") # averaging within groups
+#' fd_avg_time_group <- do_avg(fd, c("C_Time", "C_Group")) # averaging within a 
+#' # subset defined by "C_Time" and "C_Group"
 #' }
 #' @family Data pre-treatment functions 
 #' @seealso \code{\link{getcd}}
 #' @export
-do_avg <- function(dataset) {
+do_avg <- function(dataset, clv=NULL, inParallel=TRUE) {
 	autoUpS()
-	NIR <- matrix(apply(dataset$NIR, 2, mean), nrow=1)
-	colnames(NIR) <- colnames(dataset$NIR)
-	dsNew <- dataset[1,]
-	dsNew$NIR <- I(NIR)
-	return(dsNew)	
+	if (is.null(clv)) {
+		NIR <- matrix(apply(dataset$NIR, 2, mean), nrow=1)
+		colnames(NIR) <- colnames(dataset$NIR)
+		dsNew <- dataset[1,]
+		dsNew$NIR <- I(NIR)
+		return(dsNew)		
+	} # end is.null(clv)
+	#
+	cns <- colnames(dataset$header)
+	if (!all(clv %in% cns)) {
+		ind <- which(!clv %in% cns)
+		stop(paste0("Sorry, the class-variables '", paste(clv[ind], collapse="', '"), "' seem not to be present in the provided dataset."), call.=FALSE)
+	}
+	fdf <- makeFlatDataFrameMulti(dataset, clv)
+	if (inParallel) {
+		registerParallelBackend()
+	} else {
+		registerDoSEQ()
+	}
+	##
+	fdfMean <- plyr::ddply(fdf, .variables=clv, .fun=plyr::colwise(mean), .parallel=inParallel) ##### CORE #####
+	NIR <- as.matrix(fdfMean[,-(1:length(clv))])
+	smh <- fdfMean[, 1:length(clv)]
+	##
+	header <- as.data.frame(matrix(rep(NA, ncol(dataset$header)), nrow=1))
+	colnames(header) <- colnames(dataset$header)
+	colRep <- as.data.frame(matrix(rep(NA, ncol(dataset$colRep)), nrow=1))
+	colnames(colRep) <- colnames(dataset$colRep)
+	ds <- dataset
+	for (i in 1: nrow(smh)) {
+		for (k in 1: ncol(smh)) {
+			ds <- ssc_s(ds, clv[k], smh[i,k]) # search the matching data to construct the header
+		} # end for k
+		ds <- ds[1,] # only take the first row
+		siH <- ds$header
+		class(siH) <- "data.frame"
+		header <- rbind(header, siH)
+		siCol <- ds$colRep
+		class(siCol) <- "data.frame"
+		colRep <- rbind(colRep, siCol)
+		ds <- dataset
+	} # end for i
+	header <- header[-1,] # leave out all the NAs
+	colRep <- colRep[-1,]
+	rownames(NIR) <- rownames(header)
+	newData <- data.frame(I(header), I(colRep), I(NIR))
+	dataset@.Data <- newData
+	dataset@row.names <- rownames(header)
+	for (i in 1: ncol(dataset$header)) {
+		if (all(is.character(dataset$header[,i]))) {
+			dataset$header[i] <- factor(dataset$header[,i])
+		}
+	} 
+	return(dataset)
 } # EOF
 
 ### input is a data frame with one or 2 loading vectors or one regression vector
