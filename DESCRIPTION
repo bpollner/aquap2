@@ -10,12 +10,11 @@ Description: Methods and tools for multivariate data analysis in R, with an
 License: GPL (>=2)
 LazyLoad: yes
 Depends:
-    R (>= 3.3.2)
+    R (>= 3.2.3)
 Imports:
     methods,
     foreach,
     doParallel,
-    openxlsx,
     signal,
     ChemometricsWithR,
     plyr,
@@ -31,11 +30,12 @@ Imports:
     prospectr,
     plotrix,
     pracma,
-    beeswarm,
-    devtools,
-    grid,
-    gridExtra
+    beeswarm
 Suggests:
+	openxlsx,
+	devtools,
+    grid,
+    gridExtra,
     knitr
 VignetteBuilder: knitr
 Collate:
