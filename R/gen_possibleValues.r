@@ -48,7 +48,7 @@ pv_tripleDotsMod <- c(pv_modifyUCL, pv_modifyDPT, pv_modifyPCA, pv_modifySIMCA, 
 ##############
 
 ## import, filetype etc.
-pv_filetypes <- c("vision_NSAS.da", "tabDelim.txt", "Pirouette.pir")
+pv_filetypes <- c("vision_NSAS.da", "tabDelim.txt", "Pirouette.pir", "xlsx")
 
 
 ## Data pre-treatment moduls

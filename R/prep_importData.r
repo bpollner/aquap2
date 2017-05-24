@@ -57,7 +57,7 @@ readSpec_checkDefaults <- function(possibleFiletypes, md, filetype, naString) {
 #' @export
 readSpectra <- function(md=getmd(), filetype="def", naString="NA") {
 	autoUpS()
-	possibleFiletypes <- pv_filetypes #global constant, they get handed down to the checking function !  	# 	pv_filetypes <- c("vision_NSAS.da", "tabDelim.txt", "Pirouette.pir")
+	possibleFiletypes <- pv_filetypes #global constant, they get handed down to the checking function !  	# 	pv_filetypes <- c("vision_NSAS.da", "tabDelim.txt", "Pirouette.pir", "xlsx")
 	filename <- NULL # will be changed in the checking
 	readSpec_checkDefaults(possibleFiletypes, md, filetype, naString)
 	rawFolder <- .ap2$stn$fn_rawdata
@@ -78,6 +78,11 @@ readSpectra <- function(md=getmd(), filetype="def", naString="NA") {
 		a <- paste(folderFile, ".pir", sep="")
 		assign("spectraFilePath", a, pos=parent.frame(n=1))
  		return(getNIRData_Pirouette(a))
+	} 
+	if (filetype == possibleFiletypes[4]) {
+		a <- paste(folderFile, ".xlsx", sep="")
+		assign("spectraFilePath", a, pos=parent.frame(n=1))
+ 		return(getNirData_Excel(a))
 	} 
 	## if nothing of the above happend, then we must have (checked!) the path to a valid custom .r file in "filetype" 
 	custName <- strsplit(filetype, "custom@")[[1]][2]

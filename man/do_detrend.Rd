@@ -86,4 +86,3 @@ Other dpt modules documentation: \code{\link{do_emsc}},
   \code{\link{do_sgolay}}, \code{\link{do_snv}},
   \code{\link{dpt_modules}}
 }
-

@@ -41,6 +41,7 @@ sure to export it \strong{non randomized} - please see examples.
 before importing the dataset; if the numerical column \code{smpTemp} is not 
 present, the temperature calibration data can not be used.
 }
+
 \examples{
 \dontrun{
 genTempCalibExp(Tcenter=30) # generate the folder structure in the current 
@@ -56,13 +57,12 @@ gfd <- gfd() # imports temperature raw-data and saves an R-data file in the
 \code{\link{tempCalib_procedures}}, \code{\link{genFolderStr}}, 
 \code{\link{genNoiseRecExp}}
 
+Other Temperature procedures: \code{\link{tempCalib_procedures}}
+
 Other Helper Functions: \code{\link{genFolderStr}},
   \code{\link{genNoiseRecExp}}, \code{\link{getcd}},
   \code{\link{getcm}}, \code{\link{instAquap2Examples}},
   \code{\link{printStdColnames}}, \code{\link{reColor}},
   \code{\link{saveAQdata}}, \code{\link{updateAquap2}},
   \code{\link{updateSettings}}
-
-Other Temperature procedures: \code{\link{tempCalib_procedures}}
 }
-

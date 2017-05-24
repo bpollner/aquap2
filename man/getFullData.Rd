@@ -150,6 +150,7 @@ inside the .pir file, set argument 'slType'to NULL
 at first at bit complicated, but it proved to be good practise to ensure a 
 strict and conscious handling of the files.
 }
+
 \examples{
 \dontrun{
  md <- getmd()
@@ -176,4 +177,3 @@ Other Core functions: \code{\link{exportSampleList}},
   \code{\link{plot,aquap_cube,missing-method}},
   \code{\link{plot,aquap_data,missing-method}}
 }
-

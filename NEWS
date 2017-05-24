@@ -1,5 +1,23 @@
 #############################
 Version 0.1.8
+New:
+	Values on the X-Axis can be others than wavelengths; the denominator can be specified in the metadata.
+
+
+
+
+
+
+
+
+
+
+#############################
+
+
+
+#############################
+Version 0.1.8
 New:	
 	Added possibility to plot Aquagrams linear instead of circular. Factory-default is linear; 
 		parameter "aqg_plottingType" in the settings file.

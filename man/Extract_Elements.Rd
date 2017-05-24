@@ -2,10 +2,10 @@
 % Please edit documentation in R/cl_classDefs.r, R/doc_methods.r
 \docType{methods}
 \name{getHeader}
-\alias{Extract_Elements}
 \alias{getHeader}
 \alias{getHeader,aquap_data-method}
 \alias{getHeader,aquap_set-method}
+\alias{Extract_Elements}
 \title{Extract Elements}
 \usage{
 getHeader(object)
@@ -40,4 +40,3 @@ Other Extract Elements: \code{\link{getWavelengths,aquap_data-method}},
   \code{\link{getcd}}, \code{\link{getcm}},
   \code{\link{siWl}}
 }
-

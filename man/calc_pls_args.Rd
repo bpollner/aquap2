@@ -77,6 +77,7 @@ please see \code{\link{anproc_file}}.
  Calculation of PLSR models is done with the function  
 \code{\link[pls]{plsr}}.
 }
+
 \examples{
 \dontrun{
  dataset <- gfd()
@@ -95,4 +96,3 @@ Other PLSR documentation: \code{\link{plot_pls,aquap_cube-method}},
   \code{\link{plot_pls_args}},
   \code{\link{plot_pls_indepPred}}
 }
-

@@ -27,4 +27,3 @@ Other Helper Functions: \code{\link{genFolderStr}},
   \code{\link{printStdColnames}}, \code{\link{reColor}},
   \code{\link{saveAQdata}}, \code{\link{updateSettings}}
 }
-

@@ -103,6 +103,7 @@ the spectral value of the actual dataset.
 sd=noi_staticValue),1)})}
 }
 }
+
 \examples{
 \dontrun{
 fd <- gfd()
@@ -120,4 +121,3 @@ plot_pca(cu)
 Other Noise procedures: \code{\link{do_addNoise}},
   \code{\link{genNoiseRecExp}}
 }
-

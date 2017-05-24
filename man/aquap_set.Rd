@@ -27,10 +27,10 @@ dataset.}
 
 \item{\code{aquagr}}{All data related to the calculation of Aquagrams.}
 }}
+
 \seealso{
 \code{\link{gdmm}}
 
 Other Class documentations: \code{\link{aquap_cpt}},
   \code{\link{aquap_cube}}
 }
-

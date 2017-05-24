@@ -96,4 +96,3 @@ files in \code{examples/metadata}.)
 Other fileDocs: \code{\link{anproc_file}},
   \code{\link{settings_file}}
 }
-

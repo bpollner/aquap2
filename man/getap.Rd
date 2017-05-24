@@ -46,4 +46,3 @@ ap <- getap(spl.var="C_Group") # change the split variable to "C_Group"
 \seealso{
 \code{\link{anproc_file}}, \code{\link{getmd}}, \code{\link{gdmm}}
 }
-

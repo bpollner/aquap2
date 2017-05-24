@@ -66,4 +66,3 @@ Other Development Functions: \code{\link{custom_TRH}},
   \code{\link{custom_import}}, \code{\link{readHeader}},
   \code{\link{readSpectra}}
 }
-

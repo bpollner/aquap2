@@ -26,6 +26,7 @@ please see \code{\link{anproc_file}}.
  Calculation of PCA is done with the function 
 \code{\link[ChemometricsWithR]{PCA}}
 }
+
 \examples{
 \dontrun{
  dataset <- gfd()
@@ -42,4 +43,3 @@ Other Calc. arguments: \code{\link{calc_aqg_args}},
 Other PCA documentation: \code{\link{plot_pca,aquap_cube-method}},
   \code{\link{plot_pca_args}}
 }
-

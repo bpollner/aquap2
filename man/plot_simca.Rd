@@ -2,8 +2,8 @@
 % Please edit documentation in R/cl_classDefs.r, R/plot_simca.r
 \docType{methods}
 \name{plot_simca,aquap_cube-method}
-\alias{plot_simca}
 \alias{plot_simca,aquap_cube-method}
+\alias{plot_simca}
 \title{Plot SIMCA}
 \usage{
 \S4method{plot_simca}{aquap_cube}(object, ...)
@@ -81,4 +81,3 @@ Other Plot functions: \code{\link{plot,aquap_cube,missing-method}},
 Other SIMCA documentation: \code{\link{calc_sim_args}},
   \code{\link{plot_sim_args}}
 }
-

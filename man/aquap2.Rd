@@ -4,10 +4,11 @@
 \name{aquap2}
 \alias{aquap2}
 \alias{aquap2-package}
-\title{Aquaphotomics NIRS Analysis}
+\title{Multivariate Data Analysis Tools for R including Aquaphotomics Methods}
 \description{
-Methods and tools to analyse NIRS data from an Aquaphotomics 
-perspective. The package can support you in preparing (randomizing) your 
+Methods and tools for multivariate data analysis in R, with an 
+additional focus on specialized Aquaphotomics procedures and methods. 
+The package can support you in preparing (randomizing) your 
 experiment, and it will assist you in splitting up your data and analyzing 
 it using standard multivariate analysis methods and, especially, the Aquagram.
 }
@@ -23,6 +24,7 @@ vignettes: \code{browseVignettes(package = "aquap2")}
  \code{\link{esl}}, \code{\link{gfd}} 
 \code{\link{gdmm}}, \code{\link{plot_cube}}
 }
+
 \examples{
 \dontrun{
  dataset <- gfd() # will load or import data
@@ -33,4 +35,3 @@ cube <- gdmm(dataset) # split up the dataset and make models
 \author{
 Bernhard Pollner, Zoltan Kovacs
 }
-

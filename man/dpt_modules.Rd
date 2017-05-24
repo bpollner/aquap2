@@ -114,6 +114,7 @@ Please see the description and \code{\link{split_dataset}} to understand
 \strong{when} in the data-processing procedure the respective data treatment 
 modules are applied!
 }
+
 \examples{
 \dontrun{
 fd <- gfd() # load a dataset
@@ -145,16 +146,15 @@ cube <- gdmm(fd, getap(dpt.pre=c("sgol", "snv"))) # modify via gdmm function
 \code{\link{do_avg}} for averaging datasets into a single spectrum, 
 \code{\link{getcm}} for extracting a specific model from a 'cube' object.
 
+Other dpt modules documentation: \code{\link{do_detrend}},
+  \code{\link{do_emsc}}, \code{\link{do_gapDer}},
+  \code{\link{do_msc}}, \code{\link{do_sgolay}},
+  \code{\link{do_snv}}
+
 Other Data pre-treatment functions: \code{\link{[,aquap_data-method}},
   \code{\link{do_addNoise}}, \code{\link{do_avg}},
   \code{\link{do_detrend}}, \code{\link{do_emsc}},
   \code{\link{do_gapDer}}, \code{\link{do_msc}},
   \code{\link{do_resampleNIR}}, \code{\link{do_sgolay}},
   \code{\link{selectWls}}, \code{\link{ssc}}
-
-Other dpt modules documentation: \code{\link{do_detrend}},
-  \code{\link{do_emsc}}, \code{\link{do_gapDer}},
-  \code{\link{do_msc}}, \code{\link{do_sgolay}},
-  \code{\link{do_snv}}
 }
-

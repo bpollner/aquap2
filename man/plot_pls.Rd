@@ -2,8 +2,8 @@
 % Please edit documentation in R/cl_classDefs.r, R/plot_plsr.r
 \docType{methods}
 \name{plot_pls,aquap_cube-method}
-\alias{plot_pls}
 \alias{plot_pls,aquap_cube-method}
+\alias{plot_pls}
 \title{Plot PLSR}
 \usage{
 \S4method{plot_pls}{aquap_cube}(object, ...)
@@ -80,15 +80,14 @@ The width and height of the resulting pdf can be set in the settings.
 }
 }
 \seealso{
-Other PLSR documentation: \code{\link{calc_pls_args}},
-  \code{\link{plot_pls_args}},
-  \code{\link{plot_pls_indepPred}}
-
 Other Plot functions: \code{\link{plot,aquap_cube,missing-method}},
   \code{\link{plot,aquap_data,missing-method}},
   \code{\link{plot_aqg}},
   \code{\link{plot_pca,aquap_cube-method}},
   \code{\link{plot_pls_indepPred}},
   \code{\link{plot_simca,aquap_cube-method}}
-}
 
+Other PLSR documentation: \code{\link{calc_pls_args}},
+  \code{\link{plot_pls_args}},
+  \code{\link{plot_pls_indepPred}}
+}

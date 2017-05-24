@@ -63,4 +63,3 @@ graphical elements should be produced:
 \code{\link{plot_pca}}, \code{\link{plot_pls}}, 
 \code{\link{plot_aqg_args}}
 }
-
