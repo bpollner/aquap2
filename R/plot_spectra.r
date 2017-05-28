@@ -1,4 +1,4 @@
-plotSpectra_outer <- function(dataset, colorBy, onMain, onSub, idString="") {
+plotSpectra_outer <- function(dataset, colorBy, onMain, onSub, idString="", md) {
 	if (!is.null(colorBy)) {
 		if (any(colorBy == "all")) {	
 			cPref <- .ap2$stn$p_ClassVarPref
@@ -15,15 +15,18 @@ plotSpectra_outer <- function(dataset, colorBy, onMain, onSub, idString="") {
 		stop(paste("Sorry, the class-variable '", paste(colorBy[a], collapse=", "), "' does not exist. Please check your input.", sep=""), call.=FALSE)
 	}	
 	if (is.null(colorBy)) {
-		plotSpectra_inner(dataset, singleColorBy=NULL, onMain, onSub, idString)
+		plotSpectra_inner(dataset, singleColorBy=NULL, onMain, onSub, idString, md)
 	} else {
 		for (i in 1: length(colorBy)) {
-			plotSpectra_inner(dataset, colorBy[i], onMain, onSub, idString)
+			plotSpectra_inner(dataset, colorBy[i], onMain, onSub, idString, md)
 		} # end for i	
 	} 
 } # EOF
 
-plotSpectra_inner <- function(dataset, singleColorBy, onMain, onSub, idString="") {
+plotSpectra_inner <- function(dataset, singleColorBy, onMain, onSub, idString="", md) {
+	xlab <- md$meta$xaxDenom
+	ylab <- md$meta$yaxDenom
+	#
 	if (is.null(singleColorBy)) {
 		colorData <- 1
 		msg <- ""
@@ -54,7 +57,7 @@ plotSpectra_inner <- function(dataset, singleColorBy, onMain, onSub, idString=""
 #	plotPeaks(pires, onMain="", onSub="", adLines=TRUE, pcaVariances=NULL, customColor=NULL, ylim=NULL, wls, clty=NULL)
 	#
 	onSub <- paste(onSub, msg, partNMsg, sep=" ")
-	matplot(wls, t(dataset$NIR), type="l", xlab="Wavelengths", ylab="Absorbance", main=onMain, sub=onSub, col=colorData, lty=1)
+	matplot(wls, t(dataset$NIR), type="l", xlab=xlab, ylab=ylab, main=onMain, sub=onSub, col=colorData, lty=1)
 	abline(h=0, col="gray")
 	if (makeLegend) {
 		legBgCol <- rgb(255,255,255, alpha=.ap2$stn$col_alphaForLegends, maxColorValue=255) # is a white with alpha to be determined in the settings
@@ -87,7 +90,7 @@ plot_spectra_Data <- function(x, colorBy=NULL, ...) {
 	onMain <- paste(expName, onMain, sep=" ")
 	if (where == "pdf") { pdf(file=filename, width, height, onefile=TRUE, family='Helvetica', pointsize=12) }
 	if (where != "pdf" & (Sys.getenv("RSTUDIO") != 1) & (!names(dev.cur()) == "quartz") ) {dev.new(height=height, width=width)}	
-	plotSpectra_outer(dataset, colorBy, onMain, onSub)
+	plotSpectra_outer(dataset, colorBy, onMain, onSub, md=md)
 	if (where == "pdf") {dev.off()}
 	if (!.ap2$stn$allSilent & (where == "pdf" )) {cat("ok\n") }
 } # EOF
@@ -133,7 +136,7 @@ plot_spectra_Cube <- function(x, colorBy=NULL, ...) {
 		dataset <- getDataset(x[[i]]) # the sets are in the list within the cube
 		idString <- getIdString(x[[i]])
 		if (!.ap2$stn$allSilent & (where == "pdf" )) {cat(paste("   working on #", i, " of ", length(x), "\n", sep=""))}
-		plotSpectra_outer(dataset, colorBy, onMain, onSub, idString)
+		plotSpectra_outer(dataset, colorBy, onMain, onSub, idString, md)
 	} # end for i
 	if (where == "pdf") {dev.off()}
 	if (!.ap2$stn$allSilent & (where == "pdf" )) {cat("ok\n") }
