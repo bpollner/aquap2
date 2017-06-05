@@ -40,6 +40,12 @@ code{def} to take the default value from the settings
 the samples of an experiment. Leave at \code{def} to take the default value 
 from the settings (parameter \code{p_realMeasurementLabel}).}
 
+\item{xaxDenominator}{The unit that is displayed on the x-axis when 
+plotting e.g. raw spectra.}
+
+\item{yaxDenominator}{The unit that is displayed on the y-axis when 
+plotting e.g. raw spectra.}
+
 \item{TimePoints}{Logical 'FALSE' or a character vector. Leave at 'FALSE' if 
 your experiment does not cover more than one point in time, otherwise provide 
 a label for each time-point in the format c("T0", "T1", "T2", ...) or leave 

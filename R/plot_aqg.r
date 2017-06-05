@@ -59,7 +59,8 @@ aq_makeNicePlottingFrame_linear <- function(aquCalcResult, onMain, onSub, mod, T
 		ord <- order(groups)
 	}
 	legTextExt <- legTextExt[ord]
-	legendColor <- legendColor[ord]
+	legendColor <- aq_checkReSortLegendColor(legendColor, ord, aquCalcResult@colRep, customColor)
+	plotData <- aq_checkReSortPlotData(plotData, ord, aquCalcResult@colRep, customColor)
 	#
 	lwd <- 1
 	##
@@ -101,13 +102,35 @@ aq_makeGraphicsTexts <- function(onSub, aqCalcPossNrPart, nrCorr) {
 	out <- list(onSub=onSubNew, mText=mText)
 } # EOF
 
+aq_checkReSortLegendColor <- function(legendColor, ord, numRepColor, customColor) {
+	if (!is.null(customColor)) {
+		if (length(numRepColor) != length(customColor)) {
+			return(legendColor[ord]) 	## so either there was a misstake, or the coloring is meant for an other grouping
+		}
+		return(legendColor) # return the input-custom color
+	} else { # so if customColor is NULL
+		return(legendColor[ord])
+	}
+} # EOF
+
+aq_checkReSortPlotData <- function(plotData, ord, numRepColor, customColor) {
+	if (!is.null(customColor)) {
+		if (length(numRepColor) != length(customColor)) {
+			return(plotData) 	## so either there was a misstake, or the coloring is meant for an other grouping
+		}
+		return(plotData[ord,]) # so only in case of a the right length of custom color we are re-sorting the plotting data
+	} else { # so if customColor is NULL
+		return(plotData)
+	}
+} # EOF
+
 aq_checkColors <- function(numRepColor, customColor) {
 	if (!is.null(customColor)) {
 			Color <- customColor
 		if (length(numRepColor) != length(customColor)) {
 			Color <- numRepColor 	## so either there was a misstake, or the coloring is meant for an other grouping
 		}
-	} else {
+	} else { # so if customColor is NULL
 		Color <- numRepColor
 	}
 	return(Color)
@@ -230,6 +253,7 @@ plot_aquagram_inner <- function(aquCalc, selWls=.ap2$stn$aqg_wlsAquagram, onSub,
 	plotWamacsLines <- .ap2$stn$aqg_plotWamacsLines
 	alwaysPlotAvgAqg <- .ap2$stn$aqg_alwaysPlotAvgAqg
 	doPlotAvg <- TRUE
+	maxElmsPerCol <- .ap2$stn$aqg_plot_maxNrLegendElements # the max number of elements in one column
 	#
 	if (bootCI & !is.null(aquCalc@bootRes) & !alwaysPlotAvgAqg) { 
 		doPlotAvg <- FALSE
@@ -239,18 +263,26 @@ plot_aquagram_inner <- function(aquCalc, selWls=.ap2$stn$aqg_wlsAquagram, onSub,
 	a <- aq_makeGraphicsTexts(onSub, aquCalc@possN, nrCorr)
 		onSub <- a$onSub
 		mText <- a$mText
-	########
+	#################
+	getNrOfLegCols <- function(X) {
+		out <- 1
+		if (nrow(X) > 1* maxElmsPerCol) { out <- 2 }
+		if (nrow(X) > 2* maxElmsPerCol) { out <- 3 }
+		return(out)
+	} # EOIF
+	#################
 	aq_plotCore_circ <- function(dfpList) {
 		dataForPlotting <- dfpList$Data
+		ncLeg <- getNrOfLegCols(dataForPlotting)
 		caxislabels <- dfpList$Labels
 		if(where != "pdf" & Sys.getenv("RSTUDIO") != 1)  {dev.new(height=height, width=width)}
 		fmsb::radarchart(dataForPlotting, axistype=4, maxmin=T, axislabcol=1, seg=4, pty=32, caxislabels=caxislabels, pcol=Color, plty=ltPlot, cglwd=0.5, plwd=pLineWi, centerzero=T, cglty=3, sub=onSub, title=onMain)
 		legBgCol <- rgb(255,255,255, alpha=.ap2$stn$col_alphaForLegends, maxColorValue=255) # is a white with alpha to be determined in the settings
-		legend("topright", cex=0.8, xjust=0.5, yjust=0.5, legend=legText, col=legColor, lty=ltLeg, lwd=4, bg=legBgCol)
+		legend("topright", cex=0.8, xjust=0.5, yjust=0.5, legend=legText, col=legColor, lty=ltLeg, lwd=4, bg=legBgCol, ncol=ncLeg)
 		legend("bottomleft", cex=0.8, xjust=0.5, yjust=0.5, legend=legTextMod, bg=legBgCol)
 		mtext(mText, 1)
 	} # EOIF
-	## 
+	########
 	aq_plotCore_linear <- function(linData, legTextMod, curYlim, inBoot=FALSE) { #### CORE ####
 		yLabMod <- linData$yLab
 		onMain <- linData$onMain
@@ -264,6 +296,8 @@ plot_aquagram_inner <- function(aquCalc, selWls=.ap2$stn$aqg_wlsAquagram, onSub,
 		ltPlot <- linData$ltPlot
 		ltLeg <- linData$ltLeg
 		lwd <- linData$lwd
+		ncLeg <- getNrOfLegCols(plotData)
+		#
 		if(where != "pdf" & Sys.getenv("RSTUDIO") != 1)  {dev.new(height=height, width=width)}
 		matplot(t(plotData), type="l", xaxt="n", lty=ltPlot, col=dataColor, ylab=yLabMod, xlab=xAxisTitle, ylim=curYlim, main=onMain, sub=onSub, cex.main=0.8, cex.sub=0.8, lwd=lwd) # masterScaleAQ can be NULL
 		axis(1, at=seq(1, ncol(plotData)), labels=colnames(plotData))
@@ -275,10 +309,10 @@ plot_aquagram_inner <- function(aquCalc, selWls=.ap2$stn$aqg_wlsAquagram, onSub,
 			abline(v=seq(1, ncol(plotData)), col="lightgray", lwd=0.4)
 		}
 		legBgCol <- rgb(255,255,255, alpha=.ap2$stn$col_alphaForLegends, maxColorValue=255) # is a white with alpha to be determined in the settings
-		legend("topright", legend=legTxt, title=legTitle, cex=legCex, col=legendColor, lty=ltLeg, bg=legBgCol)
+		legend("topright", legend=legTxt, title=legTitle, cex=legCex, col=legendColor, lty=ltLeg, bg=legBgCol, ncol=ncLeg)
 		legend("bottomleft", legend=legTextMod, cex=legCex, bg=legBgCol)
 	} # EOIF		
-	########
+	#################
 	## here always plot the selected aquagram, no fancy CI
 	legTextMod <- aq_checkLegendTextMod(mod, minus, TCalib, Texp)
 	## for circular only
