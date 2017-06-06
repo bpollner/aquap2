@@ -50,17 +50,10 @@ aq_makeNicePlottingFrame_linear <- function(aquCalcResult, onMain, onSub, mod, T
 	groups <- rownames(plotData)
 	legTextExt <- paste0(groups, " N=", possN)
 	#
-	options(warn=-1)
-	grNrs <- as.numeric(groups)
-	options(warn=0)
-	if (!any(is.na(grNrs))){ # so we have, indeed, all numbers
-		ord <- order(grNrs)
-	} else {
-		ord <- order(groups)
-	}
+	ord <- aq_getOrder(groups)
 	legTextExt <- legTextExt[ord]
 	legendColor <- aq_checkReSortLegendColor(legendColor, ord, aquCalcResult@colRep, customColor)
-	plotData <- aq_checkReSortPlotData(plotData, ord, aquCalcResult@colRep, customColor)
+#	plotData <- aq_checkReSortPlotData(plotData, ord, aquCalcResult@colRep, customColor)
 	#
 	lwd <- 1
 	##
@@ -68,6 +61,7 @@ aq_makeNicePlottingFrame_linear <- function(aquCalcResult, onMain, onSub, mod, T
 		if (!is.null(aquCalcResult@bootRes)) {
 			plotData <- aquCalcResult@bootRes
 			dataColor <- rep(dataColor, each=3)
+			ord <- aq_getOrder(rownames(plotData))
 			ltPlot <- c(1, ltyCI, ltyCI) # otherwise could be: ltPlot <- c(ltPlot, 3, 3)
 			ltLeg <- 1		## ( the legend text stays the same as above)
 			lwd <- c(1, 0.5, 0.5)
@@ -76,6 +70,8 @@ aq_makeNicePlottingFrame_linear <- function(aquCalcResult, onMain, onSub, mod, T
 			plotData <- NULL
 		} 
 	}
+	plotData <- aq_checkReSortPlotData(plotData, ord, aquCalcResult@colRep, customColor)
+	#
 	return(list(plotData=plotData, onMain=onMain, onSub=onSub, yLab=mod, TexpLine=TexpLine, legTextExt=legTextExt, legTitle=legTitle, dataColor=dataColor, legendColor=legendColor, ltPlot=ltPlot, ltLeg=ltLeg, lwd=lwd))
 } # EOF
 
@@ -191,7 +187,7 @@ aq_checkPlotType <- function(mod) {
 	return(plotType)
 }
 
-aq_makePolygons <- function(plotData, legendColor) {
+aq_makePolygons_OLD <- function(plotData, legendColor) {
 	if (!is.null(plotData)) {
 		alpha <- .ap2$stn$aqg_plot_color_alpha_CIfill
 		#
@@ -206,6 +202,36 @@ aq_makePolygons <- function(plotData, legendColor) {
 			polygon(xx, c(lower, rev(upper)), col=makeColorsTransparent(legendColor[i], alpha), border=FALSE)
 		} # end for i
 	} # end !is.null(plotData)
+} # EOF
+
+aq_makePolygons <- function(plotData, dataColor) {
+	if (!is.null(plotData)) {
+		dataColor <- dataColor[seq(1, length(dataColor), by=3)]
+		alpha <- .ap2$stn$aqg_plot_color_alpha_CIfill
+		#
+		xfwd <- seq(1, ncol(plotData))
+		xrev <- rev(xfwd)
+		xx <- c(xfwd, xrev)
+		for (i in 1: (nrow(plotData)/3) ) {
+			rind <- c(i*3+1, i*3+2, i*3+3) - 3 # always get the 3er groups
+			curr <- plotData[rind,]
+			lower <- curr[2,]
+			upper <- curr[3, ]
+			polygon(xx, c(lower, rev(upper)), col=makeColorsTransparent(dataColor[i], alpha), border=FALSE)
+		} # end for i
+	} # end !is.null(plotData)
+} # EOF
+
+aq_getOrder <- function(groupsChar) {
+	options(warn=-1)
+	grNrs <- as.numeric(groupsChar)
+	options(warn=0)
+	if (!any(is.na(grNrs))){ # so we have, indeed, all numbers
+		ord <- order(grNrs)
+	} else {
+		ord <- order(groupsChar)
+	}
+	return(ord)	
 } # EOF
 
 aq_plotCore_sigTable <- function(aquCalc) {
@@ -228,6 +254,8 @@ aq_plotCore_sigTable <- function(aquCalc) {
 		}
 		colnames(avgTable) <- cns
 		rownames(avgTable) <- rnsAvg
+		ord <- aq_getOrder(rnsAvg)
+		avgTable <- avgTable[ord,]
 		#
 		sep <- sigTable[1,,drop=FALSE]
 		sep[1,] <- rep("---", ncol(avgTable))
@@ -264,10 +292,12 @@ plot_aquagram_inner <- function(aquCalc, selWls=.ap2$stn$aqg_wlsAquagram, onSub,
 		onSub <- a$onSub
 		mText <- a$mText
 	#################
-	getNrOfLegCols <- function(X) {
+	getNrOfLegCols <- function(X, inBoot=FALSE) {
 		out <- 1
-		if (nrow(X) > 1* maxElmsPerCol) { out <- 2 }
-		if (nrow(X) > 2* maxElmsPerCol) { out <- 3 }
+		div <- 1
+		if (inBoot) {div <- 3}
+		if (nrow(X)/div > 1* maxElmsPerCol) { out <- 2 }
+		if (nrow(X)/div > 2* maxElmsPerCol) { out <- 3 }
 		return(out)
 	} # EOIF
 	#################
@@ -296,13 +326,13 @@ plot_aquagram_inner <- function(aquCalc, selWls=.ap2$stn$aqg_wlsAquagram, onSub,
 		ltPlot <- linData$ltPlot
 		ltLeg <- linData$ltLeg
 		lwd <- linData$lwd
-		ncLeg <- getNrOfLegCols(plotData)
+		ncLeg <- getNrOfLegCols(plotData, inBoot)
 		#
 		if(where != "pdf" & Sys.getenv("RSTUDIO") != 1)  {dev.new(height=height, width=width)}
 		matplot(t(plotData), type="l", xaxt="n", lty=ltPlot, col=dataColor, ylab=yLabMod, xlab=xAxisTitle, ylim=curYlim, main=onMain, sub=onSub, cex.main=0.8, cex.sub=0.8, lwd=lwd) # masterScaleAQ can be NULL
 		axis(1, at=seq(1, ncol(plotData)), labels=colnames(plotData))
 		if (inBoot) {	
-			aq_makePolygons(plotData, legendColor)
+			aq_makePolygons(plotData, dataColor)
 		}
 		abline(h=TexpLine, col="gray", lwd=0.6) 
 		if (plotWamacsLines) {
