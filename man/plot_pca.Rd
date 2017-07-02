@@ -2,9 +2,9 @@
 % Please edit documentation in R/cl_classDefs.r, R/plot_pca.r
 \docType{methods}
 \name{plot_pca,aquap_cube-method}
-\alias{plot_pca}
 \alias{plot_pca,aquap_cube-method}
 \alias{plot_pca,aquap_data-method}
+\alias{plot_pca}
 \title{Plot PCA}
 \usage{
 \S4method{plot_pca}{aquap_cube}(object, ...)
@@ -91,14 +91,13 @@ plot_pca(fd, pg.where="", pca.colorBy="C_Group") # assumes existence of "C_Group
 \seealso{
 \code{\link{getcd}}
 
-Other PCA documentation: \code{\link{calc_pca_args}},
-  \code{\link{plot_pca_args}}
-
 Other Plot functions: \code{\link{plot,aquap_cube,missing-method}},
   \code{\link{plot,aquap_data,missing-method}},
   \code{\link{plot_aqg}},
   \code{\link{plot_pls,aquap_cube-method}},
   \code{\link{plot_pls_indepPred}},
   \code{\link{plot_simca,aquap_cube-method}}
-}
 
+Other PCA documentation: \code{\link{calc_pca_args}},
+  \code{\link{plot_pca_args}}
+}

@@ -2,9 +2,9 @@
 % Please edit documentation in R/cl_classDefs.r, R/doc_methods.r
 \docType{methods}
 \name{getWavelengths,aquap_data-method}
-\alias{getWavelengths}
 \alias{getWavelengths,aquap_data-method}
 \alias{getWavelengths,aquap_set-method}
+\alias{getWavelengths}
 \title{Get Wavelengths}
 \usage{
 \S4method{getWavelengths}{aquap_data}(object)
@@ -42,4 +42,3 @@ Other Extract Elements: \code{\link{getHeader}},
   \code{\link{getcd}}, \code{\link{getcm}},
   \code{\link{siWl}}
 }
-

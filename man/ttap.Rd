@@ -34,4 +34,3 @@ Transform a given object into the aquap2 data structure.
 Class and Numeric prefixes in the column names are expected. 
 Function \code{ttapM} is a reduced function for internal use only.
 }
-

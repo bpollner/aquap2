@@ -160,7 +160,7 @@ getmd_core <- function(fn="def") {
 	## put together
  	expClasses <- list(L1=e$L1, L2=e$L2, Repls=Repls, Group=Group, timeLabels=TimePoints)
  	postProc <- list(spacing=e$spacing, ECRMLabel=c(ECLabel, RMLabel), noSplitLabel=noSplitLabel, nrConScans=e$nrConScans)
- 	meta <- list(expName=e$expName, coluNames=coluNames, filetype=filetype, noiseFile=noiseFileName, tempFile=tempCalibFileName)
+ 	meta <- list(expName=e$expName, coluNames=coluNames, filetype=filetype, noiseFile=noiseFileName, tempFile=tempCalibFileName, xaxDenom=e$xaxDenominator, yaxDenom=e$yaxDenominator)
 	expMetaData <- list(expClasses = expClasses, postProc = postProc, meta = meta)
 	return(new("aquap_md", expMetaData))
 } # EOF

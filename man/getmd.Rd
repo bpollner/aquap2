@@ -43,4 +43,3 @@ dataset <- gfd(getmd(expName="OtherName"))
 \seealso{
 \code{\link{metadata_file}}, \code{\link{getap}}, \code{\link{gdmm}}
 }
-

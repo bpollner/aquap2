@@ -39,4 +39,3 @@ Other Extract Elements: \code{\link{getHeader}},
   \code{\link{getWavelengths,aquap_data-method}},
   \code{\link{getcd}}, \code{\link{getcm}}
 }
-

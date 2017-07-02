@@ -226,6 +226,17 @@ getNIRData_Pirouette <- function(dataFile) {
 	return(outList)	
 } # EOF
 
+# Spectra from an Excel File ---------------------------
+getNirData_Excel <- function(dataFile) {
+	sampleNr <- conSNr <- timePoints <- ecrm <- repl <- group <- temp  <- relHum <- C_cols <- Y_cols <- timestamp <- NULL
+	eData <- openxlsx::read.xlsx(dataFile, sheet=1, colNames=TRUE, rowNames=TRUE) # in the first sheet the data
+	eMeta <- openxlsx::read.xlsx(dataFile, sheet=2, colNames=TRUE, rowNames=TRUE) # in the second sheet the metadata
+	info <- list(nCharPrevWl=eMeta[1,"ncpwl"])
+	NIR <- as.matrix(eData)
+	return(list(sampleNr=sampleNr, conSNr=conSNr, timePoints=timePoints, ecrm=ecrm, repl=repl, group=group, temp=temp, relHum=relHum, C_cols=C_cols, Y_cols=Y_cols, timestamp=timestamp, info=info, NIR=NIR))
+} # EOF
+
+
 ##########################################################################
 
 

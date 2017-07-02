@@ -89,4 +89,3 @@ Other Calc. arguments: \code{\link{calc_aqg_args}},
   \code{\link{calc_pca_args}}, \code{\link{calc_pls_args}},
   \code{\link{calc_sim_args}}
 }
-

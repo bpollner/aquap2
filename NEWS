@@ -1,4 +1,16 @@
 #############################
+Version 0.1.9
+New:
+	Values on the X-Axis can be others than wavelengths; the denominator can be specified in the metadata.
+	
+Bugfix:
+	Repaired custom color vectors in Aquagrams.
+	Other small bugfixes.
+#############################
+
+
+
+#############################
 Version 0.1.8
 New:	
 	Added possibility to plot Aquagrams linear instead of circular. Factory-default is linear; 

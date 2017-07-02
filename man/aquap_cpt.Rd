@@ -29,10 +29,10 @@ element.}
 
 \item{\code{noise}}{A logical vector.}
 }}
+
 \seealso{
 \code{\link{gdmm}}
 
 Other Class documentations: \code{\link{aquap_cube}},
   \code{\link{aquap_set}}
 }
-

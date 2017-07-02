@@ -385,10 +385,10 @@ your previously recoreded temperature calibration data (see
 application of some data-treatment functions (see e.g. \code{\link{do_gapDer}}) 
 can lead to unexpected and distorted results in the Aquagram.
 }
+
 \seealso{
 \code{\link{getap}}, \code{\link{gdmm}}
 
 Other fileDocs: \code{\link{metadata_file}},
   \code{\link{settings_file}}
 }
-

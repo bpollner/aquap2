@@ -29,10 +29,10 @@ to the screen when you just type the name of a cube-object. (method 'show')}
 \item{\code{cpt}}{An object of class \code{\link{aquap_cpt}}, what is basically just an 
 other version of the data in 'cp' for internal use.}
 }}
+
 \seealso{
 \code{\link{gdmm}}
 
 Other Class documentations: \code{\link{aquap_cpt}},
   \code{\link{aquap_set}}
 }
-

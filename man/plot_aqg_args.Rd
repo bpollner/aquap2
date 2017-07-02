@@ -100,12 +100,11 @@ plot(cube)
 \seealso{
 \code{\link{plot_aqg}}
 
-Other Aquagram documentation: \code{\link{calc_aqg_args}},
-  \code{\link{plot_aqg}},
-  \code{\link{tempCalib_procedures}}
-
 Other Plot arguments: \code{\link{plot,aquap_data,missing-method}},
   \code{\link{plot_pca_args}}, \code{\link{plot_pg_args}},
   \code{\link{plot_pls_args}}, \code{\link{plot_sim_args}}
-}
 
+Other Aquagram documentation: \code{\link{calc_aqg_args}},
+  \code{\link{plot_aqg}},
+  \code{\link{tempCalib_procedures}}
+}

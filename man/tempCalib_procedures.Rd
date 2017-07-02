@@ -51,6 +51,7 @@ via the \code{...} argument in the function \code{\link{getap}} in \code{\link{g
 see examples and \code{\link{calc_aqg_args}}.}
 }
 }
+
 \examples{
 \dontrun{
 fd <- gfd()
@@ -68,9 +69,8 @@ cube <- gdmm(fd, getap(aqg.mod="aucs.dce-diff", aqg.minus="C_Cont"), tempFile="F
 \seealso{
 \code{\link{genTempCalibExp}}
 
+Other Temperature procedures: \code{\link{genTempCalibExp}}
+
 Other Aquagram documentation: \code{\link{calc_aqg_args}},
   \code{\link{plot_aqg_args}}, \code{\link{plot_aqg}}
-
-Other Temperature procedures: \code{\link{genTempCalibExp}}
 }
-

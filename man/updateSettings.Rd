@@ -33,6 +33,7 @@ to be stored once in your .Renviron file by defining
 settings.r file will reside in. If you do not have a '.Renviron' file in your 
 home directory (user/home) you have to create one.
 }
+
 \examples{
 \dontrun{
 updateSettings()
@@ -50,4 +51,3 @@ Other Helper Functions: \code{\link{genFolderStr}},
   \code{\link{printStdColnames}}, \code{\link{reColor}},
   \code{\link{saveAQdata}}, \code{\link{updateAquap2}}
 }
-

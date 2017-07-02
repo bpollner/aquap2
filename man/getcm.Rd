@@ -38,6 +38,7 @@ To extract e.g. two loading vectors from a pca-model, you could use a code like
 \code{loadingVectors <- pcaModel$loadings$[, c(1,2)]} to extract the first two 
 loading vectors from the model - see examples.
 }
+
 \examples{
 \dontrun{
 fd <- gfd()
@@ -54,10 +55,6 @@ str(fd_2_pls)
 \seealso{
 \code{\link{do_emsc}}, \code{\link{dpt_modules}}
 
-Other Extract Elements: \code{\link{getHeader}},
-  \code{\link{getWavelengths,aquap_data-method}},
-  \code{\link{getcd}}, \code{\link{siWl}}
-
 Other Helper Functions: \code{\link{genFolderStr}},
   \code{\link{genNoiseRecExp}},
   \code{\link{genTempCalibExp}}, \code{\link{getcd}},
@@ -65,5 +62,8 @@ Other Helper Functions: \code{\link{genFolderStr}},
   \code{\link{printStdColnames}}, \code{\link{reColor}},
   \code{\link{saveAQdata}}, \code{\link{updateAquap2}},
   \code{\link{updateSettings}}
-}
 
+Other Extract Elements: \code{\link{getHeader}},
+  \code{\link{getWavelengths,aquap_data-method}},
+  \code{\link{getcd}}, \code{\link{siWl}}
+}

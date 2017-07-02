@@ -39,6 +39,7 @@ celsius equivalent
 others
 }
 }
+
 \references{
 XXX the Aquagram paper XXX
 }
@@ -46,4 +47,3 @@ XXX the Aquagram paper XXX
 \code{\link{calc_aqg_args}}, for recording your own temperature 
 calibration spectra: \code{\link{genTempCalibExp}}
 }
-

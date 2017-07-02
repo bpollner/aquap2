@@ -30,4 +30,3 @@ Other Helper Functions: \code{\link{genNoiseRecExp}},
   \code{\link{saveAQdata}}, \code{\link{updateAquap2}},
   \code{\link{updateSettings}}
 }
-
