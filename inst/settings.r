@@ -199,6 +199,7 @@ stn <- list(
 	aqg_alwaysPlotAvgAqg = TRUE, 			## Logical. If, should a bootstrapped Aquagram be available, also the basic "average-only" Aquagram should be plotted.
 	aqg_plotSigTable = TRUE, 				## Logical. If, should a bootstrapped Aquagram be available, the corresponding table indicating significant differences between groups should be plotted as well.
 	aqg_plot_linear_legendCex = 0.7, 		## the cex for the legend in the linear Aquagram
+	aqg_plot_maxNrLegendElements = 15,		## the number of elements in the legend defining the cutoff for more than one column in the legend
 	aqg_plot_pdfSizeAdd = 2.5, 				## increase the size of a possible Aquagram pdf output (linear Aquagram plotting type only) by this value in each x and y axis
 	aqg_plot_ltyCIs = 3, 					## the line-types for the confidence intervals in linear Aquagrams
 	aqg_plot_color_alpha_CIfill = 15, 		## The alpha-value, i.t. transparency for the color-fill of the confidence intervals in the linear Aquagram. Values between 1 and 255, with 1 being completely transparent 

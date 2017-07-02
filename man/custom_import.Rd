@@ -67,6 +67,7 @@ There need to be two and only to objects in this file, having the names
 \section{Note}{
  Every list element except 'NIR' and 'info' can be set to NULL.
 }
+
 \examples{
 \dontrun{
 # this could be the content of the .r file for defining a custom function, 
@@ -104,4 +105,3 @@ Other Development Functions: \code{\link{custom_TRH}},
   \code{\link{imp_searchAskColumns}},
   \code{\link{readHeader}}, \code{\link{readSpectra}}
 }
-

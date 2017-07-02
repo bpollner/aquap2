@@ -36,6 +36,7 @@ please see \code{\link{anproc_file}}.
 \code{\link[rrcovHD]{RSimca}} /  \code{\link[rrcovHD]{CSimca}} and with code 
 adapted from the manual-page of the Chemometrics-software "Pirouette".
 }
+
 \examples{
 \dontrun{
  dataset <- gfd()
@@ -53,4 +54,3 @@ Other Calc. arguments: \code{\link{calc_aqg_args}},
 Other SIMCA documentation: \code{\link{plot_sim_args}},
   \code{\link{plot_simca,aquap_cube-method}}
 }
-

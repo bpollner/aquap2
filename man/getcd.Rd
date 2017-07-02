@@ -36,10 +36,6 @@ str(dataset_3)
 \seealso{
 \code{\link{do_msc}}, \code{\link{do_avg}}
 
-Other Extract Elements: \code{\link{getHeader}},
-  \code{\link{getWavelengths,aquap_data-method}},
-  \code{\link{getcm}}, \code{\link{siWl}}
-
 Other Helper Functions: \code{\link{genFolderStr}},
   \code{\link{genNoiseRecExp}},
   \code{\link{genTempCalibExp}}, \code{\link{getcm}},
@@ -47,5 +43,8 @@ Other Helper Functions: \code{\link{genFolderStr}},
   \code{\link{printStdColnames}}, \code{\link{reColor}},
   \code{\link{saveAQdata}}, \code{\link{updateAquap2}},
   \code{\link{updateSettings}}
-}
 
+Other Extract Elements: \code{\link{getHeader}},
+  \code{\link{getWavelengths,aquap_data-method}},
+  \code{\link{getcm}}, \code{\link{siWl}}
+}

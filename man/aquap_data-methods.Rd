@@ -2,9 +2,9 @@
 % Please edit documentation in R/cl_classDefs.r, R/doc_methods.r
 \docType{methods}
 \name{[,aquap_data-method}
+\alias{[,aquap_data-method}
 \alias{-,aquap_data,aquap_data-method}
 \alias{/,aquap_data,aquap_data-method}
-\alias{[,aquap_data-method}
 \alias{aquap_data-methods}
 \title{aquap_data methods}
 \usage{
@@ -75,4 +75,3 @@ Other Data pre-treatment functions: \code{\link{do_addNoise}},
   \code{\link{do_sgolay}}, \code{\link{dpt_modules}},
   \code{\link{selectWls}}, \code{\link{ssc}}
 }
-

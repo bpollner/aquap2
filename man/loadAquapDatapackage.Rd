@@ -24,4 +24,3 @@ Always downloads and installs the latest available version, also
  loadAquapDatapackage()
  }
 }
-

@@ -3,9 +3,9 @@
 \docType{methods}
 \name{plot,aquap_data,missing-method}
 \alias{plot,aquap_data,missing-method}
-\alias{plot_spectra}
-\alias{plot_spectra,aquap_cube-method}
 \alias{plot_spectra,aquap_data-method}
+\alias{plot_spectra,aquap_cube-method}
+\alias{plot_spectra}
 \title{Plot Raw Spectra}
 \usage{
 \S4method{plot}{aquap_data,missing}(x, colorBy = NULL, ...)
@@ -51,19 +51,18 @@ plot_spectra(cube)
 \seealso{
 \code{\link{plot_all_modells}}
 
-Other Core functions: \code{\link{exportSampleList}},
-  \code{\link{gdmm}}, \code{\link{getFullData}},
-  \code{\link{plot,aquap_cube,missing-method}}
-
-Other Plot arguments: \code{\link{plot_aqg_args}},
-  \code{\link{plot_pca_args}}, \code{\link{plot_pg_args}},
-  \code{\link{plot_pls_args}}, \code{\link{plot_sim_args}}
-
 Other Plot functions: \code{\link{plot,aquap_cube,missing-method}},
   \code{\link{plot_aqg}},
   \code{\link{plot_pca,aquap_cube-method}},
   \code{\link{plot_pls,aquap_cube-method}},
   \code{\link{plot_pls_indepPred}},
   \code{\link{plot_simca,aquap_cube-method}}
-}
 
+Other Plot arguments: \code{\link{plot_aqg_args}},
+  \code{\link{plot_pca_args}}, \code{\link{plot_pg_args}},
+  \code{\link{plot_pls_args}}, \code{\link{plot_sim_args}}
+
+Other Core functions: \code{\link{exportSampleList}},
+  \code{\link{gdmm}}, \code{\link{getFullData}},
+  \code{\link{plot,aquap_cube,missing-method}}
+}

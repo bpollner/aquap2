@@ -50,16 +50,10 @@ aq_makeNicePlottingFrame_linear <- function(aquCalcResult, onMain, onSub, mod, T
 	groups <- rownames(plotData)
 	legTextExt <- paste0(groups, " N=", possN)
 	#
-	options(warn=-1)
-	grNrs <- as.numeric(groups)
-	options(warn=0)
-	if (!any(is.na(grNrs))){ # so we have, indeed, all numbers
-		ord <- order(grNrs)
-	} else {
-		ord <- order(groups)
-	}
+	ord <- aq_getOrder(groups)
 	legTextExt <- legTextExt[ord]
-	legendColor <- legendColor[ord]
+	legendColor <- aq_checkReSortLegendColor(legendColor, ord, aquCalcResult@colRep, customColor)
+#	plotData <- aq_checkReSortPlotData(plotData, ord, aquCalcResult@colRep, customColor)
 	#
 	lwd <- 1
 	##
@@ -67,6 +61,7 @@ aq_makeNicePlottingFrame_linear <- function(aquCalcResult, onMain, onSub, mod, T
 		if (!is.null(aquCalcResult@bootRes)) {
 			plotData <- aquCalcResult@bootRes
 			dataColor <- rep(dataColor, each=3)
+			ord <- aq_getOrder(rownames(plotData))
 			ltPlot <- c(1, ltyCI, ltyCI) # otherwise could be: ltPlot <- c(ltPlot, 3, 3)
 			ltLeg <- 1		## ( the legend text stays the same as above)
 			lwd <- c(1, 0.5, 0.5)
@@ -75,6 +70,8 @@ aq_makeNicePlottingFrame_linear <- function(aquCalcResult, onMain, onSub, mod, T
 			plotData <- NULL
 		} 
 	}
+	plotData <- aq_checkReSortPlotData(plotData, ord, aquCalcResult@colRep, customColor)
+	#
 	return(list(plotData=plotData, onMain=onMain, onSub=onSub, yLab=mod, TexpLine=TexpLine, legTextExt=legTextExt, legTitle=legTitle, dataColor=dataColor, legendColor=legendColor, ltPlot=ltPlot, ltLeg=ltLeg, lwd=lwd))
 } # EOF
 
@@ -101,13 +98,35 @@ aq_makeGraphicsTexts <- function(onSub, aqCalcPossNrPart, nrCorr) {
 	out <- list(onSub=onSubNew, mText=mText)
 } # EOF
 
+aq_checkReSortLegendColor <- function(legendColor, ord, numRepColor, customColor) {
+	if (!is.null(customColor)) {
+		if (length(numRepColor) != length(customColor)) {
+			return(legendColor[ord]) 	## so either there was a misstake, or the coloring is meant for an other grouping
+		}
+		return(legendColor) # return the input-custom color
+	} else { # so if customColor is NULL
+		return(legendColor[ord])
+	}
+} # EOF
+
+aq_checkReSortPlotData <- function(plotData, ord, numRepColor, customColor) {
+	if (!is.null(customColor)) {
+		if (length(numRepColor) != length(customColor)) {
+			return(plotData) 	## so either there was a misstake, or the coloring is meant for an other grouping
+		}
+		return(plotData[ord,]) # so only in case of a the right length of custom color we are re-sorting the plotting data
+	} else { # so if customColor is NULL
+		return(plotData)
+	}
+} # EOF
+
 aq_checkColors <- function(numRepColor, customColor) {
 	if (!is.null(customColor)) {
 			Color <- customColor
 		if (length(numRepColor) != length(customColor)) {
 			Color <- numRepColor 	## so either there was a misstake, or the coloring is meant for an other grouping
 		}
-	} else {
+	} else { # so if customColor is NULL
 		Color <- numRepColor
 	}
 	return(Color)
@@ -168,7 +187,7 @@ aq_checkPlotType <- function(mod) {
 	return(plotType)
 }
 
-aq_makePolygons <- function(plotData, legendColor) {
+aq_makePolygons_OLD <- function(plotData, legendColor) {
 	if (!is.null(plotData)) {
 		alpha <- .ap2$stn$aqg_plot_color_alpha_CIfill
 		#
@@ -183,6 +202,36 @@ aq_makePolygons <- function(plotData, legendColor) {
 			polygon(xx, c(lower, rev(upper)), col=makeColorsTransparent(legendColor[i], alpha), border=FALSE)
 		} # end for i
 	} # end !is.null(plotData)
+} # EOF
+
+aq_makePolygons <- function(plotData, dataColor) {
+	if (!is.null(plotData)) {
+		dataColor <- dataColor[seq(1, length(dataColor), by=3)]
+		alpha <- .ap2$stn$aqg_plot_color_alpha_CIfill
+		#
+		xfwd <- seq(1, ncol(plotData))
+		xrev <- rev(xfwd)
+		xx <- c(xfwd, xrev)
+		for (i in 1: (nrow(plotData)/3) ) {
+			rind <- c(i*3+1, i*3+2, i*3+3) - 3 # always get the 3er groups
+			curr <- plotData[rind,]
+			lower <- curr[2,]
+			upper <- curr[3, ]
+			polygon(xx, c(lower, rev(upper)), col=makeColorsTransparent(dataColor[i], alpha), border=FALSE)
+		} # end for i
+	} # end !is.null(plotData)
+} # EOF
+
+aq_getOrder <- function(groupsChar) {
+	options(warn=-1)
+	grNrs <- as.numeric(groupsChar)
+	options(warn=0)
+	if (!any(is.na(grNrs))){ # so we have, indeed, all numbers
+		ord <- order(grNrs)
+	} else {
+		ord <- order(groupsChar)
+	}
+	return(ord)	
 } # EOF
 
 aq_plotCore_sigTable <- function(aquCalc) {
@@ -205,6 +254,8 @@ aq_plotCore_sigTable <- function(aquCalc) {
 		}
 		colnames(avgTable) <- cns
 		rownames(avgTable) <- rnsAvg
+		ord <- aq_getOrder(rnsAvg)
+		avgTable <- avgTable[ord,]
 		#
 		sep <- sigTable[1,,drop=FALSE]
 		sep[1,] <- rep("---", ncol(avgTable))
@@ -230,6 +281,7 @@ plot_aquagram_inner <- function(aquCalc, selWls=.ap2$stn$aqg_wlsAquagram, onSub,
 	plotWamacsLines <- .ap2$stn$aqg_plotWamacsLines
 	alwaysPlotAvgAqg <- .ap2$stn$aqg_alwaysPlotAvgAqg
 	doPlotAvg <- TRUE
+	maxElmsPerCol <- .ap2$stn$aqg_plot_maxNrLegendElements # the max number of elements in one column
 	#
 	if (bootCI & !is.null(aquCalc@bootRes) & !alwaysPlotAvgAqg) { 
 		doPlotAvg <- FALSE
@@ -239,18 +291,28 @@ plot_aquagram_inner <- function(aquCalc, selWls=.ap2$stn$aqg_wlsAquagram, onSub,
 	a <- aq_makeGraphicsTexts(onSub, aquCalc@possN, nrCorr)
 		onSub <- a$onSub
 		mText <- a$mText
-	########
+	#################
+	getNrOfLegCols <- function(X, inBoot=FALSE) {
+		out <- 1
+		div <- 1
+		if (inBoot) {div <- 3}
+		if (nrow(X)/div > 1* maxElmsPerCol) { out <- 2 }
+		if (nrow(X)/div > 2* maxElmsPerCol) { out <- 3 }
+		return(out)
+	} # EOIF
+	#################
 	aq_plotCore_circ <- function(dfpList) {
 		dataForPlotting <- dfpList$Data
+		ncLeg <- getNrOfLegCols(dataForPlotting)
 		caxislabels <- dfpList$Labels
 		if(where != "pdf" & Sys.getenv("RSTUDIO") != 1)  {dev.new(height=height, width=width)}
 		fmsb::radarchart(dataForPlotting, axistype=4, maxmin=T, axislabcol=1, seg=4, pty=32, caxislabels=caxislabels, pcol=Color, plty=ltPlot, cglwd=0.5, plwd=pLineWi, centerzero=T, cglty=3, sub=onSub, title=onMain)
 		legBgCol <- rgb(255,255,255, alpha=.ap2$stn$col_alphaForLegends, maxColorValue=255) # is a white with alpha to be determined in the settings
-		legend("topright", cex=0.8, xjust=0.5, yjust=0.5, legend=legText, col=legColor, lty=ltLeg, lwd=4, bg=legBgCol)
+		legend("topright", cex=0.8, xjust=0.5, yjust=0.5, legend=legText, col=legColor, lty=ltLeg, lwd=4, bg=legBgCol, ncol=ncLeg)
 		legend("bottomleft", cex=0.8, xjust=0.5, yjust=0.5, legend=legTextMod, bg=legBgCol)
 		mtext(mText, 1)
 	} # EOIF
-	## 
+	########
 	aq_plotCore_linear <- function(linData, legTextMod, curYlim, inBoot=FALSE) { #### CORE ####
 		yLabMod <- linData$yLab
 		onMain <- linData$onMain
@@ -264,21 +326,23 @@ plot_aquagram_inner <- function(aquCalc, selWls=.ap2$stn$aqg_wlsAquagram, onSub,
 		ltPlot <- linData$ltPlot
 		ltLeg <- linData$ltLeg
 		lwd <- linData$lwd
+		ncLeg <- getNrOfLegCols(plotData, inBoot)
+		#
 		if(where != "pdf" & Sys.getenv("RSTUDIO") != 1)  {dev.new(height=height, width=width)}
 		matplot(t(plotData), type="l", xaxt="n", lty=ltPlot, col=dataColor, ylab=yLabMod, xlab=xAxisTitle, ylim=curYlim, main=onMain, sub=onSub, cex.main=0.8, cex.sub=0.8, lwd=lwd) # masterScaleAQ can be NULL
 		axis(1, at=seq(1, ncol(plotData)), labels=colnames(plotData))
 		if (inBoot) {	
-			aq_makePolygons(plotData, legendColor)
+			aq_makePolygons(plotData, dataColor)
 		}
 		abline(h=TexpLine, col="gray", lwd=0.6) 
 		if (plotWamacsLines) {
 			abline(v=seq(1, ncol(plotData)), col="lightgray", lwd=0.4)
 		}
 		legBgCol <- rgb(255,255,255, alpha=.ap2$stn$col_alphaForLegends, maxColorValue=255) # is a white with alpha to be determined in the settings
-		legend("topright", legend=legTxt, title=legTitle, cex=legCex, col=legendColor, lty=ltLeg, bg=legBgCol)
+		legend("topright", legend=legTxt, title=legTitle, cex=legCex, col=legendColor, lty=ltLeg, bg=legBgCol, ncol=ncLeg)
 		legend("bottomleft", legend=legTextMod, cex=legCex, bg=legBgCol)
 	} # EOIF		
-	########
+	#################
 	## here always plot the selected aquagram, no fancy CI
 	legTextMod <- aq_checkLegendTextMod(mod, minus, TCalib, Texp)
 	## for circular only

@@ -56,4 +56,3 @@ Other Development Functions: \code{\link{custom_import}},
   \code{\link{imp_searchAskColumns}},
   \code{\link{readHeader}}, \code{\link{readSpectra}}
 }
-

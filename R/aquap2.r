@@ -1,6 +1,7 @@
-#' @title Aquaphotomics NIRS Analysis
-#' @description Methods and tools to analyse NIRS data from an Aquaphotomics 
-#' perspective. The package can support you in preparing (randomizing) your 
+#' @title Multivariate Data Analysis Tools for R including Aquaphotomics Methods
+#' @description Methods and tools for multivariate data analysis in R, with an 
+#' additional focus on specialized Aquaphotomics procedures and methods. 
+#' The package can support you in preparing (randomizing) your 
 #' experiment, and it will assist you in splitting up your data and analyzing 
 #' it using standard multivariate analysis methods and, especially, the Aquagram.
 #' @details For an introduction and more detailed information please see the package 

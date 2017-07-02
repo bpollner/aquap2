@@ -80,11 +80,10 @@ plot_pca(cube, pca.what="scores")
 \seealso{
 \code{\link{plot_pca}}
 
-Other PCA documentation: \code{\link{calc_pca_args}},
-  \code{\link{plot_pca,aquap_cube-method}}
-
 Other Plot arguments: \code{\link{plot,aquap_data,missing-method}},
   \code{\link{plot_aqg_args}}, \code{\link{plot_pg_args}},
   \code{\link{plot_pls_args}}, \code{\link{plot_sim_args}}
-}
 
+Other PCA documentation: \code{\link{calc_pca_args}},
+  \code{\link{plot_pca,aquap_cube-method}}
+}

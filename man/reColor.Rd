@@ -36,4 +36,3 @@ Other Helper Functions: \code{\link{genFolderStr}},
   \code{\link{printStdColnames}}, \code{\link{saveAQdata}},
   \code{\link{updateAquap2}}, \code{\link{updateSettings}}
 }
-

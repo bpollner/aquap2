@@ -26,4 +26,3 @@ string.
 \details{
 For internal use.
 }
-

@@ -3,8 +3,8 @@
 \docType{methods}
 \name{plot,aquap_cube,missing-method}
 \alias{plot,aquap_cube,missing-method}
-\alias{plot_all_modells}
 \alias{plot_cube}
+\alias{plot_all_modells}
 \title{*** Plot All Available Models ***}
 \usage{
 \S4method{plot}{aquap_cube,missing}(x, y, ...)
@@ -92,4 +92,3 @@ Other Plot functions: \code{\link{plot,aquap_data,missing-method}},
   \code{\link{plot_pls_indepPred}},
   \code{\link{plot_simca,aquap_cube-method}}
 }
-

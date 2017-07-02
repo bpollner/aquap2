@@ -119,4 +119,3 @@ Other Plot functions: \code{\link{plot,aquap_cube,missing-method}},
   \code{\link{plot_pls,aquap_cube-method}},
   \code{\link{plot_simca,aquap_cube-method}}
 }
-

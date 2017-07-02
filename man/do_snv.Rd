@@ -35,4 +35,3 @@ Other dpt modules documentation: \code{\link{do_detrend}},
   \code{\link{do_msc}}, \code{\link{do_sgolay}},
   \code{\link{dpt_modules}}
 }
-
