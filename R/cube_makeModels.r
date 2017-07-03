@@ -104,6 +104,17 @@ calculateAquagram <- function(dataset, md, ap, idString, tempFile) {
 	return(aquCalcRes)
 } # EOF
 
+calculateFda <- function(dataset, md, ap, idString) {
+	if (is.null(ap$fda)) {
+		return(NULL)
+	}
+	if (!.ap2$stn$allSilent) {cat("      calc. fda, ")}
+		aa <- make_fda_models(dataset, md, ap, idString)
+#		print(str(aa)); wait()
+	if (!.ap2$stn$allSilent) {cat(" ok\n")}
+		return(list("here please result"))	
+} # EOF
+
 # works on a single element of the list in the cube
 makeAllModels <- function(set, md, ap, tempFile) {
 #	dataset <- set@dataset
@@ -115,5 +126,7 @@ makeAllModels <- function(set, md, ap, tempFile) {
 	newSet@dataset <- getDataset(set)
 	newSet@idString <- set@idString
 	newSet@extraModels <- set@extraModels
+	# classifiers
+	newSet@fda <- calculateFda(getDataset(set), md, ap, getIdString(set))
 	return(newSet)
 } # EOF
