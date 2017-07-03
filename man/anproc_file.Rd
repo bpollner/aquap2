@@ -320,6 +320,160 @@ If left at the default value 'def', the default from the settings.r file
 \item{aqg.discr}{Logical or character 'def'. If set to TRUE, negative (resp. 
 positive) peaks can be only found in peak-heights below (resp. above) zero.}
 
+\item{do.da}{Logical. If used in \code{getap}, if classification via 
+discriminant analysis (\code{\link[MASS]{lda}}, \code{\link[MASS]{qda}}, 
+\code{\link[mda]{fda}}, \code{\link[mclust]{MclustDA}}) should be performed 
+in the given dataset.}
+
+\item{da.type}{Character vector. The type of discriminant analysis (DA) to 
+perform; possible values (one or more) are: 
+\code{'lda', 'qda', 'fda', 'mclustda'}:
+\itemize{
+   \item \code{lda} Linear DA using 
+   \code{\link[MASS]{lda}}.
+   \item \code{qda} Quadratic DA using 
+   \code{\link[MASS]{qda}}.
+   \item \code{fda} Flexible DA using 
+   \code{\link[mda]{fda}}.
+   \item \code{mclustda} DA based on Gaussian finite 
+   mixture modeling using \code{\link[mclust]{MclustDA}}.
+ }}
+
+\item{da.clOn}{Character vector. One or more class variables to define the 
+grouping used for classification.}
+
+\item{da.testCV}{Logical, if the errors of the test-data should be crossvalidated. 
+If set to true, CV and testing is repeated in alternating datasets. See below.}
+
+\item{da.percTest}{Numeric length one. The percentage of the dataset that should 
+be set aside for testing the models; these data are never seen during training 
+and crossvalidation.}
+
+\item{da.cvBootCutoff}{If the number of observations within the smallest 
+subgroup defined by the classification grouping variable is EQUAL or HIGHER then 
+\code{.cvBootCutoff}, the crossvalidation is done via splitting the training 
+data in the number of segments defined in \code{.valid} (see below), otherwise 
+the crossvalidation is done via bootstrap resampling, with the number of 
+bootstrap iterations resulting from the multiplication by the number of 
+observations in this smallest subgroup with \code{.cvBootFactor}. Set the latter 
+to 1 to NEVER perform the CV of the training data via bootstrap, or, for a 
+global solution, set the parameter \code{cl_gen_neverBootstrapForCV} in the 
+settings file to \code{TRUE}.}
+
+\item{da.cvBootFactor}{The factor used to multiply the number of observations 
+within the smallest subgroup defined by the classification grouping variable 
+with, resulting in the number of iterations of a possible bootstrap 
+crossvalidation of the trainign data -- see \code{.cvBootCutoff}.}
+
+\item{da.valid}{The number of segments the training data should be divided 
+into in case of a "traditional" crossvalidation of the training data; see above.}
+
+\item{reserved}{-- No plotting parameter yet defined --}
+
+\item{do.rnf}{Logical. If used in \code{getap}, if classification via 
+\code{\link[randomForest]{randomForest}} should be performed in the given 
+dataset.}
+
+\item{rnf.clOn}{Character vector. One or more class variables to define the 
+grouping used for classification.}
+
+\item{rnf.testCV}{Logical, if the errors of the test-data should be crossvalidated. 
+If set to true, CV and testing is repeated in alternating datasets. See below.}
+
+\item{rnf.percTest}{Numeric length one. The percentage of the dataset that should 
+be set aside for testing the models; these data are never seen during training 
+and crossvalidation.}
+
+\item{rnf.cvBootCutoff}{If the number of observations within the smallest 
+subgroup defined by the classification grouping variable is EQUAL or HIGHER then 
+\code{.cvBootCutoff}, the crossvalidation is done via splitting the training 
+data in the number of segments defined in \code{.valid} (see below), otherwise 
+the crossvalidation is done via bootstrap resampling, with the number of 
+bootstrap iterations resulting from the multiplication by the number of 
+observations in this smallest subgroup with \code{.cvBootFactor}. Set the latter 
+to 1 to NEVER perform the CV of the training data via bootstrap, or, for a 
+global solution, set the parameter \code{cl_gen_neverBootstrapForCV} in the 
+settings file to \code{TRUE}.}
+
+\item{rnf.cvBootFactor}{The factor used to multiply the number of observations 
+within the smallest subgroup defined by the classification grouping variable 
+with, resulting in the number of iterations of a possible bootstrap 
+crossvalidation of the trainign data -- see \code{.cvBootCutoff}.}
+
+\item{rnf.valid}{The number of segments the training data should be divided 
+into in case of a "traditional" crossvalidation of the training data; see above.}
+
+\item{reserved}{-- No plotting parameter yet defined --}
+
+\item{do.svm}{Logical. If used in \code{getap}, if classification via 
+\code{\link[e1071]{svm}} should be performed in the given dataset.}
+
+\item{svm.clOn}{Character vector. One or more class variables to define the 
+grouping used for classification.}
+
+\item{svm.testCV}{Logical, if the errors of the test-data should be crossvalidated. 
+If set to true, CV and testing is repeated in alternating datasets. See below.}
+
+\item{svm.percTest}{Numeric length one. The percentage of the dataset that should 
+be set aside for testing the models; these data are never seen during training 
+and crossvalidation.}
+
+\item{svm.cvBootCutoff}{If the number of observations within the smallest 
+subgroup defined by the classification grouping variable is EQUAL or HIGHER then 
+\code{.cvBootCutoff}, the crossvalidation is done via splitting the training 
+data in the number of segments defined in \code{.valid} (see below), otherwise 
+the crossvalidation is done via bootstrap resampling, with the number of 
+bootstrap iterations resulting from the multiplication by the number of 
+observations in this smallest subgroup with \code{.cvBootFactor}. Set the latter 
+to 1 to NEVER perform the CV of the training data via bootstrap, or, for a 
+global solution, set the parameter \code{cl_gen_neverBootstrapForCV} in the 
+settings file to \code{TRUE}.}
+
+\item{svm.cvBootFactor}{The factor used to multiply the number of observations 
+within the smallest subgroup defined by the classification grouping variable 
+with, resulting in the number of iterations of a possible bootstrap 
+crossvalidation of the trainign data -- see \code{.cvBootCutoff}.}
+
+\item{svm.valid}{The number of segments the training data should be divided 
+into in case of a "traditional" crossvalidation of the training data; see above.}
+
+\item{reserved}{-- No plotting parameter yet defined --}
+
+\item{do.nnet}{Logical. If used in \code{getap}, if classification via 
+artificial neural networks (\code{\link[nnet]{nnet}}) should be performed 
+in the  given dataset.}
+
+\item{nnet.clOn}{Character vector. One or more class variables to define the 
+grouping used for classification.}
+
+\item{nnet.testCV}{Logical, if the errors of the test-data should be crossvalidated. 
+If set to true, CV and testing is repeated in alternating datasets. See below.}
+
+\item{nnet.percTest}{Numeric length one. The percentage of the dataset that should 
+be set aside for testing the models; these data are never seen during training 
+and crossvalidation.}
+
+\item{nnet.cvBootCutoff}{If the number of observations within the smallest 
+subgroup defined by the classification grouping variable is EQUAL or HIGHER then 
+\code{.cvBootCutoff}, the crossvalidation is done via splitting the training 
+data in the number of segments defined in \code{.valid} (see below), otherwise 
+the crossvalidation is done via bootstrap resampling, with the number of 
+bootstrap iterations resulting from the multiplication by the number of 
+observations in this smallest subgroup with \code{.cvBootFactor}. Set the latter 
+to 1 to NEVER perform the CV of the training data via bootstrap, or, for a 
+global solution, set the parameter \code{cl_gen_neverBootstrapForCV} in the 
+settings file to \code{TRUE}.}
+
+\item{nnet.cvBootFactor}{The factor used to multiply the number of observations 
+within the smallest subgroup defined by the classification grouping variable 
+with, resulting in the number of iterations of a possible bootstrap 
+crossvalidation of the trainign data -- see \code{.cvBootCutoff}.}
+
+\item{nnet.valid}{The number of segments the training data should be divided 
+into in case of a "traditional" crossvalidation of the training data; see above.}
+
+\item{reserved}{-- No plotting parameter yet defined --}
+
 \item{pg.where}{Character length one. If left at the default 'def', the value 
 from the settings.r file is read in (parameter \code{gen_plot_pgWhereDefault}). 
 For plotting to PDFs provide "pdf", for plotting to graphics device provide 
@@ -345,20 +499,34 @@ The analysis procedure file is used to first split the dataset
  calculations / specific plotting options and the general plotting options 
  start with a certain prefix:
  \itemize{
-   \item "spl" for all arguments related to the split-process 
+   \item "spl" for all arguments related to the split-process. 
         (For a separate listing please see  \code{\link{split_dataset}})
-   \item "pca" for all arguments related to PCA models (except do.pca)
+   \item "pca" for all arguments related to PCA models (except do.pca).
        (For a separate listing see \code{\link{calc_pca_args}} and 
        \code{\link{plot_pca_args}})
-   \item "sim" for all arguments related to SIMCA models (except do.sim)
+   \item "sim" for all arguments related to SIMCA models (except do.sim).
         (For a separate listing see \code{\link{calc_sim_args}} and 
        \code{\link{plot_sim_args}})
-   \item "pls" for all arguments related to PLSR models (except do.pls)
+   \item "pls" for all arguments related to PLSR models (except do.pls).
        (For a separate listing see \code{\link{calc_pls_args}} and 
        \code{\link{plot_pls_args}})
-   \item "aqg" for all arguments related to Aquagrams (except do.aqg)  
+   \item "aqg" for all arguments related to Aquagrams (except do.aqg).  
         (For a separate listing see \code{\link{calc_aqg_args}} and 
        \code{\link{plot_aqg_args}})
+   \item "da" for all arguments related to Discriminant Analysis classification 
+      (except do.da). (For a separate listing see 
+      \code{\link{calc_discrimAnalysis_args}} and 
+       \code{\link{plot_discrimAnalysis_args}})
+   \item "rnf" for all arguments related to RandomForest classification 
+   (except do.rnf). (For a separate listing see 
+       \code{\link{calc_randomForest_args}} and 
+       \code{\link{plot_randomForest_args}})
+   \item "svm" for all arguments related to Support Vector Machines 
+       classification (except do.svm). (For a separate listing see 
+       \code{\link{calc_SVM_args}} and \code{\link{plot_SVM_args}})
+   \item "nnet" for all arguments related to Neural Networks classification 
+      (except do.aqg). (For a separate listing see \code{\link{calc_NNET_args}} 
+      and \code{\link{plot_NNET_args}})
    \item "pg" for the general plotting options that are used in each of the 
         plotting functions. (For a separate listing see 
         \code{\link{plot_pg_args}})

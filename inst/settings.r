@@ -225,6 +225,13 @@ stn <- list(
 	aqg_tempCalib_forceOutlExcl = TRUE, 	## if the exclusion of outliers in the temperature calibration dataset should be forced or not.
 	
 
+	## Classification (all methods)
+	cl_gen_neverBootstrapForCV = TRUE,		## if bootstrap should NEVER be applied when crossvalidating any training dataset.
+
+
+
+
+
 	## plotting, PDFs
 	pdf_Height_ws = 5,						## when plotting to pdf, the settings for the format
 	pdf_Width_ws = 8.9,						## ws for widescreen (e.g. regressionvector, loading plots, raw)

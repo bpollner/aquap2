@@ -100,18 +100,76 @@ aqg.plines <- "def"						## if "lines" XXX should be added to the peak plot
 aqg.discr <- "def"						## Logical or character 'def'. If set to TRUE, negative (resp. positive) peaks can be only found in peak-heights below (resp. above) zero.
 #########################	
 
-################################################################
+####################################################################
 
 
 
-################################################################
-################ general plotting options ######################
-################################################################
+
+####################################################################
+########## classification & classif. plotting options ##############
+####################################################################
+
+#########################
+### Discriminant Analysis
+do.da <- FALSE							## if DA should be performed
+da.type <- c("fda")						## the type of discriminant analysis to perform. Provide a single character or a character vector, for possible values please see ?calc_discrimAnalysis_args.
+da.clOn <- c("foo")						## what class-variables (one or more) to use for grouping the data
+da.testCV <- TRUE						## if the errors of the test-data should be crossvalidated. If set to true, CV and testing is repeated in alternating datasets. See below.
+da.percTest <- 30						## The percentage of the dataset that should be set aside for testing the models; these data are never seen during training and crossvalidation.
+da.cvBootCutoff <- 32					## If the number of observations within the smallest subgroup defined by the classification grouping variable is EQUAL or HIGHER then ".cvBootCutoff", the crossvalidation is done via splitting the training data in ".valid" (see below) segments, otherwise the crossvalidation is done via bootstrap resampling, with the number of bootstrap iterations resulting from the multiplication by the number of observations in this smallest subgroup with ".cvBootFactor". Set ".cvBootCutoff" to 1 to NEVER perform the CV of the training data via bootstrap.
+da.cvBootFactor <- 1					## The factor used to multiply the number of observations within the smallest subgroup defined by the classification grouping variable with, resulting in the number of iterations of a possible bootstrap crossvalidation -- see above.
+da.valid <- 8							## The number of segments the training data should be divided into in case of a traditional crossvalidation of the training data; see above.
+#########################
+
+
+#########################
+### Random Forest
+do.rnf <- FALSE							## if random forests should be performed
+rnf.clOn <- c("foo")					## what class-variables (one or more) to use for grouping the data
+rnf.testCV <- TRUE						## if the errors of the test-data should be crossvalidated. If set to true, CV and testing is repeated in alternating datasets. See below.
+rnf.percTest <- 30						## The percentage of the dataset that should be set aside for testing the models; these data are never seen during training and crossvalidation.
+rnf.cvBootCutoff <- 32					## If the number of observations within the smallest subgroup defined by the classification grouping variable is EQUAL or HIGHER then ".cvBootCutoff", the crossvalidation is done via splitting the training data in ".valid" (see below) segments, otherwise the crossvalidation is done via bootstrap resampling, with the number of bootstrap iterations resulting from the multiplication by the number of observations in this smallest subgroup with ".cvBootFactor". Set ".cvBootCutoff" to 1 to NEVER perform the CV of the training data via bootstrap.
+rnf.cvBootFactor <- 1					## The factor used to multiply the number of observations within the smallest subgroup defined by the classification grouping variable with, resulting in the number of iterations of a possible bootstrap crossvalidation -- see above.
+rnf.valid <- 8							## The number of segments the training data should be divided into in case of a traditional crossvalidation of the training data; see above.
+#########################
+
+
+#########################
+### Support Vector Machine
+do.svm <- FALSE							## if svm classification should be performed
+svm.clOn <- c("foo")					## what class-variables (one or more) to use for grouping the data
+svm.testCV <- TRUE						## if the errors of the test-data should be crossvalidated. If set to true, CV and testing is repeated in alternating datasets. See below.
+svm.percTest <- 30						## The percentage of the dataset that should be set aside for testing the models; these data are never seen during training and crossvalidation.
+svm.cvBootCutoff <- 32					## If the number of observations within the smallest subgroup defined by the classification grouping variable is EQUAL or HIGHER then ".cvBootCutoff", the crossvalidation is done via splitting the training data in ".valid" (see below) segments, otherwise the crossvalidation is done via bootstrap resampling, with the number of bootstrap iterations resulting from the multiplication by the number of observations in this smallest subgroup with ".cvBootFactor". Set ".cvBootCutoff" to 1 to NEVER perform the CV of the training data via bootstrap.
+svm.cvBootFactor <- 1					## The factor used to multiply the number of observations within the smallest subgroup defined by the classification grouping variable with, resulting in the number of iterations of a possible bootstrap crossvalidation -- see above.
+svm.valid <- 8							## The number of segments the training data should be divided into in case of a traditional crossvalidation of the training data; see above.
+#########################
+
+
+#########################
+### Neural Network
+do.nnet <- FALSE						## if svm classification should be performed
+nnet.clOn <- c("foo")					## what class-variables (one or more) to use for grouping the data
+nnet.testCV <- TRUE						## if the errors of the test-data should be crossvalidated. If set to true, CV and testing is repeated in alternating datasets. See below.
+nnet.percTest <- 30						## The percentage of the dataset that should be set aside for testing the models; these data are never seen during training and crossvalidation.
+nnet.cvBootCutoff <- 32					## If the number of observations within the smallest subgroup defined by the classification grouping variable is EQUAL or HIGHER then ".cvBootCutoff", the crossvalidation is done via splitting the training data in ".valid" (see below) segments, otherwise the crossvalidation is done via bootstrap resampling, with the number of bootstrap iterations resulting from the multiplication by the number of observations in this smallest subgroup with ".cvBootFactor". Set ".cvBootCutoff" to 1 to NEVER perform the CV of the training data via bootstrap.
+nnet.cvBootFactor <- 1					## The factor used to multiply the number of observations within the smallest subgroup defined by the classification grouping variable with, resulting in the number of iterations of a possible bootstrap crossvalidation -- see above.
+nnet.valid <- 8							## The number of segments the training data should be divided into in case of a traditional crossvalidation of the training data; see above.
+#########################
+
+####################################################################
+
+
+
+
+####################################################################
+################## general plotting options ########################
+####################################################################
 pg.where <- "def"						## If left at the default 'def', the value from the settings.r file is read in (parameter gen_plot_pgWhereDefault). For plotting PDFs provide "pdf", for plotting to graphics device provide anything but "pdf".
 pg.main <- ""							## the additional text on the title of each single plot
 pg.sub <- ""							## the additional text on the subtitle of each single plot
 pg.fns <- ""							## 'filename suffix', the additional text in the filename of the pdf.
-################################################################
+####################################################################
 
 ### do NOT change the names of the variables !!  ####
 ####################################################################

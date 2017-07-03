@@ -86,6 +86,8 @@ Other Core functions: \code{\link{exportSampleList}},
   \code{\link{plot,aquap_data,missing-method}}
 
 Other Plot functions: \code{\link{plot,aquap_data,missing-method}},
+  \code{\link{plot_DA}}, \code{\link{plot_NNET}},
+  \code{\link{plot_RNF}}, \code{\link{plot_SVM}},
   \code{\link{plot_aqg}},
   \code{\link{plot_pca,aquap_cube-method}},
   \code{\link{plot_pls,aquap_cube-method}},

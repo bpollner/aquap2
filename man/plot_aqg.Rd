@@ -50,6 +50,8 @@ The width and height of the resulting pdf can be set in the settings.
 \seealso{
 Other Plot functions: \code{\link{plot,aquap_cube,missing-method}},
   \code{\link{plot,aquap_data,missing-method}},
+  \code{\link{plot_DA}}, \code{\link{plot_NNET}},
+  \code{\link{plot_RNF}}, \code{\link{plot_SVM}},
   \code{\link{plot_pca,aquap_cube-method}},
   \code{\link{plot_pls,aquap_cube-method}},
   \code{\link{plot_pls_indepPred}},

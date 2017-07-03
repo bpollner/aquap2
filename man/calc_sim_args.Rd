@@ -47,8 +47,11 @@ adapted from the manual-page of the Chemometrics-software "Pirouette".
 \seealso{
 \code{\link{gdmm}}
 
-Other Calc. arguments: \code{\link{calc_aqg_args}},
+Other Calc. arguments: \code{\link{calc_NNET_args}},
+  \code{\link{calc_SVM_args}}, \code{\link{calc_aqg_args}},
+  \code{\link{calc_discrimAnalysis_args}},
   \code{\link{calc_pca_args}}, \code{\link{calc_pls_args}},
+  \code{\link{calc_randomForest_args}},
   \code{\link{split_dataset}}
 
 Other SIMCA documentation: \code{\link{plot_sim_args}},

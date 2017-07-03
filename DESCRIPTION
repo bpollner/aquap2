@@ -34,11 +34,17 @@ Imports:
     beeswarm,
     devtools,
     grid,
-    gridExtra
+    gridExtra,
+    MASS,
+    mda,
+    mclust,
+    randomForest,
+    e1071,
+    nnet
 Suggests:
     knitr
 VignetteBuilder: knitr
-Collate:
+Collate: 
     'aquap2.r'
     'calc_aqg.r'
     'calc_noise.r'
@@ -46,10 +52,13 @@ Collate:
     'calc_simca.r'
     'cl_classFunctions.r'
     'cl_classDefs.r'
+    'classification_X.r'
+    'classification_general.r'
     'cube_generateDatasets.r'
     'cube_makeModels.r'
     'doc_anproc.r'
     'doc_classes.r'
+    'doc_classification.r'
     'doc_customImport.r'
     'doc_customTRH.r'
     'doc_dptModules.r'
@@ -64,6 +73,7 @@ Collate:
     'peaks_pick+plot.r'
     'plot_all.r'
     'plot_aqg.r'
+    'plot_classification.r'
     'plot_pca.r'
     'plot_plsr.r'
     'plot_simca.r'

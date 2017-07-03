@@ -49,8 +49,12 @@ plot_simca(cube, pg.where="pdf", pg.sub="bar", pg.fns="_bar") # adds '_bar'
 \code{\link{plot_simca}}
 
 Other Plot arguments: \code{\link{plot,aquap_data,missing-method}},
-  \code{\link{plot_aqg_args}}, \code{\link{plot_pca_args}},
-  \code{\link{plot_pg_args}}, \code{\link{plot_pls_args}}
+  \code{\link{plot_NNET_args}},
+  \code{\link{plot_SVM_args}}, \code{\link{plot_aqg_args}},
+  \code{\link{plot_discrimAnalysis_args}},
+  \code{\link{plot_pca_args}}, \code{\link{plot_pg_args}},
+  \code{\link{plot_pls_args}},
+  \code{\link{plot_randomForest_args}}
 
 Other SIMCA documentation: \code{\link{calc_sim_args}},
   \code{\link{plot_simca,aquap_cube-method}}

@@ -81,8 +81,12 @@ plot_pca(cube, pca.what="scores")
 \code{\link{plot_pca}}
 
 Other Plot arguments: \code{\link{plot,aquap_data,missing-method}},
-  \code{\link{plot_aqg_args}}, \code{\link{plot_pg_args}},
-  \code{\link{plot_pls_args}}, \code{\link{plot_sim_args}}
+  \code{\link{plot_NNET_args}},
+  \code{\link{plot_SVM_args}}, \code{\link{plot_aqg_args}},
+  \code{\link{plot_discrimAnalysis_args}},
+  \code{\link{plot_pg_args}}, \code{\link{plot_pls_args}},
+  \code{\link{plot_randomForest_args}},
+  \code{\link{plot_sim_args}}
 
 Other PCA documentation: \code{\link{calc_pca_args}},
   \code{\link{plot_pca,aquap_cube-method}}

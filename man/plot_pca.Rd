@@ -93,6 +93,8 @@ plot_pca(fd, pg.where="", pca.colorBy="C_Group") # assumes existence of "C_Group
 
 Other Plot functions: \code{\link{plot,aquap_cube,missing-method}},
   \code{\link{plot,aquap_data,missing-method}},
+  \code{\link{plot_DA}}, \code{\link{plot_NNET}},
+  \code{\link{plot_RNF}}, \code{\link{plot_SVM}},
   \code{\link{plot_aqg}},
   \code{\link{plot_pls,aquap_cube-method}},
   \code{\link{plot_pls_indepPred}},

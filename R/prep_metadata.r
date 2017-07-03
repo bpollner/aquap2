@@ -265,9 +265,14 @@ getap_core_file <- function(fn="def") {
 	simca <- list(doSIMCA=e$do.sim, simcOn=e$sim.vars, simcK=e$sim.K)
 	plsr <- list(doPLSR=e$do.pls, regressOn=e$pls.regOn, ncomp=e$pls.ncomp, valid=e$pls.valid, exOut=e$pls.exOut, colorBy=e$pls.colorBy, what=e$pls.what, inRdp=e$pls.rdp)	
 	aquagr <- list(doAqg=e$do.aqg, vars=e$aqg.vars, nrCorr=e$aqg.nrCorr, spectra=e$aqg.spectra, minus=e$aqg.minus, mod=e$aqg.mod, TCalib=e$aqg.TCalib, Texp=e$aqg.Texp, bootCI=e$aqg.bootCI, R=e$aqg.R, smoothN=e$aqg.smoothN, selWls=e$aqg.selWls, msc=e$aqg.msc, reference=e$aqg.reference, fsa=e$aqg.fsa, fss=e$aqg.fss, ccol=e$aqg.ccol, clt=e$aqg.clt, pplot=e$aqg.pplot, plines=e$aqg.plines, discr=e$aqg.discr)	
+	da <- list(doDa=e$do.da, type=e$da.type, clOn=e$da.clOn, testCV=e$da.testCV, percTest=e$da.percTest, bootCutoff=e$da.cvBootCutoff, bootFactor=e$da.cvBootFactor, valid=e$da.valid)
+	rnf <- list(doRnf=e$do.rnf, clOn=e$rnf.clOn, testCV=e$rnf.testCV, percTest=e$rnf.percTest, bootCutoff=e$rnf.cvBootCutoff, bootFactor=e$rnf.cvBootFactor, valid=e$rnf.valid)
+	svm <- list(doSvm=e$do.svm, clOn=e$svm.clOn, testCV=e$svm.testCV, percTest=e$svm.percTest, bootCutoff=e$svm.cvBootCutoff, bootFactor=e$svm.cvBootFactor, valid=e$svm.valid)
+	nnet <- list(doNnet=e$do.nnet, clOn=e$nnet.clOn, testCV=e$nnet.testCV, percTest=e$nnet.percTest, bootCutoff=e$nnet.cvBootCutoff, bootFactor=e$nnet.cvBootFactor, valid=e$nnet.valid)
+	classif <- list(da=da, rnf=rnf, svm=svm, nnet=nnet)
 	genPlot <- list(where=e$pg.where, onMain=e$pg.main, onSub=e$pg.sub, fns=e$pg.fns)
 	##
-	ap <- list(ucl=ucl, dpt=dpt, pca=pca, simca=simca, plsr=plsr, aquagr=aquagr, genPlot=genPlot)
+	ap <- list(ucl=ucl, dpt=dpt, pca=pca, simca=simca, plsr=plsr, aquagr=aquagr, classif=classif, genPlot=genPlot)
 	return(new("aquap_ap", ap))
 } #EOF
 
@@ -430,6 +435,50 @@ getap <- function(fn="def", ...) {
 		}
 	} # EOIF
 	apMod$aquagr <- modifyAquagram(...)
+	###
+	DA <- ap$classif$da
+	doIt <- checkDo(DA, "doDa")
+	modifyDA <- function(do.da=doIt, da.type=DA$type, da.clOn=DA$clOn, da.testCV=DA$testCV, da.percTest=DA$percTest, da.cvBootCutoff=DA$bootCutoff, da.cvBootFactor=DA$bootFactor, da.valid=DA$valid) {
+		if (!do.da) { 
+			return(NULL)
+		} else {
+			return(list(type=da.type, clOn=da.clOn, testCV=da.testCV, percTest=da.percTest, bootCutoff=da.cvBootCutoff, bootFactor=da.cvBootFactor, valid=da.valid))
+		}
+	} # EOIF
+	apMod$classif$da <- modifyDA(...)
+	###
+	RNF <- ap$classif$rnf
+	doIt <- checkDo(RNF, "doRnf")
+	modifyRnf <- function(do.rnf=doIt, rnf.clOn=RNF$clOn, rnf.testCV=RNF$testCV, rnf.percTest=RNF$percTest, rnf.cvBootCutoff=RNF$bootCutoff, rnf.cvBootFactor=RNF$bootFactor, rnf.valid=RNF$valid) {
+		if (!do.rnf) { 
+			return(NULL)
+		} else {
+			return(list(clOn=rnf.clOn, testCV=rnf.testCV, percTest=rnf.percTest, bootCutoff=rnf.cvBootCutoff, bootFactor=rnf.cvBootFactor, valid=rnf.valid))
+		}
+	} # EOIF
+	apMod$classif$rnf <- modifyRnf(...)
+	###
+	SVM <- ap$classif$svm
+	doIt <- checkDo(SVM, "doSvm")
+	modifySVM <- function(do.svm=doIt, svm.clOn=SVM$clOn, svm.testCV=SVM$testCV, svm.percTest=SVM$percTest, svm.cvBootCutoff=SVM$bootCutoff, svm.cvBootFactor=SVM$bootFactor, svm.valid=SVM$valid) {
+		if (!do.svm) { 
+			return(NULL)
+		} else {
+			return(list(clOn=svm.clOn, testCV=svm.testCV, percTest=svm.percTest, bootCutoff=svm.cvBootCutoff, bootFactor=svm.cvBootFactor, valid=svm.valid))
+		}
+	} # EOIF
+	apMod$classif$svm <- modifySVM(...)
+	###
+	NN <- ap$classif$nnet
+	doIt <- checkDo(NN, "doNnet")
+	modifyNnet <- function(do.nnet=doIt, nnet.clOn=NN$clOn, nnet.testCV=NN$testCV, nnet.percTest=NN$percTest, nnet.cvBootCutoff=NN$bootCutoff, nnet.cvBootFactor=NN$bootFactor, nnet.valid=NN$valid) {
+		if (!do.nnet) { 
+			return(NULL)
+		} else {
+			return(list(clOn=nnet.clOn, testCV=nnet.testCV, percTest=nnet.percTest, bootCutoff=nnet.cvBootCutoff, bootFactor=nnet.cvBootFactor, valid=nnet.valid))
+		}
+	} # EOIF
+	apMod$classif$nnet <- modifyNnet(...)
 	###
 	cnt <- checkForStats(apMod)$cnt # returns 0 if not a single model has been calculated; we have do check at the modified ap !!
 	GP <- ap$genPlot

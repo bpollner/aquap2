@@ -613,6 +613,91 @@ ap_check_plsr_Input <- function(ap, header) {
 	return(ap)
 } # EOF
 
+ap_check_classifier_Input <- function(ap, header) {
+	if (!is.null(ap$classif)) {
+		pvAllXDA <- pv_classificationFuncs_XDA
+		pvNonDA <- pv_nonDAClassifiers
+		pvAllClassif <- pv_allClassificationFuncs
+		cns <- colnames(header)
+		cPref <- .ap2$stn$p_ClassVarPref
+		cns <- cns[grep(cPref, cns)]
+		###
+		checkClassExistence <- function(X, char, ppv=FALSE) {
+			if (!all(is.character(X))) {
+				stop(paste0("Please only provide characters as input for the argument '", char, "'. Please check your input resp. the analysis procedure."), call.=FALSE)
+			}
+			for (i in 1: length(X)) {
+				if (!X[i] %in% cns) {
+					msg1 <- paste0("Sorry, it seems that the class-variable `", X[i], "` as target variable for classification (", char, ") does not exist in the provided dataset.")
+					msg2 <- "";  if (ppv) { msg2 <- paste0("\nPossible values are: '", paste(cns, collapse="', '"), ".") }
+					stop(paste0(msg1, msg2), call.=FALSE)
+				}
+				if (nlevels(header[, X[i]]) < 2) {
+					stop(paste0("Sorry, you need to have at least two distinct groups for classification (", char, "). The selected variable '", X[i], "' contains only one group in the current dataset."), call.=FALSE)
+				}
+			} # end for i
+		} # EOIF
+		checkTestCV <- function(x, char) {
+			if (!all(is.logical(x)) | length(x) != 1) {
+				stop(paste0("Please provide either `TRUE` `FALSE` to the argument `", char, "`."), call.=FALSE)
+			}
+		} # EOIF
+		checkPercTest <- function(x, char, lim=50) {
+			if (!all(is.numeric(x)) | length(x) != 1) {
+				stop(paste0("Please provide a numeric length one between ", lim, " and 100 to the argument `", char, "`."), call.=FALSE)
+			}
+			if (x < lim | x > 100) {
+				stop(paste0("Please provide a numeric between ", lim, " and 100 to the argument `", char, "`."), call.=FALSE)
+			}
+		} # EOIF
+		checkForNumericLengthOne <- function(x, char) {
+			if (!all(is.numeric(x)) | length(x) != 1) {
+				stop(paste0("Please provide a numeric length one to the argument `", char, "`."), call.=FALSE)
+			}
+		} # EOIF
+		checkThings <- function(mo, testCV, percTest, bootCutoff, BootFactor, valid) {
+			checkTestCV(testCV, paste0(mo, "testCV"))
+			checkPercTest(percTest, paste0(mo, "percTest"))
+			checkForNumericLengthOne(bootCutoff, paste0(mo, "cvBootCutoff"))
+			checkForNumericLengthOne(BootFactor, paste0(mo, "cvBootFactor"))
+			checkForNumericLengthOne(valid, paste0(mo, "valid"))
+		} # EOIF
+		###
+		# XDA
+		da <- ap$classif$da
+		if (!is.null(da)) {
+			if (!all(is.character(da$type))) {
+				stop(paste0("Please only provide characters as input for the argument 'da.type'. Please check your input resp. the analysis procedure."), call.=FALSE)
+			}
+			if (!all(da$type %in% pvAllXDA)) {
+				stop(paste0("Please provide one or more of '", paste(pvAllXDA, collapse="`, `"), "' to the argument 'da.type' in the analysis procedure / your input."), call.=FALSE)
+			}
+			checkClassExistence(da$clOn, "da.clOn")
+			checkThings("da.", da$testCV, da$percTest, da$bootCutoff, da$bootFactor, da$valid)
+		} # end !is null
+		#
+		rnf <- ap$classif$rnf
+		if (!is.null(rnf)) {
+			checkClassExistence(rnf$clOn, "rnf.clOn")
+			checkThings("rnf.", rnf$testCV, rnf$percTest, rnf$bootCutoff, rnf$bootFactor, rnf$valid)
+		} # end !is null
+		#
+		svm <- ap$classif$svm
+		if (!is.null(svm)) {
+			checkClassExistence(svm$clOn, "svm.clOn")
+			checkThings("svm.", svm$testCV, svm$percTest, svm$bootCutoff, svm$bootFactor, svm$valid)
+		} # end !is null
+		#
+		ann <- ap$classif$nnet
+		if (!is.null(ann)) {
+			checkClassExistence(ann$clOn, "nnet.clOn")
+			checkThings("nnet.", ann$testCV, ann$percTest, ann$bootCutoff, ann$bootFactor, ann$valid)	
+		} # end !is null
+		#
+	} # end not null
+	return(ap)
+} # EOF
+
 ap_checExistence_Defaults <- function(ap, dataset, haveExc, checkWlsRange) {
 	cPref <- .ap2$stn$p_ClassVarPref
 	yPref <- .ap2$stn$p_yVarPref
@@ -692,6 +777,7 @@ ap_checExistence_Defaults <- function(ap, dataset, haveExc, checkWlsRange) {
 	ap <- ap_check_gp_generalPlottingDefaults(ap)
 	ap_check_dptModules(ap)
 	ap <- ap_check_plsr_Input(ap, dataset$header)
+	ap <- ap_check_classifier_Input(ap, dataset$header)
 	# add more default checking for other statistics here
 	return(ap)
 } # EOF
@@ -1164,6 +1250,10 @@ checkForStats <- function(ap) {
 	if (!is.null(ap$aquagr)) {
 		cnt <- cnt + 1
 		char <- c(char, "Aquagram")
+	}
+	if (!is.null(ap$classif)) {
+		cnt <- cnt + 1
+		char <- c(char, "classification")
 	}
 	return(list(cnt=cnt, char=char))
 } # EOF

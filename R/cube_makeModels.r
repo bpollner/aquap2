@@ -104,16 +104,52 @@ calculateAquagram <- function(dataset, md, ap, idString, tempFile) {
 	return(aquCalcRes)
 } # EOF
 
-calculateFda <- function(dataset, md, ap, idString) {
-	if (is.null(ap$fda)) {
+calculate_XDA <- function(dataset, md, ap, idString) {
+	if (is.null(ap$classif$da)) {
 		return(NULL)
 	}
-	if (!.ap2$stn$allSilent) {cat("      calc. fda, ")}
-		aa <- make_fda_models(dataset, md, ap, idString)
-#		print(str(aa)); wait()
+	daTypes <- ap$classif$da$type
+	classOn <- ap$classif$da$clOn
+	if (length(daTypes) == 1) {add <- ""} else {add <- ", "}
+	outList <- vector("list", length(daTypes))
+	if (!.ap2$stn$allSilent) {cat("      calc. ")}
+	for (i in 1: length(daTypes)) {		
+		classFunc <- getClassifierFunction(daTypes[i])
+		if (!.ap2$stn$allSilent) {cat(paste0(daTypes[i], add))}
+			###
+			aa <- make_X_classif_models(dataset, classFunc, md, ap, classOn, idString, stnLoc=.ap2$stn)
+	#		print(str(aa)); wait()
+			outList[[i]] <- aa
+			###
+	} # end for i
 	if (!.ap2$stn$allSilent) {cat(" ok\n")}
-		return(list("here please result"))	
+	oid <- paste0("XDA__", idString)
+	return(list(id=oid, modsTy=outList, daTypes=daTypes, clOn=classOn))
+	# the order of the lists, from outer to inner: 
+	# daTypes, classOn, outerLoop (=TestCV), CV inner loop, [then list element of individual models]
 } # EOF
+
+calculate_RNF <- function(dataset, md, ap, idString) {
+	if (is.null(ap$classif$rnf)) {
+		return(NULL)
+	}
+	# here the rest
+} # EOF
+
+calculate_SVM <- function(dataset, md, ap, idString) {
+	if (is.null(ap$classif$svm)) {
+		return(NULL)
+	}
+	# here the rest
+} # EOF
+
+calculate_ANN <- function(dataset, md, ap, idString) {
+	if (is.null(ap$classif$nnet)) {
+		return(NULL)
+	}
+	# here the rest
+} # EOF
+
 
 # works on a single element of the list in the cube
 makeAllModels <- function(set, md, ap, tempFile) {
@@ -127,6 +163,10 @@ makeAllModels <- function(set, md, ap, tempFile) {
 	newSet@idString <- set@idString
 	newSet@extraModels <- set@extraModels
 	# classifiers
-	newSet@fda <- calculateFda(getDataset(set), md, ap, getIdString(set))
+	newSet@xda <- calculate_XDA(getDataset(set), md, ap, getIdString(set))
+	newSet@rnf <- calculate_RNF(getDataset(set), md, ap, getIdString(set))
+	newSet@svm <- calculate_SVM(getDataset(set), md, ap, getIdString(set))
+	newSet@ann <- calculate_ANN(getDataset(set), md, ap, getIdString(set))
+	#
 	return(newSet)
 } # EOF
