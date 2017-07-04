@@ -37,5 +37,6 @@ dataset_single2 <- siWl(fd, getMax=TRUE) # to look for the wavelength with
 
 Other Extract Elements: \code{\link{getHeader}},
   \code{\link{getWavelengths,aquap_data-method}},
-  \code{\link{getcd}}, \code{\link{getcm}}
+  \code{\link{getcd}}, \code{\link{getcm}},
+  \code{\link{siWlg}}
 }

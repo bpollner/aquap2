@@ -29,7 +29,7 @@ wavelength as \code{from}, and for the upper limit the same or the next
 lowest wavelength as \code{to} will be selected.
 }
 \seealso{
-\code{\link{siWl}}
+\code{\link{siWl}}, \code{\link{siWlg}}
 
 Other Data pre-treatment functions: \code{\link{[,aquap_data-method}},
   \code{\link{do_addNoise}}, \code{\link{do_avg}},

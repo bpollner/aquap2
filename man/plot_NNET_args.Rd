@@ -40,7 +40,8 @@ please see \code{\link{anproc_file}}.
 }
 }
 \seealso{
-\code{\link{plot_NNET}}
+\code{\link{plot_NNET}}, \code{\link{siWlg}} for reducing the number of 
+wavelengths in a dataset
 
 Other Plot arguments: \code{\link{plot,aquap_data,missing-method}},
   \code{\link{plot_SVM_args}}, \code{\link{plot_aqg_args}},

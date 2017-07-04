@@ -12,7 +12,8 @@
 #' @template mr_details_allParams
 #' @template mr_classif_XDA_plot_param
 #' @template mr_pg_genParams
-#' @seealso \code{\link{plot_DA}}
+#' @seealso \code{\link{plot_DA}}, \code{\link{siWlg}} for reducing the number of 
+#' wavelengths in a dataset
 #' @examples
 #' \dontrun{
 #' }
@@ -33,7 +34,8 @@ NULL
 #' }
 #' @template mr_details_allParams
 #' @template mr_classif_XDA_calc_param
-#' @seealso \code{\link{gdmm}}
+#' @seealso \code{\link{gdmm}}, \code{\link{siWlg}} for reducing the number of 
+#' wavelengths in a dataset
 #' @examples
 #' \dontrun{
 #' }
@@ -57,7 +59,8 @@ NULL
 #' @template mr_details_allParams
 #' @template mr_classif_RNF_plot_param
 #' @template mr_pg_genParams
-#' @seealso \code{\link{plot_RNF}}
+#' @seealso \code{\link{plot_RNF}}, \code{\link{siWlg}} for reducing the number of 
+#' wavelengths in a dataset
 #' @examples
 #' \dontrun{
 #' }
@@ -78,7 +81,8 @@ NULL
 #' }
 #' @template mr_details_allParams
 #' @template mr_classif_RNF_calc_param
-#' @seealso \code{\link{gdmm}}
+#' @seealso \code{\link{gdmm}}, \code{\link{siWlg}} for reducing the number of 
+#' wavelengths in a dataset
 #' @examples
 #' \dontrun{
 #' }
@@ -102,7 +106,8 @@ NULL
 #' @template mr_details_allParams
 #' @template mr_classif_SVM_plot_param
 #' @template mr_pg_genParams
-#' @seealso \code{\link{plot_SVM}}
+#' @seealso \code{\link{plot_SVM}}, \code{\link{siWlg}} for reducing the number of 
+#' wavelengths in a dataset
 #' @examples
 #' \dontrun{
 #' }
@@ -123,7 +128,8 @@ NULL
 #' }
 #' @template mr_details_allParams
 #' @template mr_classif_SVM_calc_param
-#' @seealso \code{\link{gdmm}}
+#' @seealso \code{\link{gdmm}}, \code{\link{siWlg}} for reducing the number of 
+#' wavelengths in a dataset
 #' @examples
 #' \dontrun{
 #' }
@@ -146,7 +152,8 @@ NULL
 #' @template mr_details_allParams
 #' @template mr_classif_NNET_plot_param
 #' @template mr_pg_genParams
-#' @seealso \code{\link{plot_NNET}}
+#' @seealso \code{\link{plot_NNET}}, \code{\link{siWlg}} for reducing the number of 
+#' wavelengths in a dataset
 #' @examples
 #' \dontrun{
 #' }
@@ -167,7 +174,8 @@ NULL
 #' }
 #' @template mr_details_allParams
 #' @template mr_classif_NNET_calc_param
-#' @seealso \code{\link{gdmm}}
+#' @seealso \code{\link{gdmm}}, \code{\link{siWlg}} for reducing the number of 
+#' wavelengths in a dataset
 #' @examples
 #' \dontrun{
 #' }
@@ -176,3 +184,24 @@ NULL
 #' @family NNET documentation
 #' @name calc_NNET_args
 NULL
+
+
+
+#' @title Classification - General Considerations
+#' @description General remarks regarding the use of the classification functions 
+#' in package aquap2.
+#` @details 
+#' \itemize{
+#' \item Except the svm classification, most methods do not work well in fat data 
+#' matrices, so if there are more variables (wavelengths) than observations.
+#' For an easy reduction of the number of wavelengths we provide, especially in 
+#' the Aquaphotomics context, a special function to reduce the number of 
+#' wavelengths dataset (as produced by \code{\link{gfd}}): function 
+#' \code{\link{siWlg}} can isolate any custom group of wavelengths from the dataset, 
+#' or, of legt at its default, is isolating the ranges of the 12 water matrix 
+#' coordinates within the 1st overtone. 
+#' }
+#' @family Classification Helpers
+#' @name classification_helpers
+NULL
+

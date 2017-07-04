@@ -38,5 +38,5 @@ header1 <- getHeader(cube[[1]]) # gets the header from the first dataset in
 \seealso{
 Other Extract Elements: \code{\link{getWavelengths,aquap_data-method}},
   \code{\link{getcd}}, \code{\link{getcm}},
-  \code{\link{siWl}}
+  \code{\link{siWlg}}, \code{\link{siWl}}
 }

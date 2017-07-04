@@ -56,7 +56,8 @@ please see \code{\link{anproc_file}}.
 }
 }
 \seealso{
-\code{\link{gdmm}}
+\code{\link{gdmm}}, \code{\link{siWlg}} for reducing the number of 
+wavelengths in a dataset
 
 Other Calc. arguments: \code{\link{calc_NNET_args}},
   \code{\link{calc_aqg_args}},

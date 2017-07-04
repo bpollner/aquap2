@@ -1018,6 +1018,85 @@ siWl <- function(dataset, wl, getMax=FALSE) {
 	return(dataset)
 } # EOF
 
+#' @title Reduce Number of Wavelengths
+#' @description Reduces the number of wavelengths in a provided dataset, either 
+#' by simply keeping only the wavelengths of the 12 or 15 water matrix coordinates 
+#' in the first overtone (1300nm - 1400nm), or by providing a user-defined list 
+#' containing the wavelengths to be kept.
+#' @param dataset The standard dataset as produced by \code{\link{gfd}}.
+#' @param wlg List or character. Provide an integer matrix with two columns and n 
+#' rows to keep the ranges of wavelengths defined in each row - see examples. 
+#' Provide either \code{ot1.12} or \code{ot1.15} to only keep the respective 
+#' wavelengths of the 12 or 15 water matrix coordinates in the first overtone. 
+#' (The definition of the wavelengths is in root of the package aquap2.)
+#' @param avg Logical If, for further reduction of wavelengths, the values of the 
+#' wavelengths in each group (as defined in each row of the matrix) should be 
+#' averaged.
+#' @seealso \code{\link{selectWls}}, \code{\link{siWl}} 
+#' @return The transformed dataset.
+#' @examples
+#' \dontrun{
+#' fd <- gfd()
+#' m <- matrix(c(300, 320, 400, 450, 530, 570), ncol=2, byrow=TRUE)
+#' fdc <- siWlg(fd, wlg=m) 
+#' }
+#' @family Classification Helpers
+#' @family Extract Elements
+#' @family Helper Functions
+#' @export
+siWlg <- function(dataset, avg=FALSE, wlg="ot1.12") {
+	errMsg <- c("Please provide either a matrix with 2 columns and n rows, or a character length one (`ot1.12` or `ot1.15`) to the argument `wlg`.")
+	useWls <- wlg
+	if (any(is.character(wlg))) {
+		if (!all(is.character(wlg)) | length(wlg) != 1) {
+			stop(paste0(errMsg, "\nThanks for your consideration, and have a good day."), call.=FALSE)
+		} # end if
+		aqs <- readInAquagramPSettings()
+		if (wlg == "ot1.12") {
+			useWls <- aqs$ot1$wls$wls12
+		} else {
+			if (wlg == "ot1.15") {
+				useWls <- aqs$ot1$wls$wls15
+			} else {
+				stop(errMsg, call.=FALSE)
+			}
+		}
+	} # end if any is character
+	# now we should have only numbers as input
+	if (ncol(useWls) != 2 | !all(is.numeric(useWls)) ) {stop(errMsg, call.=FALSE)}
+	# now everything should be good
+	wls <- getWavelengths(dataset)
+	inds <- apply(useWls, 1, function(x, wls) which(wls >= x[1] & wls <= x[2]), wls=wls) # is a list !
+	if (!avg) {
+		inds <- unlist(inds)
+		cns <- colnames(dataset$NIR)[inds]
+		rns <- rownames(dataset$NIR)
+		NIR <- dataset$NIR[,inds, drop=FALSE]
+		colnames(NIR) <- cns
+		rownames(NIR) <- rns
+		dataset$NIR <- I(NIR)
+		return(dataset)
+	} else { # so we want to average within each group
+		NIR <- dataset$NIR
+		rns <- rownames(NIR)
+		outMat <- matrix(NA, nrow=nrow(NIR), ncol=length(inds))
+		for (i in 1: nrow(NIR)) {
+			obsAvg <- vector("numeric", length(inds))
+			for (k in 1: length(inds)) {
+				obsAvg[k] <- mean(NIR[i,inds[[k]]]) # averaging all the absorbance values within the single elements defined by inds
+			} # end for k
+			outMat[i,] <- obsAvg
+		} # end for i
+		cpwl <- substr(colnames(NIR)[1], dataset@ncpwl, dataset@ncpwl)
+		wlsAvg <- round(unlist(lapply(lapply(inds, function(x, wls) wls[x], wls=wls) , mean)),0) # averages the wavelength names (number), for a central wavelength for the colnames
+		rownames(outMat) <- rns
+		colnames(outMat) <- paste0(cpwl, wlsAvg)
+		NIR <- outMat
+		dataset$NIR <- I(NIR)
+		return(dataset)
+	}
+} # EOF
+
 setCheck_NumericLengthOne <- function(num, char) {
 	if (!all(is.numeric(num)) | length(num) != 1) {
 		stop(paste0("Please provide a numeric length one to the argument '", char, "' in the settings.r file."), call.=FALSE)

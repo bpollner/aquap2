@@ -244,7 +244,7 @@ make_X_classif_models <- function(dataset, classFunc, md, apCl, classOn, idStrin
 	return(list(modsClOn=outList, realClOn=realClOnList))
 } # EOF
 
-make_X_classif_handoverType <- function(dataset, md, apCl, types, idString, priInfo, priTy="") { # this is the "general" handover function called in cube_makeModels.r; the incoming dataset from the set -- everything here still
+make_X_classif_handoverType <- function(dataset, md, apCl, types, idString, priInfo, priTy="") { # this is the "general" handover function called in cube_makeModels.r; the incoming dataset from the set
 	stnLoc=.ap2$stn
 	classOn <- apCl$classOn
 	#
