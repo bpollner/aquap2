@@ -169,14 +169,14 @@ make_Xclass_models_CV_outer <- function(cvData, classFunc, valid, classOn) {
 } # EOF
 
 make_Xclass_models_boot <- function(cvData, classFunc, R, classOn) {
-	
+	# boot here please
 } # EOF
 
 
-make_Xclass_models_inner <- function(cvData, testData, classFunc, classOn, md, ap, idString, stnLoc) {
-	cvBootCutoff <- 1 # 400
-	cvBootFactor <- 1 # the factor used for multiplying the number of observations in the group, resulting in the bootR value
-	cvValid <- round(7, 0) # just to be sure 
+make_Xclass_models_inner <- function(cvData, testData, classFunc, classOn, md, apCl, idString, stnLoc) {
+	cvBootCutoff <- apCl$bootCutoff
+	cvBootFactor <- apCl$bootFactor # the factor used for multiplying the number of observations in the group, resulting in the bootR value
+	cvValid <- round(apCl$valid, 0) # round just to be sure 
 	#
 	neverBoot <- stnLoc$cl_gen_neverBootstrapForCV
 	clPref <- stnLoc$p_ClassVarPref
@@ -187,42 +187,85 @@ make_Xclass_models_inner <- function(cvData, testData, classFunc, classOn, md, a
 	aa <- lapply(split(cvData$header, cvData$header[,classOn]), function(x) x[,ind]) # split into groups, then get the sampleNr column
 	minNrow <-  min(unlist(lapply(aa, length))) #  returns the smallest nr of observations from all separate groups
 	if (minNrow >= cvBootCutoff | neverBoot) {
+		if (!stnLoc$allSilent) {cat(".")}
 		mods <- make_Xclass_models_CV_outer(cvData, classFunc, valid=cvValid, classOn)
 	} else {
+		if (!stnLoc$allSilent) {cat(":")}
 		mods <- make_Xclass_models_boot(cvData, classFunc, R=minNrow*cvBootFactor, classOn)
 	}
 	return(mods)
 } # EOF
 
-getClassOnChar <- function() {
-	
-} # EOF
 
-make_X_classif_models <- function(dataset, classFunc, md, ap, classOn, idString=NULL, stnLoc) { # called in cube_makeModels.r; the incoming dataset from the set -- everything here still
+make_X_classif_models <- function(dataset, classFunc, md, apCl, classOn, idString=NULL, stnLoc) { 
 	# will come from the ap
-	doOuter <- TRUE
-	percTest <- 30
+	doOuter <- apCl$testCV
+	percTest <- apCl$percTest
+	if (percTest <= 0 ) {
+		doOuter <- FALSE
+	}
 	#
 	outList <- vector("list", length(classOn))
+	outListRealClassOn <- vector("list", length(classOn))
 	for (k in 1: length(classOn)) {
 		splitList <- makeOuterSplitList(dataset, percTest, classOn[k], stnLoc) # new split in CV and TEST data for every classOn variable
 		if (!doOuter) {
 			modsList <- vector("list", 1)
+			realClOnList <- vector("list", 1)
 			aa <- makeOuterSplitDatasets(dataset, splitList, testInd=1) # returns a list:  $test and $cv
-			mods <- make_Xclass_models_inner(cvData=aa$cv, testData=aa$test, classFunc, classOn[k], md, ap, idString, stnLoc)
+			if (nlevels(aa$cv$header[,classOn[k]]) < 2) {
+				mods <- NULL
+				realClOnFill <- NULL
+			} else {
+				mods <- make_Xclass_models_inner(cvData=aa$cv, testData=aa$test, classFunc, classOn[k], md, apCl, idString, stnLoc)
+				realClOnFill <- classOn[k]
+			} # end if
 			modsList[[1]] <- mods # filling in the mods for the outer loop
+			realClOnList[[1]] <- realClOnFill
 		} else {
 			modsList <- vector("list", length(splitList))
+			realClOnList <- vector("list", length(splitList))
 			for (i in 1: length(splitList)) {	
 				aa <- makeOuterSplitDatasets(dataset, splitList, testInd=i)	
-				mods <- make_Xclass_models_inner(cvData=aa$cv, testData=aa$test, classFunc, classOn[k], md, ap, idString, stnLoc)
+				if (nlevels(aa$cv$header[,classOn[k]]) < 2) {
+					mods <- NULL
+					realClOnFill <- NULL
+				} else {
+					mods <- make_Xclass_models_inner(cvData=aa$cv, testData=aa$test, classFunc, classOn[k], md, apCl, idString, stnLoc)					
+					realClOnFill <- classOn[k]
+				}	
 				modsList[[i]] <- mods # filling in the mods for the outer loop
+				realClOnList[[i]] <- realClOnFill
 			} # end for i
 		} # end else
 		outList[[k]] <- modsList
+		outListRealClassOn[[k]] <- realClOnList
 	} # end for k
-	return(outList)
+	return(list(modsClOn=outList, realClOn=realClOnList))
+} # EOF
+
+make_X_classif_handoverType <- function(dataset, md, apCl, types, idString, priInfo, priTy="") { # this is the "general" handover function called in cube_makeModels.r; the incoming dataset from the set -- everything here still
+	stnLoc=.ap2$stn
+	classOn <- apCl$classOn
+	#
+	if (length(types) == 1) {add <- ""} else {add <- ""}
+	outList <- vector("list", length(types))
+	outListRealClOn <- vector("list", length(types))
+	if (!stnLoc$allSilent) {cat(paste0("      calc. ", priInfo, ":"))}
+	for (i in 1: length(types)) {		
+		classFunc <- getClassifierFunction(types[i]) ####### here select the desired classifier method !! ######
+		if (!stnLoc$allSilent) {cat(paste0(" ", priTy[i], add))}
+			###
+			aa <- make_X_classif_models(dataset, classFunc, md, apCl, classOn, idString, stnLoc) ##### make models #######
+			outList[[i]] <- aa$modsClOn
+			outListRealClOn[[i]] <- aa$realClOn
+			###
+	} # end for i
+	if (!stnLoc$allSilent) {cat(" ok\n")}
+	oid <- paste0(priInfo, "__", idString)
+	return(list(modsTy=outList, realClassOn=NA, apCl=apCl, id=oid))
+#	return(list(modsTy=outList, realClassOn=outListRealClOn, apCl=apCl, id=oid))
+	#
 	# the order of the lists, from outer to inner: 
 	# daTypes, classOn, outerLoop (=TestCV), CV inner loop, [then list element of individual models]
 } # EOF
-

@@ -23,7 +23,7 @@ perform; possible values (one or more) are:
    mixture modeling using \code{\link[mclust]{MclustDA}}.
  }}
 
-\item{da.clOn}{Character vector. One or more class variables to define the 
+\item{da.classOn}{Character vector. One or more class variables to define the 
 grouping used for classification.}
 
 \item{da.testCV}{Logical, if the errors of the test-data should be crossvalidated. 

@@ -31,7 +31,7 @@ pv_fsa_fss <- c("both", "only")
 
 ## Classification
 pv_classificationFuncs_XDA <- c("lda", "qda", "fda", "mclustda")
-pv_nonDAClassifiers <- c("randForest", "svm", "nnet")
+pv_nonDAClassifiers <- c("rndforest", "svm", "nnet")
 pv_allClassificationFuncs <- c(pv_classificationFuncs_XDA, pv_nonDAClassifiers)
 
 ## General Plotting
@@ -47,7 +47,7 @@ pv_modifySIMCA <- c("do.sim", "sim.vars", "sim.K")
 pv_modifyPLSR <- c("do.pls", "pls.regOn", "pls.ncomp", "pls.valid", "pls.exOut", "pls.colorBy", "pls.what", "pls.rdp")
 pv_modifyAquagram_calc <- c("do.aqg", "aqg.vars", "aqg.nrCorr", "aqg.spectra", "aqg.minus", "aqg.mod", "aqg.TCalib", "aqg.Texp", "aqg.bootCI", "aqg.R", "aqg.smoothN", "aqg.selWls", "aqg.msc", "aqg.reference")
 pv_modifyAquagram_plot <- c("aqg.fsa", "aqg.fss", "aqg.ccol", "aqg.clt", "aqg.pplot", "aqg.plines", "aqg.disc")
-pv_modifyClassifiers <- c("do.da", "da.type", "da.clOn", "do.rnf", "rnf.clOn", "do.svm", "svm.clOn", "do.nnet", "nnet.clOn")
+pv_modifyClassifiers <- c("do.da", "da.type", "da.classOn", "do.rnf", "rnf.classOn", "do.svm", "svm.classOn", "do.nnet", "nnet.classOn")
 pv_modifyClassif2 <- c("da.testCV", "da.percTest", "da.cvBootCutoff", "da.cvBootFactor", "da.valid", "rnf.testCV", " rnf.percTest", "rnf.cvBootCutoff", "rnf.cvBootFactor", "rnf.valid", "svm.testCV", "svm.percTest", "svm.cvBootCutoff", " vm.cvBootFactor", "svm.valid", "nnet.testCV", "nnet.percTest", "nnet.cvBootCutoff", "nnet.cvBootFactor", "nnet.valid")
 pv_modifyGenPlot <- c("pg.where", "pg.main", "pg.sub", "pg.fns")	
 additionalElements <- c("aps")

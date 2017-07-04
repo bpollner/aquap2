@@ -108,46 +108,39 @@ calculate_XDA <- function(dataset, md, ap, idString) {
 	if (is.null(ap$classif$da)) {
 		return(NULL)
 	}
-	daTypes <- ap$classif$da$type
-	classOn <- ap$classif$da$clOn
-	if (length(daTypes) == 1) {add <- ""} else {add <- ", "}
-	outList <- vector("list", length(daTypes))
-	if (!.ap2$stn$allSilent) {cat("      calc. ")}
-	for (i in 1: length(daTypes)) {		
-		classFunc <- getClassifierFunction(daTypes[i])
-		if (!.ap2$stn$allSilent) {cat(paste0(daTypes[i], add))}
-			###
-			aa <- make_X_classif_models(dataset, classFunc, md, ap, classOn, idString, stnLoc=.ap2$stn)
-	#		print(str(aa)); wait()
-			outList[[i]] <- aa
-			###
-	} # end for i
-	if (!.ap2$stn$allSilent) {cat(" ok\n")}
-	oid <- paste0("XDA__", idString)
-	return(list(id=oid, modsTy=outList, daTypes=daTypes, clOn=classOn))
-	# the order of the lists, from outer to inner: 
-	# daTypes, classOn, outerLoop (=TestCV), CV inner loop, [then list element of individual models]
+	apCl <- ap$classif$da
+	daTypes <- apCl$type
+	pri <- "DA"
+	priTy <- daTypes
+	return(make_X_classif_handoverType(dataset, md, apCl, types=daTypes, idString, priInfo=pri, priTy))
 } # EOF
+
 
 calculate_RNF <- function(dataset, md, ap, idString) {
 	if (is.null(ap$classif$rnf)) {
 		return(NULL)
-	}
-	# here the rest
+	}	
+	apCl <- ap$classif$rnf
+	types <- pv_nonDAClassifiers[1]  # pv_nonDAClassifiers <- c("rndforest", "svm", "nnet")
+	return(make_X_classif_handoverType(dataset, md, apCl, types, idString, priInfo="RNF"))
 } # EOF
 
 calculate_SVM <- function(dataset, md, ap, idString) {
 	if (is.null(ap$classif$svm)) {
 		return(NULL)
 	}
-	# here the rest
+	apCl <- ap$classif$svm
+	types <- pv_nonDAClassifiers[2]  # pv_nonDAClassifiers <- c("rndforest", "svm", "nnet")
+	return(make_X_classif_handoverType(dataset, md, apCl, types, idString, priInfo="SVM"))
 } # EOF
 
 calculate_ANN <- function(dataset, md, ap, idString) {
 	if (is.null(ap$classif$nnet)) {
 		return(NULL)
 	}
-	# here the rest
+	apCl <- ap$classif$nnet
+	types <- pv_nonDAClassifiers[3]  # pv_nonDAClassifiers <- c("rndforest", "svm", "nnet")
+	return(make_X_classif_handoverType(dataset, md, apCl, types, idString, priInfo="NNET"))
 } # EOF
 
 

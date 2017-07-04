@@ -339,7 +339,7 @@ perform; possible values (one or more) are:
    mixture modeling using \code{\link[mclust]{MclustDA}}.
  }}
 
-\item{da.clOn}{Character vector. One or more class variables to define the 
+\item{da.classOn}{Character vector. One or more class variables to define the 
 grouping used for classification.}
 
 \item{da.testCV}{Logical, if the errors of the test-data should be crossvalidated. 
@@ -374,7 +374,7 @@ into in case of a "traditional" crossvalidation of the training data; see above.
 \code{\link[randomForest]{randomForest}} should be performed in the given 
 dataset.}
 
-\item{rnf.clOn}{Character vector. One or more class variables to define the 
+\item{rnf.classOn}{Character vector. One or more class variables to define the 
 grouping used for classification.}
 
 \item{rnf.testCV}{Logical, if the errors of the test-data should be crossvalidated. 
@@ -408,7 +408,7 @@ into in case of a "traditional" crossvalidation of the training data; see above.
 \item{do.svm}{Logical. If used in \code{getap}, if classification via 
 \code{\link[e1071]{svm}} should be performed in the given dataset.}
 
-\item{svm.clOn}{Character vector. One or more class variables to define the 
+\item{svm.classOn}{Character vector. One or more class variables to define the 
 grouping used for classification.}
 
 \item{svm.testCV}{Logical, if the errors of the test-data should be crossvalidated. 
@@ -443,7 +443,7 @@ into in case of a "traditional" crossvalidation of the training data; see above.
 artificial neural networks (\code{\link[nnet]{nnet}}) should be performed 
 in the  given dataset.}
 
-\item{nnet.clOn}{Character vector. One or more class variables to define the 
+\item{nnet.classOn}{Character vector. One or more class variables to define the 
 grouping used for classification.}
 
 \item{nnet.testCV}{Logical, if the errors of the test-data should be crossvalidated. 

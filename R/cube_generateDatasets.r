@@ -646,8 +646,8 @@ ap_check_classifier_Input <- function(ap, header) {
 			if (!all(is.numeric(x)) | length(x) != 1) {
 				stop(paste0("Please provide a numeric length one between ", lim, " and 100 to the argument `", char, "`."), call.=FALSE)
 			}
-			if (x < lim | x > 100) {
-				stop(paste0("Please provide a numeric between ", lim, " and 100 to the argument `", char, "`."), call.=FALSE)
+			if (x < 0 | x > lim) {
+				stop(paste0("Please provide a numeric between 0 and ", lim, " to the argument `", char, "`."), call.=FALSE)
 			}
 		} # EOIF
 		checkForNumericLengthOne <- function(x, char) {
@@ -672,25 +672,25 @@ ap_check_classifier_Input <- function(ap, header) {
 			if (!all(da$type %in% pvAllXDA)) {
 				stop(paste0("Please provide one or more of '", paste(pvAllXDA, collapse="`, `"), "' to the argument 'da.type' in the analysis procedure / your input."), call.=FALSE)
 			}
-			checkClassExistence(da$clOn, "da.clOn")
+			checkClassExistence(da$classOn, "da.classOn")
 			checkThings("da.", da$testCV, da$percTest, da$bootCutoff, da$bootFactor, da$valid)
 		} # end !is null
 		#
 		rnf <- ap$classif$rnf
 		if (!is.null(rnf)) {
-			checkClassExistence(rnf$clOn, "rnf.clOn")
+			checkClassExistence(rnf$classOn, "rnf.classOn")
 			checkThings("rnf.", rnf$testCV, rnf$percTest, rnf$bootCutoff, rnf$bootFactor, rnf$valid)
 		} # end !is null
 		#
 		svm <- ap$classif$svm
 		if (!is.null(svm)) {
-			checkClassExistence(svm$clOn, "svm.clOn")
+			checkClassExistence(svm$classOn, "svm.classOn")
 			checkThings("svm.", svm$testCV, svm$percTest, svm$bootCutoff, svm$bootFactor, svm$valid)
 		} # end !is null
 		#
 		ann <- ap$classif$nnet
 		if (!is.null(ann)) {
-			checkClassExistence(ann$clOn, "nnet.clOn")
+			checkClassExistence(ann$classOn, "nnet.classOn")
 			checkThings("nnet.", ann$testCV, ann$percTest, ann$bootCutoff, ann$bootFactor, ann$valid)	
 		} # end !is null
 		#
@@ -1279,6 +1279,22 @@ checkCubeForRealStats <- function(cube) {
 	if (cle("aquagr")) {
 		cnt <- cnt + 1
 		char <- c(char, "Aquagram")
+	}
+	if (cle("xda")) {
+		cnt <- cnt + 1
+		char <- c(char, "X.DA")
+	}
+	if (cle("rnf")) {
+		cnt <- cnt + 1
+		char <- c(char, "RNF")
+	}
+	if (cle("svm")) {
+		cnt <- cnt + 1
+		char <- c(char, "SVM")
+	}
+	if (cle("ann")) {
+		cnt <- cnt + 1
+		char <- c(char, "NNET")
 	}
 	return(list(cnt=cnt, char=char))
 #	return(checkForStats(cube@anproc))

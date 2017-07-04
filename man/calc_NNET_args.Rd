@@ -8,7 +8,7 @@
 artificial neural networks (\code{\link[nnet]{nnet}}) should be performed 
 in the  given dataset.}
 
-\item{nnet.clOn}{Character vector. One or more class variables to define the 
+\item{nnet.classOn}{Character vector. One or more class variables to define the 
 grouping used for classification.}
 
 \item{nnet.testCV}{Logical, if the errors of the test-data should be crossvalidated. 

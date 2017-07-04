@@ -17,7 +17,7 @@ setClass("aqg_calc", slots = c(ID="character", classVar="character", itemIndex="
 #setClass("aquap_extMod", slots=c(type="character", mod="listNull"))
 setClass("aquap_set", slots=c(dataset="aquap_data", idString="character", pca="listNull", plsr="listNull", simca="listNull", aquagr="listNull", extraModels="listNull", xda="listNull", rnf="listNull", svm="listNull", ann="listNull")) 
 setClass("aquap_cube", slots=c(metadata="aquap_md", anproc="aquap_ap", cp="data.frame", cpt="aquap_cpt", aqgRan="listNull"), contains="list")
-setClass("aquap_xda", slots=c(daType="character", clOn="character"), contains="list")
+# setClass("aquap_xda", slots=c(daType="character", classOn="character"), contains="list")
 # setClass("aquap_noiseDist", slots=c(timestamp="POSIXct", version="character"), contains="matrix")
 
 # methods ----------------------------------------

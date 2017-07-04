@@ -1,7 +1,7 @@
 #' @param do.rnf Logical. If used in \code{getap}, if classification via 
 #' \code{\link[randomForest]{randomForest}} should be performed in the given 
 #' dataset.
-#' @param rnf.clOn Character vector. One or more class variables to define the 
+#' @param rnf.classOn Character vector. One or more class variables to define the 
 #' grouping used for classification.
 #' @param rnf.testCV Logical, if the errors of the test-data should be crossvalidated. 
 #' If set to true, CV and testing is repeated in alternating datasets. See below.

@@ -8,7 +8,7 @@
 \code{\link[randomForest]{randomForest}} should be performed in the given 
 dataset.}
 
-\item{rnf.clOn}{Character vector. One or more class variables to define the 
+\item{rnf.classOn}{Character vector. One or more class variables to define the 
 grouping used for classification.}
 
 \item{rnf.testCV}{Logical, if the errors of the test-data should be crossvalidated. 

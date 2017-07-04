@@ -1,6 +1,6 @@
 #' @param do.svm Logical. If used in \code{getap}, if classification via 
 #' \code{\link[e1071]{svm}} should be performed in the given dataset.
-#' @param svm.clOn Character vector. One or more class variables to define the 
+#' @param svm.classOn Character vector. One or more class variables to define the 
 #' grouping used for classification.
 #' @param svm.testCV Logical, if the errors of the test-data should be crossvalidated. 
 #' If set to true, CV and testing is repeated in alternating datasets. See below.

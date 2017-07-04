@@ -16,7 +16,7 @@
 #'    \item \code{<%=pv_classificationFuncs_XDA[4]%>} DA based on Gaussian finite 
 #'    mixture modeling using \code{\link[mclust]{MclustDA}}.
 #'  }
-#' @param da.clOn Character vector. One or more class variables to define the 
+#' @param da.classOn Character vector. One or more class variables to define the 
 #' grouping used for classification.
 #' @param da.testCV Logical, if the errors of the test-data should be crossvalidated. 
 #' If set to true, CV and testing is repeated in alternating datasets. See below.
