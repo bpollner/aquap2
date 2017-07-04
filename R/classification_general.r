@@ -11,8 +11,8 @@ coreClassCalc_FDA <- function(...) {
 	return(mda::fda(...))
 } # EOF
 
-coreClassCalc_mclustDA <- function(...) {
-	return(mclust::MclustDA(...)) # ! no formula interface here !
+coreClassCalc_mclustDA <- function(...) { # ! no formula interface here !
+	return(mclust::MclustDA(...)) 
 } # EOF
 
 coreClassCalc_randomForest <- function(...) {
@@ -127,6 +127,9 @@ createSegmentListForClassification <- function(header, nrSegs=10, classOn, stnLo
 } # EOF
 
 makeOuterSplitList <- function(dataset, percTest, classOn, stnLoc=.ap2$stn) {
+	if (percTest <= 0) {
+		percTest <- 100 # so the below division still works and is resulting in 1
+	}
 	nrOuterLoops <- round(100/percTest, 0)
 	splitList <- createSegmentListForClassification(dataset$header, nrSegs=nrOuterLoops, classOn, stnLoc)
 	return(splitList)
@@ -137,7 +140,10 @@ makeOuterSplitDatasets <- function(dataset, splitList, testInd=1) { # returns a 
 		stop("The provided testIndex is exceeding the maximum available value from the splitList.", call.= TRUE)
 	}
 	if (length(testInd) > 1) {
-		stop("Test testIndex can not be of size > 1", call.=TRUE)
+		stop("Test testIndex can not be of length > 1", call.=TRUE)
+	}
+	if (length(splitList) == 1) { # we might have zero percent as test data
+		return(list(cv=dataset, test=NULL))
 	}
 	cv <- 1: length(splitList)
 	cv <- cv[cv != testInd]
@@ -149,31 +155,48 @@ makeOuterSplitDatasets <- function(dataset, splitList, testInd=1) { # returns a 
 
 
 # universal looping outer and inner ---------
-make_Xclass_model_CV_single <- function(dataset, classFunc, classOn) {
-	fdf <- makeFlatDataFrame(dataset, classOn)
-	mod <- classFunc(grouping ~ ., data=fdf)
+make_Xclass_model_CV_single <- function(trainDataset, predDataset, classFunc, classOn, type, apCl) { # single models and predictions (in CV)
+	# pv_classificationFuncs_XDA <- c("lda", "qda", "fda", "mclustda")
+	#
+	fdfTrain <- makeFlatDataFrame(trainDataset, classOn)
+	fdfPred <- makeFlatDataFrame(predDataset, classOn)
+	#
+	# exceptions
+	if (type == pv_classificationFuncs_XDA[4]) { # MclustDA does not have a formula interface
+		mod <- classFunc(fdfTrain[,-1], fdfTrain[,1])
+	} else {
+		mod <- classFunc(grouping ~ ., data=fdfTrain)		
+	}
+	# now please the CV-predictions
+	pred <- predict(mod, newdata=fdfPred) # the prediction of the one left out segment in the model made from all the other segments
+#	return(list(mod=mod, pred=pred))
 	return(mod)
 } # EOF
 
 
-make_Xclass_models_CV_outer <- function(cvData, classFunc, valid, classOn) {
+make_Xclass_models_CV_outer <- function(cvData, classFunc, valid, classOn, type, apCl, stnLoc) { # inner loop via CV: making models and predictions
 	if (valid == "LOO") {
 		valid <- nrow(cvData)
 	}
-	segList <- createSegmentListForClassification(cvData$header, nrSegs=valid, classOn, stnLoc=.ap2$stn) # looks in each group individually
+	segList <- createSegmentListForClassification(cvData$header, nrSegs=valid, classOn, stnLoc) # looks in each group individually
+	# now, from this segList, use all except one list elements for training the model, and then the one for prediction --> collect models and predictions (errors)
 	modList <- vector("list", length(segList))
-	for (i in 1: length(segList)) {
-		modList[[i]] <- make_Xclass_model_CV_single(cvData[ segList[[i]] ], classFunc, classOn)
+	indPool <- 1: length(segList)
+	for (i in 1: length(segList)) { # cycling through the combinations of the n-fold CV
+		predInd <- i
+		trainInd <- indPool[indPool != predInd]		###### CORE ###### CORE #######
+		siMod <- make_Xclass_model_CV_single(cvData[ unlist(segList[trainInd]) ], cvData[ unlist(segList[predInd]) ], classFunc, classOn, type, apCl)  # the individual (X-fold) crossvalidation models
+		# will be aa, then aa$ from the list...
+		modList[[i]] <- siMod
 	} # end for i
 	return(modList)
 } # EOF
 
-make_Xclass_models_boot <- function(cvData, classFunc, R, classOn) {
+make_Xclass_models_boot <- function(cvData, classFunc, R, classOn, type, apCl, stnLoc) { # inner loop via boot: making  models
 	# boot here please
 } # EOF
 
-
-make_Xclass_models_inner <- function(cvData, testData, classFunc, classOn, md, apCl, idString, stnLoc) {
+make_Xclass_models_inner <- function(cvData, testData, classFunc, classOn, md, apCl, idString, stnLoc, type) { # in the inner loop: deciding if via boot or not
 	cvBootCutoff <- apCl$bootCutoff
 	cvBootFactor <- apCl$bootFactor # the factor used for multiplying the number of observations in the group, resulting in the bootR value
 	cvValid <- round(apCl$valid, 0) # round just to be sure 
@@ -188,17 +211,16 @@ make_Xclass_models_inner <- function(cvData, testData, classFunc, classOn, md, a
 	minNrow <-  min(unlist(lapply(aa, length))) #  returns the smallest nr of observations from all separate groups
 	if (minNrow >= cvBootCutoff | neverBoot) {
 		if (!stnLoc$allSilent) {cat(".")}
-		mods <- make_Xclass_models_CV_outer(cvData, classFunc, valid=cvValid, classOn)
+		mods <- make_Xclass_models_CV_outer(cvData, classFunc, valid=cvValid, classOn, type, apCl, stnLoc) ##### CORE ######
 	} else {
 		if (!stnLoc$allSilent) {cat(":")}
-		mods <- make_Xclass_models_boot(cvData, classFunc, R=minNrow*cvBootFactor, classOn)
+		mods <- make_Xclass_models_boot(cvData, classFunc, R=minNrow*cvBootFactor, classOn, type, apCl, stnLoc) ##### CORE ######
 	}
+	# now mods contains the CV models from either boot or the n-fold CV
 	return(mods)
 } # EOF
 
-
-make_X_classif_models <- function(dataset, classFunc, md, apCl, classOn, idString=NULL, stnLoc) { 
-	# will come from the ap
+make_X_classif_models <- function(dataset, classFunc, md, apCl, classOn, idString=NULL, stnLoc, type) { # going 1) through the classOn, and 2) outerSplit
 	doOuter <- apCl$testCV
 	percTest <- apCl$percTest
 	if (percTest <= 0 ) {
@@ -212,12 +234,12 @@ make_X_classif_models <- function(dataset, classFunc, md, apCl, classOn, idStrin
 		if (!doOuter) {
 			modsList <- vector("list", 1)
 			realClOnList <- vector("list", 1)
-			aa <- makeOuterSplitDatasets(dataset, splitList, testInd=1) # returns a list:  $test and $cv
+			aa <- makeOuterSplitDatasets(dataset, splitList, testInd=1) # returns a list:  $test and $cv; the smallest dataset is always on place 1 for testing
 			if (nlevels(aa$cv$header[,classOn[k]]) < 2) {
 				mods <- NULL
 				realClOnFill <- NULL
 			} else {
-				mods <- make_Xclass_models_inner(cvData=aa$cv, testData=aa$test, classFunc, classOn[k], md, apCl, idString, stnLoc)
+				mods <- make_Xclass_models_inner(cvData=aa$cv, testData=aa$test, classFunc, classOn[k], md, apCl, idString, stnLoc, type) ##### CORE ######
 				realClOnFill <- classOn[k]
 			} # end if
 			modsList[[1]] <- mods # filling in the mods for the outer loop
@@ -231,7 +253,7 @@ make_X_classif_models <- function(dataset, classFunc, md, apCl, classOn, idStrin
 					mods <- NULL
 					realClOnFill <- NULL
 				} else {
-					mods <- make_Xclass_models_inner(cvData=aa$cv, testData=aa$test, classFunc, classOn[k], md, apCl, idString, stnLoc)					
+					mods <- make_Xclass_models_inner(cvData=aa$cv, testData=aa$test, classFunc, classOn[k], md, apCl, idString, stnLoc, type)	##### CORE ######				
 					realClOnFill <- classOn[k]
 				}	
 				modsList[[i]] <- mods # filling in the mods for the outer loop
@@ -244,7 +266,7 @@ make_X_classif_models <- function(dataset, classFunc, md, apCl, classOn, idStrin
 	return(list(modsClOn=outList, realClOn=realClOnList))
 } # EOF
 
-make_X_classif_handoverType <- function(dataset, md, apCl, types, idString, priInfo, priTy="") { # this is the "general" handover function called in cube_makeModels.r; the incoming dataset from the set
+make_X_classif_handoverType <- function(dataset, md, apCl, types, idString, priInfo, priTy="") { # going through types; called in cube_makeModels.r; the incoming dataset from the set
 	stnLoc=.ap2$stn
 	classOn <- apCl$classOn
 	#
@@ -256,7 +278,7 @@ make_X_classif_handoverType <- function(dataset, md, apCl, types, idString, priI
 		classFunc <- getClassifierFunction(types[i]) ####### here select the desired classifier method !! ######
 		if (!stnLoc$allSilent) {cat(paste0(" ", priTy[i], add))}
 			###
-			aa <- make_X_classif_models(dataset, classFunc, md, apCl, classOn, idString, stnLoc) ##### make models #######
+			aa <- make_X_classif_models(dataset, classFunc, md, apCl, classOn, idString, stnLoc, type=types[i]) ##### make models ###### CORE ######	
 			outList[[i]] <- aa$modsClOn
 			outListRealClOn[[i]] <- aa$realClOn
 			###

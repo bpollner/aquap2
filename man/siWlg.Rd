@@ -33,6 +33,9 @@ containing the wavelengths to be kept.
 fd <- gfd()
 m <- matrix(c(300, 320, 400, 450, 530, 570), ncol=2, byrow=TRUE)
 fdc <- siWlg(fd, wlg=m) 
+fdc <- siWlg(fd) # using all the 12 wavelength ranges in the first overtone
+fdc <- siWlg(fd, TRUE) # averaging within the 12 ranges, resulting in only 12
+# wavelengths in the dataset
 }
 }
 \seealso{

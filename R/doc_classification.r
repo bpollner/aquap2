@@ -196,10 +196,11 @@ NULL
 #' matrices, so if there are more variables (wavelengths) than observations.
 #' For an easy reduction of the number of wavelengths we provide, especially in 
 #' the Aquaphotomics context, a special function to reduce the number of 
-#' wavelengths dataset (as produced by \code{\link{gfd}}): function 
+#' wavelengths in a dataset (as produced by \code{\link{gfd}}): function 
 #' \code{\link{siWlg}} can isolate any custom group of wavelengths from the dataset, 
-#' or, of legt at its default, is isolating the ranges of the 12 water matrix 
-#' coordinates within the 1st overtone. 
+#' or, if left at its default, is isolating the ranges of the 12 water matrix 
+#' coordinates within the 1st overtone. For further data reduction, this groups 
+#' can be averaged within as well.
 #' }
 #' @family Classification Helpers
 #' @name classification_helpers
