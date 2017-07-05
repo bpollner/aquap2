@@ -119,6 +119,8 @@ da.percTest <- 30						## The percentage of the dataset that should be set aside
 da.cvBootCutoff <- 32					## If the number of observations within the smallest subgroup defined by the classification grouping variable is EQUAL or HIGHER then ".cvBootCutoff", the crossvalidation is done via splitting the training data in ".valid" (see below) segments, otherwise the crossvalidation is done via bootstrap resampling, with the number of bootstrap iterations resulting from the multiplication by the number of observations in this smallest subgroup with ".cvBootFactor". Set ".cvBootCutoff" to 1 to NEVER perform the CV of the training data via bootstrap.
 da.cvBootFactor <- 1					## The factor used to multiply the number of observations within the smallest subgroup defined by the classification grouping variable with, resulting in the number of iterations of a possible bootstrap crossvalidation -- see above.
 da.valid <- 8							## The number of segments the training data should be divided into in case of a traditional crossvalidation of the training data; see above.
+da.pcaRed <- TRUE						## If variable reduction via PCA should be applied; if TRUE, the subsequent classifications are performed on the PCA scores, see below.
+da.pcaNComp <- c("max")					## Provide the character "max" to use the maximum number of components (i.e. the number of observations minus 1), or an integer vector specifying the components resp. their scores to be used for DA.
 #########################
 
 
@@ -143,6 +145,8 @@ svm.percTest <- 30						## The percentage of the dataset that should be set asid
 svm.cvBootCutoff <- 32					## If the number of observations within the smallest subgroup defined by the classification grouping variable is EQUAL or HIGHER then ".cvBootCutoff", the crossvalidation is done via splitting the training data in ".valid" (see below) segments, otherwise the crossvalidation is done via bootstrap resampling, with the number of bootstrap iterations resulting from the multiplication by the number of observations in this smallest subgroup with ".cvBootFactor". Set ".cvBootCutoff" to 1 to NEVER perform the CV of the training data via bootstrap.
 svm.cvBootFactor <- 1					## The factor used to multiply the number of observations within the smallest subgroup defined by the classification grouping variable with, resulting in the number of iterations of a possible bootstrap crossvalidation -- see above.
 svm.valid <- 8							## The number of segments the training data should be divided into in case of a traditional crossvalidation of the training data; see above.
+svm.pcaRed <- TRUE						## If variable reduction via PCA should be applied; if TRUE, the subsequent classifications are performed on the PCA scores, see below.
+svm.pcaNComp <- c("max")					## Provide the character "max" to use the maximum number of components (i.e. the number of observations minus 1), or an integer vector specifying the components resp. their scores to be used for DA.
 #########################
 
 

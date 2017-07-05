@@ -796,6 +796,23 @@ makeFlatDataFrame <- function(dataset, groupBy, fusionGroupBy=NULL) {
 	return(out)
 } # EOF
 
+makeDataFrameForClassification <- function(dataset, groupBy, fusionGroupBy=NULL) { # ! is not flat !
+	if (is.null(fusionGroupBy)) {
+		colInd <- which(colnames(dataset$header) == groupBy)
+		grouping <- dataset$header[, colInd]
+		class(grouping) <- "factor" # to get rid of the "AsIs" that, strangely, got smuggled in..
+	} else {
+		grouping <- fusionGroupBy
+	}
+	
+	NIR <- matrix(dataset$NIR, nrow=(nrow(dataset$NIR)))
+	rownames(NIR) <- rownames(dataset$NIR)
+	colnames(NIR) <- colnames(dataset$NIR)
+	out <- data.frame(I(grouping), I(NIR))
+	rownames(out) <- rownames(dataset)
+	return(out)
+} # EOF
+
 makeFlatDataFrameMulti <- function(dataset, groupBy) {
 	colInd <- which(colnames(dataset$header) %in% groupBy)
 	grouping <- dataset$header[, colInd, drop=FALSE]

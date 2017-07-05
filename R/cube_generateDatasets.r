@@ -655,6 +655,20 @@ ap_check_classifier_Input <- function(ap, header) {
 				stop(paste0("Please provide a numeric length one to the argument `", char, "`."), call.=FALSE)
 			}
 		} # EOIF
+		checkPCAred <- function(mo, prLog, prNC) {
+			if (!all(is.logical(prLog)) | length(prLog) != 1) {
+				stop(paste0("Please provide either TRUE or FALSE to the argument `", mo, "pcaRed` in the analysis procedure / your input."), call.=FALSE)
+			}
+			if (any(is.character(prNC))) {
+				if (length(prNC) != 1 | !all(prNC == "max")) {
+					stop(paste0("For using the maximum number of components resp. their scores for subsequent classification, please provide `max` to the argument `", mo, "pcaNComp`in the analysis procedure / your input."), call.=FALSE)
+				}
+			} else { # end if any character
+				if (!all(is.wholenumber(prNC))) {
+					stop(paste0("In order to specify the components resp. their scores for subsequent classification, please provide only integers to the argument `", mo, "pcaNComp` in the analysis procedure / your input."), call.=FALSE)
+				}
+			} # end else
+		} # EOIF
 		checkThings <- function(mo, testCV, percTest, bootCutoff, BootFactor, valid) {
 			checkTestCV(testCV, paste0(mo, "testCV"))
 			checkPercTest(percTest, paste0(mo, "percTest"))
@@ -674,6 +688,7 @@ ap_check_classifier_Input <- function(ap, header) {
 			}
 			checkClassExistence(da$classOn, "da.classOn")
 			checkThings("da.", da$testCV, da$percTest, da$bootCutoff, da$bootFactor, da$valid)
+			checkPCAred("da.", da$pcaRed, da$pcaNComp)
 		} # end !is null
 		#
 		rnf <- ap$classif$rnf
@@ -686,6 +701,7 @@ ap_check_classifier_Input <- function(ap, header) {
 		if (!is.null(svm)) {
 			checkClassExistence(svm$classOn, "svm.classOn")
 			checkThings("svm.", svm$testCV, svm$percTest, svm$bootCutoff, svm$bootFactor, svm$valid)
+			checkPCAred("svm.", svm$pcaRed, svm$pcaNComp)
 		} # end !is null
 		#
 		ann <- ap$classif$nnet

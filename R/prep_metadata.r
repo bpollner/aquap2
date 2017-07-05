@@ -265,9 +265,9 @@ getap_core_file <- function(fn="def") {
 	simca <- list(doSIMCA=e$do.sim, simcOn=e$sim.vars, simcK=e$sim.K)
 	plsr <- list(doPLSR=e$do.pls, regressOn=e$pls.regOn, ncomp=e$pls.ncomp, valid=e$pls.valid, exOut=e$pls.exOut, colorBy=e$pls.colorBy, what=e$pls.what, inRdp=e$pls.rdp)	
 	aquagr <- list(doAqg=e$do.aqg, vars=e$aqg.vars, nrCorr=e$aqg.nrCorr, spectra=e$aqg.spectra, minus=e$aqg.minus, mod=e$aqg.mod, TCalib=e$aqg.TCalib, Texp=e$aqg.Texp, bootCI=e$aqg.bootCI, R=e$aqg.R, smoothN=e$aqg.smoothN, selWls=e$aqg.selWls, msc=e$aqg.msc, reference=e$aqg.reference, fsa=e$aqg.fsa, fss=e$aqg.fss, ccol=e$aqg.ccol, clt=e$aqg.clt, pplot=e$aqg.pplot, plines=e$aqg.plines, discr=e$aqg.discr)	
-	da <- list(doDa=e$do.da, type=e$da.type, classOn=e$da.classOn, testCV=e$da.testCV, percTest=e$da.percTest, bootCutoff=e$da.cvBootCutoff, bootFactor=e$da.cvBootFactor, valid=e$da.valid)
+	da <- list(doDa=e$do.da, type=e$da.type, classOn=e$da.classOn, testCV=e$da.testCV, percTest=e$da.percTest, bootCutoff=e$da.cvBootCutoff, bootFactor=e$da.cvBootFactor, valid=e$da.valid, pcaRed=e$da.pcaRed, pcaNComp=e$da.pcaNComp)
 	rnf <- list(doRnf=e$do.rnf, classOn=e$rnf.classOn, testCV=e$rnf.testCV, percTest=e$rnf.percTest, bootCutoff=e$rnf.cvBootCutoff, bootFactor=e$rnf.cvBootFactor, valid=e$rnf.valid)
-	svm <- list(doSvm=e$do.svm, classOn=e$svm.classOn, testCV=e$svm.testCV, percTest=e$svm.percTest, bootCutoff=e$svm.cvBootCutoff, bootFactor=e$svm.cvBootFactor, valid=e$svm.valid)
+	svm <- list(doSvm=e$do.svm, classOn=e$svm.classOn, testCV=e$svm.testCV, percTest=e$svm.percTest, bootCutoff=e$svm.cvBootCutoff, bootFactor=e$svm.cvBootFactor, valid=e$svm.valid, pcaRed=e$svm.pcaRed, pcaNComp=e$svm.pcaNComp)
 	nnet <- list(doNnet=e$do.nnet, classOn=e$nnet.classOn, testCV=e$nnet.testCV, percTest=e$nnet.percTest, bootCutoff=e$nnet.cvBootCutoff, bootFactor=e$nnet.cvBootFactor, valid=e$nnet.valid)
 	classif <- list(da=da, rnf=rnf, svm=svm, nnet=nnet)
 	genPlot <- list(where=e$pg.where, onMain=e$pg.main, onSub=e$pg.sub, fns=e$pg.fns)
@@ -438,11 +438,11 @@ getap <- function(fn="def", ...) {
 	###
 	DA <- ap$classif$da
 	doIt <- checkDo(DA, "doDa")
-	modifyDA <- function(do.da=doIt, da.type=DA$type, da.classOn=DA$classOn, da.testCV=DA$testCV, da.percTest=DA$percTest, da.cvBootCutoff=DA$bootCutoff, da.cvBootFactor=DA$bootFactor, da.valid=DA$valid) {
+	modifyDA <- function(do.da=doIt, da.type=DA$type, da.classOn=DA$classOn, da.testCV=DA$testCV, da.percTest=DA$percTest, da.cvBootCutoff=DA$bootCutoff, da.cvBootFactor=DA$bootFactor, da.valid=DA$valid, da.pcaRed=DA$pcaRed, da.pcaNComp=DA$pcaNComp) {
 		if (!do.da) { 
 			return(NULL)
 		} else {
-			return(list(type=da.type, classOn=da.classOn, testCV=da.testCV, percTest=da.percTest, bootCutoff=da.cvBootCutoff, bootFactor=da.cvBootFactor, valid=da.valid))
+			return(list(type=da.type, classOn=da.classOn, testCV=da.testCV, percTest=da.percTest, bootCutoff=da.cvBootCutoff, bootFactor=da.cvBootFactor, valid=da.valid, pcaRed=da.pcaRed, pcaNComp=da.pcaNComp))
 		}
 	} # EOIF
 	apMod$classif$da <- modifyDA(...)
@@ -460,11 +460,11 @@ getap <- function(fn="def", ...) {
 	###
 	SVM <- ap$classif$svm
 	doIt <- checkDo(SVM, "doSvm")
-	modifySVM <- function(do.svm=doIt, svm.classOn=SVM$classOn, svm.testCV=SVM$testCV, svm.percTest=SVM$percTest, svm.cvBootCutoff=SVM$bootCutoff, svm.cvBootFactor=SVM$bootFactor, svm.valid=SVM$valid) {
+	modifySVM <- function(do.svm=doIt, svm.classOn=SVM$classOn, svm.testCV=SVM$testCV, svm.percTest=SVM$percTest, svm.cvBootCutoff=SVM$bootCutoff, svm.cvBootFactor=SVM$bootFactor, svm.valid=SVM$valid, svm.pcaRed=SVM$pcaRed, svm.pcaNComp=SVM$pcaNComp) {
 		if (!do.svm) { 
 			return(NULL)
 		} else {
-			return(list(classOn=svm.classOn, testCV=svm.testCV, percTest=svm.percTest, bootCutoff=svm.cvBootCutoff, bootFactor=svm.cvBootFactor, valid=svm.valid))
+			return(list(classOn=svm.classOn, testCV=svm.testCV, percTest=svm.percTest, bootCutoff=svm.cvBootCutoff, bootFactor=svm.cvBootFactor, valid=svm.valid, pcaRed=svm.pcaRed, pcaNComp=svm.pcaNComp))
 		}
 	} # EOIF
 	apMod$classif$svm <- modifySVM(...)

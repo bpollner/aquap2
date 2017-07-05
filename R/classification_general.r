@@ -1,30 +1,30 @@
 # core classFunc definitions -----------
-coreClassCalc_LDA <- function(...) {
-	return(MASS::lda(...))
+coreClassCalc_LDA <- function(dfData, apCl=NULL) {
+	return(MASS::lda(grouping ~ NIR, data=dfData))
 } # EOF
 
-coreClassCalc_QDA <- function(...) {
-	return(MASS::qda(...))
+coreClassCalc_QDA <- function(dfData, apCl=NULL) {
+	return(MASS::qda(grouping ~ NIR, data=dfData))
 } # EOF
 
-coreClassCalc_FDA <- function(...) {
-	return(mda::fda(...))
+coreClassCalc_FDA <- function(dfData, apCl=NULL) {
+	return(mda::fda(grouping ~ NIR, data=dfData))
 } # EOF
 
-coreClassCalc_mclustDA <- function(...) { # ! no formula interface here !
-	return(mclust::MclustDA(...)) 
+coreClassCalc_mclustDA <- function(dfData, apCl=NULL) { # ! no formula interface here !
+	return(mclust::MclustDA(dfData$NIR, dfData$grouping)) 
 } # EOF
 
-coreClassCalc_randomForest <- function(...) {
-	return(randomForest::randomForest(...))
+coreClassCalc_randomForest <- function(dfData, apCl=NULL) {
+	return(randomForest::randomForest(grouping ~ NIR, data=dfData))
 } # EOF
 
-coreClassCalc_SVM <- function(...) {
-	return(e1071::svm(...))
+coreClassCalc_SVM <- function(dfData, apCl=NULL) {
+	return(e1071::svm(grouping ~ NIR, data=dfData))
 } # EOF
 
-coreClassCalc_nnet <- function(...) {
-	return(nnet::nnet(...))
+coreClassCalc_nnet <- function(dfData, apCl=NULL) {
+	return(nnet::nnet(grouping ~ NIR, data=dfData))
 } # EOF
 
 getClassifierFunction <- function(char) {
@@ -155,24 +155,41 @@ makeOuterSplitDatasets <- function(dataset, splitList, testInd=1) { # returns a 
 
 
 # universal looping outer and inner ---------
-make_Xclass_model_CV_single <- function(trainDataset, predDataset, classFunc, classOn, type, apCl) { # single models and predictions (in CV)
-	# pv_classificationFuncs_XDA <- c("lda", "qda", "fda", "mclustda")
+make_Xclass_model_CV_single <- function(trainDataset, predDataset, classFunc, classOn, type, apCl) { # inside the single steps of the x-fold CV, single models and predictions (in CV)
+	dfTrain <- makeDataFrameForClassification(trainDataset, classOn) # ! is not flat
+	dfPred <- makeDataFrameForClassification(predDataset, classOn) # ! is not flat
 	#
-	fdfTrain <- makeFlatDataFrame(trainDataset, classOn)
-	fdfPred <- makeFlatDataFrame(predDataset, classOn)
-	#
-	# exceptions
-	if (type == pv_classificationFuncs_XDA[4]) { # MclustDA does not have a formula interface
-		mod <- classFunc(fdfTrain[,-1], fdfTrain[,1])
-	} else {
-		mod <- classFunc(grouping ~ ., data=fdfTrain)		
+	# possibly use PCA for data reduction
+	subtr <- 0
+	if (apCl$pcaRed) {
+		nc <- apCl$pcaNComp # can be either "max" or the desired numbers
+		if (any(nc == "max")) {
+			nc <- 1: nrow(dfTrain) - 1
+			subtr <- 1
+		}
+	#	NIR <- scale(dfTrain$NIR, scale=FALSE) # center first, need the centers later
+	#	trainCenters <- attr(NIR, "scaled:center", exact=TRUE)
+		pcaObTrain <- ChemometricsWithR::PCA(scale(dfTrain$NIR, scale=FALSE))
+		NIR <- pcaObTrain$scores[,nc] # replace the NIR, select components via nc
+		dfTrain$NIR <- I(NIR)
+		#
+		NIR <- ChemometricsWithR::project(pcaObTrain, newdata=dfPred$NIR , npc=(length(nc)-subtr))
+	#	NIR <- scale(dfPred$NIR, scale=FALSE, center=trainCenters)
+	#	pcaObPred <- ChemometricsWithR::PCA(NIR, warn=FALSE)
+	#	print(""); print(nc); print(dim(dfTrain$NIR))
+	#	print(str(pcaObPred)); wait()
+	#	NIR <- ChemometricsWithR::PCA(NIR, warn=FALSE)$scores[,nc]
+		dfPred$NIR <- I(NIR)
 	}
-	# now please the CV-predictions
-	pred <- predict(mod, newdata=fdfPred) # the prediction of the one left out segment in the model made from all the other segments
-#	return(list(mod=mod, pred=pred))
-	return(mod)
+	#
+#	cat("Training:\n"); print(str(dfTrain)); cat("Prediction:\n"); print(str(dfPred))
+	mod <-classFunc(dfTrain, apCl)
+	pred <- predict(mod, newdata=dfPred) # the prediction of the one left out segment in the model made from all the other segments
+	cat("\n"); print(confusion(pred, dfPred$grouping)); cat("\n\n")
+#	pred <- predict(mod, newdata=dfTrain) # the prediction of the one left out segment in the model made from all the other segments
+#	cat("\n"); print(confusion(pred, dfTrain$grouping)); cat("\n\n")
+	return(list(mod=mod, pred=pred))
 } # EOF
-
 
 make_Xclass_models_CV_outer <- function(cvData, classFunc, valid, classOn, type, apCl, stnLoc) { # inner loop via CV: making models and predictions
 	if (valid == "LOO") {
@@ -181,13 +198,15 @@ make_Xclass_models_CV_outer <- function(cvData, classFunc, valid, classOn, type,
 	segList <- createSegmentListForClassification(cvData$header, nrSegs=valid, classOn, stnLoc) # looks in each group individually
 	# now, from this segList, use all except one list elements for training the model, and then the one for prediction --> collect models and predictions (errors)
 	modList <- vector("list", length(segList))
+	predList <- vector("list", length(segList))
 	indPool <- 1: length(segList)
 	for (i in 1: length(segList)) { # cycling through the combinations of the n-fold CV
 		predInd <- i
 		trainInd <- indPool[indPool != predInd]		###### CORE ###### CORE #######
-		siMod <- make_Xclass_model_CV_single(cvData[ unlist(segList[trainInd]) ], cvData[ unlist(segList[predInd]) ], classFunc, classOn, type, apCl)  # the individual (X-fold) crossvalidation models
+		aa <- make_Xclass_model_CV_single(cvData[ unlist(segList[trainInd]) ], cvData[ unlist(segList[predInd]) ], classFunc, classOn, type, apCl)  # the individual (X-fold) crossvalidation models
 		# will be aa, then aa$ from the list...
-		modList[[i]] <- siMod
+		modList[[i]] <- aa$mod 
+		predList[[i]] <- aa$pred
 	} # end for i
 	return(modList)
 } # EOF
