@@ -38,12 +38,12 @@ into in case of a "traditional" crossvalidation of the training data; see above.
 
 \item{svm.pcaRed}{Logical, if variable reduction via PCA should be applied; if 
 TRUE, the subsequent classifications are performed on the PCA scores, see
-\code{da.pcaNComp} below.}
+\code{svm.pcaNComp} below.}
 
 \item{svm.pcaNComp}{Character or integer vector. Provide the character "max" 
 to use the maximum number of components (i.e. the number of observations minus 
 1), or an integer vector specifying the components resp. their scores to be 
-used for DA.}
+used for SVM classification.}
 }
 \description{
 The following parameters can be used in the \code{...} argument in 

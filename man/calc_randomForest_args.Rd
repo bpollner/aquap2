@@ -36,6 +36,15 @@ crossvalidation of the trainign data -- see \code{.cvBootCutoff}.}
 
 \item{rnf.valid}{The number of segments the training data should be divided 
 into in case of a "traditional" crossvalidation of the training data; see above.}
+
+\item{rnf.pcaRed}{Logical, if variable reduction via PCA should be applied; if 
+TRUE, the subsequent classifications are performed on the PCA scores, see
+\code{rnf.pcaNComp} below.}
+
+\item{rnf.pcaNComp}{Character or integer vector. Provide the character "max" 
+to use the maximum number of components (i.e. the number of observations minus 
+1), or an integer vector specifying the components resp. their scores to be 
+used for random forest classification.}
 }
 \description{
 The following parameters can be used in the \code{...} argument in 

@@ -155,7 +155,7 @@ makeOuterSplitDatasets <- function(dataset, splitList, testInd=1) { # returns a 
 
 
 # universal looping outer and inner ---------
-make_Xclass_model_CV_single <- function(trainDataset, predDataset, classFunc, classOn, type, apCl) { # inside the single steps of the x-fold CV, single models and predictions (in CV)
+make_Xclass_model_CV_single <- function(trainDataset, predDataset, testData, classFunc, classOn, type, apCl) { # inside the single steps of the x-fold CV, single models and predictions (in CV)
 	dfTrain <- makeDataFrameForClassification(trainDataset, classOn) # ! is not flat
 	dfPred <- makeDataFrameForClassification(predDataset, classOn) # ! is not flat
 	#
@@ -167,55 +167,66 @@ make_Xclass_model_CV_single <- function(trainDataset, predDataset, classFunc, cl
 			nc <- 1: nrow(dfTrain) - 1
 			subtr <- 1
 		}
-	#	NIR <- scale(dfTrain$NIR, scale=FALSE) # center first, need the centers later
-	#	trainCenters <- attr(NIR, "scaled:center", exact=TRUE)
-		pcaObTrain <- ChemometricsWithR::PCA(scale(dfTrain$NIR, scale=FALSE))
-		NIR <- pcaObTrain$scores[,nc] # replace the NIR, select components via nc
+		pcaObTrain <- stats::prcomp(dfTrain$NIR) # the default is to not scale and only mean-center
+		NIR <- pcaObTrain$x[,nc]
 		dfTrain$NIR <- I(NIR)
-		#
-		NIR <- ChemometricsWithR::project(pcaObTrain, newdata=dfPred$NIR , npc=(length(nc)-subtr))
-	#	NIR <- scale(dfPred$NIR, scale=FALSE, center=trainCenters)
-	#	pcaObPred <- ChemometricsWithR::PCA(NIR, warn=FALSE)
-	#	print(""); print(nc); print(dim(dfTrain$NIR))
-	#	print(str(pcaObPred)); wait()
-	#	NIR <- ChemometricsWithR::PCA(NIR, warn=FALSE)$scores[,nc]
+		NIR <- predict(pcaObTrain, newdata=dfPred$NIR)[,nc] # get back the scores for the prediction data
 		dfPred$NIR <- I(NIR)
-	}
-	#
-#	cat("Training:\n"); print(str(dfTrain)); cat("Prediction:\n"); print(str(dfPred))
+		#########	# other version using ChemometricsWithR::PCA and its "project"
+		#	pcaObTrain <- ChemometricsWithR::PCA(scale(dfTrain$NIR, scale=FALSE))
+		#	NIR <- pcaObTrain$scores[,nc] # replace the NIR, select components via nc
+		#	dfTrain$NIR <- I(NIR)
+		#	NIR <- ChemometricsWithR::project(pcaObTrain, newdata=dfPred$NIR)[,nc]
+		#	dfPred$NIR <- I(NIR)
+		#########
+	} # end pcaRed
 	mod <-classFunc(dfTrain, apCl)
 	pred <- predict(mod, newdata=dfPred) # the prediction of the one left out segment in the model made from all the other segments
-	cat("\n"); print(confusion(pred, dfPred$grouping)); cat("\n\n")
-#	pred <- predict(mod, newdata=dfTrain) # the prediction of the one left out segment in the model made from all the other segments
-#	cat("\n"); print(confusion(pred, dfTrain$grouping)); cat("\n\n")
-	return(list(mod=mod, pred=pred))
+	conf <- mda::confusion(pred, dfPred$grouping)
+	confPerc <- sweep(conf, 2, apply(conf, 2, sum), "/") * 100  #  calculate the confusion table in percent
+	corrClassPerc <- sum(diag(conf))/sum(conf)*100  # calculate the correct classification in percent
+#	cat("\n"); print(confPerc); cat("\n"); print(corrClassPerc); cat("\n\n")
+	return(list(mod=mod, dfPred=dfPred, confPerc=confPerc, corrClassPerc=corrClassPerc))
 } # EOF
 
-make_Xclass_models_CV_outer <- function(cvData, classFunc, valid, classOn, type, apCl, stnLoc) { # inner loop via CV: making models and predictions
+make_Xclass_models_CV_outer <- function(cvData, testData, classFunc, valid, classOn, type, apCl, stnLoc) { # inner loop via CV: making models and predictions
 	if (valid == "LOO") {
 		valid <- nrow(cvData)
 	}
 	segList <- createSegmentListForClassification(cvData$header, nrSegs=valid, classOn, stnLoc) # looks in each group individually
 	# now, from this segList, use all except one list elements for training the model, and then the one for prediction --> collect models and predictions (errors)
-	modList <- vector("list", length(segList))
-	predList <- vector("list", length(segList))
+	modList <- dfPredList <- confPercList <- corrClassPercList <- vector("list", length(segList))
 	indPool <- 1: length(segList)
 	for (i in 1: length(segList)) { # cycling through the combinations of the n-fold CV
 		predInd <- i
 		trainInd <- indPool[indPool != predInd]		###### CORE ###### CORE #######
-		aa <- make_Xclass_model_CV_single(cvData[ unlist(segList[trainInd]) ], cvData[ unlist(segList[predInd]) ], classFunc, classOn, type, apCl)  # the individual (X-fold) crossvalidation models
-		# will be aa, then aa$ from the list...
+		aa <- make_Xclass_model_CV_single(cvData[ unlist(segList[trainInd]) ], cvData[ unlist(segList[predInd]) ], testData, classFunc, classOn, type, apCl)  # the individual (X-fold) crossvalidation models
 		modList[[i]] <- aa$mod 
-		predList[[i]] <- aa$pred
+		dfPredList[[i]] <- aa$dfPred
+		confPercList[[i]] <- aa$confPerc
+		corrClassPercList[[i]] <- aa$corrClassPerc
 	} # end for i
-	return(modList)
+	# now, inside the lists, we have the single results of the individual CV steps
+	#
+	# get the single cell averages of the confusion in percent, use them to calculate the mean and SD
+	percDF <- plyr::ldply(confPercList, function(x) as.numeric(x)) # strings out each single confusion table into a singel row, then these rows rbind into a data frame
+	aa <- confPercList[[1]] ; nr <- nrow(aa) ; nc <- ncol(aa); dn <- dimnames(aa) # just take the first one to get the dimensions
+	avgsTable <- as.table(matrix(apply(percDF, 2, mean), nr, nc, dimnames=dn))
+	SDsTable <- as.table(matrix(apply(percDF, 2, sd), nr, nc, dimnames=dn))
+	#
+	# get the average of correct classifications in percent
+	aa <- unlist(corrClassPercList)
+	corrClassAvg <- mean(aa)
+	corrClassSD <- sd(aa)
+	#
+	return(list(mods=modList, dfPreds=dfPredList, errors=list(avg=avgsTable, SD=SDsTable), corrClass=list(avg=corrClassAvg, SD=corrClassSD))) # the return of function make_Xclass_models_CV_outer
 } # EOF
 
-make_Xclass_models_boot <- function(cvData, classFunc, R, classOn, type, apCl, stnLoc) { # inner loop via boot: making  models
+make_Xclass_models_boot <- function(cvData, testData, classFunc, R, classOn, type, apCl, stnLoc) { # inner loop via boot: making  models
 	# boot here please
 } # EOF
 
-make_Xclass_models_inner <- function(cvData, testData, classFunc, classOn, md, apCl, idString, stnLoc, type) { # in the inner loop: deciding if via boot or not
+make_Xclass_models_inner <- function(cvData, testData, classFunc, classOn, md, apCl, idString, stnLoc, type) { # in the inner loop: deciding if via boot or not AND predicting the TEST data in the models
 	cvBootCutoff <- apCl$bootCutoff
 	cvBootFactor <- apCl$bootFactor # the factor used for multiplying the number of observations in the group, resulting in the bootR value
 	cvValid <- round(apCl$valid, 0) # round just to be sure 
@@ -230,13 +241,17 @@ make_Xclass_models_inner <- function(cvData, testData, classFunc, classOn, md, a
 	minNrow <-  min(unlist(lapply(aa, length))) #  returns the smallest nr of observations from all separate groups
 	if (minNrow >= cvBootCutoff | neverBoot) {
 		if (!stnLoc$allSilent) {cat(".")}
-		mods <- make_Xclass_models_CV_outer(cvData, classFunc, valid=cvValid, classOn, type, apCl, stnLoc) ##### CORE ######
+		innerList <- make_Xclass_models_CV_outer(cvData, testData, classFunc, valid=cvValid, classOn, type, apCl, stnLoc) ##### CORE ######
 	} else {
 		if (!stnLoc$allSilent) {cat(":")}
-		mods <- make_Xclass_models_boot(cvData, classFunc, R=minNrow*cvBootFactor, classOn, type, apCl, stnLoc) ##### CORE ######
+		innerList <- make_Xclass_models_boot(cvData, testData, classFunc, R=minNrow*cvBootFactor, classOn, type, apCl, stnLoc) ##### CORE ######
 	}
-	# now mods contains the CV models from either boot or the n-fold CV
-	return(mods)
+	# now innerList (in $mods) contains the CV models from either boot or the n-fold CV
+	#
+	# now we have to test, i.e. make the really independent prediction with the testData on the crossvalidated models
+	mods <- innerList$mods # can be either in raw space or in PCA space !
+	
+	return(innerList)
 } # EOF
 
 make_X_classif_models <- function(dataset, classFunc, md, apCl, classOn, idString=NULL, stnLoc, type) { # going 1) through the classOn, and 2) outerSplit
@@ -258,6 +273,7 @@ make_X_classif_models <- function(dataset, classFunc, md, apCl, classOn, idStrin
 				mods <- NULL
 				realClOnFill <- NULL
 			} else {
+				if (!stnLoc$allSilent) { cat(paste0(" ",classOn[k])) }
 				mods <- make_Xclass_models_inner(cvData=aa$cv, testData=aa$test, classFunc, classOn[k], md, apCl, idString, stnLoc, type) ##### CORE ######
 				realClOnFill <- classOn[k]
 			} # end if
@@ -266,6 +282,7 @@ make_X_classif_models <- function(dataset, classFunc, md, apCl, classOn, idStrin
 		} else {
 			modsList <- vector("list", length(splitList))
 			realClOnList <- vector("list", length(splitList))
+			if (!stnLoc$allSilent) { cat(paste0(" ",classOn[k])) }
 			for (i in 1: length(splitList)) {	
 				aa <- makeOuterSplitDatasets(dataset, splitList, testInd=i)	
 				if (nlevels(aa$cv$header[,classOn[k]]) < 2) {
@@ -295,7 +312,7 @@ make_X_classif_handoverType <- function(dataset, md, apCl, types, idString, priI
 	if (!stnLoc$allSilent) {cat(paste0("      calc. ", priInfo, ":"))}
 	for (i in 1: length(types)) {		
 		classFunc <- getClassifierFunction(types[i]) ####### here select the desired classifier method !! ######
-		if (!stnLoc$allSilent) {cat(paste0(" ", priTy[i], add))}
+		if (!stnLoc$allSilent) {cat(paste0(" ", priTy[i], add, ":"))}
 			###
 			aa <- make_X_classif_models(dataset, classFunc, md, apCl, classOn, idString, stnLoc, type=types[i]) ##### make models ###### CORE ######	
 			outList[[i]] <- aa$modsClOn

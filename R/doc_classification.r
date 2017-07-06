@@ -200,7 +200,15 @@ NULL
 #' \code{\link{siWlg}} can isolate any custom group of wavelengths from the dataset, 
 #' or, if left at its default, is isolating the ranges of the 12 water matrix 
 #' coordinates within the 1st overtone. For further data reduction, this groups 
-#' can be averaged within as well.
+#' can be averaged within as well by setting the second argument in 
+#' \code{\link{siWlg}} to \code{TRUE}.
+#' \item For reducing the number of variables not in the raw data, but on the 
+#' classification side of the algorithm, it is possible to apply all classifiers 
+#' not on the rawdata, but on the PCA scores of the rawdata. This option can be 
+#' activated by setting the respective argument \code{.pcaRed} in the analysis 
+#' procedure to \code{TRUE}. In this case the prediction data for crossvalidation 
+#' as well as the independent test data are projected into the pca-models of the 
+#' training data, and the resulting scores are then used for classification.
 #' }
 #' @family Classification Helpers
 #' @name classification_helpers

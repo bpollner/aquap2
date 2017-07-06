@@ -266,9 +266,9 @@ getap_core_file <- function(fn="def") {
 	plsr <- list(doPLSR=e$do.pls, regressOn=e$pls.regOn, ncomp=e$pls.ncomp, valid=e$pls.valid, exOut=e$pls.exOut, colorBy=e$pls.colorBy, what=e$pls.what, inRdp=e$pls.rdp)	
 	aquagr <- list(doAqg=e$do.aqg, vars=e$aqg.vars, nrCorr=e$aqg.nrCorr, spectra=e$aqg.spectra, minus=e$aqg.minus, mod=e$aqg.mod, TCalib=e$aqg.TCalib, Texp=e$aqg.Texp, bootCI=e$aqg.bootCI, R=e$aqg.R, smoothN=e$aqg.smoothN, selWls=e$aqg.selWls, msc=e$aqg.msc, reference=e$aqg.reference, fsa=e$aqg.fsa, fss=e$aqg.fss, ccol=e$aqg.ccol, clt=e$aqg.clt, pplot=e$aqg.pplot, plines=e$aqg.plines, discr=e$aqg.discr)	
 	da <- list(doDa=e$do.da, type=e$da.type, classOn=e$da.classOn, testCV=e$da.testCV, percTest=e$da.percTest, bootCutoff=e$da.cvBootCutoff, bootFactor=e$da.cvBootFactor, valid=e$da.valid, pcaRed=e$da.pcaRed, pcaNComp=e$da.pcaNComp)
-	rnf <- list(doRnf=e$do.rnf, classOn=e$rnf.classOn, testCV=e$rnf.testCV, percTest=e$rnf.percTest, bootCutoff=e$rnf.cvBootCutoff, bootFactor=e$rnf.cvBootFactor, valid=e$rnf.valid)
+	rnf <- list(doRnf=e$do.rnf, classOn=e$rnf.classOn, testCV=e$rnf.testCV, percTest=e$rnf.percTest, bootCutoff=e$rnf.cvBootCutoff, bootFactor=e$rnf.cvBootFactor, valid=e$rnf.valid, pcaRed=e$rnf.pcaRed, pcaNComp=e$rnf.pcaNComp)
 	svm <- list(doSvm=e$do.svm, classOn=e$svm.classOn, testCV=e$svm.testCV, percTest=e$svm.percTest, bootCutoff=e$svm.cvBootCutoff, bootFactor=e$svm.cvBootFactor, valid=e$svm.valid, pcaRed=e$svm.pcaRed, pcaNComp=e$svm.pcaNComp)
-	nnet <- list(doNnet=e$do.nnet, classOn=e$nnet.classOn, testCV=e$nnet.testCV, percTest=e$nnet.percTest, bootCutoff=e$nnet.cvBootCutoff, bootFactor=e$nnet.cvBootFactor, valid=e$nnet.valid)
+	nnet <- list(doNnet=e$do.nnet, classOn=e$nnet.classOn, testCV=e$nnet.testCV, percTest=e$nnet.percTest, bootCutoff=e$nnet.cvBootCutoff, bootFactor=e$nnet.cvBootFactor, valid=e$nnet.valid, pcaRed=e$nnet.pcaRed, pcaNComp=e$nnet.pcaNComp)
 	classif <- list(da=da, rnf=rnf, svm=svm, nnet=nnet)
 	genPlot <- list(where=e$pg.where, onMain=e$pg.main, onSub=e$pg.sub, fns=e$pg.fns)
 	##
@@ -449,11 +449,11 @@ getap <- function(fn="def", ...) {
 	###
 	RNF <- ap$classif$rnf
 	doIt <- checkDo(RNF, "doRnf")
-	modifyRnf <- function(do.rnf=doIt, rnf.classOn=RNF$classOn, rnf.testCV=RNF$testCV, rnf.percTest=RNF$percTest, rnf.cvBootCutoff=RNF$bootCutoff, rnf.cvBootFactor=RNF$bootFactor, rnf.valid=RNF$valid) {
+	modifyRnf <- function(do.rnf=doIt, rnf.classOn=RNF$classOn, rnf.testCV=RNF$testCV, rnf.percTest=RNF$percTest, rnf.cvBootCutoff=RNF$bootCutoff, rnf.cvBootFactor=RNF$bootFactor, rnf.valid=RNF$valid,  rnf.pcaRed=RNF$pcaRed, rnf.pcaNComp=RNF$pcaNComp) {
 		if (!do.rnf) { 
 			return(NULL)
 		} else {
-			return(list(classOn=rnf.classOn, testCV=rnf.testCV, percTest=rnf.percTest, bootCutoff=rnf.cvBootCutoff, bootFactor=rnf.cvBootFactor, valid=rnf.valid))
+			return(list(classOn=rnf.classOn, testCV=rnf.testCV, percTest=rnf.percTest, bootCutoff=rnf.cvBootCutoff, bootFactor=rnf.cvBootFactor, valid=rnf.valid, pcaRed=rnf.pcaRed, pcaNComp=rnf.pcaNComp))
 		}
 	} # EOIF
 	apMod$classif$rnf <- modifyRnf(...)
@@ -471,11 +471,11 @@ getap <- function(fn="def", ...) {
 	###
 	NN <- ap$classif$nnet
 	doIt <- checkDo(NN, "doNnet")
-	modifyNnet <- function(do.nnet=doIt, nnet.classOn=NN$classOn, nnet.testCV=NN$testCV, nnet.percTest=NN$percTest, nnet.cvBootCutoff=NN$bootCutoff, nnet.cvBootFactor=NN$bootFactor, nnet.valid=NN$valid) {
+	modifyNnet <- function(do.nnet=doIt, nnet.classOn=NN$classOn, nnet.testCV=NN$testCV, nnet.percTest=NN$percTest, nnet.cvBootCutoff=NN$bootCutoff, nnet.cvBootFactor=NN$bootFactor, nnet.valid=NN$valid,  nnet.pcaRed=NN$pcaRed, nnet.pcaNComp=NN$pcaNComp) {
 		if (!do.nnet) { 
 			return(NULL)
 		} else {
-			return(list(classOn=nnet.classOn, testCV=nnet.testCV, percTest=nnet.percTest, bootCutoff=nnet.cvBootCutoff, bootFactor=nnet.cvBootFactor, valid=nnet.valid))
+			return(list(classOn=nnet.classOn, testCV=nnet.testCV, percTest=nnet.percTest, bootCutoff=nnet.cvBootCutoff, bootFactor=nnet.cvBootFactor, valid=nnet.valid, pcaRed=nnet.pcaRed, pcaNComp=nnet.pcaNComp))
 		}
 	} # EOIF
 	apMod$classif$nnet <- modifyNnet(...)

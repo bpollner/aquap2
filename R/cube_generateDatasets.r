@@ -695,6 +695,7 @@ ap_check_classifier_Input <- function(ap, header) {
 		if (!is.null(rnf)) {
 			checkClassExistence(rnf$classOn, "rnf.classOn")
 			checkThings("rnf.", rnf$testCV, rnf$percTest, rnf$bootCutoff, rnf$bootFactor, rnf$valid)
+			checkPCAred("rnf.", rnf$pcaRed, rnf$pcaNComp)
 		} # end !is null
 		#
 		svm <- ap$classif$svm
@@ -707,7 +708,8 @@ ap_check_classifier_Input <- function(ap, header) {
 		ann <- ap$classif$nnet
 		if (!is.null(ann)) {
 			checkClassExistence(ann$classOn, "nnet.classOn")
-			checkThings("nnet.", ann$testCV, ann$percTest, ann$bootCutoff, ann$bootFactor, ann$valid)	
+			checkThings("nnet.", ann$testCV, ann$percTest, ann$bootCutoff, ann$bootFactor, ann$valid)
+			checkPCAred("nnet.", ann$pcaRed, ann$pcaNComp)			
 		} # end !is null
 		#
 	} # end not null
