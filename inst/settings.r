@@ -227,9 +227,9 @@ stn <- list(
 
 	## Classification (all methods)
 	cl_gen_neverBootstrapForCV = TRUE,		## if bootstrap should NEVER be applied when crossvalidating any training dataset.
-	cl_gen_digitsRoundConfTablePerc = 1, 	## the number of digits to which the confusion table in percent should be rounded.
-
-
+	cl_gen_digitsRoundConfTablePerc = 1, 	## the number of digits to which the confusion table in percent should be rounded to.
+	cl_gen_digitsRoundSDTablePerc = 1, 		## the number of digits to which the standard deviation tables should be rounded to.
+	cl_gen_digitsRoundTableAverages = 1, 	## the number of digits to which the general table averages should be rounded to.
 
 
 	## plotting, PDFs

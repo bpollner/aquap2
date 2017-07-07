@@ -54,7 +54,6 @@ getClassifierFunction <- function(char) {
 } # EOF
 
 
-
 # segment lists and dataset splitting ---------
 createSegmentListForClassification <- function(header, nrSegs=10, classOn, stnLoc) { # looks in each group individually
 	yPref <- stnLoc$p_yVarPref
@@ -152,14 +151,28 @@ makeOuterSplitDatasets <- function(dataset, splitList, testInd=1) { # returns a 
 	return(list(cv=dataset[cvInds], test=dataset[testInds]))
 } # EOF
 
+
 # common mathematics -----------
-calculate_Avg_SDs_confPercList <- function(confPercList) { # the input is a list with a confusion table in percent in every single list element
+calculate_Avg_SDs_confPercList <- function(confPercList, stnLoc=NULL) { # the input is a list with a confusion table in percent in every single list element
+	rndAvg <- stnLoc$cl_gen_digitsRoundConfTablePerc
+	rndSDs <- stnLoc$cl_gen_digitsRoundSDTablePerc
+	#
 	percDF <- plyr::ldply(confPercList, function(x) as.numeric(x)) # strings out each single confusion table into a singel row, then these rows rbind into a data frame
 	aa <- confPercList[[1]] ; nr <- nrow(aa) ; nc <- ncol(aa); dn <- dimnames(aa) # just take the first one to get the dimensions
-	avgsTable <- as.table(matrix(apply(percDF, 2, mean), nr, nc, dimnames=dn))
-	SDsTable <- as.table(matrix(apply(percDF, 2, sd), nr, nc, dimnames=dn))
+	avgsTable <- as.table(matrix(round(apply(percDF, 2, mean), rndAvg), nr, nc, dimnames=dn))
+	SDsTable <- as.table(matrix(round(apply(percDF, 2, sd), rndSDs), nr, nc, dimnames=dn))
 	return(list(avgsTable=avgsTable, SDsTable=SDsTable))
 } # EOF
+
+calculateAverageOfTablesList <- function(tableList, stnLoc=NULL) { # the input is a list with a table (avg or SD e.g.) in each list element
+	rnd <- stnLoc$cl_gen_digitsRoundTableAverages
+	#
+	dataDF <- plyr::ldply(tableList, function(x) as.numeric(x)) # strings out each single table into a singel row, then these rows rbind into a data frame
+	aa <- tableList[[1]] ; nr <- nrow(aa) ; nc <- ncol(aa); dn <- dimnames(aa) # just take the first one to get the dimensions
+	avgOut <- as.table(matrix(round(apply(dataDF, 2, mean), rnd), nr, nc, dimnames=dn))
+	return(avgOut)
+} # EOF
+
 
 # universal looping outer and inner ---------
 make_Xclass_model_CV_single <- function(trainDataset, predDataset, testData, classFunc, classOn, type, apCl) { # inside the single steps of the x-fold CV, single models and predictions (in CV)
@@ -197,13 +210,12 @@ make_Xclass_model_CV_single <- function(trainDataset, predDataset, testData, cla
 	confPerc <- sweep(conf, 2, apply(conf, 2, sum), "/") * 100  #  calculate the confusion table in percent
 	corrClassPerc <- sum(diag(conf))/sum(conf)*100  # calculate the correct classification in percent
 #	cat("\n"); print(confPerc); cat("\n"); print(corrClassPerc); cat("\n\n")
-	cvBranch <- list(mod=mod, dfPred=dfPred, confPerc=confPerc, corrClassPerc=corrClassPerc)
+	cvBranch <- list(mod=mod, dfPred=dfPred, dfTest=dfTest, confPerc=confPerc, corrClassPerc=corrClassPerc)
 	#
 	predTestClass <- predict(mod, newdata=dfTest) # here we keep the predictions of classes (the vector with the factors)
 	testBranch <- list(predTestClass=predTestClass, trueTestClass=dfTest$grouping) # trueTestClass is always the same, as the test data is not changing down here
 	#
-	return(list(cvBranch=cvBranch, testBranch=testBranch))
-#	return(list(mod=mod, dfPred=dfPred, confPerc=confPerc, corrClassPerc=corrClassPerc))
+	return(list(cvBranch=cvBranch, testBranch=testBranch)) # output of function make_Xclass_model_CV_single
 } # EOF
 
 make_Xclass_models_CV_outer <- function(cvData, testData, classFunc, valid, classOn, type, apCl, stnLoc) { # inner loop via CV: making models and predictions
@@ -230,7 +242,7 @@ make_Xclass_models_CV_outer <- function(cvData, testData, classFunc, valid, clas
 	# now, inside the lists, we have the single results of the individual CV steps
 	#
 	# get the single cell averages of the confusion in percent, use them to calculate the mean and SD
-	aa <- calculate_Avg_SDs_confPercList(confPercList)
+	aa <- calculate_Avg_SDs_confPercList(confPercList, stnLoc)
 	avgsTable <- aa$avgsTable
 	SDsTable <- aa$SDsTable
 	#	
@@ -238,8 +250,8 @@ make_Xclass_models_CV_outer <- function(cvData, testData, classFunc, valid, clas
 	aa <- unlist(corrClassPercList)
 	corrClassAvg <- mean(aa)
 	corrClassSD <- sd(aa)
-	#
-	cvBranch <- list(mods=modList, dfPreds=dfPredList, errors=list(avg=avgsTable, SD=SDsTable), corrClass=list(avg=corrClassAvg, SD=corrClassSD))
+	# 								# as dfTest we only need the last one (all the test-data are the same down there), so we do not collect the test data and just take the last value in cvBranch$dfTest
+	cvBranch <- list(mods=modList, dfPreds=dfPredList, dfTest=list(cvBranch$dfTest), errors=list(avg=avgsTable, SD=SDsTable), corrClass=list(avg=corrClassAvg, SD=corrClassSD))
 	testBranch <- list(predTestClassList=predTestClassList, trueTestClass= trueTestClassList[[1]]) # all the list elements are identical, as the testData did not change down there
 	return(list(cvBranch=cvBranch, testBranch=testBranch))  # the return of function make_Xclass_models_CV_outer
 } # EOF
@@ -271,11 +283,11 @@ make_Xclass_models_inner <- function(cvData, testData, classFunc, classOn, md, a
 	}
 	#
 	# make the majority vote of the predicted test data, produce confusion table and calculate it into percent, pass it on uphill for averaging and SD there
+	##### CORE #### ("averaging" the predictions of all available models (could come from CV or from boot))
 	testBranch <- innerList$testBranch
 	testPredDF <- apply(apply(plyr::ldply(testBranch$predTestClassList, function(x) as.character(x)), 2, sort), 2, rle) # make a nice data frame in character, sort the values and do rle (run length encoding), result is a list
-	##### CORE ## ("averaging" the predictions of all available models (could come from CV or from boot))
 	majorVote <- as.factor(unlist(lapply(testPredDF, function(x) x$values[which.max(x$lengths)]))) # get back the single character that appears most often in each column ! # XXX possibly here a random element when in a tie??
-	##### CORE ## 
+	##### CORE #### 
 	testConf <- mda::confusion(majorVote, testBranch$trueTestClass) # all the list elements are identical, as the testData did not change down there
 	testConfPerc <- round(sweep(testConf, 2, apply(testConf, 2, sum), "/") * 100, nrDig)  #  calculate the confusion table in percent
 	testCorrClassPerc <- sum(diag(testConf))/sum(testConf)*100  # calculate the correct classification in percent
@@ -291,7 +303,7 @@ make_X_classif_models <- function(dataset, classFunc, md, apCl, classOn, idStrin
 		doOuter <- FALSE
 	}
 	#
-	cvList <- testList <- outListRealClassOn <- vector("list", length(classOn))
+	cvList <- testList <- outListRealClassOn <- cvBranchErrorsList <- cvBranchCorrClassList <- summaryList <- vector("list", length(classOn))
 	for (k in 1: length(classOn)) {
 		splitList <- makeOuterSplitList(dataset, percTest, classOn[k], stnLoc) # new split in CV and TEST data for every classOn variable
 		if (!doOuter) {
@@ -321,27 +333,39 @@ make_X_classif_models <- function(dataset, classFunc, md, apCl, classOn, idStrin
 					realClOnFill <- classOn[k]
 				}	
 				modsList[[i]] <- mods$cvBranch # filling in the data and all the CV info from the outer loop
+				cvBranchErrorsList[[i]] <- mods$cvBranch$errors # collect the cv errors and SDs (and correct classifications and their SDs, below) to average them
+				cvBranchCorrClassList[[i]] <- mods$cvBranch$corrClass
 				testBranchList[[i]] <- mods$testBranch
 				realClOnList[[i]] <- realClOnFill
-			} # end for i - going through the split list
+			} # end for i - going through the split list ###### end going through split list !!!! ###############
+			#######
 		} # end else (so we DO the outer loop, i.e. the CV of the test data)
-	#	print(""); print(str(testBranchList, max.level=4)); wait()
+		##########
+		cvList[[k]] <- modsList
 		#
-		# now, please, calculate the averages and SDs from the crossvalidated test data (that have been projected onto the N models from crossvalidation)
+		### from each run of the outer loop, i.e. the N rounds of producing crossvalidated models and testing them, average the cv errors and SDs, and the correct classification and their SDs. --> avg. of the inner loop avg.
+		avgCvErrors <- calculateAverageOfTablesList(lapply(cvBranchErrorsList, function(x) x$avg), stnLoc) # first extract the element ($avg), then hand over to function to calculate averages of all tables. same below.
+		avgCvSDs <- calculateAverageOfTablesList(lapply(cvBranchErrorsList, function(x) x$SD), stnLoc)
+		avgAvgCvCorrectClass <- mean(unlist(lapply(cvBranchCorrClassList, function(x) x$avg))) # extract the elemtn ($avg) from the list, unlist and calculate mean. same below.
+		avgSDsCvCorrectClass <- mean(unlist(lapply(cvBranchCorrClassList, function(x) x$SD)))
+		summaryList[[k]] <- list(errors=list(avg=avgCvErrors, SD=avgCvSDs), corrClass=list(avg=avgAvgCvCorrectClass, SD=avgSDsCvCorrectClass))
+		#
+		### now, please, calculate the averages and SDs from the crossvalidated test data (that have been projected onto the N models from crossvalidation)
 		testConfPercList <- lapply(testBranchList, function(x) x$testConfPerc) # extract the list element "testConfPerc"
-		aa <- calculate_Avg_SDs_confPercList(testConfPercList)
+		aa <- calculate_Avg_SDs_confPercList(testConfPercList, stnLoc)
 		test_avgsTable <- aa$avgsTable
 		test_SDsTable <- aa$SDsTable
 		#
 		aa <- unlist(lapply(testBranchList, function(x) x$testCorrClassPerc)) # extract the list element "testCorrClassPerc", gives out a vector
 		testCorrClassAvg <- mean(aa)
 		testCorrClassSD <- sd(aa)
-		# 
-		cvList[[k]] <- modsList
 		testList[[k]] <- list(testErrors=list(avg=test_avgsTable, SD=test_SDsTable), testCorrClass=list(avg=testCorrClassAvg, SD=testCorrClassSD))
+		###
 		outListRealClassOn[[k]] <- realClOnList
-	} # end for k (cycling through the classOn values)
-	return(list(cvBranch=cvList, testBranch=testList, realClOn=realClOnList)) # output of function make_X_classif_models
+	} # end for k (cycling through the classOn values) ######### end going through the classOn values !!!! #################
+	##############
+	cvDualList <- list(cvSingle=cvList, cvSummary=summaryList)
+	return(list(cvBranch=cvDualList, testBranch=testList, realClOn=realClOnList)) # output of function make_X_classif_models
 } # EOF
 
 make_X_classif_handoverType <- function(dataset, md, apCl, types, idString, priInfo, priTy="") { # going through types; called in cube_makeModels.r; the incoming dataset from the set
@@ -365,8 +389,11 @@ make_X_classif_handoverType <- function(dataset, md, apCl, types, idString, priI
 	oid <- paste0(priInfo, "__", idString)
 	return(list(cvBranch=cvList, testBranch=testList, realClassOn=NA, apCl=apCl, id=oid))
 	#
-	# the order of the lists, from outer to inner: 
+	### the order of the cvBranch, from outer to inner: 
 	# daTypes, classOn, outerLoop (=TestCV), CV inner loop, [then list element of individual models]
+	#
+	### the order of the testBranch, frou outer to inner:
+	# daTypes, classOn; (then already the results: test errors, test CorrClass)
 } # EOF
 
 ## next: make possible to have 0 percent test data / NOT do the outer loop in all combinations !
