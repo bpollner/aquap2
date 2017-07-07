@@ -225,11 +225,14 @@ stn <- list(
 	aqg_tempCalib_forceOutlExcl = TRUE, 	## if the exclusion of outliers in the temperature calibration dataset should be forced or not.
 	
 
-	## Classification (all methods)
-	cl_gen_neverBootstrapForCV = TRUE,		## if bootstrap should NEVER be applied when crossvalidating any training dataset.
+	## Classification
+	cl_gen_neverBootstrapForCV = FALSE,		## if bootstrap should NEVER be applied when crossvalidating any training dataset.
 	cl_gen_digitsRoundConfTablePerc = 1, 	## the number of digits to which the confusion table in percent should be rounded to.
 	cl_gen_digitsRoundSDTablePerc = 1, 		## the number of digits to which the standard deviation tables should be rounded to.
 	cl_gen_digitsRoundTableAverages = 1, 	## the number of digits to which the general table averages should be rounded to.
+	cl_gen_CvIndicator = ".", 				## the character used to indicate that we are doing traditional CV
+	cl_gen_bootIndicator = "`", 			## the character used to indicate that we are doing traditional CV
+
 
 
 	## plotting, PDFs

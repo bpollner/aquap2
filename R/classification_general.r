@@ -175,35 +175,45 @@ calculateAverageOfTablesList <- function(tableList, stnLoc=NULL) { # the input i
 
 
 # universal looping outer and inner ---------
-make_Xclass_model_CV_single <- function(trainDataset, predDataset, testData, classFunc, classOn, type, apCl) { # inside the single steps of the x-fold CV, single models and predictions (in CV)
+
+makePcaVariableReduction <- function(dfTrain, dfPred=NULL, dfTest, apCl) { # dfPred can be NULL, as in the bootstrap case we do not have it
+	nc <- apCl$pcaNComp # can be either "max" or the desired numbers
+	if (any(nc == "max")) {
+		nc <- 1: nrow(dfTrain) - 1
+	}
+	pcaObTrain <- stats::prcomp(dfTrain$NIR) # the default is to not scale and only mean-center
+	NIR <- pcaObTrain$x[,nc]
+	dfTrain$NIR <- I(NIR)
+	if (!is.null(dfPred)) {
+		NIR <- predict(pcaObTrain, newdata=dfPred$NIR)[,nc] # get back the scores for the prediction data
+		dfPred$NIR <- I(NIR)
+	}
+	# we also have, in this case, to transform the test data into PCA space
+	NIR <- predict(pcaObTrain, newdata=dfTest$NIR)[,nc] # the results are collected and then later the majority vote is done
+	dfTest$NIR <- I(NIR)
+	#########	# other version using ChemometricsWithR::PCA and its "project"
+	#	pcaObTrain <- ChemometricsWithR::PCA(scale(dfTrain$NIR, scale=FALSE))
+	#	NIR <- pcaObTrain$scores[,nc] # replace the NIR, select components via nc
+	#	dfTrain$NIR <- I(NIR)
+	#	NIR <- ChemometricsWithR::project(pcaObTrain, newdata=dfPred$NIR)[,nc]
+	#	dfPred$NIR <- I(NIR)
+	#########
+	return(list(dfTrain=dfTrain, dfPred=dfPred, dfTest=dfTest))
+} # EOF
+
+make_Xclass_model_CV_single <- function(trainDataset, predDataset, testData, classFunc, classOn, type, apCl) { # inside the single steps of the x-fold *CV*, single models and predictions (in CV)
 	dfTrain <- makeDataFrameForClassification(trainDataset, classOn) # ! is not flat
 	dfPred <- makeDataFrameForClassification(predDataset, classOn) # ! is not flat
 	dfTest <- makeDataFrameForClassification(testData, classOn) # still not flat
 	#
 	# possibly use PCA for data reduction
-	subtr <- 0
 	if (apCl$pcaRed) {
-		nc <- apCl$pcaNComp # can be either "max" or the desired numbers
-		if (any(nc == "max")) {
-			nc <- 1: nrow(dfTrain) - 1
-			subtr <- 1
-		}
-		pcaObTrain <- stats::prcomp(dfTrain$NIR) # the default is to not scale and only mean-center
-		NIR <- pcaObTrain$x[,nc]
-		dfTrain$NIR <- I(NIR)
-		NIR <- predict(pcaObTrain, newdata=dfPred$NIR)[,nc] # get back the scores for the prediction data
-		dfPred$NIR <- I(NIR)
-		# we also have, in this case, to transform the test data into PCA space
-		NIR <- predict(pcaObTrain, newdata=dfTest$NIR)[,nc] # the results are collected and then later the majority vote is done
-		dfTest$NIR <- I(NIR)
-		#########	# other version using ChemometricsWithR::PCA and its "project"
-		#	pcaObTrain <- ChemometricsWithR::PCA(scale(dfTrain$NIR, scale=FALSE))
-		#	NIR <- pcaObTrain$scores[,nc] # replace the NIR, select components via nc
-		#	dfTrain$NIR <- I(NIR)
-		#	NIR <- ChemometricsWithR::project(pcaObTrain, newdata=dfPred$NIR)[,nc]
-		#	dfPred$NIR <- I(NIR)
-		#########
-	} # end pcaRed
+		aa <- makePcaVariableReduction(dfTrain, dfPred, dfTest, apCl)
+		dfTrain <- aa$dfTrain
+		dfPred <- aa$dfPred
+		dfTest <- aa$dfTest
+	} # end if pcaRed
+	#
 	mod <-classFunc(dfTrain, apCl)
 	pred <- predict(mod, newdata=dfPred) # the prediction of the one left out segment in the model made from all the other segments
 	conf <- mda::confusion(pred, dfPred$grouping)
@@ -218,7 +228,7 @@ make_Xclass_model_CV_single <- function(trainDataset, predDataset, testData, cla
 	return(list(cvBranch=cvBranch, testBranch=testBranch)) # output of function make_Xclass_model_CV_single
 } # EOF
 
-make_Xclass_models_CV_outer <- function(cvData, testData, classFunc, valid, classOn, type, apCl, stnLoc) { # inner loop via CV: making models and predictions
+make_Xclass_models_CV_outer <- function(cvData, testData, classFunc, valid, classOn, type, apCl, stnLoc) { # inner loop via *CV*: making models and predictions
 	if (valid == "LOO") {
 		valid <- nrow(cvData)
 	}
@@ -256,8 +266,94 @@ make_Xclass_models_CV_outer <- function(cvData, testData, classFunc, valid, clas
 	return(list(cvBranch=cvBranch, testBranch=testBranch))  # the return of function make_Xclass_models_CV_outer
 } # EOF
 
-make_Xclass_models_boot <- function(cvData, testData, classFunc, R, classOn, type, apCl, stnLoc) { # inner loop via boot: making  models
-	# boot here please
+make_Xclass_models_boot_outer <- function(cvData, testData, classFunc, R, classOn, type, apCl, stnLoc) { # inner loop via *boot*: making  models
+	dfTrain <- makeDataFrameForClassification(cvData, classOn) # ! is not flat
+	dfTest <- makeDataFrameForClassification(testData, classOn) # still not flat
+	# we want to produce many models via boot, then use the OOB samples for CV, then apply the test data to all the models and make a majority vote
+	# as we (or at least I) can not get out the models from within boot, we will use the boot function only to generate the indices, then do everything else manually.
+	# when applying the strata argument, it proved that that out-ob-bag samples are usually around 1/3 (avg ratio 2.8) of the nrow of the dataset, with all subgroups equally present.
+	#	
+	innerWorkings <- function(dfT, ind, APCL=apCl) { # dfT is the dataset 
+	#	pool <- 1:nrow(dfT)
+	#	oobInd <- pool[which(! pool %in% ind)]
+	#	cat("\n")
+	#	print(sort(ind)); print(sort(oobInd))
+	#	a <- unlist(lapply(split(dfT[ind,], dfT[ind,]$grouping), nrow)); 	print(a)
+	#	b <- unlist(lapply(split(dfT[oobInd,], dfT[oobInd,]$grouping), nrow)); print(b)
+	#	print(length(ind)); print(length(oobInd)); cat(paste0("Ratio In/oob = ", round(length(ind) / length(oobInd),1))) 
+	#	cat("\n\n")
+		#
+	#	mod <-classFunc(dfT[ind,], APCL) # subselect data via ind
+	#	pred <- predict(mod, newdata=dfT[oobInd,])
+		#
+		out <- matrix(ind, nrow=1)
+	#	rownames(out) <- NULL
+		return(out)		
+	} # EOIF
+	thisR <- R
+	bootResult <- boot::boot(dfTrain, innerWorkings, R=thisR, strata=dfTrain$grouping, parallel="no")   	### using bootstrap to just get the indices of the datasets
+	indMat <- as.matrix(bootResult$t) # is a matrix with R rows (one row for every replicate) and the in-the-bag indices in the columns
+	pool <- 1:ncol(indMat)
+	oobIndList <- apply(indMat, 1, function(x) pool[which(! pool %in% x)]) # get the out-of-bag indices
+#	a <- t(apply(indMat, 1, sort)); print(a[1:5, 1:12]);  print(str(oobIndList))
+	##
+	
+	if (apCl$pcaRed) {
+		aa <- makePcaVariableReduction(dfTrain, dfPred=NULL, dfTest, apCl)
+		dfTrain <- aa$dfTrain
+		dfTest <- aa$dfTest
+	} # end if pcaRed
+
+	
+	
+	modsList <- vector("list", nrow(indMat))
+	for (i in 1: nrow(indMat)) { # make a model for every bootstrap iteration
+		modsList[[i]] <- classFunc(dfTrain[indMat[i,], ], apCl)
+	#	pred <- predict(mod, newdata=dfT[oobInd,])
+	} # end for i nrow(indMat)
+	
+	# next moves: implement correct PCA spacing of data; make CV predictions, collect ... etc...
+	
+#	print(length(modsList))	
+#	print(str(modsList, max.level=1))
+	
+	
+	
+	stop("so far", call.=FALSE)
+
+
+	if (apCl$pcaRed) {
+		aa <- makePcaVariableReduction(dfTrain, dfPred=NULL, dfTest, apCl)
+		dfTrain <- aa$dfTrain
+		dfTest <- aa$dfTest
+	} # end if pcaRed
+
+
+
+
+
+
+
+
+	
+	
+	
+
+
+	#
+	# get the single cell averages of the confusion in percent, use them to calculate the mean and SD
+	aa <- calculate_Avg_SDs_confPercList(confPercList, stnLoc)
+	avgsTable <- aa$avgsTable
+	SDsTable <- aa$SDsTable
+	#	
+	# get the average of correct classifications in percent
+	aa <- unlist(corrClassPercList)
+	corrClassAvg <- mean(aa)
+	corrClassSD <- sd(aa)
+	# 								# as dfTest we only need the last one (all the test-data are the same down there), so we do not collect the test data and just take the last value in cvBranch$dfTest
+	cvBranch <- list(mods=modList, dfPreds=dfPredList, dfTest=list(cvBranch$dfTest), errors=list(avg=avgsTable, SD=SDsTable), corrClass=list(avg=corrClassAvg, SD=corrClassSD))
+	testBranch <- list(predTestClassList=predTestClassList, trueTestClass= trueTestClassList[[1]]) # all the list elements are identical, as the testData did not change down there
+	return(list(cvBranch=cvBranch, testBranch=testBranch))  # the return of function make_Xclass_models_CV_outer
 } # EOF
 
 make_Xclass_models_inner <- function(cvData, testData, classFunc, classOn, md, apCl, idString, stnLoc, type) { # in the inner loop: deciding if via boot or not AND evaluate the testData predictions
@@ -265,6 +361,9 @@ make_Xclass_models_inner <- function(cvData, testData, classFunc, classOn, md, a
 	cvBootFactor <- apCl$bootFactor # the factor used for multiplying the number of observations in the group, resulting in the bootR value
 	cvValid <- round(apCl$valid, 0) # round just to be sure 
 	nrDig <- stnLoc$cl_gen_digitsRoundConfTablePerc
+	nrCV <- apCl$valid
+	cvIndicator <- stnLoc$cl_gen_CvIndicator
+	bootIndicator <- stnLoc$cl_gen_bootIndicator
 	#
 	neverBoot <- stnLoc$cl_gen_neverBootstrapForCV
 	clPref <- stnLoc$p_ClassVarPref
@@ -273,13 +372,17 @@ make_Xclass_models_inner <- function(cvData, testData, classFunc, classOn, md, a
 	#
 	ind <- which(colnames(cvData$header) == snrCol)
 	aa <- lapply(split(cvData$header, cvData$header[,classOn]), function(x) x[,ind]) # split into groups, then get the sampleNr column
-	minNrow <-  min(unlist(lapply(aa, length))) #  returns the smallest nr of observations from all separate groups
-	if (minNrow >= cvBootCutoff | neverBoot) {
-		if (!stnLoc$allSilent) {cat(".")}
+	minNrow <-  min(unlist(lapply(aa, length))) #  returns the smallest nr of observations from all separate groups 
+	minNrowInCV <- minNrow / nrCV # ... divided by the nr of crossvalidations
+	if (minNrowInCV >= cvBootCutoff | neverBoot) {
+		if (!stnLoc$allSilent) {cat(cvIndicator)}
 		innerList <- make_Xclass_models_CV_outer(cvData, testData, classFunc, valid=cvValid, classOn, type, apCl, stnLoc) ##### CORE ######
+		method <- "CV"
 	} else {
-		if (!stnLoc$allSilent) {cat(":")}
-		innerList <- make_Xclass_models_boot(cvData, testData, classFunc, R=minNrow*cvBootFactor, classOn, type, apCl, stnLoc) ##### CORE ######
+		if (!stnLoc$allSilent) {cat(bootIndicator)}
+		bootR <- round(minNrow*cvBootFactor, 0)
+		innerList <- make_Xclass_models_boot_outer(cvData, testData, classFunc, R=bootR, classOn, type, apCl, stnLoc) ##### CORE ######
+		method <- "boot"
 	}
 	#
 	# make the majority vote of the predicted test data, produce confusion table and calculate it into percent, pass it on uphill for averaging and SD there
@@ -292,7 +395,7 @@ make_Xclass_models_inner <- function(cvData, testData, classFunc, classOn, md, a
 	testConfPerc <- round(sweep(testConf, 2, apply(testConf, 2, sum), "/") * 100, nrDig)  #  calculate the confusion table in percent
 	testCorrClassPerc <- sum(diag(testConf))/sum(testConf)*100  # calculate the correct classification in percent
 #	cat("\n"); print(testConfPerc); cat("\n"); cat("\n"); 
-	return(list(cvBranch=innerList$cvBranch, testBranch=list(testConfPerc=testConfPerc, testCorrClassPerc=testCorrClassPerc))) # handing the individual conf. tables and the correct classif. of the test data in percent up
+	return(list(cvBranch=innerList$cvBranch, testBranch=list(testConfPerc=testConfPerc, testCorrClassPerc=testCorrClassPerc), method=method)) # handing the individual conf. tables and the correct classif. of the test data in percent up
 	# output of function make_Xclass_models_inner
 } # EOF
 
@@ -303,7 +406,7 @@ make_X_classif_models <- function(dataset, classFunc, md, apCl, classOn, idStrin
 		doOuter <- FALSE
 	}
 	#
-	cvList <- testList <- outListRealClassOn <- cvBranchErrorsList <- cvBranchCorrClassList <- summaryList <- vector("list", length(classOn))
+	cvList <- testList <- outListRealClassOn <- cvBranchErrorsList <- cvBranchCorrClassList <- summaryList <- methodList <-  vector("list", length(classOn))
 	for (k in 1: length(classOn)) {
 		splitList <- makeOuterSplitList(dataset, percTest, classOn[k], stnLoc) # new split in CV and TEST data for every classOn variable
 		if (!doOuter) {
@@ -342,6 +445,7 @@ make_X_classif_models <- function(dataset, classFunc, md, apCl, classOn, idStrin
 		} # end else (so we DO the outer loop, i.e. the CV of the test data)
 		##########
 		cvList[[k]] <- modsList
+		methodList[[k]] <- mods$method
 		#
 		### from each run of the outer loop, i.e. the N rounds of producing crossvalidated models and testing them, average the cv errors and SDs, and the correct classification and their SDs. --> avg. of the inner loop avg.
 		avgCvErrors <- calculateAverageOfTablesList(lapply(cvBranchErrorsList, function(x) x$avg), stnLoc) # first extract the element ($avg), then hand over to function to calculate averages of all tables. same below.
@@ -364,7 +468,7 @@ make_X_classif_models <- function(dataset, classFunc, md, apCl, classOn, idStrin
 		outListRealClassOn[[k]] <- realClOnList
 	} # end for k (cycling through the classOn values) ######### end going through the classOn values !!!! #################
 	##############
-	cvDualList <- list(cvSingle=cvList, cvSummary=summaryList)
+	cvDualList <- list(cvSingle=cvList, cvSummary=summaryList, method=methodList)
 	return(list(cvBranch=cvDualList, testBranch=testList, realClOn=realClOnList)) # output of function make_X_classif_models
 } # EOF
 

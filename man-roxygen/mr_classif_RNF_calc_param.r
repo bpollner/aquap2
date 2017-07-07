@@ -8,16 +8,30 @@
 #' @param rnf.percTest Numeric length one. The percentage of the dataset that should 
 #' be set aside for testing the models; these data are never seen during training 
 #' and crossvalidation.
-#' @param rnf.cvBootCutoff  If the number of observations within the smallest 
-#' subgroup defined by the classification grouping variable is EQUAL or HIGHER then 
-#' \code{.cvBootCutoff}, the crossvalidation is done via splitting the training 
-#' data in the number of segments defined in \code{.valid} (see below), otherwise 
-#' the crossvalidation is done via bootstrap resampling, with the number of 
-#' bootstrap iterations resulting from the multiplication by the number of 
-#' observations in this smallest subgroup with \code{.cvBootFactor}. Set the latter 
-#' to 1 to NEVER perform the CV of the training data via bootstrap, or, for a 
-#' global solution, set the parameter \code{cl_gen_neverBootstrapForCV} in the 
-#' settings file to \code{TRUE}.
+#' @param rnf.cvBootCutoff The minimum number of observations (W) that should be 
+#' in the smallest subgroup (as defined by the classification grouping variable) 
+#' *AFTER* the split into \code{rnf.valid} crossvalidation segments (below). If W 
+#' is equal or higher than \code{rnf.cvBootCutoff}, the crossvalidation is done 
+#' via splitting the training data in \code{rnf.valid} (see below) segments, 
+#' otherwise the crossvalidation is done via bootstrap resampling, with the number 
+#' of bootstrap iterations resulting from the multiplication of the number of 
+#' observations in this smallest subgroup (as defined by the classification 
+#' grouping variable) in *all* of the training data with \code{rnf.cvBootFactor}. 
+#' To never perform the CV of the training data via bootstrap, set the parameter 
+#' \code{cl_gen_neverBootstrapForCV} in the settings.r file to \code{TRUE}. 
+#' An example: With \code{rnf.cvBootCutoff} 
+#' set to \code{15} and a 8-fold crossvalidation \code{rnf.valid <- 8}, the 
+#' required minimum number of observations in the smallest subgroup *after* the 
+#' split in 8 segments would be 15, and in all the training data to perform the 
+#' desired 8-fold CV would be (8x15=) 120, in what case then 8 times 15 
+#' observations will form the test data to be projected into models made from 
+#' (120-15=) 105 observations. If there would be less than 120 observations, lets 
+#' say for example, only 100 observations in the smallest group as defined by the 
+#' classification grouping variable, bootstrap resampling with 
+#' \code{rnf.cvBootFactor * 100} iterations would be performed. In this example, 
+#' if we would also be satisfied with a 5-fold crossvalidation, then we would have 
+#' enough data: 100 / 5 = 20, and with the \code{rnf.cvBootCutoff} value being 15, 
+#' the 5-fold crossvalidation would be performed.
 #' @param rnf.cvBootFactor The factor used to multiply the number of observations 
 #' within the smallest subgroup defined by the classification grouping variable 
 #' with, resulting in the number of iterations of a possible bootstrap 
