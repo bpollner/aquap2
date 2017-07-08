@@ -1,4 +1,4 @@
-# core classFunc definitions -----------
+# core classFunc definitions and general -----------
 coreClassCalc_LDA <- function(dfData, apCl=NULL) {
 	return(MASS::lda(grouping ~ NIR, data=dfData))
 } # EOF
@@ -50,6 +50,20 @@ getClassifierFunction <- function(char) {
 	}
 	if (char == pvClass[7]) { # nnet
 		return(coreClassCalc_nnet)
+	}
+} # EOF
+
+ctKeepData <- function(object, type, stnLoc) { # checks if for the current type, or generallay, we want to keep the data, if not returns NULL
+	alwaysKeepData <- stnLoc$cl_gen_alwaysKeepData
+	desiredKeepers <- stnLoc$cl_gen_keepDataFor
+	#
+	if (alwaysKeepData) {
+		return(object)
+	}
+	if (type %in% desiredKeepers) {
+		return(object)
+	} else {
+		return(NULL)
 	}
 } # EOF
 
@@ -153,7 +167,7 @@ makeOuterSplitDatasets <- function(dataset, splitList, testInd=1) { # returns a 
 
 
 # common mathematics -----------
-calculate_Avg_SDs_confPercList <- function(confPercList, stnLoc=NULL) { # the input is a list with a confusion table in percent in every single list element
+calculate_Avg_SDs_confPercList <- function(confPercList, stnLoc) { # the input is a list with a confusion table in percent in every single list element
 	rndAvg <- stnLoc$cl_gen_digitsRoundConfTablePerc
 	rndSDs <- stnLoc$cl_gen_digitsRoundSDTablePerc
 	#
@@ -164,7 +178,7 @@ calculate_Avg_SDs_confPercList <- function(confPercList, stnLoc=NULL) { # the in
 	return(list(avgsTable=avgsTable, SDsTable=SDsTable))
 } # EOF
 
-calculateAverageOfTablesList <- function(tableList, stnLoc=NULL) { # the input is a list with a table (avg or SD e.g.) in each list element
+calculateAverageOfTablesList <- function(tableList, stnLoc) { # the input is a list with a table (avg or SD e.g.) in each list element
 	rnd <- stnLoc$cl_gen_digitsRoundTableAverages
 	#
 	dataDF <- plyr::ldply(tableList, function(x) as.numeric(x)) # strings out each single table into a singel row, then these rows rbind into a data frame
@@ -173,10 +187,27 @@ calculateAverageOfTablesList <- function(tableList, stnLoc=NULL) { # the input i
 	return(avgOut)
 } # EOF
 
+calculateConfusionTableInPercent <- function(confTable, stnLoc) {
+	rnd <- stnLoc$cl_gen_digitsRoundConfTablePerc
+	#
+	out <- round(sweep(confTable, 2, apply(confTable, 2, sum), "/") * 100, rnd)  #  calculate the confusion table in percent
+	return(out)
+} # EOF
 
-# universal looping outer and inner ---------
+calculateCorrectClassificationInPercent <- function(confTable, stnLoc) {
+	rnd <- stnLoc$cl_gen_digitsRoundConfTablePerc
+	#
+	out <- round(sum(diag(confTable))/sum(confTable)*100, rnd)  # calculate the correct classification in percent
+	return(out)	
+} # EOF
 
-makePcaVariableReduction <- function(dfTrain, dfPred=NULL, dfTest, apCl) { # dfPred can be NULL, as in the bootstrap case we do not have it
+performMajorityVote <- function(classList) {
+	predDF <- apply(apply(plyr::ldply(classList, function(x) as.character(x)), 2, sort), 2, rle) # make a nice data frame in character, sort the values and do rle (run length encoding), result is a list
+	majorVote <- as.factor(unlist(lapply(predDF, function(x) x$values[which.max(x$lengths)]))) # get back the single character that appears most often in each column ! # XXX possibly here a random element when in a tie??
+	return(majorVote)
+} # EOF
+
+makePcaVariableReduction <- function(dfTrain, dfPred, dfTest, apCl) { 
 	nc <- apCl$pcaNComp # can be either "max" or the desired numbers
 	if (any(nc == "max")) {
 		nc <- 1: nrow(dfTrain) - 1
@@ -184,10 +215,8 @@ makePcaVariableReduction <- function(dfTrain, dfPred=NULL, dfTest, apCl) { # dfP
 	pcaObTrain <- stats::prcomp(dfTrain$NIR) # the default is to not scale and only mean-center
 	NIR <- pcaObTrain$x[,nc]
 	dfTrain$NIR <- I(NIR)
-	if (!is.null(dfPred)) {
-		NIR <- predict(pcaObTrain, newdata=dfPred$NIR)[,nc] # get back the scores for the prediction data
-		dfPred$NIR <- I(NIR)
-	}
+	NIR <- predict(pcaObTrain, newdata=dfPred$NIR)[,nc] # get back the scores for the prediction data
+	dfPred$NIR <- I(NIR)
 	# we also have, in this case, to transform the test data into PCA space
 	NIR <- predict(pcaObTrain, newdata=dfTest$NIR)[,nc] # the results are collected and then later the majority vote is done
 	dfTest$NIR <- I(NIR)
@@ -201,7 +230,9 @@ makePcaVariableReduction <- function(dfTrain, dfPred=NULL, dfTest, apCl) { # dfP
 	return(list(dfTrain=dfTrain, dfPred=dfPred, dfTest=dfTest))
 } # EOF
 
-make_Xclass_model_CV_single <- function(trainDataset, predDataset, testData, classFunc, classOn, type, apCl) { # inside the single steps of the x-fold *CV*, single models and predictions (in CV)
+
+# universal looping outer and inner ---------
+make_Xclass_model_CV_single <- function(trainDataset, predDataset, testData, classFunc, classOn, type, apCl, stnLoc) { # inside the single steps of the x-fold *CV*, single models and predictions (in CV)
 	dfTrain <- makeDataFrameForClassification(trainDataset, classOn) # ! is not flat
 	dfPred <- makeDataFrameForClassification(predDataset, classOn) # ! is not flat
 	dfTest <- makeDataFrameForClassification(testData, classOn) # still not flat
@@ -217,8 +248,8 @@ make_Xclass_model_CV_single <- function(trainDataset, predDataset, testData, cla
 	mod <-classFunc(dfTrain, apCl)
 	pred <- predict(mod, newdata=dfPred) # the prediction of the one left out segment in the model made from all the other segments
 	conf <- mda::confusion(pred, dfPred$grouping)
-	confPerc <- sweep(conf, 2, apply(conf, 2, sum), "/") * 100  #  calculate the confusion table in percent
-	corrClassPerc <- sum(diag(conf))/sum(conf)*100  # calculate the correct classification in percent
+	confPerc <- calculateConfusionTableInPercent(conf, stnLoc)
+	corrClassPerc <- calculateCorrectClassificationInPercent(conf, stnLoc)
 #	cat("\n"); print(confPerc); cat("\n"); print(corrClassPerc); cat("\n\n")
 	cvBranch <- list(mod=mod, dfPred=dfPred, dfTest=dfTest, confPerc=confPerc, corrClassPerc=corrClassPerc)
 	#
@@ -234,15 +265,16 @@ make_Xclass_models_CV_outer <- function(cvData, testData, classFunc, valid, clas
 	}
 	segList <- createSegmentListForClassification(cvData$header, nrSegs=valid, classOn, stnLoc) # looks in each group individually
 	# now, from this segList, use all except one list elements for training the model, and then the one for prediction --> collect models and predictions (errors)
-	modList <- dfPredList <- confPercList <- corrClassPercList <- predTestClassList <- trueTestClassList <- vector("list", length(segList))
+	modList <- dfPredList <- dfTestList <- confPercList <- corrClassPercList <- predTestClassList <- trueTestClassList <- vector("list", length(segList))
 	indPool <- 1: length(segList)
 	for (i in 1: length(segList)) { # cycling through the combinations of the n-fold CV
 		predInd <- i
 		trainInd <- indPool[indPool != predInd]		###### CORE ###### CORE #######
-		aa <- make_Xclass_model_CV_single(cvData[ unlist(segList[trainInd]) ], cvData[ unlist(segList[predInd]) ], testData, classFunc, classOn, type, apCl)  # the individual (X-fold) crossvalidation models
+		aa <- make_Xclass_model_CV_single(cvData[ unlist(segList[trainInd]) ], cvData[ unlist(segList[predInd]) ], testData, classFunc, classOn, type, apCl, stnLoc)  # the individual (X-fold) crossvalidation models
 		cvBranch <- aa$cvBranch
 		modList[[i]] <- cvBranch$mod 
-		dfPredList[[i]] <- cvBranch$dfPred
+		dfPredList[[i]] <-  ctKeepData(cvBranch$dfPred, type, stnLoc)
+		dfTestList[[i]] <- ctKeepData(cvBranch$dfTest, type, stnLoc)
 		confPercList[[i]] <- cvBranch$confPerc
 		corrClassPercList[[i]] <- cvBranch$corrClassPerc
 		testBranch <- aa$testBranch
@@ -260,20 +292,21 @@ make_Xclass_models_CV_outer <- function(cvData, testData, classFunc, valid, clas
 	aa <- unlist(corrClassPercList)
 	corrClassAvg <- mean(aa)
 	corrClassSD <- sd(aa)
-	# 								# as dfTest we only need the last one (all the test-data are the same down there), so we do not collect the test data and just take the last value in cvBranch$dfTest
-	cvBranch <- list(mods=modList, dfPreds=dfPredList, dfTest=list(cvBranch$dfTest), errors=list(avg=avgsTable, SD=SDsTable), corrClass=list(avg=corrClassAvg, SD=corrClassSD))
+	#
+	cvBranch <- list(mods=modList, dfPreds=dfPredList, dfTest=dfTestList, errors=list(avg=avgsTable, SD=SDsTable), corrClass=list(avg=corrClassAvg, SD=corrClassSD))
 	testBranch <- list(predTestClassList=predTestClassList, trueTestClass= trueTestClassList[[1]]) # all the list elements are identical, as the testData did not change down there
 	return(list(cvBranch=cvBranch, testBranch=testBranch))  # the return of function make_Xclass_models_CV_outer
 } # EOF
 
-make_Xclass_models_boot_outer <- function(cvData, testData, classFunc, R, classOn, type, apCl, stnLoc) { # inner loop via *boot*: making  models
+make_Xclass_models_boot <- function(cvData, testData, classFunc, R, classOn, type, apCl, stnLoc) { # inner loop via *boot*: making  models
 	dfTrain <- makeDataFrameForClassification(cvData, classOn) # ! is not flat
 	dfTest <- makeDataFrameForClassification(testData, classOn) # still not flat
 	# we want to produce many models via boot, then use the OOB samples for CV, then apply the test data to all the models and make a majority vote
 	# as we (or at least I) can not get out the models from within boot, we will use the boot function only to generate the indices, then do everything else manually.
-	# when applying the strata argument, it proved that that out-ob-bag samples are usually around 1/3 (avg ratio 2.8) of the nrow of the dataset, with all subgroups equally present.
+	# when applying the strata argument, it shows that that out-ob-bag samples are usually around 1/3 (avg ratio 2.8) of the nrow of the dataset, with all subgroups equally present. (detailed code for that in innerWorkings)
+	# we are here in a single step of the outer loop
 	#	
-	innerWorkings <- function(dfT, ind, APCL=apCl) { # dfT is the dataset 
+	innerWorkings <- function(dfT, ind) { # dfT is the dataset 
 	#	pool <- 1:nrow(dfT)
 	#	oobInd <- pool[which(! pool %in% ind)]
 	#	cat("\n")
@@ -283,66 +316,42 @@ make_Xclass_models_boot_outer <- function(cvData, testData, classFunc, R, classO
 	#	print(length(ind)); print(length(oobInd)); cat(paste0("Ratio In/oob = ", round(length(ind) / length(oobInd),1))) 
 	#	cat("\n\n")
 		#
-	#	mod <-classFunc(dfT[ind,], APCL) # subselect data via ind
-	#	pred <- predict(mod, newdata=dfT[oobInd,])
-		#
-		out <- matrix(ind, nrow=1)
-	#	rownames(out) <- NULL
-		return(out)		
+		return(matrix(ind, nrow=1))		
 	} # EOIF
 	thisR <- R
 	bootResult <- boot::boot(dfTrain, innerWorkings, R=thisR, strata=dfTrain$grouping, parallel="no")   	### using bootstrap to just get the indices of the datasets
 	indMat <- as.matrix(bootResult$t) # is a matrix with R rows (one row for every replicate) and the in-the-bag indices in the columns
 	pool <- 1:ncol(indMat)
-	oobIndList <- apply(indMat, 1, function(x) pool[which(! pool %in% x)]) # get the out-of-bag indices
+	oobIndList <- apply(indMat, 1, function(x) pool[which(! pool %in% x)]) # get the out-of-bag indices, have them in a list
 #	a <- t(apply(indMat, 1, sort)); print(a[1:5, 1:12]);  print(str(oobIndList))
 	##
-	
-	if (apCl$pcaRed) {
-		aa <- makePcaVariableReduction(dfTrain, dfPred=NULL, dfTest, apCl)
-		dfTrain <- aa$dfTrain
-		dfTest <- aa$dfTest
-	} # end if pcaRed
-
-	
-	
-	modsList <- vector("list", nrow(indMat))
-	for (i in 1: nrow(indMat)) { # make a model for every bootstrap iteration
-		modsList[[i]] <- classFunc(dfTrain[indMat[i,], ], apCl)
-	#	pred <- predict(mod, newdata=dfT[oobInd,])
-	} # end for i nrow(indMat)
-	
-	# next moves: implement correct PCA spacing of data; make CV predictions, collect ... etc...
-	
-#	print(length(modsList))	
-#	print(str(modsList, max.level=1))
-	
-	
-	
-	stop("so far", call.=FALSE)
-
-
-	if (apCl$pcaRed) {
-		aa <- makePcaVariableReduction(dfTrain, dfPred=NULL, dfTest, apCl)
-		dfTrain <- aa$dfTrain
-		dfTest <- aa$dfTest
-	} # end if pcaRed
-
-
-
-
-
-
-
-
-	
-	
-	
-
-
+	modList <- dfPredList <- dfTestList <- confPercList <- corrClassPercList <- predTestClassList <- vector("list", nrow(indMat))
+	for (i in 1: nrow(indMat)) { # make a model for every bootstrap iteration (one in every row) ## XXX here make it in parallel !! XXX
+		siDfTrain <- dfTrain[indMat[i,],] # get the in-the-bag data
+		siDfPred <- dfTrain[oobIndList[[i]],] # get the out-of-bag data; around 1/3 of the original dfTrain
+		siDdfTest <- dfTest # no change yet
+		if (apCl$pcaRed) {
+			aa <- makePcaVariableReduction(siDfTrain, siDfPred, siDdfTest, apCl)
+			siDfTrain <- aa$dfTrain
+			siDfPred <- aa$dfPred
+			siDdfTest <- aa$dfTest
+		} # end if pcaRed
+		mod <- classFunc(siDfTrain, apCl)
+		pred <- predict(mod, newdata=siDfPred) # the prediction of the left out observations in the model made from all the other observations
+		conf <- mda::confusion(pred, siDfPred$grouping)
+		#
+		modList[[i]] <- mod
+		dfPredList[[i]] <- ctKeepData(siDfPred, type, stnLoc) # returns NULL if we are not within a desired keeper type
+		dfTestList[[i]] <- ctKeepData(siDdfTest, type, stnLoc)
+		confPercList[[i]] <- calculateConfusionTableInPercent(conf, stnLoc)
+		corrClassPercList[[i]] <- calculateCorrectClassificationInPercent(conf, stnLoc)
+		predTestClassList[[i]] <- predict(mod, newdata=siDdfTest) # here we keep the predictions of classes (the vector with the factors)
+		} # end for i nrow(indMat)
+	# we are here in a single step of the outer loop
+	# collect all the models, (all the dfPreds and dfTests), average the confusion tables of all bootstrap iterations
 	#
 	# get the single cell averages of the confusion in percent, use them to calculate the mean and SD
-	aa <- calculate_Avg_SDs_confPercList(confPercList, stnLoc)
+	aa <- calculate_Avg_SDs_confPercList(confPercList, stnLoc) # the bootstrap data from a single step of the outer loop
 	avgsTable <- aa$avgsTable
 	SDsTable <- aa$SDsTable
 	#	
@@ -350,10 +359,10 @@ make_Xclass_models_boot_outer <- function(cvData, testData, classFunc, R, classO
 	aa <- unlist(corrClassPercList)
 	corrClassAvg <- mean(aa)
 	corrClassSD <- sd(aa)
-	# 								# as dfTest we only need the last one (all the test-data are the same down there), so we do not collect the test data and just take the last value in cvBranch$dfTest
-	cvBranch <- list(mods=modList, dfPreds=dfPredList, dfTest=list(cvBranch$dfTest), errors=list(avg=avgsTable, SD=SDsTable), corrClass=list(avg=corrClassAvg, SD=corrClassSD))
-	testBranch <- list(predTestClassList=predTestClassList, trueTestClass= trueTestClassList[[1]]) # all the list elements are identical, as the testData did not change down there
-	return(list(cvBranch=cvBranch, testBranch=testBranch))  # the return of function make_Xclass_models_CV_outer
+	#
+	cvBranch <- list(mods=modList, dfPreds=dfPredList, dfTest=dfTestList, errors=list(avg=avgsTable, SD=SDsTable), corrClass=list(avg=corrClassAvg, SD=corrClassSD))
+	testBranch <- list(predTestClassList=predTestClassList, trueTestClass=dfTest$grouping) 
+	return(list(cvBranch=cvBranch, testBranch=testBranch))  # the return of function make_Xclass_models_boot
 } # EOF
 
 make_Xclass_models_inner <- function(cvData, testData, classFunc, classOn, md, apCl, idString, stnLoc, type) { # in the inner loop: deciding if via boot or not AND evaluate the testData predictions
@@ -381,19 +390,18 @@ make_Xclass_models_inner <- function(cvData, testData, classFunc, classOn, md, a
 	} else {
 		if (!stnLoc$allSilent) {cat(bootIndicator)}
 		bootR <- round(minNrow*cvBootFactor, 0)
-		innerList <- make_Xclass_models_boot_outer(cvData, testData, classFunc, R=bootR, classOn, type, apCl, stnLoc) ##### CORE ######
+		innerList <- make_Xclass_models_boot(cvData, testData, classFunc, R=bootR, classOn, type, apCl, stnLoc) ##### CORE ######
 		method <- "boot"
 	}
 	#
 	# make the majority vote of the predicted test data, produce confusion table and calculate it into percent, pass it on uphill for averaging and SD there
 	##### CORE #### ("averaging" the predictions of all available models (could come from CV or from boot))
 	testBranch <- innerList$testBranch
-	testPredDF <- apply(apply(plyr::ldply(testBranch$predTestClassList, function(x) as.character(x)), 2, sort), 2, rle) # make a nice data frame in character, sort the values and do rle (run length encoding), result is a list
-	majorVote <- as.factor(unlist(lapply(testPredDF, function(x) x$values[which.max(x$lengths)]))) # get back the single character that appears most often in each column ! # XXX possibly here a random element when in a tie??
+	majorVote <- performMajorityVote(testBranch$predTestClassList)
 	##### CORE #### 
 	testConf <- mda::confusion(majorVote, testBranch$trueTestClass) # all the list elements are identical, as the testData did not change down there
-	testConfPerc <- round(sweep(testConf, 2, apply(testConf, 2, sum), "/") * 100, nrDig)  #  calculate the confusion table in percent
-	testCorrClassPerc <- sum(diag(testConf))/sum(testConf)*100  # calculate the correct classification in percent
+	testConfPerc <- calculateConfusionTableInPercent(testConf, stnLoc)
+	testCorrClassPerc <- calculateCorrectClassificationInPercent(testConf, stnLoc)
 #	cat("\n"); print(testConfPerc); cat("\n"); cat("\n"); 
 	return(list(cvBranch=innerList$cvBranch, testBranch=list(testConfPerc=testConfPerc, testCorrClassPerc=testCorrClassPerc), method=method)) # handing the individual conf. tables and the correct classif. of the test data in percent up
 	# output of function make_Xclass_models_inner
@@ -500,4 +508,9 @@ make_X_classif_handoverType <- function(dataset, md, apCl, types, idString, priI
 	# daTypes, classOn; (then already the results: test errors, test CorrClass)
 } # EOF
 
-## next: make possible to have 0 percent test data / NOT do the outer loop in all combinations !
+## next: 
+# make possible to have 0 percent test data / NOT do the outer loop in all combinations !
+# parallelize the boot-part
+# explore the m argument in boot -- for really small number of observations, have m higher ? what does that do? more predictions... --> more samples ? how is the oob then behaving?
+# transport through the method, have the method information as list element in the final output.
+

@@ -232,7 +232,8 @@ stn <- list(
 	cl_gen_digitsRoundTableAverages = 1, 	## the number of digits to which the general table averages should be rounded to.
 	cl_gen_CvIndicator = ".", 				## the character used to indicate that we are doing traditional CV
 	cl_gen_bootIndicator = "`", 			## the character used to indicate that we are doing traditional CV
-
+	cl_gen_alwaysKeepData = FALSE, 			## if the argument below should be ignored and the data should be kept always, anyway
+	cl_gen_keepDataFor = c("lda", "qda", "fda", "mclustda"), 		## the type of classification for what data (training data, test data) should be kept.
 
 
 	## plotting, PDFs
