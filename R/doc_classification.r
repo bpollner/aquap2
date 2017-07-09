@@ -209,6 +209,11 @@ NULL
 #' procedure to \code{TRUE}. In this case the prediction data for crossvalidation 
 #' as well as the independent test data are projected into the pca-models of the 
 #' training data, and the resulting scores are then used for classification.
+#' \item If the traditional crossvalidation is applied, so, if there are enough 
+#' observations in the smallest subgroup to meet the criteria to perform the N-fold 
+#' crossvalidation, consecutive scans of the same sample are always excluded resp. 
+#' included together. If the crossvalidation of the models is performed via 
+#' bootstrap, consecutive scans are, for the moment, ignored.
 #' }
 #' @family Classification Helpers
 #' @name classification_helpers
