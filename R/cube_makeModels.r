@@ -115,7 +115,6 @@ calculate_XDA <- function(dataset, md, ap, idString) {
 	return(make_X_classif_handoverType(dataset, md, apCl, types=daTypes, idString, priInfo=pri, priTy))
 } # EOF
 
-
 calculate_RNF <- function(dataset, md, ap, idString) {
 	if (is.null(ap$classif$rnf)) {
 		return(NULL)

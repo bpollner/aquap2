@@ -204,11 +204,12 @@ makePLSRModels <- function(dataset, md, ap) {
 			if (i == leng) {coa <- ". "} else {coa <- ", "}
 			if (!stnLoc$allSilent) {cat(paste(regrOnList[i]), coa, sep="" )}
 		}
+		dataUse <- dataset
 		if (exOut[i]) { # is logical vector, determining whether we want to do the plsr specific outlier detection or not
 			origMods <- makePLSRModel_inner(dataset, regrOnList[i], niter, ncomp, valid[i], stnLoc, exOut[i])
-			dataset <- excludePlsrOutliers(dataset, origMods, stnLoc) # we make a custom dataset for each element in the regress on list
+			dataUse <- excludePlsrOutliers(dataset, origMods, stnLoc) # we make a custom dataset for each element in the regress on list
 		}
-		out <- makePLSRModel_inner(dataset, regrOnList[i], niter, ncomp, valid[i], stnLoc, exOut[i])	 ####### CORE ###### CORE !!!!
+		out <- makePLSRModel_inner(dataUse, regrOnList[i], niter, ncomp, valid[i], stnLoc, exOut[i])	 ####### CORE ###### CORE !!!!
 	} # end foreach i
 	modCorr <- modPlus <- regrOn <- usedDataset <- exOut <- list()
 	for (i in 1: length(modelList)) { # resort the list from modelList

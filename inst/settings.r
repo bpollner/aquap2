@@ -234,6 +234,9 @@ stn <- list(
 	cl_gen_bootIndicator = "`", 			## the character used to indicate that we are doing traditional CV
 	cl_gen_alwaysKeepData = FALSE, 			## if the argument below should be ignored and the data should be kept always, anyway
 	cl_gen_keepDataFor = c("lda", "qda", "fda", "mclustda"), 		## the type of classification for what data (training data, test data) should be kept.
+	cl_CV_inParallel = TRUE, 				## if traditional CV operations should be done in parallel
+	cl_boot_inParallel = TRUE,				## if bootstrapped CV operations should be done in parallel
+
 
 
 	## plotting, PDFs

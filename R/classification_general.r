@@ -260,27 +260,60 @@ make_Xclass_model_CV_single <- function(trainDataset, predDataset, testData, cla
 } # EOF
 
 make_Xclass_models_CV_outer <- function(cvData, testData, classFunc, valid, classOn, type, apCl, stnLoc) { # inner loop via *CV*: making models and predictions
+	doPar <- stnLoc$cl_CV_inParallel
+	#
 	if (valid == "LOO") {
 		valid <- nrow(cvData)
 	}
 	segList <- createSegmentListForClassification(cvData$header, nrSegs=valid, classOn, stnLoc) # looks in each group individually
-	# now, from this segList, use all except one list elements for training the model, and then the one for prediction --> collect models and predictions (errors)
-	modList <- dfPredList <- dfTestList <- confPercList <- corrClassPercList <- predTestClassList <- trueTestClassList <- vector("list", length(segList))
+	if (doPar) {
+		registerParallelBackend()
+	} else {
+		registerDoSEQ()
+	}
+	dopare <- checkHaveParallel()
+	## #now, from this segList, use all except one list elements for training the model, and then the one for prediction --> collect models and predictions (errors)
 	indPool <- 1: length(segList)
-	for (i in 1: length(segList)) { # cycling through the combinations of the n-fold CV
+	parOutList <- foreach(i = 1: length(segList)) %dopar% {
 		predInd <- i
 		trainInd <- indPool[indPool != predInd]		###### CORE ###### CORE #######
 		aa <- make_Xclass_model_CV_single(cvData[ unlist(segList[trainInd]) ], cvData[ unlist(segList[predInd]) ], testData, classFunc, classOn, type, apCl, stnLoc)  # the individual (X-fold) crossvalidation models
 		cvBranch <- aa$cvBranch
-		modList[[i]] <- cvBranch$mod 
-		dfPredList[[i]] <-  ctKeepData(cvBranch$dfPred, type, stnLoc)
-		dfTestList[[i]] <- ctKeepData(cvBranch$dfTest, type, stnLoc)
-		confPercList[[i]] <- cvBranch$confPerc
-		corrClassPercList[[i]] <- cvBranch$corrClassPerc
 		testBranch <- aa$testBranch
-		predTestClassList[[i]] <- testBranch$predTestClass # here we have the vectors (in factors) with the predictions of the test data that were done deeper down, because we might have had to transform the test data into PCA space
-		trueTestClassList[[i]] <- testBranch$trueTestClass
-	} # end for i
+		singleRound <- list(mod=cvBranch$mod, dfPred=ctKeepData(cvBranch$dfPred, type, stnLoc), dfTest=ctKeepData(cvBranch$dfTest, type, stnLoc), confPerc=cvBranch$confPerc, corrClassPerc=cvBranch$corrClassPerc, predTestClass=testBranch$predTestClass, trueTestClass=testBranch$trueTestClass)
+	} # end dopar
+	###
+	# now we have to re-sort the resulting list (parOutList)
+	modList <- dfPredList <- dfTestList <- confPercList <- corrClassPercList <- predTestClassList <- trueTestClassList <- list()	
+	for (i in 1: length(parOutList)) { # resort the list from parOutList
+		modList <- c(modList, list(parOutList[[i]]$mod))
+		dfPredList <- c(dfPredList, list(parOutList[[i]]$dfPred))
+		dfTestList <- c(dfTestList, list(parOutList[[i]]$dfTest))
+		confPercList <- c(confPercList, list(parOutList[[i]]$confPerc))
+		corrClassPercList <- c(corrClassPercList, list(parOutList[[i]]$corrClassPerc))
+		predTestClassList <- c(predTestClassList, list(parOutList[[i]]$predTestClass))		
+		trueTestClassList <- c(trueTestClassList, list(parOutList[[i]]$trueTestClass))		
+	} # end for i	
+
+############### (strictly serial) 
+#	modList <- dfPredList <- dfTestList <- confPercList <- corrClassPercList <- predTestClassList <- trueTestClassList <- vector("list", length(segList))
+#	indPool <- 1: length(segList)
+#	for (i in 1: length(segList)) { # cycling through the combinations of the n-fold CV
+#		predInd <- i
+#		trainInd <- indPool[indPool != predInd]		###### CORE ###### CORE #######
+#		aa <- make_Xclass_model_CV_single(cvData[ unlist(segList[trainInd]) ], cvData[ unlist(segList[predInd]) ], testData, classFunc, classOn, type, apCl, stnLoc)  # the individual (X-fold) crossvalidation models
+#		cvBranch <- aa$cvBranch
+#		modList[[i]] <- cvBranch$mod 
+#		dfPredList[[i]] <-  ctKeepData(cvBranch$dfPred, type, stnLoc)
+#		dfTestList[[i]] <- ctKeepData(cvBranch$dfTest, type, stnLoc)
+#		confPercList[[i]] <- cvBranch$confPerc
+#		corrClassPercList[[i]] <- cvBranch$corrClassPerc
+#		testBranch <- aa$testBranch
+#		predTestClassList[[i]] <- testBranch$predTestClass # here we have the vectors (in factors) with the predictions of the test data that were done deeper down, because we might have had to transform the test data into PCA space
+#		trueTestClassList[[i]] <- testBranch$trueTestClass
+#	} # end for i
+###############
+
 	# now, inside the lists, we have the single results of the individual CV steps
 	#
 	# get the single cell averages of the confusion in percent, use them to calculate the mean and SD
@@ -299,6 +332,8 @@ make_Xclass_models_CV_outer <- function(cvData, testData, classFunc, valid, clas
 } # EOF
 
 make_Xclass_models_boot <- function(cvData, testData, classFunc, R, classOn, type, apCl, stnLoc) { # inner loop via *boot*: making  models
+	doPar <- stnLoc$cl_boot_inParallel
+	#
 	dfTrain <- makeDataFrameForClassification(cvData, classOn) # ! is not flat
 	dfTest <- makeDataFrameForClassification(testData, classOn) # still not flat
 	# we want to produce many models via boot, then use the OOB samples for CV, then apply the test data to all the models and make a majority vote
@@ -324,9 +359,13 @@ make_Xclass_models_boot <- function(cvData, testData, classFunc, R, classOn, typ
 	pool <- 1:ncol(indMat)
 	oobIndList <- apply(indMat, 1, function(x) pool[which(! pool %in% x)]) # get the out-of-bag indices, have them in a list
 #	a <- t(apply(indMat, 1, sort)); print(a[1:5, 1:12]);  print(str(oobIndList))
-	##
-	modList <- dfPredList <- dfTestList <- confPercList <- corrClassPercList <- predTestClassList <- vector("list", nrow(indMat))
-	for (i in 1: nrow(indMat)) { # make a model for every bootstrap iteration (one in every row) ## XXX here make it in parallel !! XXX
+	if (doPar) {
+		registerParallelBackend()
+	} else {
+		registerDoSEQ()
+	}
+	dopare <- checkHaveParallel()
+	parOutList <- foreach(i = 1:nrow(indMat)) %dopar% {   # make a model for every bootstrap iteration (one in every row), the result comes back in a list
 		siDfTrain <- dfTrain[indMat[i,],] # get the in-the-bag data
 		siDfPred <- dfTrain[oobIndList[[i]],] # get the out-of-bag data; around 1/3 of the original dfTrain
 		siDdfTest <- dfTest # no change yet
@@ -339,14 +378,45 @@ make_Xclass_models_boot <- function(cvData, testData, classFunc, R, classOn, typ
 		mod <- classFunc(siDfTrain, apCl)
 		pred <- predict(mod, newdata=siDfPred) # the prediction of the left out observations in the model made from all the other observations
 		conf <- mda::confusion(pred, siDfPred$grouping)
-		#
-		modList[[i]] <- mod
-		dfPredList[[i]] <- ctKeepData(siDfPred, type, stnLoc) # returns NULL if we are not within a desired keeper type
-		dfTestList[[i]] <- ctKeepData(siDdfTest, type, stnLoc)
-		confPercList[[i]] <- calculateConfusionTableInPercent(conf, stnLoc)
-		corrClassPercList[[i]] <- calculateCorrectClassificationInPercent(conf, stnLoc)
-		predTestClassList[[i]] <- predict(mod, newdata=siDdfTest) # here we keep the predictions of classes (the vector with the factors)
-		} # end for i nrow(indMat)
+		singleRound <- list(mod=mod, dfPred=ctKeepData(siDfPred, type, stnLoc), dfTest=ctKeepData(siDdfTest, type, stnLoc), confPerc=calculateConfusionTableInPercent(conf, stnLoc), corrClassPerc=calculateCorrectClassificationInPercent(conf, stnLoc), predTestClass= predict(mod, newdata=siDdfTest))
+	} # end dopar
+	###
+	# now we have to re-sort the resulting list (parOutList)
+	modList <- dfPredList <- dfTestList <- confPercList <- corrClassPercList <- predTestClassList <- list()	
+	for (i in 1: length(parOutList)) { # resort the list from parOutList
+		modList <- c(modList, list(parOutList[[i]]$mod))
+		dfPredList <- c(dfPredList, list(parOutList[[i]]$dfPred))
+		dfTestList <- c(dfTestList, list(parOutList[[i]]$dfTest))
+		confPercList <- c(confPercList, list(parOutList[[i]]$confPerc))
+		corrClassPercList <- c(corrClassPercList, list(parOutList[[i]]$corrClassPerc))
+		predTestClassList <- c(predTestClassList, list(parOutList[[i]]$predTestClass))		
+	} # end for i	
+
+############### (strictly serial)
+#	modList <- dfPredList <- dfTestList <- confPercList <- corrClassPercList <- predTestClassList <- vector("list", nrow(indMat))
+#	for (i in 1: nrow(indMat)) { # make a model for every bootstrap iteration (one in every row) ## XXX here make it in parallel !! XXX
+#		siDfTrain <- dfTrain[indMat[i,],] # get the in-the-bag data
+#		siDfPred <- dfTrain[oobIndList[[i]],] # get the out-of-bag data; around 1/3 of the original dfTrain
+#		siDdfTest <- dfTest # no change yet
+#		if (apCl$pcaRed) {
+#			aa <- makePcaVariableReduction(siDfTrain, siDfPred, siDdfTest, apCl)
+#			siDfTrain <- aa$dfTrain
+#			siDfPred <- aa$dfPred
+#			siDdfTest <- aa$dfTest
+#		} # end if pcaRed
+#		mod <- classFunc(siDfTrain, apCl)
+#		pred <- predict(mod, newdata=siDfPred) # the prediction of the left out observations in the model made from all the other observations
+#		conf <- mda::confusion(pred, siDfPred$grouping)
+#		#
+#		modList[[i]] <- mod
+#		dfPredList[[i]] <- ctKeepData(siDfPred, type, stnLoc) # returns NULL if we are not within a desired keeper type
+#		dfTestList[[i]] <- ctKeepData(siDdfTest, type, stnLoc)
+#		confPercList[[i]] <- calculateConfusionTableInPercent(conf, stnLoc)
+#		corrClassPercList[[i]] <- calculateCorrectClassificationInPercent(conf, stnLoc)
+#		predTestClassList[[i]] <- predict(mod, newdata=siDdfTest) # here we keep the predictions of classes (the vector with the factors)
+#	} # end for i nrow(indMat)
+###############
+
 	# we are here in a single step of the outer loop
 	# collect all the models, (all the dfPreds and dfTests), average the confusion tables of all bootstrap iterations
 	#
@@ -510,7 +580,7 @@ make_X_classif_handoverType <- function(dataset, md, apCl, types, idString, priI
 
 ## next: 
 # make possible to have 0 percent test data / NOT do the outer loop in all combinations !
-# parallelize the boot-part
 # explore the m argument in boot -- for really small number of observations, have m higher ? what does that do? more predictions... --> more samples ? how is the oob then behaving?
-# transport through the method, have the method information as list element in the final output.
-
+# ??? transport through the method, have the method information as list element in the final output.
+# in the PCA data reduction, make sure that we can not manually provide more NCs than are possible.
+# average the n rounds of the test --> for one single output
