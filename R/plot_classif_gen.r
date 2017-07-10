@@ -110,28 +110,77 @@ getTruePercTest <- function(percTest) {
 	return(out)
 } # EOF
 
-plot_classif_typeClassOn <- function(type, classOn, cvSummaryList, testSummaryList, method, apCl) {
-	cat(paste0("Type: ", type, "; classOn: ", classOn, " (", method, ")\n"))
-	cat("CV Summary \n")
-	print(cvSummaryList)
-	cat("Test Summary \n")
-	print(testSummaryList)
+makeClassifDataFrameForBarplot <- function(avgTable, sdTable) {
+	# both incoming tables (have to) have the same names and dimensions
+	avgNum <- as.numeric(avgTable)
+	sdNum <- as.numeric(sdTable)
+	namesList <- attr(avgTable, "dimnames")
+	namesTrue <- rep(namesList$true, each=nrow(avgTable))
+	namesPred <- rep(namesList$predicted, nrow(avgTable))
+	out <- data.frame(true=namesTrue, predicted=namesPred, avgCorrClass=avgNum, SD=sdNum)
+	return(out)	
+} # EOF
+
+plot_classif_typeClassOn <- function(type, classOn, cvSummaryList, testSummaryList, method, apCl, ap, expName, onMain, onSub) { # we are already in the PDF or not
+#	cat(paste0("Type: ", type, "; classOn: ", classOn, " (", method, ")\n"))
+#	cat("CV Summary \n")
+#	print(cvSummaryList)
+#	cat("Test Summary \n")
+#	print(testSummaryList)
 	trueTestPerc <- getTruePercTest(apCl$percTest)
 	pcaRedChar <- ""
 	if (apCl$pcaRed) {
 		pcaRedChar <- "pcaRed"
 	}
+	#
+	cvConfAvg <- cvSummaryList$errors$avg
+	cvConfSD <- cvSummaryList$errors$SD
+	cvCorrClassAvg <- cvSummaryList$corrClass$avg
+	cvCorrClassSD <- cvSummaryList$corrClass$SD
+	#
+	testConfAvg <- testSummaryList$testErrors$avg
+	testConfSD <- testSummaryList$testErrors$SD
+	testCorrClassAvg <- testSummaryList$testCorrClass$avg
+	testCorrClassSD <- testSummaryList$testCorrClass$SD
 	
+	cvDF <- makeClassifDataFrameForBarplot(cvConfAvg, cvConfSD)
+	testDF <- makeClassifDataFrameForBarplot(testConfAvg, testConfSD)
 	
-	
-	
-	
+#	par(mfrow=c(2,1))
+	cvPlot <- ggplot(cvDF, aes(fill=predicted, y=avgCorrClass, x=true)) + geom_bar(stat="identity", position="dodge") + ggtitle(paste0("Crossvalidation")) + xlab("true class") + ylab("average predicted class")
+	testPlot <- ggplot(testDF, aes(fill=predicted, y=avgCorrClass, x=true)) + geom_bar(stat="identity", position="dodge") + ggtitle(paste0("Test")) + xlab("true class") + ylab("average predicted class") 
+	plot(cvPlot)
+	plot(testPlot)
+#	par(mfrow=c(1,1))
+#	print(cvDF); print(testDF)
 	
 	
 } # EOF
 
 
-plot_classif_generalHandover <- function(masterList) { # in the specific function above (in file "plot_classif_spec.r") we are cycling through the cube elements!!; here we are cycling through the type and the classOn value
+
+
+plot_classif_typeClassOn_setup <- function(type, classOn, cvSummaryList, testSummaryList, method, apCl, ap, expName) {
+	where <- ap$genPlot$where
+	onMain <- ap$genPlot$onMain
+	onSub <- ap$genPlot$onSub
+	fns <- ap$genPlot$fns
+	height <-.ap2$stn$pdf_Height_ws
+	width <- .ap2$stn$pdf_Width_ws
+	path <- .ap2$stn$fn_results
+	suffix <- paste0(type, "_classif")
+	message <- paste0(type, "classification")
+	filename <- paste(expName, suffix, sep="__")
+	filename <- paste(path, "/", filename, fns, ".pdf", sep="")
+	onMain <- paste(expName, onMain, sep=" ")
+	if (where == "pdf") { pdf(file=filename, width, height, onefile=TRUE, family='Helvetica', pointsize=12) }
+	if (where != "pdf" & Sys.getenv("RSTUDIO") != 1) {dev.new(height=height, width=width)}	
+	plot_classif_typeClassOn(type, classOn, cvSummaryList, testSummaryList, method, apCl, ap, expName, onMain, onSub)
+	if (where == "pdf") {dev.off()}
+	if (!.ap2$stn$allSilent & (where == "pdf" )) {cat("ok\n") }
+} # EOF
+
+plot_classif_CubeElement <- function(masterList, ap, expName) { # here we are cycling through the type and the classOn value
 	# we want, for each type, and there for each classOn variable, the CV summary and the test summary
 	typeList <- vector("list", length(masterList$apCl$type))
 	classOnList <- vector("list", length(masterList$apCl$classOn))
@@ -147,8 +196,14 @@ plot_classif_generalHandover <- function(masterList) { # in the specific functio
 			classOnCvSummaryList <- siTypeCvSummaryList[[k]]
 			thisMethod <- siTypeMethodList[[k]]
 			classOnTestList <- siTypeTestList[[k]]
-			plot_classif_typeClassOn(thisType, thisClassOn, classOnCvSummaryList, classOnTestList, thisMethod, masterList$apCl)
+			plot_classif_typeClassOn_setup(thisType, thisClassOn, classOnCvSummaryList, classOnTestList, thisMethod, masterList$apCl, ap, expName)
 		} # end for k (classOn)
 	} # end for i (type)
 } # EOF
 
+plot_classif_generalHandover <- function(cube, ap, slotChar) { # cycling through the cube elements; the slotChar comes in from the specific function in file "plot_classif_spec.r"
+	expName <- getExpName(cube)
+	for (i in 1: length(cube)) {
+		plot_classif_CubeElement(masterList=slot(cube[[i]], slotChar), ap, expName)
+	}		
+} # EOF

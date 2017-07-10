@@ -5,9 +5,7 @@ plot_da_cube <- function(cube, aps="def", ...) {
 	if (is.null(ap$classif$da)) {
 		return(cat("*** DA model not available or not selected for plotting \n"))
 	}
-	for (i in 1: length(cube)) {
-		plot_classif_generalHandover(masterList=cube[[i]]@xda)
-	}
+	plot_classif_generalHandover(cube, ap, slotChar="xda")
 } # EOF
 
 plot_rnf_cube <- function(cube, aps="def", ...) {
@@ -17,9 +15,7 @@ plot_rnf_cube <- function(cube, aps="def", ...) {
 	if (is.null(ap$classif$rnf)) {
 		return(cat("*** Random forest model not available or not selected for plotting \n"))
 	}
-	for (i in 1: length(cube)) {
-		plot_classif_generalHandover(masterList=cube[[i]]@rnf)
-	}	
+	plot_classif_generalHandover(cube, ap, slotChar="rnf")	
 } # EOF
 
 plot_svm_cube <- function(cube, aps="def", ...) {
@@ -29,9 +25,7 @@ plot_svm_cube <- function(cube, aps="def", ...) {
 	if (is.null(ap$classif$svm)) {
 		return(cat("*** SVM model not available or not selected for plotting \n"))
 	}
-	for (i in 1: length(cube)) {
-		plot_classif_generalHandover(masterList=cube[[i]]@svm)
-	}
+	plot_classif_generalHandover(cube, ap, slotChar="svm")
 } # EOF
 
 plot_nnet_cube <- function(cube, aps="def", ...) {
@@ -41,9 +35,7 @@ plot_nnet_cube <- function(cube, aps="def", ...) {
 	if (is.null(ap$classif$nnet)) {
 		return(cat("*** NNET model not available or not selected for plotting \n"))
 	}
-	for (i in 1: length(cube)) {
-		plot_classif_generalHandover(masterList=cube[[i]]@ann)
-	}
+	plot_classif_generalHandover(cube, ap, slotChar="ann")
 } # EOF
 
 
