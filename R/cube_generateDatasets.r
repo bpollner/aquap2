@@ -807,7 +807,7 @@ ap_cleanZeroValuesCheckExistenceDefaults <- function(ap, dataset, haveExc, check
 } # EOF
 
 #' @title Select Wavelengths
-#' @description Select wavelenghts from a dataset.
+#' @description Select wavelengths from a dataset.
 #' @details It is not necessary to exactly know the numbers of the wavelengths 
 #' present in the dataset, as for the lower limit the same or the next highest 
 #' wavelength as \code{from}, and for the upper limit the same or the next 

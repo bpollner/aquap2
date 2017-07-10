@@ -22,12 +22,12 @@ the pdf.}
 }
 \description{
 The following parameters can be used in the \code{...} argument 
-e.g. in function \code{\link{plot}} and \code{\link{plot_SVM}} to override 
+e.g. in function \code{\link{plot}} and \code{\link{plot_svm}} to override 
 the values in the analysis procedure file and so to modify the graphics - 
 see examples.
 \describe{
 \item{\code{plot(cube, ...)}}{ }
-\item{ \code{plot_SVM(cube, ...)}}{ }
+\item{ \code{plot_svm(cube, ...)}}{ }
 }
 }
 \details{
@@ -40,7 +40,7 @@ please see \code{\link{anproc_file}}.
 }
 }
 \seealso{
-\code{\link{plot_SVM}}, \code{\link{siWlg}} for reducing the number of 
+\code{\link{plot_svm}}, \code{\link{siWlg}} for reducing the number of 
 wavelengths in a dataset
 
 Other Plot arguments: \code{\link{plot,aquap_data,missing-method}},
@@ -53,5 +53,5 @@ Other Plot arguments: \code{\link{plot,aquap_data,missing-method}},
   \code{\link{plot_sim_args}}
 
 Other SVM documentation: \code{\link{calc_SVM_args}},
-  \code{\link{plot_SVM}}
+  \code{\link{plot_svm,aquap_cube-method}}
 }

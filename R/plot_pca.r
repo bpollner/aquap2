@@ -341,7 +341,7 @@ plot_pca_data <- function(dataset, aps="def", ...) {
 #' specified in the settings.r file in \code{fn_anProcDefFile}.}
 #' \item{Custom filename}{Provide any valid filename for an analysis procedure to 
 #' use as input for specifying the plotting options.}
-#' }}
+#' }} 
 #' \item{ld.bandwidth}{Character "def", or numeric length one. The bandwidth of 
 #' wavelengths used in the peak-picking process when plotting the loadings. If 
 #' left at the default "def", the value from the settings.r file 
@@ -360,7 +360,7 @@ plot_pca_data <- function(dataset, aps="def", ...) {
 #'  \item{ld.lty}{Character "def" or a positive integer vector indicating the 
 #' desired line types. When left at the default "def" the value from the 
 #' settings.r file is read in (parameter \code{pca_ld_customLinetype}).}
-#'  }
+#'  } 
 #' @return A pdf or graphic device.
 #' @family Plot functions
 #' @family PCA documentation

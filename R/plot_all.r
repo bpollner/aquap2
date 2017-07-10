@@ -3,7 +3,7 @@
 #' @export
 plot_cube <- function(x, what="all", ...) {
 	autoUpS()
-	pv <- pv_what_subPlots 			# c("all", "pca", "sim", "pls", "aqg")
+	pv <- pv_what_subPlots 			# c("all", "pca", "sim", "pls", "aqg")  c("da", "rnf", "svm", "nnet")
 	if (!all(what %in% pv)) {
 		stop(paste("Please provide one or more of \n'", paste(pv, collapse="', '"), "' \nto the argument 'what'.", sep=""), call.=FALSE)
 	}
@@ -19,8 +19,23 @@ plot_cube <- function(x, what="all", ...) {
 	if (any(c(pv[1], pv[5]) %in% what)) { # Aquagram
 		plot_aqg(x, ...)
 	}
+	# classification
+	if (any(c(pv[1], pv[6]) %in% what)) { # DA
+		plot_da(x, ...)
+	}
+	if (any(c(pv[1], pv[7]) %in% what)) { # RNF
+		plot_rnf(x, ...)
+	}
+	if (any(c(pv[1], pv[8]) %in% what)) { # SVM
+		plot_svm(x, ...)
+	}
+	if (any(c(pv[1], pv[9]) %in% what)) { # NNET
+		plot_nnet(x, ...)
+	}				
 	invisible(NULL)
 } # EOIF
+
+
 
 
 #' @title Plot - General Plotting  Arguments

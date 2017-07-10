@@ -2,17 +2,17 @@
 
 #' @title Plot Discriminant Analysis - Arguments
 #' @description The following parameters can be used in the \code{...} argument 
-#' e.g. in function \code{\link{plot}} and \code{\link{plot_DA}} to override 
+#' e.g. in function \code{\link{plot}} and \code{\link{plot_da}} to override 
 #' the values in the analysis procedure file and so to modify the graphics - 
 #' see examples.
 #' \describe{
 #' \item{\code{plot(cube, ...)}}{ }
-#' \item{ \code{plot_DA(cube, ...)}}{ }
+#' \item{ \code{plot_da(cube, ...)}}{ }
 #' }
 #' @template mr_details_allParams
 #' @template mr_classif_XDA_plot_param
 #' @template mr_pg_genParams
-#' @seealso \code{\link{plot_DA}}, \code{\link{siWlg}} for reducing the number of 
+#' @seealso \code{\link{plot_da}}, \code{\link{siWlg}} for reducing the number of 
 #' wavelengths in a dataset
 #' @examples
 #' \dontrun{
@@ -49,17 +49,17 @@ NULL
 # RNF ---------------
 #' @title Plot Random Forest - Arguments
 #' @description The following parameters can be used in the \code{...} argument 
-#' e.g. in function \code{\link{plot}} and \code{\link{plot_RNF}} to override 
+#' e.g. in function \code{\link{plot}} and \code{\link{plot_rnf}} to override 
 #' the values in the analysis procedure file and so to modify the graphics - 
 #' see examples.
 #' \describe{
 #' \item{\code{plot(cube, ...)}}{ }
-#' \item{ \code{plot_RNF(cube, ...)}}{ }
+#' \item{ \code{plot_rnf(cube, ...)}}{ }
 #' }
 #' @template mr_details_allParams
 #' @template mr_classif_RNF_plot_param
 #' @template mr_pg_genParams
-#' @seealso \code{\link{plot_RNF}}, \code{\link{siWlg}} for reducing the number of 
+#' @seealso \code{\link{plot_rnf}}, \code{\link{siWlg}} for reducing the number of 
 #' wavelengths in a dataset
 #' @examples
 #' \dontrun{
@@ -96,17 +96,17 @@ NULL
 # SVM ---------------
 #' @title Plot SVM - Arguments
 #' @description The following parameters can be used in the \code{...} argument 
-#' e.g. in function \code{\link{plot}} and \code{\link{plot_SVM}} to override 
+#' e.g. in function \code{\link{plot}} and \code{\link{plot_svm}} to override 
 #' the values in the analysis procedure file and so to modify the graphics - 
 #' see examples.
 #' \describe{
 #' \item{\code{plot(cube, ...)}}{ }
-#' \item{ \code{plot_SVM(cube, ...)}}{ }
+#' \item{ \code{plot_svm(cube, ...)}}{ }
 #' }
 #' @template mr_details_allParams
 #' @template mr_classif_SVM_plot_param
 #' @template mr_pg_genParams
-#' @seealso \code{\link{plot_SVM}}, \code{\link{siWlg}} for reducing the number of 
+#' @seealso \code{\link{plot_svm}}, \code{\link{siWlg}} for reducing the number of 
 #' wavelengths in a dataset
 #' @examples
 #' \dontrun{
@@ -142,17 +142,17 @@ NULL
 # NNET ---------------
 #' @title Plot NNET - Arguments
 #' @description The following parameters can be used in the \code{...} argument 
-#' e.g. in function \code{\link{plot}} and \code{\link{plot_NNET}} to override 
+#' e.g. in function \code{\link{plot}} and \code{\link{plot_nnet}} to override 
 #' the values in the analysis procedure file and so to modify the graphics - 
 #' see examples.
 #' \describe{
 #' \item{\code{plot(cube, ...)}}{ }
-#' \item{ \code{plot_NNET(cube, ...)}}{ }
+#' \item{ \code{plot_nnet(cube, ...)}}{ }
 #' }
 #' @template mr_details_allParams
 #' @template mr_classif_NNET_plot_param
 #' @template mr_pg_genParams
-#' @seealso \code{\link{plot_NNET}}, \code{\link{siWlg}} for reducing the number of 
+#' @seealso \code{\link{plot_nnet}}, \code{\link{siWlg}} for reducing the number of 
 #' wavelengths in a dataset
 #' @examples
 #' \dontrun{
@@ -209,11 +209,9 @@ NULL
 #' procedure to \code{TRUE}. In this case the prediction data for crossvalidation 
 #' as well as the independent test data are projected into the pca-models of the 
 #' training data, and the resulting scores are then used for classification.
-#' \item If the traditional crossvalidation is applied, so, if there are enough 
-#' observations in the smallest subgroup to meet the criteria to perform the N-fold 
-#' crossvalidation, consecutive scans of the same sample are always excluded resp. 
-#' included together. If the crossvalidation of the models is performed via 
-#' bootstrap, consecutive scans are, for the moment, ignored.
+#' \item For both traditional crossvalidation and the bootstrap "crossvalidation", 
+#' consecutive scans of the same sample are always excluded resp. included 
+#' together.
 #' }
 #' @family Classification Helpers
 #' @name classification_helpers

@@ -375,6 +375,10 @@ make_Xclass_models_CV_outer <- function(cvData, testData, classFunc, valid, clas
 
 make_Xclass_models_boot <- function(cvData, testData, classFunc, R, classOn, type, apCl, stnLoc) { # inner loop via *boot*: making  models
 	doPar <- stnLoc$cl_boot_inParallel
+	yPref <- stnLoc$p_yVarPref
+	conSnCol <- stnLoc$p_conSNrCol
+	snrCol <- stnLoc$p_sampleNrCol
+	snrColname <- paste0(yPref, snrCol)
 	#
 	dfTrain <- makeDataFrameForClassification(cvData, classOn) # ! is not flat
 	dfTest <- NULL # we can have 0 percent test data
@@ -385,7 +389,10 @@ make_Xclass_models_boot <- function(cvData, testData, classFunc, R, classOn, typ
 	# as we (or at least I) can not get out the models from within boot, we will use the boot function only to generate the indices, then do everything else manually.
 	# when applying the strata argument, it shows that that out-ob-bag samples are usually around 1/3 (avg ratio 2.8) of the nrow of the dataset, with all subgroups equally present. (detailed code for that in innerWorkings)
 	# we are here in a single step of the outer loop
-	#	
+	#
+	# we want to always exclude resp. include the consecutive scans together
+	cvDataCS1 <- ssc_s(cvData, paste0(yPref, conSnCol), 1) # get all the observations that have the cons. scan number 1
+	dfCS1 <- makeDataFrameForClassification(cvDataCS1, classOn)
 	innerWorkings <- function(dfT, ind) { # dfT is the dataset 
 		if (FALSE) { # for devTesting only
 			pool <- 1:nrow(dfT)
@@ -401,12 +408,37 @@ make_Xclass_models_boot <- function(cvData, testData, classFunc, R, classOn, typ
 		return(matrix(ind, nrow=1))		
 	} # EOIF
 	thisR <- R
-	bootResult <- boot::boot(dfTrain, innerWorkings, R=thisR, strata=dfTrain$grouping, parallel="no")   	### using bootstrap to just get the indices of the datasets
-#	cat(paste0("Nr of bootstrap replicates: ", nrow(bootResult$t), "\n"))
-	indMat <- as.matrix(bootResult$t) # is a matrix with R rows (one row for every replicate) and the in-the-bag indices in the columns
+	bootResCS1 <- boot::boot(dfCS1, innerWorkings, R=thisR, strata=dfCS1$grouping, parallel="no")   	### using bootstrap to just get the indices of the dataset (before, dfTrain was used as data)
+	snrs <- cvDataCS1$header[, snrColname] # get all the sample numbers from the dataset that was reduced to cons. scan nr.1 
+	snrsInd <- t(apply(bootResCS1$t, 1, function(x, snrs) snrs[x], snrs=snrs)) # get back only those sample numbers that we want in the boot result (in the bag). The boot results are in $t.
+	snrsAll <- cvData$header[, snrColname] # get all the sample numbers in all consecutive scans
+	indListOuter <- vector("list", nrow(snrsInd))
+	for (i in 1: nrow(snrsInd)) { # going through the rows, i.e. bootstrap replicates
+		le <- length(snrsInd[i,])
+		indListInner <- vector("list", le)
+		for (k in 1: le) { # within a single bootstrap replicate, ...
+			indListInner[[k]] <- which(snrsAll == snrsInd[i,k]) # ... mapping back to the indices of the original dataset (have to do it one by one [i,k] to get all the repeated samples)
+		} # end for k
+		indListOuter[[i]] <- indListInner
+	} # end for i
+	indList <- lapply(indListOuter, function(x) sort(unlist(x))) # we now have a list with the length of the bootstrap replicates, in each list element the number of observations indices
+	indMat <- matrix(unlist(indList), nrow=length(indList), byrow=TRUE)	# transform the list back to matrix; # now, in indMat, we have always excluded resp. included the consecutive scans together
 	pool <- 1:ncol(indMat)
 	oobIndList <- apply(indMat, 1, function(x) pool[which(! pool %in% x)]) # get the out-of-bag indices, have them in a list
-#	a <- t(apply(indMat, 1, sort)); print(a[1:5, 1:12]);  print(str(oobIndList))
+	if (FALSE) { ## for DEV only
+		ratioCollect <- vector("numeric", nrow(indMat))
+		for (i in 1: nrow(indMat)) {
+			cat("\n")
+			cat(paste0("Nr of samples drawn: ", length(indMat[i,]), "; Nr or observations: ", nrow(dfTrain),"\n"))
+			a <- unlist(lapply(split(dfTrain[indMat[i,],], dfTrain[indMat[i,],]$grouping), nrow)); 	print(a)
+			b <- unlist(lapply(split(dfTrain[oobIndList[[i]],], dfTrain[oobIndList[[i]],]$grouping), nrow)); print(b)
+			ratio <- length(indMat[i,]) / length(oobIndList[[i]])
+			ratioCollect[i] <- ratio
+			cat(paste0("Nr of samples: ", length(indMat[i,]), "\n")); cat(paste0("Nr oob: ", length(oobIndList[[i]]), "\n")); cat(paste0("Ratio In/oob = ", round(ratio,1))) 
+			cat("\n\n")
+		} # end for i
+		cat(paste0("Average ratio In/oob: ", round(mean(ratioCollect),1), "\n"))		
+	} # end DEV
 	if (doPar) {
 		registerParallelBackend()
 	} else {

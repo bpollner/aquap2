@@ -3,11 +3,6 @@ pv_AquagramModes <- c("classic", "classic-diff", "sfc", "sfc-diff", "aucs", "auc
 
 
 
-## regarding cube
-pv_what_subPlots <- c("all", "pca", "sim", "pls", "aqg")
-pv_what_models <- c("pca", "simca", "plsr", "aquagr") # what possible values for arguments when retrieving the models using getcm
-
-
 ## PCA plotting
 pv_pca_what <- c("both", "scores", "loadings")
 
@@ -33,6 +28,15 @@ pv_fsa_fss <- c("both", "only")
 pv_classificationFuncs_XDA <- c("lda", "qda", "fda", "mclustda")
 pv_nonDAClassifiers <- c("rndforest", "svm", "nnet")
 pv_allClassificationFuncs <- c(pv_classificationFuncs_XDA, pv_nonDAClassifiers)
+
+
+
+## regarding cube
+pv_what_classifPlots <- c("da", "rnf", "svm", "nnet")
+pv_what_subPlots <- c("all", "pca", "sim", "pls", "aqg", pv_what_classifPlots)
+pv_what_models <- c("pca", "simca", "plsr", "aquagr") # what possible values for arguments when retrieving the models using getcm
+
+
 
 ## General Plotting
 pv_legendPosition <- c("auto", "topleft", "topright", "bottomright", "bottomleft")

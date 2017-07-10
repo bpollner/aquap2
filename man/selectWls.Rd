@@ -20,7 +20,7 @@ The standard dataset (class 'aquap_data') containing only the
 selected wavelengths.
 }
 \description{
-Select wavelenghts from a dataset.
+Select wavelengths from a dataset.
 }
 \details{
 It is not necessary to exactly know the numbers of the wavelengths 

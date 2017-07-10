@@ -22,12 +22,12 @@ the pdf.}
 }
 \description{
 The following parameters can be used in the \code{...} argument 
-e.g. in function \code{\link{plot}} and \code{\link{plot_NNET}} to override 
+e.g. in function \code{\link{plot}} and \code{\link{plot_nnet}} to override 
 the values in the analysis procedure file and so to modify the graphics - 
 see examples.
 \describe{
 \item{\code{plot(cube, ...)}}{ }
-\item{ \code{plot_NNET(cube, ...)}}{ }
+\item{ \code{plot_nnet(cube, ...)}}{ }
 }
 }
 \details{
@@ -40,7 +40,7 @@ please see \code{\link{anproc_file}}.
 }
 }
 \seealso{
-\code{\link{plot_NNET}}, \code{\link{siWlg}} for reducing the number of 
+\code{\link{plot_nnet}}, \code{\link{siWlg}} for reducing the number of 
 wavelengths in a dataset
 
 Other Plot arguments: \code{\link{plot,aquap_data,missing-method}},
@@ -52,5 +52,5 @@ Other Plot arguments: \code{\link{plot,aquap_data,missing-method}},
   \code{\link{plot_sim_args}}
 
 Other NNET documentation: \code{\link{calc_NNET_args}},
-  \code{\link{plot_NNET}}
+  \code{\link{plot_nnet,aquap_cube-method}}
 }

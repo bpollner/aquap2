@@ -94,5 +94,5 @@ Other Classification functions: \code{\link{calc_NNET_args}},
   \code{\link{calc_randomForest_args}}
 
 Other SVM documentation: \code{\link{plot_SVM_args}},
-  \code{\link{plot_SVM}}
+  \code{\link{plot_svm,aquap_cube-method}}
 }

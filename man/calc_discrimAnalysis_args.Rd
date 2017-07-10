@@ -108,6 +108,6 @@ Other Classification functions: \code{\link{calc_NNET_args}},
   \code{\link{calc_SVM_args}},
   \code{\link{calc_randomForest_args}}
 
-Other DA documentation: \code{\link{plot_DA}},
+Other DA documentation: \code{\link{plot_da,aquap_cube-method}},
   \code{\link{plot_discrimAnalysis_args}}
 }

@@ -50,6 +50,8 @@ setMethod("-", signature(e1="aquap_data", e2="aquap_data"), definition = subtrac
 setMethod("/", signature(e1="aquap_data", e2="aquap_data"), definition = divide_two_aquap_data_M)
 
 
+
+# plotting old ones ----------
 setGeneric("plot", function(x, y, ...) standardGeneric("plot"))
 #' @rdname plot_spectra
 #' @export
@@ -89,6 +91,32 @@ setGeneric("plot_simca", function(object, ...)  standardGeneric("plot_simca"))
 setMethod("plot_simca", signature(object = "aquap_cube"), definition = plot_simca_cube_M)
 
 
+
+# classification ------------
+setGeneric("plot_da", function(object, ...)  standardGeneric("plot_da"))
+#' @rdname plot_da
+#' @export
+setMethod("plot_da", signature(object = "aquap_cube"), definition = plot_da_cube_M)
+
+setGeneric("plot_rnf", function(object, ...)  standardGeneric("plot_rnf"))
+#' @rdname plot_rnf
+#' @export
+setMethod("plot_rnf", signature(object = "aquap_cube"), definition = plot_rnf_cube_M)
+
+setGeneric("plot_svm", function(object, ...)  standardGeneric("plot_svm"))
+#' @rdname plot_svm
+#' @export
+setMethod("plot_svm", signature(object = "aquap_cube"), definition = plot_svm_cube_M)
+
+setGeneric("plot_nnet", function(object, ...)  standardGeneric("plot_nnet"))
+#' @rdname plot_nnet
+#' @export
+setMethod("plot_nnet", signature(object = "aquap_cube"), definition = plot_nnet_cube_M)
+
+
+
+
+# general --------------
 setGeneric("getNcpwl", function(object) standardGeneric("getNcpwl"))
 setMethod("getNcpwl", "aquap_data", function(object) object@ncpwl)
 

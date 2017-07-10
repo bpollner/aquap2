@@ -22,12 +22,12 @@ the pdf.}
 }
 \description{
 The following parameters can be used in the \code{...} argument 
-e.g. in function \code{\link{plot}} and \code{\link{plot_DA}} to override 
+e.g. in function \code{\link{plot}} and \code{\link{plot_da}} to override 
 the values in the analysis procedure file and so to modify the graphics - 
 see examples.
 \describe{
 \item{\code{plot(cube, ...)}}{ }
-\item{ \code{plot_DA(cube, ...)}}{ }
+\item{ \code{plot_da(cube, ...)}}{ }
 }
 }
 \details{
@@ -40,7 +40,7 @@ please see \code{\link{anproc_file}}.
 }
 }
 \seealso{
-\code{\link{plot_DA}}, \code{\link{siWlg}} for reducing the number of 
+\code{\link{plot_da}}, \code{\link{siWlg}} for reducing the number of 
 wavelengths in a dataset
 
 Other Plot arguments: \code{\link{plot,aquap_data,missing-method}},
@@ -52,5 +52,5 @@ Other Plot arguments: \code{\link{plot,aquap_data,missing-method}},
   \code{\link{plot_sim_args}}
 
 Other DA documentation: \code{\link{calc_discrimAnalysis_args}},
-  \code{\link{plot_DA}}
+  \code{\link{plot_da,aquap_cube-method}}
 }

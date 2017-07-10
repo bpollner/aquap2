@@ -93,6 +93,6 @@ Other Classification functions: \code{\link{calc_NNET_args}},
   \code{\link{calc_SVM_args}},
   \code{\link{calc_discrimAnalysis_args}}
 
-Other RNF documentation: \code{\link{plot_RNF}},
-  \code{\link{plot_randomForest_args}}
+Other RNF documentation: \code{\link{plot_randomForest_args}},
+  \code{\link{plot_rnf,aquap_cube-method}}
 }

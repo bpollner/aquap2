@@ -104,7 +104,7 @@ do_msc <- function(dataset, ref=NULL, extMscModel=NULL, exportModel=FALSE) {
 			stop("Please provide a dataset with only one single row, i.e. only one single spectrum, to the argument 'ref'.", call.=FALSE)
 		}
 		if (ncol(ref$NIR) != ncol(dataset$NIR)) {
-			stop("Please provide a dataset containing the same number of wavelenghts to the argument 'ref'", call.=FALSE)
+			stop("Please provide a dataset containing the same number of wavelengths to the argument 'ref'", call.=FALSE)
 		}
 		refInput <- as.numeric(ref$NIR)
 	} else {

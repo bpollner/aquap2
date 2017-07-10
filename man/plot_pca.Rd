@@ -32,7 +32,7 @@ is used.}
 specified in the settings.r file in \code{fn_anProcDefFile}.}
 \item{Custom filename}{Provide any valid filename for an analysis procedure to 
 use as input for specifying the plotting options.}
-}}
+}} 
 \item{ld.bandwidth}{Character "def", or numeric length one. The bandwidth of 
 wavelengths used in the peak-picking process when plotting the loadings. If 
 left at the default "def", the value from the settings.r file 
@@ -93,12 +93,14 @@ plot_pca(fd, pg.where="", pca.colorBy="C_Group") # assumes existence of "C_Group
 
 Other Plot functions: \code{\link{plot,aquap_cube,missing-method}},
   \code{\link{plot,aquap_data,missing-method}},
-  \code{\link{plot_DA}}, \code{\link{plot_NNET}},
-  \code{\link{plot_RNF}}, \code{\link{plot_SVM}},
   \code{\link{plot_aqg}},
+  \code{\link{plot_da,aquap_cube-method}},
+  \code{\link{plot_nnet,aquap_cube-method}},
   \code{\link{plot_pls,aquap_cube-method}},
   \code{\link{plot_pls_indepPred}},
-  \code{\link{plot_simca,aquap_cube-method}}
+  \code{\link{plot_rnf,aquap_cube-method}},
+  \code{\link{plot_simca,aquap_cube-method}},
+  \code{\link{plot_svm,aquap_cube-method}}
 
 Other PCA documentation: \code{\link{calc_pca_args}},
   \code{\link{plot_pca_args}}

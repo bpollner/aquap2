@@ -438,7 +438,7 @@ getap <- function(fn="def", ...) {
 	###
 	DA <- ap$classif$da
 	doIt <- checkDo(DA, "doDa")
-	modifyDA <- function(do.da=doIt, da.type=DA$type, da.classOn=DA$classOn, da.testCV=DA$testCV, da.percTest=DA$percTest, da.cvBootCutoff=DA$bootCutoff, da.cvBootFactor=DA$bootFactor, da.valid=DA$valid, da.pcaRed=DA$pcaRed, da.pcaNComp=DA$pcaNComp) {
+	modifyDA <- function(do.da=doIt, da.type=DA$type, da.classOn=DA$classOn, da.testCV=DA$testCV, da.percTest=DA$percTest, da.cvBootCutoff=DA$bootCutoff, da.cvBootFactor=DA$bootFactor, da.valid=DA$valid, da.pcaRed=DA$pcaRed, da.pcaNComp=DA$pcaNComp, ...) {
 		if (!do.da) { 
 			return(NULL)
 		} else {
@@ -449,7 +449,7 @@ getap <- function(fn="def", ...) {
 	###
 	RNF <- ap$classif$rnf
 	doIt <- checkDo(RNF, "doRnf")
-	modifyRnf <- function(do.rnf=doIt, rnf.classOn=RNF$classOn, rnf.testCV=RNF$testCV, rnf.percTest=RNF$percTest, rnf.cvBootCutoff=RNF$bootCutoff, rnf.cvBootFactor=RNF$bootFactor, rnf.valid=RNF$valid,  rnf.pcaRed=RNF$pcaRed, rnf.pcaNComp=RNF$pcaNComp) {
+	modifyRnf <- function(do.rnf=doIt, rnf.classOn=RNF$classOn, rnf.testCV=RNF$testCV, rnf.percTest=RNF$percTest, rnf.cvBootCutoff=RNF$bootCutoff, rnf.cvBootFactor=RNF$bootFactor, rnf.valid=RNF$valid,  rnf.pcaRed=RNF$pcaRed, rnf.pcaNComp=RNF$pcaNComp, ...) {
 		if (!do.rnf) { 
 			return(NULL)
 		} else {
@@ -460,7 +460,7 @@ getap <- function(fn="def", ...) {
 	###
 	SVM <- ap$classif$svm
 	doIt <- checkDo(SVM, "doSvm")
-	modifySVM <- function(do.svm=doIt, svm.classOn=SVM$classOn, svm.testCV=SVM$testCV, svm.percTest=SVM$percTest, svm.cvBootCutoff=SVM$bootCutoff, svm.cvBootFactor=SVM$bootFactor, svm.valid=SVM$valid, svm.pcaRed=SVM$pcaRed, svm.pcaNComp=SVM$pcaNComp) {
+	modifySVM <- function(do.svm=doIt, svm.classOn=SVM$classOn, svm.testCV=SVM$testCV, svm.percTest=SVM$percTest, svm.cvBootCutoff=SVM$bootCutoff, svm.cvBootFactor=SVM$bootFactor, svm.valid=SVM$valid, svm.pcaRed=SVM$pcaRed, svm.pcaNComp=SVM$pcaNComp, ...) {
 		if (!do.svm) { 
 			return(NULL)
 		} else {
@@ -471,7 +471,7 @@ getap <- function(fn="def", ...) {
 	###
 	NN <- ap$classif$nnet
 	doIt <- checkDo(NN, "doNnet")
-	modifyNnet <- function(do.nnet=doIt, nnet.classOn=NN$classOn, nnet.testCV=NN$testCV, nnet.percTest=NN$percTest, nnet.cvBootCutoff=NN$bootCutoff, nnet.cvBootFactor=NN$bootFactor, nnet.valid=NN$valid,  nnet.pcaRed=NN$pcaRed, nnet.pcaNComp=NN$pcaNComp) {
+	modifyNnet <- function(do.nnet=doIt, nnet.classOn=NN$classOn, nnet.testCV=NN$testCV, nnet.percTest=NN$percTest, nnet.cvBootCutoff=NN$bootCutoff, nnet.cvBootFactor=NN$bootFactor, nnet.valid=NN$valid,  nnet.pcaRed=NN$pcaRed, nnet.pcaNComp=NN$pcaNComp, ...) {
 		if (!do.nnet) { 
 			return(NULL)
 		} else {
