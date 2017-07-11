@@ -35,6 +35,8 @@ Imports:
     devtools,
     grid,
     gridExtra,
+    ggplot2,
+    gtable,
     MASS,
     mda,
     mclust,
@@ -53,7 +55,6 @@ Collate:
     'calc_simca.r'
     'cl_classFunctions.r'
     'cl_classDefs.r'
-    'classification_X.r'
     'cube_generateDatasets.r'
     'cube_makeModels.r'
     'doc_anproc.r'

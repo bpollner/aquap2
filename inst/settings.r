@@ -226,17 +226,29 @@ stn <- list(
 	
 
 	## Classification
-	cl_gen_neverBootstrapForCV = FALSE,		## if bootstrap should NEVER be applied when crossvalidating any training dataset.
+	cl_gen_neverBootstrapForCV = FALSE,		## if bootstrap should NEVER be applied when crossvalidating any training dataset. Recommended value is FALSE.
 	cl_gen_digitsRoundConfTablePerc = 1, 	## the number of digits to which the confusion table in percent should be rounded to.
 	cl_gen_digitsRoundSDTablePerc = 1, 		## the number of digits to which the standard deviation tables should be rounded to.
 	cl_gen_digitsRoundTableAverages = 1, 	## the number of digits to which the general table averages should be rounded to.
+	cl_gen_digitsRoundCorrClass = 1, 		## the number of digits to which the general percentage of correct classification and its standard deviation should be rounded to.
 	cl_gen_CvIndicator = ".", 				## the character used to indicate that we are doing traditional CV
 	cl_gen_bootIndicator = "`", 			## the character used to indicate that we are doing traditional CV
-	cl_gen_alwaysKeepData = FALSE, 			## if the argument below should be ignored and the data should be kept always, anyway
+	cl_gen_alwaysKeepData = FALSE, 			## if the argument below (cl_gen_keepDataFor) should be ignored and the data should be kept always, anyway
 	cl_gen_keepDataFor = c("lda", "qda", "fda", "mclustda"), 		## the type of classification for what data (training data, test data) should be kept.
 	cl_CV_inParallel = TRUE, 				## if traditional CV operations should be done in parallel
 	cl_boot_inParallel = TRUE,				## if bootstrapped CV operations should be done in parallel
-
+	cl_plot_CVandTestInOnePage = TRUE, 		## if the crossvalidation and test results should be printed on one page
+	cl_plot_addConfusionTables = TRUE,		## if the data of the confusion tables should be plotted as well
+	cl_plot_includeSDtables = TRUE, 		## if confusion tables containing the cell-wise standard deviation should be included when plotting the average confusion tables
+	cl_plot_baseTextSizeTables = 10, 		## the basic text size for tables (using gridExtra::ttheme_default)
+	cl_plot_CharForCV = "Crossvalidation",	## the character added to the title for crossvalidation graphics
+	cl_plot_CharForTest = "Test", 			## the character added to the title for test graphics
+	cl_plot_CharForPcaReduction = "pcaRed", ## the character indicating that a PCA data reduction took place
+	cl_plot_avgTableTitle = "avg%",			## the character defining the title of the confusion tables holding the averages
+	cl_plot_sdTableTitle = "sd%", 			## the character defining the title of the confusion tables holding the standard deviations
+	cl_plot_confTablePadding = 2.5, 		## the padding of the confusion tables in mm
+	cl_plot_useColorsFromDataset = FALSE, 	## if the colors embedded in the dataset should be used. If set to FALSE, the standard colors via ggplot will be used.
+	cl_plot_colorErrorBar = "black",	 	## the color for the error bars. # darkviolet
 
 
 	## plotting, PDFs
@@ -244,6 +256,8 @@ stn <- list(
 	pdf_Width_ws = 8.9,						## ws for widescreen (e.g. regressionvector, loading plots, raw)
 	pdf_Height_sq = 9,						## sq for square (e.g. scoreplots)
 	pdf_Width_sq = 9, 
+	pdf_Height_classif = 9, 				## the format for classification
+	pdf_Width_classif = 12, 				
 	plt_lengthLegend_limToCols = 20, 		## the limit of the length of the legend text determining when the legend text should be displayed in more than 1 column
 	plt_lengthLegend_truncate = 60, 		## the limit of the length of the legend text determining when the legend text should be truncated (displaying then the first 3, the middle 3, and the last 3 legend elements)
 	plt_legendMoreCols = 3, 				## the number of columns to display the legend in if the length of the legend is higher than the number specified in 'plt_lengthLegend_limToCols' above

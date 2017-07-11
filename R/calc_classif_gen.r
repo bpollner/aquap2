@@ -526,7 +526,6 @@ make_Xclass_models_inner <- function(cvData, testData, classFunc, classOn, md, a
 	cvBootFactor <- apCl$bootFactor # the factor used for multiplying the number of observations in the group, resulting in the bootR value
 	cvValid <- round(apCl$valid, 0) # round just to be sure 
 	nrDig <- stnLoc$cl_gen_digitsRoundConfTablePerc
-	nrCV <- apCl$valid
 	cvIndicator <- stnLoc$cl_gen_CvIndicator
 	bootIndicator <- stnLoc$cl_gen_bootIndicator
 	#
@@ -538,16 +537,16 @@ make_Xclass_models_inner <- function(cvData, testData, classFunc, classOn, md, a
 	ind <- which(colnames(cvData$header) == snrCol)
 	aa <- lapply(split(cvData$header, cvData$header[,classOn]), function(x) x[,ind]) # split into groups, then get the sampleNr column
 	minNrow <-  min(unlist(lapply(aa, length))) #  returns the smallest nr of observations from all separate groups 
-	minNrowInCV <- minNrow / nrCV # ... above, divided by the nr of crossvalidations
+	minNrowInCV <- floor(minNrow / cvValid) # ... above, divided by the nr of crossvalidations
 	if (minNrowInCV >= cvBootCutoff | neverBoot) {
 		if (!stnLoc$allSilent) {cat(cvIndicator)}
 		innerList <- make_Xclass_models_CV_outer(cvData, testData, classFunc, valid=cvValid, classOn, type, apCl, stnLoc) ##### CORE ######
-		method <- "CV"
+		method <- paste0("CV.", cvValid, ", mods.grp.min=", minNrowInCV)
 	} else {
 		if (!stnLoc$allSilent) {cat(bootIndicator)}
 		bootR <- round(minNrow*cvBootFactor, 0)
 		innerList <- make_Xclass_models_boot(cvData, testData, classFunc, R=bootR, classOn, type, apCl, stnLoc) ##### CORE ######
-		method <- "boot"
+		method <- paste0("boot.", bootR, ", mods.oob.min=", floor(minNrow / 3 ))  # it showed that via the bootstrap on average 1/3 of the data are kept out of the bag
 	}
 	#
 	# make the majority vote of the predicted test data, produce confusion table and calculate it into percent, pass it on uphill for averaging and SD there
@@ -566,6 +565,8 @@ make_Xclass_models_inner <- function(cvData, testData, classFunc, classOn, md, a
 make_X_classif_models <- function(dataset, classFunc, md, apCl, classOn, idString=NULL, stnLoc, type) { # going 1) through the classOn, and 2) outerSplit
 	doOuter <- apCl$testCV
 	percTest <- apCl$percTest
+	rndCC <- stnLoc$cl_gen_digitsRoundCorrClass
+	#
 	if (percTest <= 0 ) {
 		doOuter <- FALSE
 	}
@@ -600,8 +601,8 @@ make_X_classif_models <- function(dataset, classFunc, md, apCl, classOn, idStrin
 		### from each run of the outer loop, i.e. the N rounds of producing crossvalidated models and testing them, average the cv errors and SDs, and the correct classification and their SDs. --> avg. of the inner loop avg.
 		avgCvErrors <- calculateAverageOfTablesList(lapply(cvBranchErrorsList, function(x) x$avg), stnLoc) # first extract the element ($avg), then hand over to function to calculate averages of all tables. same below.
 		avgCvSDs <- calculateAverageOfTablesList(lapply(cvBranchErrorsList, function(x) x$SD), stnLoc)
-		avgAvgCvCorrectClass <- mean(unlist(lapply(cvBranchCorrClassList, function(x) x$avg))) # extract the elemtn ($avg) from the list, unlist and calculate mean. same below.
-		avgSDsCvCorrectClass <- mean(unlist(lapply(cvBranchCorrClassList, function(x) x$SD)))
+		avgAvgCvCorrectClass <- round(mean(unlist(lapply(cvBranchCorrClassList, function(x) x$avg))), rndCC) # extract the elemtn ($avg) from the list, unlist and calculate mean. same below.
+		avgSDsCvCorrectClass <- round(mean(unlist(lapply(cvBranchCorrClassList, function(x) x$SD))), rndCC)
 		summaryList[[k]] <- list(errors=list(avg=avgCvErrors, SD=avgCvSDs), corrClass=list(avg=avgAvgCvCorrectClass, SD=avgSDsCvCorrectClass))
 		#
 		### now, please, calculate the averages and SDs from the crossvalidated test data (that have been projected onto the N models from crossvalidation)
@@ -611,8 +612,8 @@ make_X_classif_models <- function(dataset, classFunc, md, apCl, classOn, idStrin
 		test_SDsTable <- aa$SDsTable
 		#
 		aa <- unlist(lapply(testBranchList, function(x) x$testCorrClassPerc)) # extract the list element "testCorrClassPerc", gives out a vector
-		testCorrClassAvg <- if (!is.null(aa)) {mean(aa)} else {NULL}
-		testCorrClassSD <- if (!is.null(aa)) {sd(aa)} else {NULL}
+		testCorrClassAvg <- if (!is.null(aa)) {round(mean(aa), rndCC)} else {NULL}
+		testCorrClassSD <- if (!is.null(aa)) {round(sd(aa), rndCC)} else {NULL}
 		testList[[k]] <- list(testErrors=list(avg=test_avgsTable, SD=test_SDsTable), testCorrClass=list(avg=testCorrClassAvg, SD=testCorrClassSD))
 		###
 		outListRealClassOn[[k]] <- realClOnList
@@ -649,3 +650,6 @@ make_X_classif_handoverType <- function(dataset, md, apCl, types, idString, priI
 	### the order of the testBranch, frou outer to inner:
 	# daTypes, classOn; (then already the results: test errors, test CorrClass)
 } # EOF
+
+# next
+# have minimum of CV and test data; as multiple of groups; a factor in settings defining the multiple of observations, if fac=5 for 4 groups there would have to be 20 observations in the smalles CV
