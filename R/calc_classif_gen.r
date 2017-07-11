@@ -528,26 +528,46 @@ make_Xclass_models_inner <- function(cvData, testData, classFunc, classOn, md, a
 	nrDig <- stnLoc$cl_gen_digitsRoundConfTablePerc
 	cvIndicator <- stnLoc$cl_gen_CvIndicator
 	bootIndicator <- stnLoc$cl_gen_bootIndicator
-	#
 	neverBoot <- stnLoc$cl_gen_neverBootstrapForCV
+	enfCritVal <- stnLoc$cl_gen_enforceCriticalValue
+	grpFac <- stnLoc$cl_gen_factorMinGrp	
+	#
 	clPref <- stnLoc$p_ClassVarPref
 	snColName <- stnLoc$p_sampleNrCol 
 	snrCol <- paste0(clPref, snColName)
 	#
+	method <- "" ; doThisCV <- TRUE; doThisBoot <- TRUE 
 	ind <- which(colnames(cvData$header) == snrCol)
+	critLowerValue <- length(unique(cvData$header[,classOn])) * grpFac # the number of groups times the factor
 	aa <- lapply(split(cvData$header, cvData$header[,classOn]), function(x) x[,ind]) # split into groups, then get the sampleNr column
 	minNrow <-  min(unlist(lapply(aa, length))) #  returns the smallest nr of observations from all separate groups 
 	minNrowInCV <- floor(minNrow / cvValid) # ... above, divided by the nr of crossvalidations
-	if (minNrowInCV >= cvBootCutoff | neverBoot) {
-		if (!stnLoc$allSilent) {cat(cvIndicator)}
-		innerList <- make_Xclass_models_CV_outer(cvData, testData, classFunc, valid=cvValid, classOn, type, apCl, stnLoc) ##### CORE ######
-		method <- paste0("CV.", cvValid, ", mods.grp.min=", minNrowInCV)
-	} else {
-		if (!stnLoc$allSilent) {cat(bootIndicator)}
-		bootR <- round(minNrow*cvBootFactor, 0)
-		innerList <- make_Xclass_models_boot(cvData, testData, classFunc, R=bootR, classOn, type, apCl, stnLoc) ##### CORE ######
-		method <- paste0("boot.", bootR, ", mods.oob.min=", floor(minNrow / 3 ))  # it showed that via the bootstrap on average 1/3 of the data are kept out of the bag
-	}
+	if (minNrowInCV >= cvBootCutoff | neverBoot) { # so we have enough for CV
+		if (enfCritVal) { # if the critical value should be enforced or not
+			if (critLowerValue > minNrowInCV ) {
+				doThisCV <- FALSE
+				message(paste0("Critical value (", critLowerValue, ") for crossvalidation not reached. Classification on `", classOn, "` not performed.\nTurn off this behaviour at `cl_gen_enforceCriticalValue` in the settings.r file."))
+			}
+		} # end if enfCritVal
+		if (doThisCV) {
+			if (!stnLoc$allSilent) {cat(cvIndicator)}
+			innerList <- make_Xclass_models_CV_outer(cvData, testData, classFunc, valid=cvValid, classOn, type, apCl, stnLoc) ##### CORE ######
+			method <- paste0("CV.", cvValid, ", mods.grp.min=", minNrowInCV)
+		} # end doThisCV
+	} else { # so we are going for boot
+		if (enfCritVal) { # if the critical value should be enforced or not
+			if (critLowerValue > floor(minNrow/3)) {
+				doThisBoot <- FALSE
+				message(paste0("Critical value (", critLowerValue, ") for boot-styled CV not reached. Classification on `", classOn, "` not performed.\nTurn off this behaviour at `cl_gen_enforceCriticalValue` in the settings.r file."))				
+			}
+		} # end if enfCritVal
+		if (doThisBoot) {
+			if (!stnLoc$allSilent) {cat(bootIndicator)}
+			bootR <- round(minNrow*cvBootFactor, 0)
+			innerList <- make_Xclass_models_boot(cvData, testData, classFunc, R=bootR, classOn, type, apCl, stnLoc) ##### CORE ######
+			method <- paste0("boot.", bootR, ", mods.oob.min=", floor(minNrow / 3 ))  # it showed that via the bootstrap on average 1/3 of the data are kept out of the bag
+		} # end doThisBoot
+	} # end else
 	#
 	# make the majority vote of the predicted test data, produce confusion table and calculate it into percent, pass it on uphill for averaging and SD there
 	##### CORE #### ("averaging" the predictions of all available models (could come from CV or from boot))
@@ -650,6 +670,3 @@ make_X_classif_handoverType <- function(dataset, md, apCl, types, idString, priI
 	### the order of the testBranch, frou outer to inner:
 	# daTypes, classOn; (then already the results: test errors, test CorrClass)
 } # EOF
-
-# next
-# have minimum of CV and test data; as multiple of groups; a factor in settings defining the multiple of observations, if fac=5 for 4 groups there would have to be 20 observations in the smalles CV

@@ -235,6 +235,8 @@ stn <- list(
 	cl_gen_bootIndicator = "`", 			## the character used to indicate that we are doing traditional CV
 	cl_gen_alwaysKeepData = FALSE, 			## if the argument below (cl_gen_keepDataFor) should be ignored and the data should be kept always, anyway
 	cl_gen_keepDataFor = c("lda", "qda", "fda", "mclustda"), 		## the type of classification for what data (training data, test data) should be kept.
+	cl_gen_enforceCriticalValue = TRUE, 	## if a minium number of observations defined by multiplying "cl_gen_factorMinGrp" (below) with the number of groups should be enforced. (see below)
+	cl_gen_factorMinGrp = 4, 				## this value multiplied by the number of groups (as defined by the classOn variable) is giving the minium numbers of observations that have to present in the smallest subgroup. Set to 1 to deactivate. IN DEVELOPMENT
 	cl_CV_inParallel = TRUE, 				## if traditional CV operations should be done in parallel
 	cl_boot_inParallel = TRUE,				## if bootstrapped CV operations should be done in parallel
 	cl_plot_CVandTestInOnePage = TRUE, 		## if the crossvalidation and test results should be printed on one page
