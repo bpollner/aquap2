@@ -1,7 +1,7 @@
-getTruePercTest <- function(percTest) {
+getTruePercTestAndRounds <- function(percTest) {
 	nrOuterLoops <- round(100/percTest, 0)
-	out <- round(100/nrOuterLoops, 1)
-	return(out)
+	testPerc <- round(100/nrOuterLoops, 1)
+	return(list(perc=testPerc, nrep=nrOuterLoops))
 } # EOF
 
 makeClassifDataFrameForBarplot <- function(avgTable, sdTable, lte=NULL) {
@@ -25,8 +25,14 @@ makeClassifDataFrameForBarplot <- function(avgTable, sdTable, lte=NULL) {
 	return(out)	
 } # EOF
 
+makeAvgLegTxt <- function(naNum, char="~") { # the input is a named numeric
+	out <- paste0(names(naNum), " N", char, naNum) # we MUST NOT have more than the one space " " in there !!!!!
+	return(out)
+} # EOF
+
+
 ### CORE ###
-plot_classif_typeClassOn <- function(type, classOn, cvSummaryList, testSummaryList, method, apCl, ap, expName, idString, colorLegValues, apClUser) { # we are already in the PDF or not
+plot_classif_typeClassOn <- function(type, classOn, cvSummaryList, testSummaryList, method, apCl, ap, expName, idString, colorLegValues, apClUser, nrCvTrain, nrCvPred, grpCvPred, nrTestCv, nrTestPred, grpTestPred) { # we are already in the PDF or not
 #	cat(paste0("Type: ", type, "; classOn: ", classOn, " (", method, ")\n")) ; cat("CV Summary \n") ; print(cvSummaryList); cat("Test Summary \n"); print(testSummaryList)
 	# ap is the ap coming from where the user wants it (the aps trick)
 	# apClUser is the classification specific part of the ap taken from the user-defined ap (above); this can be used for real-time plotting changes
@@ -45,7 +51,9 @@ plot_classif_typeClassOn <- function(type, classOn, cvSummaryList, testSummaryLi
 	tlbPad <- .ap2$stn$cl_plot_confTablePadding
 	useDataCols <- .ap2$stn$cl_plot_useColorsFromDataset
 	colorErrorbar <- .ap2$stn$cl_plot_colorErrorBar
+	rndNoo <- .ap2$stn$cl_gen_digitsRoundNrObservations
 	SD <- avg <- predicted <- true <- NULL # to prevent warnings in checking (needed when creating the plots)
+	tilde <- "~"
 	#
 	titFsize <- txtSizeTables + 2
 	########################
@@ -60,9 +68,9 @@ plot_classif_typeClassOn <- function(type, classOn, cvSummaryList, testSummaryLi
 	testCorrClassAvg <- testSummaryList$testCorrClass$avg
 	testCorrClassSD <- testSummaryList$testCorrClass$SD
 	###	
-	lte <- colorLegValues$txtE
-	cvDF <- makeClassifDataFrameForBarplot(cvConfAvg, cvConfSD, lte) # transform the confusion tables into data frames that we can hand over to the barplot of ggplot
-	testDF <- makeClassifDataFrameForBarplot(testConfAvg, testConfSD, lte)
+#	lte <- colorLegValues$txtE
+	cvDF <- makeClassifDataFrameForBarplot(cvConfAvg, cvConfSD, lte=makeAvgLegTxt(grpCvPred)) # transform the confusion tables into data frames that we can hand over to the barplot of ggplot
+	testDF <- makeClassifDataFrameForBarplot(testConfAvg, testConfSD, lte=makeAvgLegTxt(grpTestPred))
 	########################
 	# prepare the confusion tables in grobs, add title etc.
 	titAvgGr <- grid::textGrob(titTblAvg, gp = grid::gpar(fontsize=titFsize, fontface="italic"))
@@ -84,6 +92,7 @@ plot_classif_typeClassOn <- function(type, classOn, cvSummaryList, testSummaryLi
 	}
 	#
 	testTablesGrob <- NULL # because the test data can be NULL
+	haveTest <- FALSE # will be overwritten below
 	if (!is.null(testConfAvg)) {
 		grobTestAvg <- gridExtra::tableGrob(testConfAvg, theme=tt)
 		grobTestAvg <- gtable::gtable_add_rows(grobTestAvg, heights = grid::grobHeight(titAvgGr) + padding, pos = 0)
@@ -92,6 +101,7 @@ plot_classif_typeClassOn <- function(type, classOn, cvSummaryList, testSummaryLi
 		grobTestSD <- gridExtra::tableGrob(testConfSD, theme=tt)
 		grobTestSD <- gtable::gtable_add_rows(grobTestSD, heights = grid::grobHeight(titSDGr) + padding, pos = 0)
 		grobTestSD <- gtable::gtable_add_grob(grobTestSD, list(titSDGr), t=c(1), l=c(1), r=ncol(grobTestSD))
+		haveTest <- TRUE
 		if (inclSDtable) {
 			testTablesGrob <- gridExtra::arrangeGrob(grobTestAvg, grobTestSD, nrow=2, ncol=1, heights=c(1,1)) #### the final right part of the test graphics
 		} else {
@@ -104,14 +114,32 @@ plot_classif_typeClassOn <- function(type, classOn, cvSummaryList, testSummaryLi
 	onSub <- ap$genPlot$onSub;	if (onSub != "") {onSub <- paste0(" - ", onSub)} # if we wanted to add the onSub e.g. to the subtitle
 	cvTitle <- paste0(onMain, "  |  ", classOn)
 	testTitle <- paste0(onMain, "  |  ", classOn)
-	trueTestPerc <- getTruePercTest(apCl$percTest)
+	aa <- getTruePercTestAndRounds(apCl$percTest)
+		trueTestPerc <- aa$perc
+		nRepeats <- aa$nrep
 	pcaRedChar <- ""; if (apCl$pcaRed) {pcaRedChar <- paste0(" (", charPcaRed, ")")}
 	totN <- colorLegValues$sumPart
-	grpCols <- colorLegValues$color_legend # ?$color_unique?;  $txtE	
-	subCV <- paste0(charCV, ": ", cvCorrClassAvg, "% (sd ", cvCorrClassSD, "%) avg. correct classification, all N=", totN, onSub)
-	subTest <- paste0(charTest, ": ", testCorrClassAvg, "% (sd ", testCorrClassSD, "%) avg. correct classification, ", trueTestPerc, "% test data, all N=", totN, onSub)
-	capCV <- paste0(type, ", ", method, pcaRedChar)
-	capTest <- paste0(type, ", ", method, pcaRedChar)	
+	grpCols <- colorLegValues$color_legend # ?$color_unique?;  $txtE
+	#
+	repeatsAdd <- "" ; capAvgAdd <- "avg. "; equalsCharSub <- equalsCharCap <- "="
+	if (haveTest) { 
+		equalsCharSub <- equalsCharCap <- tilde
+	}
+	real_nrCvPred <- round(sum(grpCvPred), rndNoo) # because in the case of bootstrap the incoming number (nrCvPred) is only an approximation, so we average the real numbers that we collected
+	nrCvTrain_use <- nrCvTrain
+	if (grepl("boot", method)) {
+		nrCvTrain_use <- nrCvTrain - real_nrCvPred # in case of boot we give out the real number of observations that the models were built on
+		equalsCharSub <- equalsCharCap <- tilde
+	} else { # so we are in traditional CV
+		equalsCharCap <- "="
+		capAvgAdd <- ""
+	}
+	if (haveTest) {
+		repeatsAdd <- paste0(capAvgAdd, "(", nRepeats, " repeats) ")		
+	}
+	subCV <- paste0(charCV, ": ", cvCorrClassAvg, "% (sd ", cvCorrClassSD, "%) avg. correct classification; ", repeatsAdd, "N.pred", equalsCharSub, real_nrCvPred, onSub)
+	subTest <- paste0(charTest, ": ", testCorrClassAvg, "% (sd ", testCorrClassSD, "%) avg. correct classification; ", nRepeats, " x ", trueTestPerc, "% test data, avg. N.test", tilde, nrTestPred, onSub)
+	comCap <-  paste0(type, ", total N=", totN, ", ", repeatsAdd, "N.mod", equalsCharCap, nrCvTrain_use, "  |  ", method, pcaRedChar)	
 	xlab <- "true class"
 	ylab <- "average predicted class [%]"
 	errBarWidth <- 0.25; if (nrow(cvConfAvg) > 7) {errBarWidth <- 0.1} 
@@ -120,15 +148,15 @@ plot_classif_typeClassOn <- function(type, classOn, cvSummaryList, testSummaryLi
 	limits <- ggplot2::aes(ymax = avg + SD, ymin = avg - SD)
 	geomBar <- ggplot2::geom_bar(stat = "identity", position = ggplot2::position_dodge())
 	geomErrBar <- ggplot2::geom_errorbar(limits, width=errBarWidth, position = ggplot2::position_dodge(width = 0.9), color=colorErrorbar)
-	custColFil <- ggplot2::scale_fill_manual(values=grpCols)
+	custColFil <- ggplot2::scale_fill_manual(values=as.character(grpCols)) # strange, but that is what is needed. yes.
 	if (!useDataCols) {
 		custColFil <- NULL
 	}
 	#
-	cvPlot <- ggplot2::ggplot(cvDF, ggplot2::aes(fill=predicted, y=avg, x=true)) + geomBar + geomErrBar + custColFil + ggplot2::labs(title=cvTitle, subtitle=subCV, caption=capCV, x=xlab, y=ylab)
+	cvPlot <- ggplot2::ggplot(cvDF, ggplot2::aes(fill=predicted, y=avg, x=true)) + geomBar + geomErrBar + custColFil + ggplot2::labs(title=cvTitle, subtitle=subCV, caption=comCap, x=xlab, y=ylab)
 	testPlot <- testPlotAll <- NULL
 	if (!is.null(testDF)) {
-		testPlot <- ggplot2::ggplot(testDF, ggplot2::aes(fill=predicted, y=avg, x=true)) + geomBar + geomErrBar + custColFil + ggplot2::labs(title=testTitle, subtitle=subTest, caption=capTest, x=xlab, y=ylab)		
+		testPlot <- ggplot2::ggplot(testDF, ggplot2::aes(fill=predicted, y=avg, x=true)) + geomBar + geomErrBar + custColFil + ggplot2::labs(title=testTitle, subtitle=subTest, caption=comCap, x=xlab, y=ylab)		
 	}
 	########################
 	# arrange graphics and tables, check for NULL test, and finally plot
@@ -168,6 +196,7 @@ plot_classif_CubeElement <- function(set, slotChar, ap, expName, apClUser) { # h
 		siTypeCvSummaryList <- masterList$cvBranch[[i]]$cvSummary
 		siTypeMethodList <- masterList$cvBranch[[i]]$method
 		siTypeTestList <- masterList$testBranch[[i]]
+		siTypeNumbersList <- masterList$numbers[[i]]
 		for (k in 1: length(classOnList)) { # going through the single classOn values
 			thisClassOn <- masterList$apCl$classOn[k]
 			classOnCvList <- siTypeCvSingleList[[k]]
@@ -175,7 +204,15 @@ plot_classif_CubeElement <- function(set, slotChar, ap, expName, apClUser) { # h
 			thisMethod <- siTypeMethodList[[k]]
 			classOnTestList <- siTypeTestList[[k]]
 			colorLegValues <- extractColorLegendValues(getDataset(set), thisClassOn)
-			plot_classif_typeClassOn(thisType, thisClassOn, classOnCvSummaryList, classOnTestList, thisMethod, masterList$apCl, ap, expName, idString, colorLegValues, apClUser)
+			#
+			nrCvTrain <- siTypeNumbersList$nrsCvTrain[[k]]
+			nrCvPred <- siTypeNumbersList$nrsCvPred[[k]]
+			grpCvPred <- siTypeNumbersList$grpsCvPred[[k]]
+			nrTestCv <- siTypeNumbersList$nrsTestCv[[k]]
+			nrTestPred <- siTypeNumbersList$nrsTestPred[[k]]
+			grpTestPred <- siTypeNumbersList$grpsTestPred[[k]]
+			#
+			plot_classif_typeClassOn(thisType, thisClassOn, classOnCvSummaryList, classOnTestList, thisMethod, masterList$apCl, ap, expName, idString, colorLegValues, apClUser, nrCvTrain, nrCvPred, grpCvPred, nrTestCv, nrTestPred, grpTestPred)
 		} # end for k (classOn)
 	} # end for i (type)
 } # EOF

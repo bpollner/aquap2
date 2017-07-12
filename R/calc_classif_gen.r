@@ -201,7 +201,7 @@ calculateAverageOfTablesList <- function(tableList, stnLoc) { # the input is a l
 
 calculateColwiseAvgOfNumericList <- function(numList, stnLoc) { # input is a list with a named numeric in each list element
 	if (all(unlist(lapply(numList, is.null)))) {
-		return(NULL)
+		return(NA)
 	}	
 	#
 	rnd <- stnLoc$cl_gen_digitsRoundNrObservations
@@ -211,6 +211,16 @@ calculateColwiseAvgOfNumericList <- function(numList, stnLoc) { # input is a lis
 	avgOut <- round(apply(dataDF, 2, mean), rnd)
 	names(avgOut) <- namesChar
 	return(avgOut)
+} # EOF
+
+calculateMeanOfList <- function(liOb, stnLoc) { # wrapped in a function to be able to prevent the warnings in case of NULL input
+	if (all(unlist(lapply(liOb, is.null)))) {
+		return(NA)
+	}
+	rnd <- stnLoc$cl_gen_digitsRoundNrObservations
+	# 
+	out <- round(mean(unlist(liOb)), rnd)
+	return(out)
 } # EOF
 
 calculateConfusionTableInPercent <- function(confTable, stnLoc) {
@@ -278,6 +288,15 @@ makeConfusionTable <- function(pred, true) {
 		return(NULL)
 	}
 	return(mda::confusion(pred, true))
+} # EOF
+
+makeNamedGrpNumsAp2 <- function(header, classOn) { # the header input is from aquap2 dataformat header
+	if (is.null(header)) {
+		return(NULL)
+	}
+	#
+	out <- unlist(lapply(lapply(split(header, header[,classOn]), function(x) x[,classOn]), length)) # gets back a named numeric with the numbers ob observations in each group
+	return(out)
 } # EOF
 
 
@@ -534,7 +553,8 @@ make_Xclass_models_inner <- function(cvData, testData, classFunc, classOn, md, a
 		if (doThisCV) {
 			if (!stnLoc$allSilent) {cat(cvIndicator)}
 			innerList <- make_Xclass_models_CV_outer(cvData, testData, classFunc, valid=cvValid, classOn, type, apCl, stnLoc) ##### CORE ######
-			method <- paste0("CV.", cvValid, ", grp.min=", minNrowInCV)
+#			method <- paste0("CV.", cvValid, ", grp.min=", minNrowInCV)
+			method <- paste0("cv.", cvValid)
 			nrsCvTrain <- round((nrow(cvData)/cvValid)*(cvValid-1), rndAno)
 			nrsCvPred <- round(nrow(cvData)/cvValid, rndAno)
 		} # end doThisCV
@@ -549,8 +569,8 @@ make_Xclass_models_inner <- function(cvData, testData, classFunc, classOn, md, a
 			if (!stnLoc$allSilent) {cat(bootIndicator)}
 			bootR <- round(minNrow*cvBootFactor, 0)
 			innerList <- make_Xclass_models_boot(cvData, testData, classFunc, R=bootR, classOn, type, apCl, stnLoc) ##### CORE ######
-			method <- paste0("boot.", bootR, ", oob.min=", floor(minNrow / 3 ))  # it showed that via the bootstrap on average 1/3 of the data are kept out of the bag
-	#		nrsCvTrain <- round((nrow(cvData)/3)*2, rndAno)
+#			method <- paste0("boot.", bootR, ", oob.min=", floor(minNrow / 3 ))  # it showed that via the bootstrap on average 1/3 of the data are kept out of the bag
+			method <- paste0("boot.", bootR) 
 			nrsCvTrain <- nrow(cvData)
 			nrsCvPred <- round(nrow(cvData)/3, rndAno)			
 		} # end doThisBoot
@@ -574,7 +594,6 @@ make_X_classif_models <- function(dataset, classFunc, md, apCl, classOn, idStrin
 	doOuter <- apCl$testCV
 	percTest <- apCl$percTest
 	rndCC <- stnLoc$cl_gen_digitsRoundCorrClass
-	rndAno <- stnLoc$cl_gen_digitsRoundNrObservations
 	#
 	if (percTest <= 0 ) {
 		doOuter <- FALSE
@@ -610,15 +629,15 @@ make_X_classif_models <- function(dataset, classFunc, md, apCl, classOn, idStrin
 			grpsCvPredLi[[i]] <- mods$numbersCv$grpsCvPred
 			nrsTestCvLi[[i]] <- nrow(spDs$cv)
 			nrsTestPredLi[[i]] <- nrow(spDs$test)
-			grpsTestPredLi[[i]] <- unlist(lapply(lapply(split(spDs$test$header, spDs$test$header[,classOn[k]]), function(x) x[,classOn[k]]), length)) # gets back a named numeric with the numbers ob observations in each group
+			grpsTestPredLi[[i]] <- makeNamedGrpNumsAp2(spDs$test$header, classOn[k])
 		} # end for i - going through the split list ###### end going through split list !!!! ###############
 		cvList[[k]] <- modsList
 		methodList[[k]] <- mods$method
-		nrsCvTrainList[[k]] <- round(mean(unlist(nrsCvTrainLi)), rndAno) 
-		nrsCvPredList[[k]] <- round(mean(unlist(nrsCvPredLi)), rndAno) 
+		nrsCvTrainList[[k]] <- calculateMeanOfList(nrsCvTrainLi, stnLoc) 	
+		nrsCvPredList[[k]] <- calculateMeanOfList(nrsCvPredLi, stnLoc) 
 		grpsCvPredList[[k]] <- calculateColwiseAvgOfNumericList(grpsCvPredLi, stnLoc) # calculate the average of either all the N crossvalidation steps, or of the R bootstrap replicates
-		nrsTestCvList[[k]] <- round(mean(unlist(nrsTestCvLi)), rndAno)
-		nrsTestPredList[[k]] <- round(mean(unlist(nrsTestPredLi)), rndAno)
+		nrsTestCvList[[k]] <- calculateMeanOfList(nrsTestCvLi, stnLoc) 
+		nrsTestPredList[[k]] <- calculateMeanOfList(nrsTestPredLi, stnLoc)
 		grpsTestPredList[[k]] <- calculateColwiseAvgOfNumericList(grpsTestPredLi, stnLoc) # calculate the average of the X repeats of the outer loop
 		#
 		### from each run of the outer loop, i.e. the N rounds of producing crossvalidated models and testing them, average the cv errors and SDs, and the correct classification and their SDs. --> avg. of the inner loop avg.
@@ -675,11 +694,6 @@ make_X_classif_handoverType <- function(dataset, md, apCl, types, idString, priI
 	### the order of the testBranch, frou outer to inner:
 	# daTypes, classOn; (then already the results: test errors, test CorrClass)
 } # EOF
-
-# next
-# correct total N and group N (in legend) for CV
-# --> have N.test and N.cv --> for CV: N.tr, N.pr; N.cv, N.ts
-# repair dataframe colors
 
 # future:
 # have chisqu.test
