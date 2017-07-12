@@ -231,6 +231,7 @@ stn <- list(
 	cl_gen_digitsRoundSDTablePerc = 1, 		## the number of digits to which the standard deviation tables should be rounded to.
 	cl_gen_digitsRoundTableAverages = 1, 	## the number of digits to which the general table averages should be rounded to.
 	cl_gen_digitsRoundCorrClass = 1, 		## the number of digits to which the general percentage of correct classification and its standard deviation should be rounded to.
+	cl_gen_digitsRoundNrObservations = 1, 	## the number of digits to which the calculations of the average number of observations (as shown in the plots) should be rounded to.
 	cl_gen_CvIndicator = ".", 				## the character used to indicate that we are doing traditional CV
 	cl_gen_bootIndicator = "`", 			## the character used to indicate that we are doing traditional CV
 	cl_gen_alwaysKeepData = FALSE, 			## if the argument below (cl_gen_keepDataFor) should be ignored and the data should be kept always, anyway

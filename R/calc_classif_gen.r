@@ -199,6 +199,20 @@ calculateAverageOfTablesList <- function(tableList, stnLoc) { # the input is a l
 	return(avgOut)
 } # EOF
 
+calculateColwiseAvgOfNumericList <- function(numList, stnLoc) { # input is a list with a named numeric in each list element
+	if (all(unlist(lapply(numList, is.null)))) {
+		return(NULL)
+	}	
+	#
+	rnd <- stnLoc$cl_gen_digitsRoundNrObservations
+	#
+	dataDF <- plyr::ldply(numList, function(x) as.numeric(x))
+	aa <- numList[[1]]; namesChar <- names(aa)
+	avgOut <- round(apply(dataDF, 2, mean), rnd)
+	names(avgOut) <- namesChar
+	return(avgOut)
+} # EOF
+
 calculateConfusionTableInPercent <- function(confTable, stnLoc) {
 	if (is.null(confTable)) {
 		return(NULL)
@@ -269,6 +283,7 @@ makeConfusionTable <- function(pred, true) {
 
 # universal looping outer and inner ---------
 make_Xclass_model_CV_single <- function(trainDataset, predDataset, testData, classFunc, classOn, type, apCl, stnLoc) { # inside the single steps of the x-fold *CV*, single models and predictions (in CV)
+	grpsCvPred <- unlist(lapply(lapply(split(predDataset$header, predDataset$header[,classOn]), function(x) x[,classOn]), length)) # gets back a named numeric with the numbers ob observations in each group
 	dfTrain <- makeDataFrameForClassification(trainDataset, classOn) # ! is not flat
 	dfPred <- makeDataFrameForClassification(predDataset, classOn) # ! is not flat
 	dfTest <- NULL # we can have 0 percent test data
@@ -290,7 +305,7 @@ make_Xclass_model_CV_single <- function(trainDataset, predDataset, testData, cla
 	confPerc <- calculateConfusionTableInPercent(conf, stnLoc)
 	corrClassPerc <- calculateCorrectClassificationInPercent(conf, stnLoc)
 #	cat("\n"); print(confPerc); cat("\n"); print(corrClassPerc); cat("\n\n")
-	cvBranch <- list(mod=mod, dfPred=dfPred, dfTest=dfTest, confPerc=confPerc, corrClassPerc=corrClassPerc)
+	cvBranch <- list(mod=mod, dfPred=dfPred, dfTest=dfTest, confPerc=confPerc, corrClassPerc=corrClassPerc, grpsCvPred=grpsCvPred)
 	#
 	testBranch <- NULL
 	if (!is.null(dfTest)) {
@@ -322,11 +337,11 @@ make_Xclass_models_CV_outer <- function(cvData, testData, classFunc, valid, clas
 		aa <- make_Xclass_model_CV_single(cvData[ unlist(segList[trainInd]) ], cvData[ unlist(segList[predInd]) ], testData, classFunc, classOn, type, apCl, stnLoc)  # the individual (X-fold) crossvalidation models
 		cvBranch <- aa$cvBranch
 		testBranch <- aa$testBranch
-		singleRound <- list(mod=cvBranch$mod, dfPred=ctKeepData(cvBranch$dfPred, type, stnLoc), dfTest=ctKeepData(cvBranch$dfTest, type, stnLoc), confPerc=cvBranch$confPerc, corrClassPerc=cvBranch$corrClassPerc, predTestClass=testBranch$predTestClass, trueTestClass=testBranch$trueTestClass)
+		singleRound <- list(mod=cvBranch$mod, dfPred=ctKeepData(cvBranch$dfPred, type, stnLoc), dfTest=ctKeepData(cvBranch$dfTest, type, stnLoc), confPerc=cvBranch$confPerc, corrClassPerc=cvBranch$corrClassPerc, predTestClass=testBranch$predTestClass, trueTestClass=testBranch$trueTestClass, grpsCvPred=cvBranch$grpsCvPred)
 	} # end dopar
 	###
 	# now we have to re-sort the resulting list (parOutList)
-	modList <- dfPredList <- dfTestList <- confPercList <- corrClassPercList <- predTestClassList <- trueTestClassList <- list()	
+	modList <- dfPredList <- dfTestList <- confPercList <- corrClassPercList <- predTestClassList <- trueTestClassList <- grpsCvPredList <- list()	
 	for (i in 1: length(parOutList)) { # resort the list from parOutList
 		modList <- c(modList, list(parOutList[[i]]$mod))
 		dfPredList <- c(dfPredList, list(parOutList[[i]]$dfPred))
@@ -334,28 +349,9 @@ make_Xclass_models_CV_outer <- function(cvData, testData, classFunc, valid, clas
 		confPercList <- c(confPercList, list(parOutList[[i]]$confPerc))
 		corrClassPercList <- c(corrClassPercList, list(parOutList[[i]]$corrClassPerc))
 		predTestClassList <- c(predTestClassList, list(parOutList[[i]]$predTestClass))		
-		trueTestClassList <- c(trueTestClassList, list(parOutList[[i]]$trueTestClass))		
+		trueTestClassList <- c(trueTestClassList, list(parOutList[[i]]$trueTestClass))
+		grpsCvPredList <- c(grpsCvPredList, list(parOutList[[i]]$grpsCvPred))			
 	} # end for i	
-
-############### (strictly serial) 
-#	modList <- dfPredList <- dfTestList <- confPercList <- corrClassPercList <- predTestClassList <- trueTestClassList <- vector("list", length(segList))
-#	indPool <- 1: length(segList)
-#	for (i in 1: length(segList)) { # cycling through the combinations of the n-fold CV
-#		predInd <- i
-#		trainInd <- indPool[indPool != predInd]		###### CORE ###### CORE #######
-#		aa <- make_Xclass_model_CV_single(cvData[ unlist(segList[trainInd]) ], cvData[ unlist(segList[predInd]) ], testData, classFunc, classOn, type, apCl, stnLoc)  # the individual (X-fold) crossvalidation models
-#		cvBranch <- aa$cvBranch
-#		modList[[i]] <- cvBranch$mod 
-#		dfPredList[[i]] <-  ctKeepData(cvBranch$dfPred, type, stnLoc)
-#		dfTestList[[i]] <- ctKeepData(cvBranch$dfTest, type, stnLoc)
-#		confPercList[[i]] <- cvBranch$confPerc
-#		corrClassPercList[[i]] <- cvBranch$corrClassPerc
-#		testBranch <- aa$testBranch
-#		predTestClassList[[i]] <- testBranch$predTestClass # here we have the vectors (in factors) with the predictions of the test data that were done deeper down, because we might have had to transform the test data into PCA space
-#		trueTestClassList[[i]] <- testBranch$trueTestClass
-#	} # end for i
-###############
-
 	# now, inside the lists, we have the single results of the individual CV steps
 	#
 	# get the single cell averages of the confusion in percent, use them to calculate the mean and SD
@@ -368,7 +364,10 @@ make_Xclass_models_CV_outer <- function(cvData, testData, classFunc, valid, clas
 	corrClassAvg <- mean(aa)
 	corrClassSD <- sd(aa)
 	#
-	cvBranch <- list(mods=modList, dfPreds=dfPredList, dfTest=dfTestList, errors=list(avg=avgsTable, SD=SDsTable), corrClass=list(avg=corrClassAvg, SD=corrClassSD))
+	# calculate the colwise average of the groupings for the prediction data
+	grpsCvPredAvg <- calculateColwiseAvgOfNumericList(grpsCvPredList, stnLoc)
+	#
+	cvBranch <- list(mods=modList, dfPreds=dfPredList, dfTest=dfTestList, errors=list(avg=avgsTable, SD=SDsTable), corrClass=list(avg=corrClassAvg, SD=corrClassSD), grpsCvPredAvg=grpsCvPredAvg)
 	testBranch <- list(predTestClassList=predTestClassList, trueTestClass= trueTestClassList[[1]]) # all the list elements are identical, as the testData did not change down there
 	return(list(cvBranch=cvBranch, testBranch=testBranch))  # the return of function make_Xclass_models_CV_outer
 } # EOF
@@ -413,7 +412,7 @@ make_Xclass_models_boot <- function(cvData, testData, classFunc, R, classOn, typ
 	snrsInd <- t(apply(bootResCS1$t, 1, function(x, snrs) snrs[x], snrs=snrs)) # get back only those sample numbers that we want in the boot result (in the bag). The boot results are in $t.
 	snrsAll <- cvData$header[, snrColname] # get all the sample numbers in all consecutive scans
 	indListOuter <- vector("list", nrow(snrsInd))
-	for (i in 1: nrow(snrsInd)) { # going through the rows, i.e. bootstrap replicates
+	for (i in 1: nrow(snrsInd)) { # going through the rows, i.e. bootstrap replicates; this for-loop is to ensure that we only exclude resp. include all consecutive scans together
 		le <- length(snrsInd[i,])
 		indListInner <- vector("list", le)
 		for (k in 1: le) { # within a single bootstrap replicate, ...
@@ -448,6 +447,7 @@ make_Xclass_models_boot <- function(cvData, testData, classFunc, R, classOn, typ
 	parOutList <- foreach(i = 1:nrow(indMat)) %dopar% {   # make a model for every bootstrap iteration (one in every row), the result comes back in a list
 		siDfTrain <- dfTrain[indMat[i,],] # get the in-the-bag data
 		siDfPred <- dfTrain[oobIndList[[i]],] # get the out-of-bag data; around 1/3 of the original dfTrain
+		grpsBootPred <- unlist(lapply(lapply(split(siDfPred$grouping, siDfPred$grouping), as.character), length))
 		siDdfTest <- dfTest # no change yet
 		if (apCl$pcaRed) {
 			aa <- makePcaVariableReduction(siDfTrain, siDfPred, siDdfTest, apCl)
@@ -464,45 +464,21 @@ make_Xclass_models_boot <- function(cvData, testData, classFunc, R, classOn, typ
 		if (!is.null(siDdfTest)) {
 			predTestClass <- predict(mod, newdata=siDdfTest)
 		}
-		singleRound <- list(mod=mod, dfPred=ctKeepData(siDfPred, type, stnLoc), dfTest=ctKeepData(siDdfTest, type, stnLoc), confPerc=confPerc, corrClassPerc=corrClassPerc, predTestClass=predTestClass)
+		singleRound <- list(mod=mod, dfPred=ctKeepData(siDfPred, type, stnLoc), dfTest=ctKeepData(siDdfTest, type, stnLoc), confPerc=confPerc, corrClassPerc=corrClassPerc, predTestClass=predTestClass, grpsBootPred=grpsBootPred)
 	} # end dopar
 	###
 	# now we have to re-sort the resulting list (parOutList)
-	modList <- dfPredList <- dfTestList <- confPercList <- corrClassPercList <- predTestClassList <- list()	
+	modList <- dfPredList <- dfTestList <- confPercList <- corrClassPercList <- predTestClassList <- grpsBootPredList <- list()	
 	for (i in 1: length(parOutList)) { # resort the list from parOutList
 		modList <- c(modList, list(parOutList[[i]]$mod))
 		dfPredList <- c(dfPredList, list(parOutList[[i]]$dfPred))
 		dfTestList <- c(dfTestList, list(parOutList[[i]]$dfTest))
 		confPercList <- c(confPercList, list(parOutList[[i]]$confPerc))
 		corrClassPercList <- c(corrClassPercList, list(parOutList[[i]]$corrClassPerc))
-		predTestClassList <- c(predTestClassList, list(parOutList[[i]]$predTestClass))		
+		predTestClassList <- c(predTestClassList, list(parOutList[[i]]$predTestClass))	
+		grpsBootPredList <- c(grpsBootPredList, list(parOutList[[i]]$grpsBootPred))		
 	} # end for i	
-
-############### (strictly serial)
-#	modList <- dfPredList <- dfTestList <- confPercList <- corrClassPercList <- predTestClassList <- vector("list", nrow(indMat))
-#	for (i in 1: nrow(indMat)) { # make a model for every bootstrap iteration (one in every row) ## XXX here make it in parallel !! XXX
-#		siDfTrain <- dfTrain[indMat[i,],] # get the in-the-bag data
-#		siDfPred <- dfTrain[oobIndList[[i]],] # get the out-of-bag data; around 1/3 of the original dfTrain
-#		siDdfTest <- dfTest # no change yet
-#		if (apCl$pcaRed) {
-#			aa <- makePcaVariableReduction(siDfTrain, siDfPred, siDdfTest, apCl)
-#			siDfTrain <- aa$dfTrain
-#			siDfPred <- aa$dfPred
-#			siDdfTest <- aa$dfTest
-#		} # end if pcaRed
-#		mod <- classFunc(siDfTrain, apCl)
-#		pred <- predict(mod, newdata=siDfPred) # the prediction of the left out observations in the model made from all the other observations
-# 		conf <- makeConfusionTable(pred, siDfPred$grouping)
-#		#
-#		modList[[i]] <- mod
-#		dfPredList[[i]] <- ctKeepData(siDfPred, type, stnLoc) # returns NULL if we are not within a desired keeper type
-#		dfTestList[[i]] <- ctKeepData(siDdfTest, type, stnLoc)
-#		confPercList[[i]] <- calculateConfusionTableInPercent(conf, stnLoc)
-#		corrClassPercList[[i]] <- calculateCorrectClassificationInPercent(conf, stnLoc)
-#		predTestClassList[[i]] <- predict(mod, newdata=siDdfTest) # here we keep the predictions of classes (the vector with the factors)
-#	} # end for i nrow(indMat)
-###############
-
+	#
 	# we are here in a single step of the outer loop
 	# collect all the models, (all the dfPreds and dfTests), average the confusion tables of all bootstrap iterations
 	#
@@ -516,7 +492,10 @@ make_Xclass_models_boot <- function(cvData, testData, classFunc, R, classOn, typ
 	corrClassAvg <- mean(aa)
 	corrClassSD <- sd(aa)
 	#
-	cvBranch <- list(mods=modList, dfPreds=dfPredList, dfTest=dfTestList, errors=list(avg=avgsTable, SD=SDsTable), corrClass=list(avg=corrClassAvg, SD=corrClassSD))
+	# calculate the colwise average of the groupings for the boot-styled prediction data
+	grpsBootPredAvg <- calculateColwiseAvgOfNumericList(grpsBootPredList, stnLoc)
+	#
+	cvBranch <- list(mods=modList, dfPreds=dfPredList, dfTest=dfTestList, errors=list(avg=avgsTable, SD=SDsTable), corrClass=list(avg=corrClassAvg, SD=corrClassSD), grpsCvPredAvg=grpsBootPredAvg)
 	testBranch <- list(predTestClassList=predTestClassList, trueTestClass=dfTest$grouping) 
 	return(list(cvBranch=cvBranch, testBranch=testBranch))  # the return of function make_Xclass_models_boot
 } # EOF
@@ -531,17 +510,20 @@ make_Xclass_models_inner <- function(cvData, testData, classFunc, classOn, md, a
 	neverBoot <- stnLoc$cl_gen_neverBootstrapForCV
 	enfCritVal <- stnLoc$cl_gen_enforceCriticalValue
 	grpFac <- stnLoc$cl_gen_factorMinGrp	
+	rndAno <- stnLoc$cl_gen_digitsRoundNrObservations
 	#
 	clPref <- stnLoc$p_ClassVarPref
 	snColName <- stnLoc$p_sampleNrCol 
 	snrCol <- paste0(clPref, snColName)
 	#
-	method <- "" ; doThisCV <- TRUE; doThisBoot <- TRUE 
 	ind <- which(colnames(cvData$header) == snrCol)
 	critLowerValue <- length(unique(cvData$header[,classOn])) * grpFac # the number of groups times the factor
-	aa <- lapply(split(cvData$header, cvData$header[,classOn]), function(x) x[,ind]) # split into groups, then get the sampleNr column
+	aa <- lapply(split(cvData$header, cvData$header[,classOn]), function(x) x[,ind]) # split into groups, then get the **sampleNr** column
 	minNrow <-  min(unlist(lapply(aa, length))) #  returns the smallest nr of observations from all separate groups 
 	minNrowInCV <- floor(minNrow / cvValid) # ... above, divided by the nr of crossvalidations
+	innerList <- testBranch <- nrsCvTrain <- nrsCvPred <- NULL # in case neither CV nor boot below is not excecuted, i.e. the critical value is not reached
+	method <- "" ; doThisCV <- TRUE; doThisBoot <- TRUE 
+	#
 	if (minNrowInCV >= cvBootCutoff | neverBoot) { # so we have enough for CV
 		if (enfCritVal) { # if the critical value should be enforced or not
 			if (critLowerValue > minNrowInCV ) {
@@ -552,7 +534,9 @@ make_Xclass_models_inner <- function(cvData, testData, classFunc, classOn, md, a
 		if (doThisCV) {
 			if (!stnLoc$allSilent) {cat(cvIndicator)}
 			innerList <- make_Xclass_models_CV_outer(cvData, testData, classFunc, valid=cvValid, classOn, type, apCl, stnLoc) ##### CORE ######
-			method <- paste0("CV.", cvValid, ", mods.grp.min=", minNrowInCV)
+			method <- paste0("CV.", cvValid, ", grp.min=", minNrowInCV)
+			nrsCvTrain <- round((nrow(cvData)/cvValid)*(cvValid-1), rndAno)
+			nrsCvPred <- round(nrow(cvData)/cvValid, rndAno)
 		} # end doThisCV
 	} else { # so we are going for boot
 		if (enfCritVal) { # if the critical value should be enforced or not
@@ -565,7 +549,10 @@ make_Xclass_models_inner <- function(cvData, testData, classFunc, classOn, md, a
 			if (!stnLoc$allSilent) {cat(bootIndicator)}
 			bootR <- round(minNrow*cvBootFactor, 0)
 			innerList <- make_Xclass_models_boot(cvData, testData, classFunc, R=bootR, classOn, type, apCl, stnLoc) ##### CORE ######
-			method <- paste0("boot.", bootR, ", mods.oob.min=", floor(minNrow / 3 ))  # it showed that via the bootstrap on average 1/3 of the data are kept out of the bag
+			method <- paste0("boot.", bootR, ", oob.min=", floor(minNrow / 3 ))  # it showed that via the bootstrap on average 1/3 of the data are kept out of the bag
+	#		nrsCvTrain <- round((nrow(cvData)/3)*2, rndAno)
+			nrsCvTrain <- nrow(cvData)
+			nrsCvPred <- round(nrow(cvData)/3, rndAno)			
 		} # end doThisBoot
 	} # end else
 	#
@@ -578,7 +565,8 @@ make_Xclass_models_inner <- function(cvData, testData, classFunc, classOn, md, a
 	testConfPerc <- calculateConfusionTableInPercent(testConf, stnLoc)
 	testCorrClassPerc <- calculateCorrectClassificationInPercent(testConf, stnLoc)
 #	cat("\n"); print(testConfPerc); cat("\n"); cat("\n"); 
-	return(list(cvBranch=innerList$cvBranch, testBranch=list(testConfPerc=testConfPerc, testCorrClassPerc=testCorrClassPerc), method=method)) # handing the individual conf. tables and the correct classif. of the test data in percent up
+	numbersList <- list(nrsCvTrain=nrsCvTrain, nrsCvPred=nrsCvPred, grpsCvPred=innerList$cvBranch$grpsCvPredAvg)
+	return(list(cvBranch=innerList$cvBranch, testBranch=list(testConfPerc=testConfPerc, testCorrClassPerc=testCorrClassPerc), method=method, numbersCv=numbersList)) # handing the individual conf. tables and the correct classif. of the test data in percent up
 	# output of function make_Xclass_models_inner
 } # EOF
 
@@ -586,37 +574,52 @@ make_X_classif_models <- function(dataset, classFunc, md, apCl, classOn, idStrin
 	doOuter <- apCl$testCV
 	percTest <- apCl$percTest
 	rndCC <- stnLoc$cl_gen_digitsRoundCorrClass
+	rndAno <- stnLoc$cl_gen_digitsRoundNrObservations
 	#
 	if (percTest <= 0 ) {
 		doOuter <- FALSE
 	}
 #	cvList <- testList <- outListRealClassOn <- cvBranchErrorsList <- cvBranchCorrClassList <- summaryList <- methodList <-  vector("list", length(classOn))
-	cvList <- testList <- outListRealClassOn <- summaryList <- methodList <-  vector("list", length(classOn))
+	cvList <- testList <- outListRealClassOn <- summaryList <- methodList <- nrsCvTrainList <- nrsCvPredList <- grpsCvPredList <- nrsTestCvList <- nrsTestPredList <- grpsTestPredList <- vector("list", length(classOn))
 	for (k in 1: length(classOn)) {
 		splitList <- makeOuterSplitList(dataset, percTest, classOn[k], stnLoc) # new split in CV and TEST data for every classOn variable
 		lengSplit <- length(splitList)
 		if (!doOuter) {
 			lengSplit <- 1
 		}
-		modsList <- realClOnList <- testBranchList <- cvBranchErrorsList <- cvBranchCorrClassList <- vector("list", lengSplit)
+		modsList <- realClOnList <- testBranchList <- cvBranchErrorsList <- cvBranchCorrClassList <- nrsCvTrainLi <- nrsCvPredLi <- grpsCvPredLi <-  nrsTestCvLi <- nrsTestPredLi <- grpsTestPredLi <- vector("list", lengSplit)
 		if (!stnLoc$allSilent) { cat(paste0(" ",classOn[k])) }
 		for (i in 1: lengSplit) { ### going through the split list (can possibly be of length 1) #######
-			aa <- makeOuterSplitDatasets(dataset, splitList, testInd=i)	
-			if (nlevels(aa$cv$header[,classOn[k]]) < 2) {
+			spDs <- makeOuterSplitDatasets(dataset, splitList, testInd=i)
+			if (nlevels(spDs$cv$header[,classOn[k]]) < 2) {
+				message(paste0("There is only one class when grouping by ", classOn[k], "."))
 				mods <- NULL
 				realClOnFill <- NULL
 			} else {
-				mods <- make_Xclass_models_inner(cvData=aa$cv, testData=aa$test, classFunc, classOn[k], md, apCl, idString, stnLoc, type)	##### CORE ######				
+				mods <- make_Xclass_models_inner(cvData=spDs$cv, testData=spDs$test, classFunc, classOn[k], md, apCl, idString, stnLoc, type)	##### CORE ######				
 				realClOnFill <- classOn[k]
 			}	
 			modsList[[i]] <- mods$cvBranch # filling in the data and all the CV info from the outer loop
 			cvBranchErrorsList[[i]] <- mods$cvBranch$errors # collect the cv errors and SDs (and correct classifications and their SDs, below) to average them
 			cvBranchCorrClassList[[i]] <- mods$cvBranch$corrClass
 			testBranchList[[i]] <- mods$testBranch
-			realClOnList[[i]] <- realClOnFill	
+			realClOnList[[i]] <- realClOnFill
+			#
+			nrsCvTrainLi[[i]] <- mods$numbersCv$nrsCvTrain
+			nrsCvPredLi[[i]] <- mods$numbersCv$nrsCvPred
+			grpsCvPredLi[[i]] <- mods$numbersCv$grpsCvPred
+			nrsTestCvLi[[i]] <- nrow(spDs$cv)
+			nrsTestPredLi[[i]] <- nrow(spDs$test)
+			grpsTestPredLi[[i]] <- unlist(lapply(lapply(split(spDs$test$header, spDs$test$header[,classOn[k]]), function(x) x[,classOn[k]]), length)) # gets back a named numeric with the numbers ob observations in each group
 		} # end for i - going through the split list ###### end going through split list !!!! ###############
 		cvList[[k]] <- modsList
 		methodList[[k]] <- mods$method
+		nrsCvTrainList[[k]] <- round(mean(unlist(nrsCvTrainLi)), rndAno) 
+		nrsCvPredList[[k]] <- round(mean(unlist(nrsCvPredLi)), rndAno) 
+		grpsCvPredList[[k]] <- calculateColwiseAvgOfNumericList(grpsCvPredLi, stnLoc) # calculate the average of either all the N crossvalidation steps, or of the R bootstrap replicates
+		nrsTestCvList[[k]] <- round(mean(unlist(nrsTestCvLi)), rndAno)
+		nrsTestPredList[[k]] <- round(mean(unlist(nrsTestPredLi)), rndAno)
+		grpsTestPredList[[k]] <- calculateColwiseAvgOfNumericList(grpsTestPredLi, stnLoc) # calculate the average of the X repeats of the outer loop
 		#
 		### from each run of the outer loop, i.e. the N rounds of producing crossvalidated models and testing them, average the cv errors and SDs, and the correct classification and their SDs. --> avg. of the inner loop avg.
 		avgCvErrors <- calculateAverageOfTablesList(lapply(cvBranchErrorsList, function(x) x$avg), stnLoc) # first extract the element ($avg), then hand over to function to calculate averages of all tables. same below.
@@ -640,7 +643,8 @@ make_X_classif_models <- function(dataset, classFunc, md, apCl, classOn, idStrin
 	} # end for k (cycling through the classOn values) ######### end going through the classOn values !!!! #################
 	##############
 	cvDualList <- list(cvSingle=cvList, cvSummary=summaryList, method=methodList)
-	return(list(cvBranch=cvDualList, testBranch=testList, realClOn=realClOnList)) # output of function make_X_classif_models
+	numbersList <- list(nrsCvTrain=nrsCvTrainList, nrsCvPred=nrsCvPredList, grpsCvPred=grpsCvPredList, nrsTestCv=nrsTestCvList, nrsTestPred=nrsTestPredList, grpsTestPred=grpsTestPredList)
+	return(list(cvBranch=cvDualList, testBranch=testList, realClOn=realClOnList, numbers=numbersList)) # output of function make_X_classif_models
 } # EOF
 
 make_X_classif_handoverType <- function(dataset, md, apCl, types, idString, priInfo, priTy="") { # going through types; called in cube_makeModels.r; the incoming dataset from the set
@@ -648,7 +652,7 @@ make_X_classif_handoverType <- function(dataset, md, apCl, types, idString, priI
 	classOn <- apCl$classOn
 	#
 	if (length(types) == 1) {add <- ""} else {add <- ""}
-	cvList <- testList <- outListRealClOn <- vector("list", length(types))
+	cvList <- testList <- outListRealClOn <- numbersList <- vector("list", length(types))
 	if (!stnLoc$allSilent) {cat(paste0("      calc. ", priInfo, ":"))}
 	for (i in 1: length(types)) {		
 		classFunc <- getClassifierFunction(types[i]) ####### here select the desired classifier method !! ######
@@ -658,11 +662,12 @@ make_X_classif_handoverType <- function(dataset, md, apCl, types, idString, priI
 			cvList[[i]] <- aa$cvBranch
 			testList[[i]] <- aa$testBranch
 			outListRealClOn[[i]] <- aa$realClOn
+			numbersList[[i]] <- aa$numbers
 			###
 	} # end for i
 	if (!stnLoc$allSilent) {cat(" ok\n")}
 	oid <- paste0(priInfo, "__", idString)
-	return(list(cvBranch=cvList, testBranch=testList, realClassOn=NA, apCl=apCl, id=oid))
+	return(list(cvBranch=cvList, testBranch=testList, realClassOn=NA, numbers=numbersList, apCl=apCl, id=oid))
 	#
 	### the order of the cvBranch, from outer to inner: 
 	# daTypes; FIX cvSingle, cvSummary, cvMethod --> each in: classOn, outerLoop (=TestCV), CV inner loop, [then list element of individual models]
@@ -670,3 +675,11 @@ make_X_classif_handoverType <- function(dataset, md, apCl, types, idString, priI
 	### the order of the testBranch, frou outer to inner:
 	# daTypes, classOn; (then already the results: test errors, test CorrClass)
 } # EOF
+
+# next
+# correct total N and group N (in legend) for CV
+# --> have N.test and N.cv --> for CV: N.tr, N.pr; N.cv, N.ts
+# repair dataframe colors
+
+# future:
+# have chisqu.test

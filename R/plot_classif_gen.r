@@ -118,7 +118,6 @@ plot_classif_typeClassOn <- function(type, classOn, cvSummaryList, testSummaryLi
 	########################
 	# prepare the plots	
 	limits <- ggplot2::aes(ymax = avg + SD, ymin = avg - SD)
-#	limits <- aes(ymax = avg + SD/2, ymin = avg - SD/2)
 	geomBar <- ggplot2::geom_bar(stat = "identity", position = ggplot2::position_dodge())
 	geomErrBar <- ggplot2::geom_errorbar(limits, width=errBarWidth, position = ggplot2::position_dodge(width = 0.9), color=colorErrorbar)
 	custColFil <- ggplot2::scale_fill_manual(values=grpCols)
