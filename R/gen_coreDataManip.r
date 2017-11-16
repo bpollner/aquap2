@@ -562,3 +562,214 @@ do_resampleNIR <- function(dataset, targetWls=NULL, tby=0.5, method="linear") {
     dataset$NIR <- NIR
     return(dataset)
 } # EOF
+
+
+checkBlowUpInput_grouping <- function(header, grp) {
+	cns <- colnames(header)
+	cPref <- .ap2$stn$p_ClassVarPref
+	cns <- cns[grep(cPref, cns)]
+	###
+	checkClassExistence <- function(X, char, ppv=TRUE) {
+		if (!all(is.character(X))) {
+			stop(paste0("Please only provide characters as input for the argument '", char, "'. Please check your input."), call.=FALSE)
+		}
+		for (i in 1: length(X)) {
+			if (!X[i] %in% cns) {
+				msg1 <- paste0("Sorry, it seems that the class-variable `", X[i], "` as grouping variable (", char, ") does not exist in the provided dataset.")
+				msg2 <- "";  if (ppv) { msg2 <- paste0("\nPossible values are: '", paste(cns, collapse="', '"), ".") }
+				stop(paste0(msg1, msg2), call.=FALSE)
+			}
+		} # end for i
+	} # EOIF
+	checkClassExistence(grp, "grp")
+} # EOF
+
+checkTransformBlowUpInput_TnAn <- function(minPart, tn, an) {
+	if (is.character(tn)) {
+		if (substr(tn,1,1) != "x") {
+			stop(paste0("Please provide `tn` in the format `xN`, with N being a positive integer"), call.=FALSE)
+		}
+		options(warn=-1)
+		tn <- round(as.numeric(substr(tn, 2, nchar(tn)))) * minPart # multiply with minPart, as we want to have it xFold
+		options(warn=0)
+		if (!is.numeric(tn)) {
+			stop(paste0("Please provide an integer after the character `x`in the argument `tn`."), call.=FALSE)
+		}
+	} else {
+		if (!is.numeric(tn)) {
+			stop(paste0("Please provide either an integer or a character in the format `xN`, with N being a positive integer, to the argument `tn`."), call.=FALSE)			
+		}
+		rn <- round(tn)
+	} # end else
+	if (tn < minPart) {tn <- minPart}
+	#
+	if (is.character(an)) {
+		if (substr(an, nchar(an), nchar(an)) != "%") {
+			stop(paste0("Please provide `an` in the format `N%`, with N being a positive integer"), call.=FALSE)			
+		}
+		options(warn=-1)
+		an <- round(as.numeric(substr(an, 1, nchar(an)-1)))
+		options(warn=0)
+		if (an > 100) { an <- 100}
+		an <- round((an * minPart) / 100)  # as we want to have a percentage
+		if (!is.numeric(an)) {
+			stop(paste0("Please provide an integer before the character `%`in the argument `an`."), call.=FALSE)
+		}
+	} else {
+		if (!is.numeric(an)) {
+			stop(paste0("Please provide either an integer or a character in the format `N%`, with N being a positive integer, to the argument `an`."), call.=FALSE)						
+		}
+		an <- round(an)
+		if (an < 1) {an <- 1}
+	} # end else
+	###
+	return(list(tn=tn, an=an))
+} # EOF
+
+#' @title Increase the Numbers of Observation in Dataset
+#' @description Use random observations of the provided dataset (within a possible 
+#' grouping), calculate their average and add the resulting spectrum as new 
+#' observation to the dataset.
+#' @details The provenience of each observation is marked in an additional column 
+#' in the header named `blowup`, where the character `orig` denotes an original 
+#' observation, while the character `artif` is marking an artificially generated 
+#' observation.
+#' @param dataset An object of class 'aquap_data' as produced e.g. by 
+#' \code{\link{gfd}}.
+#' @param tn Numeric or character length one. If numeric, \code{tn} is denoting 
+#' the target-number, i.e. the desired number of observations in the expanded 
+#' dataset. If a grouping is provided via \code{grp}, the target number is 
+#' defining the desired number of observations within each subgroup obtained 
+#' by the grouping. If \code{tn} is a character it hast to be in the format 
+#' \code{xN}, with \code{N} being a positive integer. In this case it means 
+#' an N-fold increase of the dataset resp. of each subgroup as defined by the 
+#' grouping in \code{grp}. Defaults to \code{x10}.
+#' @param an Numeric or character length one. If numeric, \code{an} is denoting 
+#' the "average-number", i.e. the number of random observations resp. their spectra 
+#' that are averaged together into a new spectrum. If \code{an} is a character it 
+#' has to be in the format \code{N\%}, with \code{N} being a positive integer. In 
+#' this case it denotes the percentage of observations in the dataset resp. in 
+#' each of the subgroups possibly obtained via \code{grp} that should be averaged 
+#' together into a new observation. Defaults to \code{20\%}.
+#' @param grp Character. One ore more valid class-variable names that should be 
+#' used to from subgroups within the dataset. Similar to the \code{spl.var} 
+#' argument in the analysis procedure.
+#' @param cst Logical. If consecutive scans should always be kept together. 
+#' NOT YET IMPLEMENTED - value is ignored, and consec. scans are NOT kept together.
+#' @return The dataset with increased numbers of observations.
+#' @examples
+#' \dontrun{
+#' fd <- gfd()
+#' fdPlus <- do_blowup(fd, tn="x4", an=4)
+#' fdPlus <- do_blowup(fd, tn="x8", an="10%", grp=c("C_Foo", "C_Bar")) 
+#' fdPlus <- do_blowup(fd, tn=1000, an=5)
+#' }
+#' @family Data pre-treatment functions 
+#' @export
+do_blowup <- function(dataset, tn="x10", an="20%", grp=NULL, cst=TRUE) {
+	cPref <- .ap2$stn$p_ClassVarPref
+	txtOrig <- "orig"
+	txtBlow <- "artif"
+	colNameBlow <- "blowup"
+	#
+	header <- headerFac <- getHeader(dataset) # headerFac only used for grouping
+	blowupDf <- data.frame(X=rep(txtOrig, nrow(header))) ## add a new column to the header telling us what samples are new and what are old
+	colnames(blowupDf) <- paste0(cPref, colNameBlow)
+	header <- cbind(header, blowupDf)
+	#
+	colRep <- getColRep(dataset)
+	# first get out the factors
+	facInd <- vector("logical", length=ncol(header))
+	for (i in 1: ncol(header)) {
+		facInd[i] <- isFac <-  is.factor(header[,i])
+		if (isFac) {
+			header[,i] <- as.character(header[,i])
+		}
+	} # end for i
+	#
+	minPart <- nrow(header)
+	splitList <- list(header)
+	NIR <- getNIR(dataset)
+	NIRsplitList <- list(NIR)
+	colRepSplitList <- list(colRep)
+	if (!is.null(grp)) {
+		checkBlowUpInput_grouping(header, grp) # stops if wrong or so
+		splitList <- split(header, headerFac[,grp]) # returns a list with a dataframe in each element
+		NIRsplitList <- split(NIR, headerFac[,grp])
+		colRepSplitList <- split(colRep, headerFac[,grp])
+		minPart <- min(unlist(lapply(splitList, nrow))) # get the minium number of participants from all the splitelements
+	}
+	aa <- checkTransformBlowUpInput_TnAn(minPart, tn, an)
+	tn <- aa$tn
+	an <- aa$an
+#	print(tn); print(an); print(minPart); print("-----")
+	# now we have the correct target and average number
+	requiredN <-  tn - minPart
+	if (requiredN == 0) {
+		message("No dataset expansion has been performed.")
+		return(dataset)
+	}
+	eachNPart <- lapply(splitList, function(x) 1: nrow(x)) # gives a list with a vector from 1:N, with N being the number of participants from each element of the splitList
+	indList <- newNirList <- newHeaderList <- newColRepList <- vector("list", length=length(splitList))
+	for (i in 1: length(splitList)) { # now for every element within the splitList (could be only 1) we perform tn iterations of the resampling
+		indList[[i]] <- lapply(1:requiredN, function(x, npa, ana) sample(npa[[i]], ana), npa=eachNPart, ana=an) # gives a list for each element of the splitList
+		newNirList[[i]] <- matrix(NA, nrow=requiredN , ncol=ncol(NIR))
+		newHeaderList[[i]] <- data.frame(matrix(NA, nrow=requiredN, ncol=ncol(header)))
+		newColRepList[[i]] <- data.frame(matrix(NA, nrow=requiredN, ncol=ncol(colRep)))
+	} # end i
+	# now we have indList containing the header segments, NIRsplitList containing the NIR segments, and the indList that contains the indices to be averaged for each segment
+	for (i in 1: length(indList)) { # i is the number of the splitSegment as defined by the grouping
+		for (k in 1: length(indList[[i]])) { # k is the number of spectra we will add to each subgroup  (k can be very large)   ######(parallelize this, NOT above !!)
+			inds <- indList[[i]][[k]]
+			newNirList[[i]][k,] <- apply(NIRsplitList[[i]][inds,], 2, mean) # subselect from the NIR segment and calculate colwise average
+			newHeaderList[[i]][k,] <- splitList[[i]][inds[1],] # (splitList contains the header segments) just get the first of the obervations to be averaged
+			newColRepList[[i]][k,] <- colRepSplitList[[i]][inds[1],] # same
+		} # end for k
+	} # end for i
+	# now we have to get the new elements out of the list into each one object
+	allNewHeader <- do.call("rbind", newHeaderList)
+	allNewHeader[,ncol(allNewHeader)] <- rep(txtBlow, nrow(allNewHeader))
+	colnames(allNewHeader) <- colnames(header)
+	allNewColRep <- do.call("rbind", newColRepList)
+	colnames(allNewColRep) <- colnames(colRep)
+	allNewNir <- do.call("rbind", newNirList)
+	colnames(allNewNir) <- colnames(NIR)
+	# (? maybe a problem with rownames?)
+	# now fuse together with the original data
+	tsi <- which(colnames(header) == "Timestamp")
+	if (length(tsi) != 0) {
+		allNewHeader[,tsi] <- as.POSIXct(allNewHeader[,tsi], origin="1970-01-01")
+	}
+	header <- rbind(header, allNewHeader)
+	colRep <- rbind(colRep, allNewColRep)
+	NIR <- as.matrix(rbind(NIR, allNewNir))
+	for (i in 1: ncol(header)) {
+		if (facInd[i]) {
+			header[,i] <- as.factor(header[,i]) # re-factorize if necessary
+		}
+	} # end for i
+	dataset@.Data <- data.frame(I(header), I(colRep), I(NIR))
+	return(dataset)
+} # EOF
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

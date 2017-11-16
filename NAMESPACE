@@ -2,6 +2,7 @@
 
 export(do_addNoise)
 export(do_avg)
+export(do_blowup)
 export(do_detrend)
 export(do_dptSeq)
 export(do_emsc)

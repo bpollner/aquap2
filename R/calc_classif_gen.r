@@ -570,7 +570,7 @@ make_Xclass_models_inner <- function(cvData, testData, classFunc, classOn, md, a
 			bootR <- round(minNrow*cvBootFactor, 0)
 			innerList <- make_Xclass_models_boot(cvData, testData, classFunc, R=bootR, classOn, type, apCl, stnLoc) ##### CORE ######
 #			method <- paste0("boot.", bootR, ", oob.min=", floor(minNrow / 3 ))  # it showed that via the bootstrap on average 1/3 of the data are kept out of the bag
-			method <- paste0("boot.", bootR) 
+			method <- paste0("boot.", bootR, " ", cvBootFactor, "x", minNrow) 
 			nrsCvTrain <- nrow(cvData)
 			nrsCvPred <- round(nrow(cvData)/3, rndAno)			
 		} # end doThisBoot
@@ -643,7 +643,7 @@ make_X_classif_models <- function(dataset, classFunc, md, apCl, classOn, idStrin
 		### from each run of the outer loop, i.e. the N rounds of producing crossvalidated models and testing them, average the cv errors and SDs, and the correct classification and their SDs. --> avg. of the inner loop avg.
 		avgCvErrors <- calculateAverageOfTablesList(lapply(cvBranchErrorsList, function(x) x$avg), stnLoc) # first extract the element ($avg), then hand over to function to calculate averages of all tables. same below.
 		avgCvSDs <- calculateAverageOfTablesList(lapply(cvBranchErrorsList, function(x) x$SD), stnLoc)
-		avgAvgCvCorrectClass <- round(mean(unlist(lapply(cvBranchCorrClassList, function(x) x$avg))), rndCC) # extract the elemtn ($avg) from the list, unlist and calculate mean. same below.
+		avgAvgCvCorrectClass <- round(mean(unlist(lapply(cvBranchCorrClassList, function(x) x$avg))), rndCC) # extract the elemtn ($avg) from the list, unlist and calculate mean. same below. XXX
 		avgSDsCvCorrectClass <- round(mean(unlist(lapply(cvBranchCorrClassList, function(x) x$SD))), rndCC)
 		summaryList[[k]] <- list(errors=list(avg=avgCvErrors, SD=avgCvSDs), corrClass=list(avg=avgAvgCvCorrectClass, SD=avgSDsCvCorrectClass))
 		#
@@ -694,6 +694,10 @@ make_X_classif_handoverType <- function(dataset, md, apCl, types, idString, priI
 	### the order of the testBranch, frou outer to inner:
 	# daTypes, classOn; (then already the results: test errors, test CorrClass)
 } # EOF
+
+# next:
+# max in pcaRed is not working
+
 
 # future:
 # have chisqu.test
