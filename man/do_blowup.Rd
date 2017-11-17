@@ -4,11 +4,16 @@
 \alias{do_blowup}
 \title{Increase the Numbers of Observation in Dataset}
 \usage{
-do_blowup(dataset, tn = "x10", an = "20\%", grp = NULL, cst = TRUE)
+do_blowup(dataset, grp = NULL, tn = "x10", an = "100\%", cst = TRUE,
+  conf = TRUE, pred = TRUE, replace = TRUE)
 }
 \arguments{
 \item{dataset}{An object of class 'aquap_data' as produced e.g. by 
 \code{\link{gfd}}.}
+
+\item{grp}{Character. One ore more valid class-variable names that should be 
+used to from subgroups within the dataset. Similar to the \code{spl.var} 
+argument in the analysis procedure.}
 
 \item{tn}{Numeric or character length one. If numeric, \code{tn} is denoting 
 the target-number, i.e. the desired number of observations in the expanded 
@@ -20,19 +25,26 @@ an N-fold increase of the dataset resp. of each subgroup as defined by the
 grouping in \code{grp}. Defaults to \code{x10}.}
 
 \item{an}{Numeric or character length one. If numeric, \code{an} is denoting 
-the "average-number", i.e. the number of random observations resp. their spectra 
-that are averaged together into a new spectrum. If \code{an} is a character it 
-has to be in the format \code{N\%}, with \code{N} being a positive integer. In 
-this case it denotes the percentage of observations in the dataset resp. in 
-each of the subgroups possibly obtained via \code{grp} that should be averaged 
-together into a new observation. Defaults to \code{20\%}.}
-
-\item{grp}{Character. One ore more valid class-variable names that should be 
-used to from subgroups within the dataset. Similar to the \code{spl.var} 
-argument in the analysis procedure.}
+the "average-number", i.e. the number of observations resp. their spectra that 
+should be drawn (with replacement) from the dataset resp. from the respective 
+subgroup. These drawn samples then are averaged together into a new spectrum. 
+If \code{an} is a character it has to be in the format \code{N\%}, with 
+\code{N} being a positive integer. In this case it denotes the percentage of 
+observations in the dataset resp. in each of the subgroups possibly obtained 
+via \code{grp} that should be drawn (with replacement) and averaged together 
+into a new observation. Defaults to \code{100\%}, what is the recommended value.}
 
 \item{cst}{Logical. If consecutive scans should always be kept together. 
 NOT YET IMPLEMENTED - value is ignored, and consec. scans are NOT kept together.}
+
+\item{conf}{Logical. If numbers should be presented and confirmation requested 
+before commencing the actual calculations.}
+
+\item{pred}{Logical. If an estimation of the number of identical spectra should 
+be made. Only presented if \code{conf} is TRUE.}
+
+\item{replace}{Logical. If the sample drawing should be done with replacement.
+Recommended value is TRUE.}
 }
 \value{
 The dataset with increased numbers of observations.
@@ -43,11 +55,17 @@ grouping), calculate their average and add the resulting spectrum as new
 observation to the dataset.
 }
 \details{
-The provenience of each observation is marked in an additional column 
-in the header named `blowup`, where the character `orig` denotes an original 
-observation, while the character `artif` is marking an artificially generated 
-observation.
+The random observations are sampled with replacement. The provenience 
+of each observation is marked in an additional column in the header named 
+`blowup`, where the character `orig` denotes an original observation, while the 
+character `artif` is marking an artificially generated observation.
 }
+\section{Warning}{
+ Do take care of a correct grouping, otherwise the inclusion 
+of observations into the same group that do not belong together will destroy
+any information.
+}
+
 \examples{
 \dontrun{
 fd <- gfd()

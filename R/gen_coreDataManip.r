@@ -626,14 +626,36 @@ checkTransformBlowUpInput_TnAn <- function(minPart, tn, an) {
 	return(list(tn=tn, an=an))
 } # EOF
 
+lotto_loop <- function(tn, an, size, n=2000) {
+   	lotto <- function(tn, an=3, size=8) {
+    	nums <- lapply(1:tn, function(x) sample(1:size, an, replace = TRUE))
+	    nums <- lapply(nums, sort)
+    	numsChar <- unlist(lapply(nums, function(x) paste(x, collapse="-")))
+	    out <- vector("logical", length(numsChar))
+   		 for (i in 1: length(numsChar)){
+        	out[i] <- numsChar[i] %in% numsChar[-i]
+	    }
+    	le <- length(which(out))
+	    perc <- round((le / tn)*100,0)
+ 	 	return(invisible(perc))
+ 	 } # EOIF
+    percOut <- vector("numeric", n)
+    for (i in 1:n) {
+        percOut[i] <- lotto(tn, an, size)
+    }
+    percOut <- round(mean(percOut),1)
+#    cat(paste0("total average: ", out))
+    return(invisible(percOut))
+}
+
 #' @title Increase the Numbers of Observation in Dataset
 #' @description Use random observations of the provided dataset (within a possible 
 #' grouping), calculate their average and add the resulting spectrum as new 
 #' observation to the dataset.
-#' @details The provenience of each observation is marked in an additional column 
-#' in the header named `blowup`, where the character `orig` denotes an original 
-#' observation, while the character `artif` is marking an artificially generated 
-#' observation.
+#' @details The random observations are sampled with replacement. The provenience 
+#' of each observation is marked in an additional column in the header named 
+#' `blowup`, where the character `orig` denotes an original observation, while the 
+#' character `artif` is marking an artificially generated observation.
 #' @param dataset An object of class 'aquap_data' as produced e.g. by 
 #' \code{\link{gfd}}.
 #' @param tn Numeric or character length one. If numeric, \code{tn} is denoting 
@@ -645,17 +667,28 @@ checkTransformBlowUpInput_TnAn <- function(minPart, tn, an) {
 #' an N-fold increase of the dataset resp. of each subgroup as defined by the 
 #' grouping in \code{grp}. Defaults to \code{x10}.
 #' @param an Numeric or character length one. If numeric, \code{an} is denoting 
-#' the "average-number", i.e. the number of random observations resp. their spectra 
-#' that are averaged together into a new spectrum. If \code{an} is a character it 
-#' has to be in the format \code{N\%}, with \code{N} being a positive integer. In 
-#' this case it denotes the percentage of observations in the dataset resp. in 
-#' each of the subgroups possibly obtained via \code{grp} that should be averaged 
-#' together into a new observation. Defaults to \code{20\%}.
+#' the "average-number", i.e. the number of observations resp. their spectra that 
+#' should be drawn (with replacement) from the dataset resp. from the respective 
+#' subgroup. These drawn samples then are averaged together into a new spectrum. 
+#' If \code{an} is a character it has to be in the format \code{N\%}, with 
+#' \code{N} being a positive integer. In this case it denotes the percentage of 
+#' observations in the dataset resp. in each of the subgroups possibly obtained 
+#' via \code{grp} that should be drawn (with replacement) and averaged together 
+#' into a new observation. Defaults to \code{100\%}, what is the recommended value.
 #' @param grp Character. One ore more valid class-variable names that should be 
 #' used to from subgroups within the dataset. Similar to the \code{spl.var} 
 #' argument in the analysis procedure.
 #' @param cst Logical. If consecutive scans should always be kept together. 
 #' NOT YET IMPLEMENTED - value is ignored, and consec. scans are NOT kept together.
+#' @param conf Logical. If numbers should be presented and confirmation requested 
+#' before commencing the actual calculations.
+#' @section Warning: Do take care of a correct grouping, otherwise the inclusion 
+#' of observations into the same group that do not belong together will destroy
+#' any information.
+#' @param replace Logical. If the sample drawing should be done with replacement.
+#' Recommended value is TRUE.
+#' @param pred Logical. If an estimation of the number of identical spectra should 
+#' be made. Only presented if \code{conf} is TRUE.
 #' @return The dataset with increased numbers of observations.
 #' @examples
 #' \dontrun{
@@ -666,18 +699,24 @@ checkTransformBlowUpInput_TnAn <- function(minPart, tn, an) {
 #' }
 #' @family Data pre-treatment functions 
 #' @export
-do_blowup <- function(dataset, tn="x10", an="20%", grp=NULL, cst=TRUE) {
+do_blowup <- function(dataset, grp=NULL, tn="x10", an="100%", cst=TRUE, conf=TRUE, pred=TRUE, replace=TRUE) {
 	cPref <- .ap2$stn$p_ClassVarPref
 	txtOrig <- "orig"
 	txtBlow <- "artif"
 	colNameBlow <- "blowup"
+	colOrig <- 1
+	colBlow <- 2
+	lottoLoopN <- 2000
 	#
 	header <- headerFac <- getHeader(dataset) # headerFac only used for grouping
+	colRep <- getColRep(dataset)
 	blowupDf <- data.frame(X=rep(txtOrig, nrow(header))) ## add a new column to the header telling us what samples are new and what are old
 	colnames(blowupDf) <- paste0(cPref, colNameBlow)
 	header <- cbind(header, blowupDf)
+	blowCol <- data.frame(X=rep(colOrig, nrow(header)))
+	colnames(blowCol) <- paste0(cPref, colNameBlow)
+	colRep <- cbind(colRep, blowCol)
 	#
-	colRep <- getColRep(dataset)
 	# first get out the factors
 	facInd <- vector("logical", length=ncol(header))
 	for (i in 1: ncol(header)) {
@@ -712,12 +751,22 @@ do_blowup <- function(dataset, tn="x10", an="20%", grp=NULL, cst=TRUE) {
 	eachNPart <- lapply(splitList, function(x) 1: nrow(x)) # gives a list with a vector from 1:N, with N being the number of participants from each element of the splitList
 	indList <- newNirList <- newHeaderList <- newColRepList <- vector("list", length=length(splitList))
 	for (i in 1: length(splitList)) { # now for every element within the splitList (could be only 1) we perform tn iterations of the resampling
-		indList[[i]] <- lapply(1:requiredN, function(x, npa, ana) sample(npa[[i]], ana), npa=eachNPart, ana=an) # gives a list for each element of the splitList
+		indList[[i]] <- lapply(1:requiredN, function(x, npa, ana) sample(npa[[i]], ana, replace=replace), npa=eachNPart, ana=an) # gives a list for each element of the splitList
 		newNirList[[i]] <- matrix(NA, nrow=requiredN , ncol=ncol(NIR))
 		newHeaderList[[i]] <- data.frame(matrix(NA, nrow=requiredN, ncol=ncol(header)))
 		newColRepList[[i]] <- data.frame(matrix(NA, nrow=requiredN, ncol=ncol(colRep)))
 	} # end i
+	if (conf) {
+		avgDoubleMsg <- ""
+		if (pred) {
+			avgDoubles <- lotto_loop(tn=requiredN, an=an, size=minPart, n=lottoLoopN)
+			avgDoubleMsg <- paste0("The expected percentage of identical spectra is ~", avgDoubles, "%.")
+		}
+		cat(paste0(requiredN, " observations will be added to each of ", length(indList), " subgroups (the smallest containing ", minPart, " observations) by drawing from ", an, " observations.\n", avgDoubleMsg, "\n\nPress enter to continue or escape to abort:"))		
+		scan(file = "", n = 1, quiet = TRUE)
+	}
 	# now we have indList containing the header segments, NIRsplitList containing the NIR segments, and the indList that contains the indices to be averaged for each segment
+	if (!.ap2$stn$allSilent) {cat(paste0("Calculating (draw from ", an, ") and adding ", requiredN, " new observations to each of ", length(indList), " subgroups:\n"))}
 	for (i in 1: length(indList)) { # i is the number of the splitSegment as defined by the grouping
 		for (k in 1: length(indList[[i]])) { # k is the number of spectra we will add to each subgroup  (k can be very large)   ######(parallelize this, NOT above !!)
 			inds <- indList[[i]][[k]]
@@ -725,12 +774,14 @@ do_blowup <- function(dataset, tn="x10", an="20%", grp=NULL, cst=TRUE) {
 			newHeaderList[[i]][k,] <- splitList[[i]][inds[1],] # (splitList contains the header segments) just get the first of the obervations to be averaged
 			newColRepList[[i]][k,] <- colRepSplitList[[i]][inds[1],] # same
 		} # end for k
+		if (!.ap2$stn$allSilent) {cat(".")}
 	} # end for i
 	# now we have to get the new elements out of the list into each one object
 	allNewHeader <- do.call("rbind", newHeaderList)
 	allNewHeader[,ncol(allNewHeader)] <- rep(txtBlow, nrow(allNewHeader))
 	colnames(allNewHeader) <- colnames(header)
 	allNewColRep <- do.call("rbind", newColRepList)
+	allNewColRep[,ncol(allNewColRep)] <- rep(colBlow, nrow(allNewColRep))	
 	colnames(allNewColRep) <- colnames(colRep)
 	allNewNir <- do.call("rbind", newNirList)
 	colnames(allNewNir) <- colnames(NIR)
@@ -749,27 +800,8 @@ do_blowup <- function(dataset, tn="x10", an="20%", grp=NULL, cst=TRUE) {
 		}
 	} # end for i
 	dataset@.Data <- data.frame(I(header), I(colRep), I(NIR))
+	if (!.ap2$stn$allSilent) {cat(" ok.\n")}
 	return(dataset)
+	## XXX still required:
+	# include consec. scans together
 } # EOF
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
