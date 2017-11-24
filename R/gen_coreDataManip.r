@@ -701,6 +701,9 @@ lotto_loop <- function(tn, an, size, n=2000) {
 #' @export
 do_blowup <- function(dataset, grp=NULL, tn="x10", an="100%", cst=TRUE, conf=TRUE, pred=TRUE, replace=TRUE) {
 	cPref <- .ap2$stn$p_ClassVarPref
+	yPref <- .ap2$stn$p_yVarPref
+	snColSet <- .ap2$stn$p_sampleNrCol
+	snCol <- paste0(yPref, snColSet)
 	txtOrig <- "orig"
 	txtBlow <- "artif"
 	colNameBlow <- "blowup"
@@ -792,6 +795,8 @@ do_blowup <- function(dataset, grp=NULL, tn="x10", an="100%", cst=TRUE, conf=TRU
 		allNewHeader[,tsi] <- as.POSIXct(allNewHeader[,tsi], origin="1970-01-01")
 	}
 	header <- rbind(header, allNewHeader)
+	snrs <- range(header[,snCol]) 
+	header[,snCol] <- seq(min(snrs), max(snrs), length.out=nrow(header))
 	colRep <- rbind(colRep, allNewColRep)
 	NIR <- as.matrix(rbind(NIR, allNewNir))
 	for (i in 1: ncol(header)) {

@@ -252,6 +252,9 @@ stn <- list(
 	cl_plot_confTablePadding = 2.5, 		## the padding of the confusion tables in mm
 	cl_plot_useColorsFromDataset = FALSE, 	## if the colors embedded in the dataset should be used. If set to FALSE, the standard colors via ggplot will be used.
 	cl_plot_colorErrorBar = "black",	 	## the color for the error bars. # darkviolet
+	cl_indepPred_exportToExcel = TRUE, 		## if an excel file with the results of an independent prediction should be produced.
+	cl_indepPred_printPairingMsg = TRUE, 	## if a message with the pairing of model and independent variable for validation should be displayed
+
 
 
 	## plotting, PDFs

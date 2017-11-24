@@ -804,12 +804,11 @@ makeDataFrameForClassification <- function(dataset, groupBy, fusionGroupBy=NULL)
 	} else {
 		grouping <- fusionGroupBy
 	}
-	
 	NIR <- matrix(dataset$NIR, nrow=(nrow(dataset$NIR)))
 	rownames(NIR) <- rownames(dataset$NIR)
 	colnames(NIR) <- colnames(dataset$NIR)
 	out <- data.frame(I(grouping), I(NIR))
-	rownames(out) <- rownames(dataset)
+	rownames(out) <- rownames(dataset$header)
 	return(out)
 } # EOF
 

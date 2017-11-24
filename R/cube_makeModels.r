@@ -121,7 +121,8 @@ calculate_RNF <- function(dataset, md, ap, idString) {
 	}	
 	apCl <- ap$classif$rnf
 	types <- pv_nonDAClassifiers[1]  # pv_nonDAClassifiers <- c("rndforest", "svm", "nnet")
-	return(make_X_classif_handoverType(dataset, md, apCl, types, idString, priInfo="RNF"))
+	apCl$type <- types
+	return(make_X_classif_handoverType(dataset, md, apCl, types, idString, priInfo="RNF", priTy=types))
 } # EOF
 
 calculate_SVM <- function(dataset, md, ap, idString) {
@@ -130,7 +131,8 @@ calculate_SVM <- function(dataset, md, ap, idString) {
 	}
 	apCl <- ap$classif$svm
 	types <- pv_nonDAClassifiers[2]  # pv_nonDAClassifiers <- c("rndforest", "svm", "nnet")
-	return(make_X_classif_handoverType(dataset, md, apCl, types, idString, priInfo="SVM"))
+	apCl$type <- types
+	return(make_X_classif_handoverType(dataset, md, apCl, types, idString, priInfo="SVM", priTy=types))
 } # EOF
 
 calculate_ANN <- function(dataset, md, ap, idString) {
@@ -139,7 +141,8 @@ calculate_ANN <- function(dataset, md, ap, idString) {
 	}
 	apCl <- ap$classif$nnet
 	types <- pv_nonDAClassifiers[3]  # pv_nonDAClassifiers <- c("rndforest", "svm", "nnet")
-	return(make_X_classif_handoverType(dataset, md, apCl, types, idString, priInfo="NNET"))
+	apCl$type <- types	
+	return(make_X_classif_handoverType(dataset, md, apCl, types, idString, priInfo="NNET", priTy=types))
 } # EOF
 
 
