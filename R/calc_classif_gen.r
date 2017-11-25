@@ -257,10 +257,10 @@ performMajorityVote <- function(classList) {
 makePcaVariableReduction <- function(dfTrain, dfPred=NULL, dfTest=NULL, apCl) { 
 	nc <- apCl$pcaNComp # can be either "max" or the desired numbers
 	if (any(nc == "max")) {
-		nc <- 1: nrow(dfTrain) - 1
+		nc <- 1: (nrow(dfTrain) - 1)
 	} else { # so we only have numbers
 		if (max(nc) >= nrow(dfTrain)) { # to prevent the user from manually providing more NCs than are available
-			nc <- 1: nrow(dfTrain) - 1
+			nc <- 1: (nrow(dfTrain) - 1)
 		}
 	} # end else
 	pcaObTrain <- stats::prcomp(dfTrain$NIR) # the default is to not scale and only mean-center
@@ -282,7 +282,7 @@ makePcaVariableReduction <- function(dfTrain, dfPred=NULL, dfTest=NULL, apCl) {
 	#	NIR <- ChemometricsWithR::project(pcaObTrain, newdata=dfPred$NIR)[,nc]
 	#	dfPred$NIR <- I(NIR)
 	#########
-	return(list(dfTrain=dfTrain, dfPred=dfPred, dfTest=dfTest))
+	return(list(dfTrain=dfTrain, dfPred=dfPred, dfTest=dfTest, pcaObTrain=pcaObTrain))
 } # EOF
 
 makeConfusionTable <- function(pred, true) {
@@ -307,7 +307,7 @@ make_Xclass_model_CV_single <- function(trainDataset, predDataset, testData, cla
 	grpsCvPred <- unlist(lapply(lapply(split(predDataset$header, predDataset$header[,classOn]), function(x) x[,classOn]), length)) # gets back a named numeric with the numbers ob observations in each group
 	dfTrain <- makeDataFrameForClassification(trainDataset, classOn) # ! is not flat
 	dfPred <- makeDataFrameForClassification(predDataset, classOn) # ! is not flat
-	dfTest <- NULL # we can have 0 percent test data
+	dfTest <- pcaObTrain <- NULL # we can have 0 percent test data
 	if (!is.null(testData)) {
 		dfTest <- makeDataFrameForClassification(testData, classOn) # still not flat
 	}
@@ -318,6 +318,7 @@ make_Xclass_model_CV_single <- function(trainDataset, predDataset, testData, cla
 		dfTrain <- aa$dfTrain
 		dfPred <- aa$dfPred
 		dfTest <- aa$dfTest
+		pcaObTrain <- aa$pcaObTrain
 	} # end if pcaRed
 	#
 	mod <- classFunc(dfTrain, apCl)
@@ -326,7 +327,7 @@ make_Xclass_model_CV_single <- function(trainDataset, predDataset, testData, cla
 	confPerc <- calculateConfusionTableInPercent(conf, stnLoc)
 	corrClassPerc <- calculateCorrectClassificationInPercent(conf, stnLoc)
 #	cat("\n"); print(confPerc); cat("\n"); print(corrClassPerc); cat("\n\n")
-	cvBranch <- list(mod=mod, dfPred=dfPred, dfTest=dfTest, confPerc=confPerc, corrClassPerc=corrClassPerc, grpsCvPred=grpsCvPred)
+	cvBranch <- list(mod=mod, dfPred=dfPred, dfTest=dfTest, confPerc=confPerc, corrClassPerc=corrClassPerc, grpsCvPred=grpsCvPred, pcaObTrain=pcaObTrain)
 	#
 	testBranch <- NULL
 	if (!is.null(dfTest)) {
@@ -358,11 +359,11 @@ make_Xclass_models_CV_outer <- function(cvData, testData, classFunc, valid, clas
 		aa <- make_Xclass_model_CV_single(cvData[ unlist(segList[trainInd]) ], cvData[ unlist(segList[predInd]) ], testData, classFunc, classOn, type, apCl, stnLoc)  # the individual (X-fold) crossvalidation models
 		cvBranch <- aa$cvBranch
 		testBranch <- aa$testBranch
-		singleRound <- list(mod=cvBranch$mod, dfPred=ctKeepData(cvBranch$dfPred, type, stnLoc), dfTest=ctKeepData(cvBranch$dfTest, type, stnLoc), confPerc=cvBranch$confPerc, corrClassPerc=cvBranch$corrClassPerc, predTestClass=testBranch$predTestClass, trueTestClass=testBranch$trueTestClass, grpsCvPred=cvBranch$grpsCvPred)
+		singleRound <- list(mod=cvBranch$mod, dfPred=ctKeepData(cvBranch$dfPred, type, stnLoc), dfTest=ctKeepData(cvBranch$dfTest, type, stnLoc), confPerc=cvBranch$confPerc, corrClassPerc=cvBranch$corrClassPerc, predTestClass=testBranch$predTestClass, trueTestClass=testBranch$trueTestClass, grpsCvPred=cvBranch$grpsCvPred, pcaObTrain=cvBranch$pcaObTrain)
 	} # end dopar
 	###
 	# now we have to re-sort the resulting list (parOutList)
-	modList <- dfPredList <- dfTestList <- confPercList <- corrClassPercList <- predTestClassList <- trueTestClassList <- grpsCvPredList <- list()	
+	modList <- dfPredList <- dfTestList <- confPercList <- corrClassPercList <- predTestClassList <- trueTestClassList <- grpsCvPredList <- pcaObTrainList <- list()	
 	for (i in 1: length(parOutList)) { # resort the list from parOutList
 		modList <- c(modList, list(parOutList[[i]]$mod))
 		dfPredList <- c(dfPredList, list(parOutList[[i]]$dfPred))
@@ -371,7 +372,8 @@ make_Xclass_models_CV_outer <- function(cvData, testData, classFunc, valid, clas
 		corrClassPercList <- c(corrClassPercList, list(parOutList[[i]]$corrClassPerc))
 		predTestClassList <- c(predTestClassList, list(parOutList[[i]]$predTestClass))		
 		trueTestClassList <- c(trueTestClassList, list(parOutList[[i]]$trueTestClass))
-		grpsCvPredList <- c(grpsCvPredList, list(parOutList[[i]]$grpsCvPred))			
+		grpsCvPredList <- c(grpsCvPredList, list(parOutList[[i]]$grpsCvPred))
+		pcaObTrainList <- c(pcaObTrainList, list(parOutList[[i]]$pcaObTrain))		
 	} # end for i	
 	# now, inside the lists, we have the single results of the individual CV steps
 	#
@@ -388,7 +390,7 @@ make_Xclass_models_CV_outer <- function(cvData, testData, classFunc, valid, clas
 	# calculate the colwise average of the groupings for the prediction data
 	grpsCvPredAvg <- calculateColwiseAvgOfNumericList(grpsCvPredList, stnLoc)
 	#
-	cvBranch <- list(mods=modList, dfPreds=dfPredList, dfTest=dfTestList, errors=list(avg=avgsTable, SD=SDsTable), corrClass=list(avg=corrClassAvg, SD=corrClassSD), grpsCvPredAvg=grpsCvPredAvg)
+	cvBranch <- list(mods=modList, dfPreds=dfPredList, dfTest=dfTestList, pcaObTrain=pcaObTrainList, errors=list(avg=avgsTable, SD=SDsTable), corrClass=list(avg=corrClassAvg, SD=corrClassSD), grpsCvPredAvg=grpsCvPredAvg)
 	testBranch <- list(predTestClassList=predTestClassList, trueTestClass= trueTestClassList[[1]]) # all the list elements are identical, as the testData did not change down there
 	return(list(cvBranch=cvBranch, testBranch=testBranch))  # the return of function make_Xclass_models_CV_outer
 } # EOF
@@ -470,11 +472,13 @@ make_Xclass_models_boot <- function(cvData, testData, classFunc, R, classOn, typ
 		siDfPred <- dfTrain[oobIndList[[i]],] # get the out-of-bag data; around 1/3 of the original dfTrain
 		grpsBootPred <- unlist(lapply(lapply(split(siDfPred$grouping, siDfPred$grouping), as.character), length))
 		siDdfTest <- dfTest # no change yet
+		pcaObTrain <- NULL
 		if (apCl$pcaRed) {
 			aa <- makePcaVariableReduction(siDfTrain, siDfPred, siDdfTest, apCl)
 			siDfTrain <- aa$dfTrain
 			siDfPred <- aa$dfPred
 			siDdfTest <- aa$dfTest
+			pcaObTrain <- aa$pcaObTrain
 		} # end if pcaRed
 		mod <- classFunc(siDfTrain, apCl)
 		pred <- predict(mod, newdata=siDfPred) # the prediction of the left out observations in the model made from all the other observations
@@ -485,11 +489,11 @@ make_Xclass_models_boot <- function(cvData, testData, classFunc, R, classOn, typ
 		if (!is.null(siDdfTest)) {
 			predTestClass <- predict(mod, newdata=siDdfTest)
 		}
-		singleRound <- list(mod=mod, dfPred=ctKeepData(siDfPred, type, stnLoc), dfTest=ctKeepData(siDdfTest, type, stnLoc), confPerc=confPerc, corrClassPerc=corrClassPerc, predTestClass=predTestClass, grpsBootPred=grpsBootPred)
+		singleRound <- list(mod=mod, dfPred=ctKeepData(siDfPred, type, stnLoc), dfTest=ctKeepData(siDdfTest, type, stnLoc), confPerc=confPerc, corrClassPerc=corrClassPerc, predTestClass=predTestClass, grpsBootPred=grpsBootPred, pcaObTrain=pcaObTrain)
 	} # end dopar
 	###
 	# now we have to re-sort the resulting list (parOutList)
-	modList <- dfPredList <- dfTestList <- confPercList <- corrClassPercList <- predTestClassList <- grpsBootPredList <- list()	
+	modList <- dfPredList <- dfTestList <- confPercList <- corrClassPercList <- predTestClassList <- grpsBootPredList <- pcaObTrainList <- list()	
 	for (i in 1: length(parOutList)) { # resort the list from parOutList
 		modList <- c(modList, list(parOutList[[i]]$mod))
 		dfPredList <- c(dfPredList, list(parOutList[[i]]$dfPred))
@@ -497,7 +501,8 @@ make_Xclass_models_boot <- function(cvData, testData, classFunc, R, classOn, typ
 		confPercList <- c(confPercList, list(parOutList[[i]]$confPerc))
 		corrClassPercList <- c(corrClassPercList, list(parOutList[[i]]$corrClassPerc))
 		predTestClassList <- c(predTestClassList, list(parOutList[[i]]$predTestClass))	
-		grpsBootPredList <- c(grpsBootPredList, list(parOutList[[i]]$grpsBootPred))		
+		grpsBootPredList <- c(grpsBootPredList, list(parOutList[[i]]$grpsBootPred))	
+		pcaObTrainList <- c(pcaObTrainList, list(parOutList[[i]]$pcaObTrain))	
 	} # end for i	
 	#
 	# we are here in a single step of the outer loop
@@ -516,7 +521,7 @@ make_Xclass_models_boot <- function(cvData, testData, classFunc, R, classOn, typ
 	# calculate the colwise average of the groupings for the boot-styled prediction data
 	grpsBootPredAvg <- calculateColwiseAvgOfNumericList(grpsBootPredList, stnLoc)
 	#
-	cvBranch <- list(mods=modList, dfPreds=dfPredList, dfTest=dfTestList, errors=list(avg=avgsTable, SD=SDsTable), corrClass=list(avg=corrClassAvg, SD=corrClassSD), grpsCvPredAvg=grpsBootPredAvg)
+	cvBranch <- list(mods=modList, dfPreds=dfPredList, dfTest=dfTestList, pcaObTrain=pcaObTrainList, errors=list(avg=avgsTable, SD=SDsTable), corrClass=list(avg=corrClassAvg, SD=corrClassSD), grpsCvPredAvg=grpsBootPredAvg)
 	testBranch <- list(predTestClassList=predTestClassList, trueTestClass=dfTest$grouping) 
 	return(list(cvBranch=cvBranch, testBranch=testBranch))  # the return of function make_Xclass_models_boot
 } # EOF
@@ -698,8 +703,12 @@ make_X_classif_handoverType <- function(dataset, md, apCl, types, idString, priI
 } # EOF
 
 
+
+
+
+
 # independent prediction ----------------
-check_indXClassifPrediction_input <- function(indepDataset, cube, ccv, icv, cubeName, dsName, toxls, psd) { ## !! is assigning ccv, icv, toxls, psd
+check_indXClassifPrediction_input <- function(indepDataset, cube, ccv, icv, cubeName, dsName, toxls, info, confirm, aps) { ## !! is assigning ccv, icv, toxls, info, confirm
 	dataset <- indepDataset
 	cPref <- .ap2$stn$p_ClassVarPref
 	ap <- getAnproc(cube)
@@ -744,7 +753,7 @@ check_indXClassifPrediction_input <- function(indepDataset, cube, ccv, icv, cube
 		stop("Please provide a character vector to the argument 'ccv'.", call.=FALSE)
 	}
 #	cns <- colnames(getDataset(cube[[1]])$header) # all datasets must have the same header structure, so just take the first
-	classOn <- unlist(lapply(ap$classif, function(x) x$classOn)) # we are only interested in those class variables on which models have been calculated
+	classOn <- unlist(lapply(ap$classif, function(x) x$classOn)) # we are only interested in those class variables on which models have been calculated, we are collectin them all across all different methods (xda, svm, rnf, ann)
 	if ( !all(ccv %in% classOn) ) { # so we have a manual input for ccv and now we have to check it
 	#	possYvarTotal <- cns[grep(yPref, cns)]
 		indNo <- which(!ccv %in% classOn)
@@ -792,32 +801,63 @@ check_indXClassifPrediction_input <- function(indepDataset, cube, ccv, icv, cube
 		stop("Please provide either TRUE or FALSE to the argument 'toxls' resp. to the argument 'cl_indepPred_exportToExcel' in the settings file.", call.=FALSE)
 	}
 	assign("toxls", toxls, pos=parent.frame(n=1))
+	#
+	if (all(info == "def")) {
+		info <- .ap2$stn$cl_indepPred_showInfo
+	}
+	if (!all(is.logical(info)) | length(info) != 1) {
+		stop("Please provide either TRUE or FALSE to the argument 'info' resp. to the argument 'cl_indepPred_showInfo' in the settings file.", call.=FALSE)
+	}
+	assign("info", info, pos=parent.frame(n=1))	
+	#
+	if (all(confirm == "def")) {
+		confirm <- .ap2$stn$cl_indepPred_confirm
+	}
+	if (!all(is.logical(confirm)) | length(confirm) != 1) {
+		stop("Please provide either TRUE or FALSE to the argument 'confirm' resp. to the argument 'cl_indepPred_confirm' in the settings file.", call.=FALSE)
+	}
+	assign("confirm", confirm, pos=parent.frame(n=1))	
+	#
 } # EOF
 
-printMessagePairing_classif <- function(ccv, icv) {
-	cat(paste0("The following class variables are used for prediction and the corresponding validation:\n\n"))
-	textDF <- data.frame(ccv, icv)
-	colnames(textDF) <- c("Prediction (model)", "    Validation (indep.data)")
-	print(textDF)
-	cat("\n")
+printMessagePairing_classif <- function(ccv, icv, info=TRUE, confirm=TRUE) {
+	if (info) {
+		cat(paste0("The following class variables are used for prediction and the corresponding validation:\n\n"))
+		textDF <- data.frame(ccv, icv)
+		colnames(textDF) <- c("Prediction (model)", "    Validation (independent data)")
+		print(textDF)
+		if (confirm) {
+			cat("\n\nPress enter to continue or escape to abort:")		
+			scan(file = "", n = 1, quiet = TRUE)
+		}
+	}
 	return(invisible(NULL))
 } # EOF
 
-calculateIndepClassifXPrediction_inner <- function(slotName, siType, siClassOn, indepDataset, ccv, icv, mods, apCl, stnLoc) { # mods comes in as a list
-	# which class variable of the independent dataset to take for validation?
-	validationClass <- icv[which(ccv == siClassOn)]
+calculateIndepClassifXPrediction_inner <- function(slotName, siType, siClassOn, indepDataset, ccv, icv, mods, pcaObTrain, apCl, stnLoc, idString, colorLegValues, method, nrCvTrain, nrCvPred) { # mods comes in as a list
+	nrRndSd <- stnLoc$cl_gen_digitsRoundSDTablePerc
 	#
-	dfIndep <- makeDataFrameForClassification(indepDataset, siClassOn) # ! is not flat
+	nc <- apCl$pcaNComp # can be either "max" or the desired numbers
+	if (any(nc == "max")) {
+		nc <- 1: (nrow(indepDataset) - 1)
+	} else { # so we only have numbers
+		if (max(nc) >= nrow(indepDataset)) { # to prevent the user from manually providing more NCs than are available
+			nc <- 1: (nrow(indepDataset) - 1)
+		}
+	} # end else
+	# which class variable of the independent dataset to take for validation?
+	validationClass <- icv[which(ccv == siClassOn)] # siClassOn is subselected from ccv
+	#
+	dfIndep <- dfIndepUse <- makeDataFrameForClassification(indepDataset, siClassOn) # ! is not flat
 	dfIndepValid <- makeDataFrameForClassification(indepDataset, validationClass) # as we can use a class variable named differently for validation
-	# possibly use PCA for data reduction
-
-	if (apCl$pcaRed) {
-		aa <- makePcaVariableReduction(dfTrain=indepDataset, apCl=apCl)
-		dfIndep <- aa$dfTrain
-	} # end if pcaRed
+	#
 	predList <- confPercList <- corrClassPercList <- vector("list", length=length(mods))
 	for (i in 1: length(mods)) {
-		pred <- predict(mods[[i]], newdata=dfIndep)
+		if (apCl$pcaRed) { 
+			NIR <- predict(pcaObTrain[[i]], newdata=dfIndep$NIR)[,nc] # get back the scores for the prediction data
+			dfIndepUse$NIR <- I(NIR)
+		}
+		pred <- predict(mods[[i]], newdata=dfIndepUse)
 		predList[[i]] <- pred
 		conf <- makeConfusionTable(pred, dfIndepValid$grouping)
 		confPercList[[i]] <- calculateConfusionTableInPercent(conf, stnLoc)
@@ -825,54 +865,79 @@ calculateIndepClassifXPrediction_inner <- function(slotName, siType, siClassOn, 
 	} # end for i
 	# get the single cell averages of the confusion in percent, use them to calculate the mean and SD
 	aa <- calculate_Avg_SDs_confPercList(confPercList, stnLoc)
-	avgsTable <- aa$avgsTable
+#	avgsTable <- aa$avgsTable
 	SDsTable <- aa$SDsTable
 	#	
 	# get the average of correct classifications in percent
 	aa <- unlist(corrClassPercList)
-	corrClassAvg <- mean(aa)
-	corrClassSD <- sd(aa)
+	corrClassAvg <- mean(aa) # is the same as indepCorrClassPerc
+	corrClassSD <- round(sd(aa), nrRndSd)
 	#
 	majorVote <- performMajorityVote(predList)   	##### CORE #### 
 	indepConf <- makeConfusionTable(majorVote, dfIndepValid$grouping)
-	indepConfPerc <- calculateConfusionTableInPercent(indepConf, stnLoc)
-	indepCorrClassPerc <- calculateCorrectClassificationInPercent(indepConf, stnLoc)
-
-	return(list(indepConfPerc=indepConfPerc, indepCorrClassPerc=indepCorrClassPerc, corrClassAvg=corrClassAvg, corrClassSD=corrClassSD)		)
+	indepConfPerc <- calculateConfusionTableInPercent(indepConf, stnLoc) # would be the same as avgsTable
+	indepCorrClassPerc <- calculateCorrectClassificationInPercent(indepConf, stnLoc) # is the same as corrClassAvg
+	grpIndPred <- unlist(lapply(lapply(split(indepDataset$header, indepDataset$header[,siClassOn]), function(x) x[,siClassOn]), length))
+	#
+	indPredSummaryList <- list(errors=list(avg=indepConfPerc, SD=SDsTable), corrClass=list(avg=indepCorrClassPerc, SD=corrClassSD)) 
+	meta <- list(slotName=slotName, type=siType, classOn=siClassOn, idString=idString, colorLegValues=colorLegValues, apCl=apCl, method=method) 
+	numbers <- list(nrCvTrain=nrCvTrain, nrCvPred=nrCvPred, grpIndPred=grpIndPred)
+	#
+	return(list(indPredSummaryList=indPredSummaryList, meta=meta, numbers=numbers))
 } # EOF
 
-applyDPTtoIndepDataset <- function(indepDataset, ap) {
+apply_dpt_ssc_dpt_toIndepDataset <- function(indepDataset, ap, classes, values) { # siClass and siValues are coming in as data.frame from the corresponding row in the splitVars from the cpt
 	# apply the data pretreatment modules within ap to indepDataset
-	allDpt <- unlist(ap$dpt$dptModules)
-	if (is.null(allDpt)) {
-		return(indepDataset)
-	} else {
-		return(do_dptSeq(indepDataset, allDpt))
+	allDpt <- ap$dpt$dptModules
+	dptPre <- allDpt$dptPre
+	dptPost <- allDpt$dptPost
+	if (!is.null(dptPre)) {
+		indepDataset <- do_dptSeq(indepDataset, dptPre)
+		if (nrow(indepDataset) == 0) {
+			stop(paste0("Sorry, the combination `", paste(classes, values, collapse=", "), "` yielded not results."), call.=FALSE)
+		}
 	}
+	indepDataset <- ssc_s(indepDataset, classes, values)
+	if (!is.null(dptPost)) {
+		indepDataset <- do_dptSeq(indepDataset, dptPost)		
+	}
+	return(indepDataset)
 } #  EOF
 
-calculateIndepClassifXPrediction <- function(indepDataset, cube, ccv, icv, ap) {
+calculateIndepClassifXPrediction <- function(indepDataset, cube, ccv, icv, ap, cubeID) { # this is called from plot_classifX_indepPred
 	stnLoc <- .ap2$stn
 	#
 	resultList <- vector("list", length=length(cube))
 	clNames <- c("xda", "rnf", "svm", "ann")
+	splitVars <- cube@cpt@splitVars
 	for (i in 1: length(cube)) { # going through the cube
 	#	cutIndepData <- adaptIndepDatasetForWls(indepDataset, getDataset(cube[[i]])) # returns NULL if independent dataset is out of range of cube-dataset
 		cutIndepData <- indepDataset
+		cutIndepData <- apply_dpt_ssc_dpt_toIndepDataset(indepDataset, ap, splitVars$classes[i,,drop=FALSE], splitVars$values[i,,drop=FALSE]) # is applying the dpt.pre, then any possible splitting, then the dpt.post
 		idString <- adaptIdStringForDpt(ap, getIdString(cube[[i]]))
 		setSlotResList <- vector("list", length=4); names(setSlotResList) <- clNames
+		set <- cube[[i]]
 		for ( k in 1 : 4) { # we have four slots for classifiers in the set; going through the four slots
-			if (!is.null(slot(cube[[i]], clNames[k]))) {
-				apCl <- slot(cube[[i]], clNames[k])$apCl
+			sl <- slot(set, clNames[k]) #### extract the current slot ###### SLOT #####
+			if (!is.null(sl)) {
+				apCl <- sl$apCl
 				type <- apCl$type
-				classOn <- apCl$classOn
+				thisClassOn <- apCl$classOn
+				ind <- which(ccv %in% thisClassOn)
+				classOn <- ccv[ind] ## !!! test this !!! --> to leave out all the classOns that we do have models on, but that we do not want, as they are not included in ccv
 				typeList <- vector("list", length=length(type)); names(typeList) <- type
 				classOnList <- vector("list", length=length(classOn)); names(classOnList) <- classOn
 				for (ty in 1: length(type)) {
 					for (co in 1: length(classOn)) {
-						sl <- slot(cube[[i]], clNames[k])
-						classOnList[[co]] <- calculateIndepClassifXPrediction_inner(clNames[k], type[ty], classOn[co], cutIndepData, ccv, icv, mods=slot(cube[[i]], clNames[k])$cvBranch[[ty]]$cvSingle[[co]][[1]]$mods, apCl, stnLoc) # the last "1" is because we are sure to have only a single set of models (no testing!)
-					} # end for co : through classOn
+						colorLegValues <- extractColorLegendValues(cutIndepData, classOn[co])
+						classOnList[[co]] <- calculateIndepClassifXPrediction_inner(clNames[k], type[ty], classOn[co], cutIndepData, ccv, icv, 
+											mods=sl$cvBranch[[ty]]$cvSingle[[co]][[1]]$mods, # the last "1" is because we are sure to have only a single set of models (no testing!)
+											pcaObTrain=sl$cvBranch[[ty]]$cvSingle[[co]][[1]]$pcaObTrain, 
+											apCl, stnLoc, idString, colorLegValues, 
+											method = sl$cvBranch[[ty]]$method[[co]],
+											nrCvTrain = sl$numbers[[ty]]$nrsCvTrain[[co]],
+											nrCvPred = sl$numbers[[ty]]$nrsCvPred[[co]] )  
+					} # end for co: through classOn
 					typeList[[ty]] <- classOnList
 				} # end for ty: through type
 				setSlotResList[[k]] <- typeList
@@ -880,41 +945,8 @@ calculateIndepClassifXPrediction <- function(indepDataset, cube, ccv, icv, ap) {
 		} # end for k (the four slots)
 		resultList[[i]] <- setSlotResList # moving over the cube elements		
 	} # end for i (going through the cube)
-	return(resultList)
+	return(new("aquap_ipl", anproc=getAnproc(cube), metadata=getMetadata(cube), cubeID=cubeID, resultList))
 } # EOF
-
-plot_classifX_indepPred <- function(indepDataset, cube, ccv=NULL, icv=NULL, aps="def", pl=TRUE, toxls="def", dpt=FALSE, ...) {
-	autoUpS()
-	dsName <- deparse(substitute(indepDataset))
-	cubeName <- deparse(substitute(cube))
-	check_indXClassifPrediction_input(indepDataset, cube, ccv, icv, cubeName, dsName, toxls) ## !! is assigning ccv, icv, toxls
-	ap1 <- getap(.lafw_fromWhere="cube", cube=cube)
-	anp2 <- doApsTrick(aps, cube, ...)
-	if (dpt) {
-		indepDataset <- applyDPTtoIndepDataset(indepDataset, ap1)
-	}	
-	if (!.ap2$stn$allSilent & .ap2$stn$cl_indepPred_printPairingMsg) {
-		printMessagePairing_classif(ccv, icv)
-	}	
-	if (length(cube) == 1) {ad1 <- ""} else {ad1 <- "s"};  	if (length(ccv) == 1) {ad2 <- ""} else {ad2 <- "s"}
-	if (!.ap2$stn$allSilent) {cat(paste0("Calc. classification predictions for ", length(cube), " cube element", ad1, " (", length(ccv), " model", ad2, " each)... "))}
-	predList <- calculateIndepClassifXPrediction(indepDataset, cube, ccv, icv, ap1) #### CORE #### calculation 
-	if (!.ap2$stn$allSilent) {cat("ok\n")}
-	###
-	if (toxls) {
-		if (!.ap2$stn$allSilent) {cat(paste0("Exporting predicted data to excel file... "))}
-#		exportPredListToExcel(cube, predList, anp2) #### export to excel ####
-		if (!.ap2$stn$allSilent) {cat("ok\n")}
-	} # end predToXls
-	###
-	# now plot, please (use the ap2 now!)
-	if (pl) {
-#		makeIndepPlsrValidationPlots(cube, indepDataset, predResults=predList, anp2, dsName, psd) #### plot the results ####
-	}
-	###	
-	return(invisible(predList))
-} # EOF
-
 
 
 

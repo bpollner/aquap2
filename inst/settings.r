@@ -246,6 +246,7 @@ stn <- list(
 	cl_plot_baseTextSizeTables = 10, 		## the basic text size for tables (using gridExtra::ttheme_default)
 	cl_plot_CharForCV = "Crossvalidation",	## the character added to the title for crossvalidation graphics
 	cl_plot_CharForTest = "Test", 			## the character added to the title for test graphics
+	cl_plot_CharForIndepPredExtData = "Independent prediction external data",  ## the character added to the title for graphics with external provided independent data
 	cl_plot_CharForPcaReduction = "pcaRed", ## the character indicating that a PCA data reduction took place
 	cl_plot_avgTableTitle = "avg%",			## the character defining the title of the confusion tables holding the averages
 	cl_plot_sdTableTitle = "sd%", 			## the character defining the title of the confusion tables holding the standard deviations
@@ -254,7 +255,8 @@ stn <- list(
 	cl_plot_colorErrorBar = "black",	 	## the color for the error bars. # darkviolet
 	cl_indepPred_exportToExcel = TRUE, 		## if an excel file with the results of an independent prediction should be produced.
 	cl_indepPred_printPairingMsg = TRUE, 	## if a message with the pairing of model and independent variable for validation should be displayed
-
+	cl_indepPred_confirm = TRUE, 			## if confirmation is required after showing the pairing information (see below) and before continuing the independent predictions
+	cl_indepPred_showInfo = TRUE, 			## if information should be displayed regarding the pairing of model-variables and the variables in the independent dataset used for validation. 
 
 
 	## plotting, PDFs

@@ -1616,6 +1616,7 @@ gdmm <- function(dataset, ap=getap(), noiseFile="def", tempFile="def") {
 	cube@cp <- cp
 	cube@cpt <- cpt
 	cube@aqgRan <- rangesColl
+	cube@timestamp <- as.character(Sys.time())
 	return(cube)
 } # EOF
 

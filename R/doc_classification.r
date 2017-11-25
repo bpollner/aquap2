@@ -212,6 +212,9 @@ NULL
 #' \item For both traditional crossvalidation and the bootstrap "crossvalidation", 
 #' consecutive scans of the same sample are always excluded resp. included 
 #' together.
+#' \item A traditional crossvalidation (no bootstrap) is indicated via a
+#' \code{.} after the name of the classificaiton-variable, while the bootstrap
+#' process is indicated via a \code{`}.
 #' }
 #' @family Classification Helpers
 #' @name classification_helpers

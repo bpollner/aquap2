@@ -16,7 +16,8 @@ setClass("aqg_calc", slots = c(ID="character", classVar="character", itemIndex="
 #setClass("aqg_cr", slots = c(res="list", ran="listNull"))
 #setClass("aquap_extMod", slots=c(type="character", mod="listNull"))
 setClass("aquap_set", slots=c(dataset="aquap_data", idString="character", pca="listNull", plsr="listNull", simca="listNull", aquagr="listNull", extraModels="listNull", xda="listNull", rnf="listNull", svm="listNull", ann="listNull")) 
-setClass("aquap_cube", slots=c(metadata="aquap_md", anproc="aquap_ap", cp="data.frame", cpt="aquap_cpt", aqgRan="listNull"), contains="list")
+setClass("aquap_cube", slots=c(metadata="aquap_md", anproc="aquap_ap", cp="data.frame", cpt="aquap_cpt", aqgRan="listNull", timestamp="character"), contains="list")
+setClass("aquap_ipl", slots=c(metadata="aquap_md", anproc="aquap_ap", cubeID="character"), contains="list")
 # setClass("aquap_xda", slots=c(daType="character", classOn="character"), contains="list")
 # setClass("aquap_noiseDist", slots=c(timestamp="POSIXct", version="character"), contains="matrix")
 
@@ -127,6 +128,7 @@ setGeneric("getExpName", function(object) standardGeneric("getExpName"))
 setMethod("getExpName", "aquap_md", function(object) object$meta$expName)
 setMethod("getExpName", "aquap_data", function(object) object@metadata$meta$expName)
 setMethod("getExpName", "aquap_cube", function(object) object@metadata$meta$expName)
+setMethod("getExpName", "aquap_ipl", function(object) object@metadata$meta$expName)
 
 setGeneric("getPCAObject", function(object) standardGeneric("getPCAObject"))
 setMethod("getPCAObject", "aquap_set", function(object) object@pca$model)
@@ -181,10 +183,12 @@ setMethod("getNIR", "aquap_set", definition=getNIR_df_set)
 setGeneric("getMetadata", function(object) standardGeneric("getMetadata"))
 setMethod("getMetadata", "aquap_data", function(object) object@metadata)
 setMethod("getMetadata", "aquap_cube", function(object) object@metadata)
+setMethod("getMetadata", "aquap_ipl", function(object) object@metadata)
 
 setGeneric("getAnproc", function(object) standardGeneric("getAnproc"))
 setMethod("getAnproc", "aquap_cube", function(object) object@anproc)
 setMethod("getAnproc", "aquap_data", function(object) object@anproc)
+setMethod("getAnproc", "aquap_ipl", function(object) object@anproc)
 
 ## SIMCA
 setGeneric("getApSimcaClassList", function(object) standardGeneric("getApSimcaClassList"))

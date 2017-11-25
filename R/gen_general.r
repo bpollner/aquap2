@@ -1122,9 +1122,9 @@ setCheck_NumericLengthOne <- function(num, char) {
 	}
 }
 
-doApsTrick <- function(aps, cube, ...) {
+doApsTrick <- function(aps, cube, allowCube=TRUE, ...) {
 	aps <- checkApsChar(aps)
-	if (aps == "cube") {
+	if (aps == "cube" & allowCube) {
 		ap <- getap(.lafw_fromWhere="cube", cube=cube, ...)			 # the ... are here used for additionally modifying (if matching arguments) the analysis procedure obtained from the cube
 	} else {
 		check_apDefaults(fn=aps)
