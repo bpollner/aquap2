@@ -449,6 +449,7 @@ make_Xclass_models_boot <- function(cvData, testData, classFunc, R, classOn, typ
 	oobIndList <- apply(indMat, 1, function(x) pool[which(! pool %in% x)]) # get the out-of-bag indices, have them in a list
 	if (FALSE) { ## for DEV only
 		ratioCollect <- vector("numeric", nrow(indMat))
+		print(str(indMat)); print(nrow(indMat)); wait()
 		for (i in 1: nrow(indMat)) {
 			cat("\n")
 			cat(paste0("Nr of samples drawn: ", length(indMat[i,]), "; Nr or observations: ", nrow(dfTrain),"\n"))
@@ -459,7 +460,8 @@ make_Xclass_models_boot <- function(cvData, testData, classFunc, R, classOn, typ
 			cat(paste0("Nr of samples: ", length(indMat[i,]), "\n")); cat(paste0("Nr oob: ", length(oobIndList[[i]]), "\n")); cat(paste0("Ratio In/oob = ", round(ratio,1))) 
 			cat("\n\n")
 		} # end for i
-		cat(paste0("Average ratio In/oob: ", round(mean(ratioCollect),1), "\n"))		
+		cat(paste0("Average ratio In/oob: ", round(mean(ratioCollect),1), "\n"))	
+		wait()
 	} # end DEV
 	if (doPar) {
 		registerParallelBackend()
@@ -578,8 +580,8 @@ make_Xclass_models_inner <- function(cvData, testData, classFunc, classOn, md, a
 			innerList <- make_Xclass_models_boot(cvData, testData, classFunc, R=bootR, classOn, type, apCl, stnLoc) ##### CORE ######
 #			method <- paste0("boot.", bootR, ", oob.min=", floor(minNrow / 3 ))  # it showed that via the bootstrap on average 1/3 of the data are kept out of the bag
 			method <- paste0("boot.", bootR, " ", cvBootFactor, "x", minNrow) 
-			nrsCvTrain <- nrow(cvData)
-			nrsCvPred <- round(nrow(cvData)/3, rndAno)			
+			nrsCvTrain <- round(nrow(cvData) - (nrow(cvData)/2.7), rndAno) # the in the bag part
+			nrsCvPred <- round(nrow(cvData)/2.7, rndAno) # the oob part
 		} # end doThisBoot
 	} # end else
 	#
@@ -904,7 +906,7 @@ apply_dpt_ssc_dpt_toIndepDataset <- function(indepDataset, ap, classes, values) 
 	return(indepDataset)
 } #  EOF
 
-calculateIndepClassifXPrediction <- function(indepDataset, cube, ccv, icv, ap, cubeID) { # this is called from plot_classifX_indepPred
+calculateIndepClassifXPrediction <- function(indepDataset, cube, ccv, icv, ap, cubeID) { # this is called from plot_classifX_indepPred (at the plotting functions)
 	stnLoc <- .ap2$stn
 	#
 	resultList <- vector("list", length=length(cube))

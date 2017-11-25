@@ -27,6 +27,9 @@ training data, and the resulting scores are then used for classification.
 \item For both traditional crossvalidation and the bootstrap "crossvalidation", 
 consecutive scans of the same sample are always excluded resp. included 
 together.
+\item A traditional crossvalidation (no bootstrap) is indicated via a "."
+after the name of the classificaiton-variable, while the bootstrap
+process is indicated via a "`".
 }
 }
 \seealso{

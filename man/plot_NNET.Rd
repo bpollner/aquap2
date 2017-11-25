@@ -39,6 +39,7 @@ classification
 Other Plot functions: \code{\link{plot,aquap_cube,missing-method}},
   \code{\link{plot,aquap_data,missing-method}},
   \code{\link{plot_aqg}},
+  \code{\link{plot_classifX_indepPred}},
   \code{\link{plot_da,aquap_cube-method}},
   \code{\link{plot_pca,aquap_cube-method}},
   \code{\link{plot_pls,aquap_cube-method}},

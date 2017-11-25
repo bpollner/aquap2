@@ -92,7 +92,8 @@ Other Calc. arguments: \code{\link{calc_SVM_args}},
 
 Other Classification functions: \code{\link{calc_SVM_args}},
   \code{\link{calc_discrimAnalysis_args}},
-  \code{\link{calc_randomForest_args}}
+  \code{\link{calc_randomForest_args}},
+  \code{\link{plot_classifX_indepPred}}
 
 Other NNET documentation: \code{\link{plot_NNET_args}},
   \code{\link{plot_nnet,aquap_cube-method}}

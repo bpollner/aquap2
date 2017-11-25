@@ -43,7 +43,7 @@ secureTRUE_FALSE_inColnames <- function(tbl) {
 ### CORE ###
 plot_classif_typeClassOn <- function(type, classOn, cvSummaryList, testSummaryList, method, apCl, ap, expName, idString, colorLegValues, apClUser, nrCvTrain, nrCvPred, grpCvPred, nrTestCv, nrTestPred, grpTestPred, exDat) { # we are already in the PDF or not
 #	cat(paste0("Type: ", type, "; classOn: ", classOn, " (", method, ")\n")) ; cat("CV Summary \n") ; print(cvSummaryList); cat("Test Summary \n"); print(testSummaryList); wait()
-	cat(paste0("nrCvTrain: ", nrCvTrain, "; nrCvPred: ", nrCvPred, "\ngrpCvPred:\n")); print(grpCvPred); cat("\n\n\n")
+#	cat(paste0("nrCvTrain: ", nrCvTrain, "; nrCvPred: ", nrCvPred, "\ngrpCvPred:\n")); print(grpCvPred); cat("\n\n\n")
 	# ap is the ap coming from where the user wants it (the aps trick)
 	# apClUser is the classification specific part of the ap taken from the user-defined ap (above); this can be used for real-time plotting changes
 	# apCl is the classification specific part taken from the master list, i.e. that was added to the calculation results
@@ -149,7 +149,7 @@ plot_classif_typeClassOn <- function(type, classOn, cvSummaryList, testSummaryLi
 			equalsCharSub <- equalsCharCap <- tilde
 		} else {
 			nrCvTrain_use <- nrCvTrain - 0 # XXX Wrong ###
-			equalsCharSub <- "="
+			if(is.wholenumber(nrCvTrain_use)) {equalsCharCap <- "="} else {equalsCharCap <- tilde}
 		}
 	} else { # so we are in traditional CV
 		equalsCharCap <- "="
@@ -182,8 +182,11 @@ plot_classif_typeClassOn <- function(type, classOn, cvSummaryList, testSummaryLi
 	}
 	########################
 	# arrange graphics and tables, check for NULL test, and finally plot
+
 	if (addConfTables) {
+		options(warn=-1)
 		cvPlotAll <- gridExtra::arrangeGrob(cvPlot, cvTablesGrob, nrow=1, ncol=2, widths=c(3,1))
+		options(warn=0)
 		if (!is.null(testPlot)) {
 			testPlotAll <- gridExtra::arrangeGrob(testPlot, testTablesGrob, nrow=1, ncol=2, widths=c(3,1))
 		}
@@ -191,6 +194,7 @@ plot_classif_typeClassOn <- function(type, classOn, cvSummaryList, testSummaryLi
 		cvPlotAll <- cvPlot
 		testPlotAll <- testPlot
 	} # end if addConfTables
+
 	if (cvTestInOnePage) {
 		if (!is.null(testPlotAll)) {
 			gridExtra::grid.arrange(cvPlotAll, testPlotAll, nrow=2, ncol=1) # "grid.arrange" includes plotting
@@ -293,8 +297,8 @@ plot_classif_PredListElement <- function(siPredLi, expName, apCube, anpPlot) { #
 makeIndepClassifXValidationPlots <- function(predList, anpPlot) {
 	apCube <- getAnproc(predList)
 	expName <- getExpName(predList)
-	where <- ap$genPlot$where
-	fns <- ap$genPlot$fns
+	where <- anpPlot$genPlot$where 
+	fns <- anpPlot$genPlot$fns
 	height <- (.ap2$stn$pdf_Height_classif) / 2
 	width <- .ap2$stn$pdf_Width_classif
 	path <- .ap2$stn$fn_results
@@ -373,12 +377,12 @@ makeIndepClassifXValidationPlots <- function(predList, anpPlot) {
 #' \code{cl_indepPred_exportToExcel} in the settings file is used. Set to TRUE 
 #' or FALSE to directly control if export of predicted data to excel should be 
 #' performed or not.
-#' @info 'def' or logical. If left at the default 'def' the value from 
+#' @param info 'def' or logical. If left at the default 'def' the value from 
 #' \code{cl_indepPred_showInfo} in the settings file is used. Set to TRUE 
 #' or FALSE to directly control if information regarding the pairing of class 
 #' variables in the model and those in the independent dataset used for validation 
 #' should be displayed.
-#' @confirm 'def' or logical. If left at the default 'def' the value from 
+#' @param confirm 'def' or logical. If left at the default 'def' the value from 
 #' \code{cl_indepPred_confirm} in the settings file is used. Set to TRUE 
 #' or FALSE to directly control if manual confirmation is required after the 
 #' (possible) display of pairing-information (see above). Ignored if \code{info} 

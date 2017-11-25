@@ -804,9 +804,9 @@ do_blowup <- function(dataset, grp=NULL, tn="x10", an="100%", cst=TRUE, conf=TRU
 			header[,i] <- as.factor(header[,i]) # re-factorize if necessary
 		}
 	} # end for i
-	dataset@.Data <- data.frame(I(header), I(colRep), I(NIR))
+	out <- new("aquap_data", data.frame(I(header), I(colRep), I(NIR)), metadata=dataset@metadata, anproc=dataset@anproc, ncpwl=dataset@ncpwl, version=dataset@version)
 	if (!.ap2$stn$allSilent) {cat(" ok.\n")}
-	return(dataset)
+	return(out)
 	## XXX still required:
 	# include consec. scans together
 } # EOF
