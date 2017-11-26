@@ -564,10 +564,15 @@ plot_plsr_checkDefaultsParams <- function(rv.bandwidth, rv.adLine, rv.col, rv.lt
 ### CORE ### CORE ###
 plot_pls_cube <- function(cube, aps="def", rv.bandwidth="def", rv.adLine="def", rv.col="def", rv.lty="def", psd="def", ...) {
 	autoUpS()
+	printEmpty <- .ap2$stn$gen_plot_printEmptySlots
+	#	
 	ap <- doApsTrick(aps, cube, ...)	
 	ap <- ap_cleanZeroValuesCheckExistenceDefaults(ap, dataset=getDataset(cube[[1]]), haveExc=FALSE) # just take the first dataset, as we mainly need the header (and the wavelengths are already checked.. )
 	if (is.null(ap$plsr)) {
-		return(cat("*** PLSR model not available or not selected for plotting \n"))
+		if (printEmpty) {
+			cat("*** PLSR model not available or not selected for plotting \n")
+		}	
+		return(NULL)
 	}
 	plot_plsr_checkDefaultsParams(rv.bandwidth, rv.adLine, rv.col, rv.lty, psd) # is assigning here !!
 	##

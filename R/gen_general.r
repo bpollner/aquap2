@@ -1127,6 +1127,7 @@ doApsTrick <- function(aps, cube, allowCube=TRUE, ...) {
 	if (aps == "cube" & allowCube) {
 		ap <- getap(.lafw_fromWhere="cube", cube=cube, ...)			 # the ... are here used for additionally modifying (if matching arguments) the analysis procedure obtained from the cube
 	} else {
+	#	if (aps == "cube") {aps <- "defFile"}
 		check_apDefaults(fn=aps)
 		ap <- getap(fn=aps, ...) # load from file, possibly modify via ...
 	}

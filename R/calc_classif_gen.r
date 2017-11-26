@@ -859,7 +859,7 @@ calculateIndepClassifXPrediction_inner <- function(slotName, siType, siClassOn, 
 			NIR <- predict(pcaObTrain[[i]], newdata=dfIndep$NIR)[,nc] # get back the scores for the prediction data
 			dfIndepUse$NIR <- I(NIR)
 		}
-		pred <- predict(mods[[i]], newdata=dfIndepUse)
+		pred <- predict(mods[[i]], newdata=dfIndepUse) ## problem when in package: had to load the complete library for all the classifier packages. Do not understand why - it worked before (see far above).
 		predList[[i]] <- pred
 		conf <- makeConfusionTable(pred, dfIndepValid$grouping)
 		confPercList[[i]] <- calculateConfusionTableInPercent(conf, stnLoc)

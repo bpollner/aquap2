@@ -32,10 +32,10 @@ makeAvgLegTxt <- function(naNum, char="~") { # the input is a named numeric
 
 secureTRUE_FALSE_inColnames <- function(tbl) {
 	if (any(c("TRUE", "FALSE") %in% rownames(tbl)) ) {
-		rownames(tbl) <- paste0(rownames(tbl), "´")
+		rownames(tbl) <- paste0(rownames(tbl), ".")
 	}
 	if (any(c("TRUE", "FALSE") %in% colnames(tbl)) ) {
-		colnames(tbl) <- paste0(colnames(tbl), "´")
+		colnames(tbl) <- paste0(colnames(tbl), ".")
 	}	
 	return(tbl)
 } # EOF
@@ -145,7 +145,8 @@ plot_classif_typeClassOn <- function(type, classOn, cvSummaryList, testSummaryLi
 	nrCvTrain_use <- nrCvTrain
 	if (grepl("boot", method)) {
 		if (!exDat) { # exDat: we provide external data for independent classification
-			nrCvTrain_use <- nrCvTrain - real_nrCvPred # in case of boot we give out the real number of observations that the models were built on
+#			nrCvTrain_use <- nrCvTrain - real_nrCvPred # in case of boot we give out the real number of observations that the models were built on # this was used before the appearance of the external data
+			nrCvTrain_use <- nrCvTrain - 0 #  
 			equalsCharSub <- equalsCharCap <- tilde
 		} else {
 			nrCvTrain_use <- nrCvTrain - 0 # XXX Wrong ###
@@ -166,7 +167,8 @@ plot_classif_typeClassOn <- function(type, classOn, cvSummaryList, testSummaryLi
 	errBarWidth <- 0.25; if (nrow(cvConfAvg) > 7) {errBarWidth <- 0.1} 
 	########################
 	# prepare the plots	
-	limits <- ggplot2::aes(ymax = avg + SD, ymin = avg - SD)
+#	limits <- ggplot2::aes(ymax = avg + SD, ymin = avg - SD) ### !!! ### appears to be wrong, as there are cases where we got below 0 -- and that cant well be
+	limits <- ggplot2::aes(ymax = avg + (SD/2), ymin = avg - (SD/2)) # SD is a colname in the dataframe
 	geomBar <- ggplot2::geom_bar(stat = "identity", position = ggplot2::position_dodge())
 	geomErrBar <- ggplot2::geom_errorbar(limits, width=errBarWidth, position = ggplot2::position_dodge(width = 0.9), color=colorErrorbar)
 	custColFil <- ggplot2::scale_fill_manual(values=as.character(grpCols)) # strange, but that is what is needed. yes.
@@ -178,7 +180,7 @@ plot_classif_typeClassOn <- function(type, classOn, cvSummaryList, testSummaryLi
 	cvPlot <- ggplot2::ggplot(cvDF, ggplot2::aes(fill=predicted, y=avg, x=true)) + geomBar + geomErrBar + yLim + custColFil + ggplot2::labs(title=cvTitle, subtitle=subCV, caption=comCap, x=xlab, y=ylab)
 	testPlot <- testPlotAll <- NULL
 	if (!is.null(testDF)) {
-		testPlot <- ggplot2::ggplot(testDF, ggplot2::aes(fill=predicted, y=avg, x=true)) + geomBar + geomErrBar + custColFil + ggplot2::labs(title=testTitle, subtitle=subTest, caption=comCap, x=xlab, y=ylab)		
+		testPlot <- ggplot2::ggplot(testDF, ggplot2::aes(fill=predicted, y=avg, x=true)) + geomBar + geomErrBar + yLim + custColFil + ggplot2::labs(title=testTitle, subtitle=subTest, caption=comCap, x=xlab, y=ylab)		
 	}
 	########################
 	# arrange graphics and tables, check for NULL test, and finally plot
@@ -255,12 +257,12 @@ plot_classif_generalHandover <- function(cube, ap, slotChar, apClCube, apClUser)
 		height <- height/2
 	}
 	path <- .ap2$stn$fn_results
-	suffix <- paste0("classification")
+	suffix <- paste0("classification_", slotChar)
 #	message <- paste0("classification")
 	expName <- getExpName(cube)
 	filename <- paste(expName, suffix, sep="_")
 	filename <- paste(path, "/", filename, fns, ".pdf", sep="")
-	if (!.ap2$stn$allSilent & (where == "pdf" )) {cat("Plotting classification... ")}
+	if (!.ap2$stn$allSilent & (where == "pdf" )) {cat(paste0("Plotting ", slotChar, " classification... "))}
 	if (where == "pdf") { pdf(file=filename, width, height, onefile=TRUE) }
 	if (where != "pdf" & Sys.getenv("RSTUDIO") != 1) {dev.new(height=height, width=width)}	
 	for (i in 1: length(cube)) {

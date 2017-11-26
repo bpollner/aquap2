@@ -1,43 +1,63 @@
 plot_da_cube <- function(cube, aps="def", ...) {
 	autoUpS()
+	printEmpty <- .ap2$stn$gen_plot_printEmptySlots
+	#
 	ap <- doApsTrick(aps, cube, ...)
 	ap <- ap_cleanZeroValuesCheckExistenceDefaults(ap, dataset=getDataset(cube[[1]]), haveExc=FALSE) # just take the first dataset, as we mainly need the header (and the wavelengths are already checked.. )
 	apCu <- getAnproc(cube)
 	if (is.null(ap$classif$da)) {
-		return(cat("*** DA model not available or not selected for plotting \n"))
+		if (printEmpty) {
+			cat("*** DA model not available or not selected for plotting \n")
+		}
+		return(NULL)
 	}
 	plot_classif_generalHandover(cube, ap, slotChar="xda", apCu$classif$da, ap$classif$da)
 } # EOF
 
 plot_rnf_cube <- function(cube, aps="def", ...) {
 	autoUpS()
+	printEmpty <- .ap2$stn$gen_plot_printEmptySlots
+	#	
 	ap <- doApsTrick(aps, cube, ...)
 	ap <- ap_cleanZeroValuesCheckExistenceDefaults(ap, dataset=getDataset(cube[[1]]), haveExc=FALSE) # just take the first dataset, as we mainly need the header (and the wavelengths are already checked.. )
 	apCu <- getAnproc(cube)
 	if (is.null(ap$classif$rnf)) {
-		return(cat("*** Random forest model not available or not selected for plotting \n"))
+		if (printEmpty) {
+			cat("*** Random forest model not available or not selected for plotting \n")
+		}
+		return(NULL)
 	}
 	plot_classif_generalHandover(cube, ap, slotChar="rnf", apCu$classif$rnf, ap$classif$rnf)	
 } # EOF
 
 plot_svm_cube <- function(cube, aps="def", ...) {
 	autoUpS()
+	printEmpty <- .ap2$stn$gen_plot_printEmptySlots
+	#	
 	ap <- doApsTrick(aps, cube, ...)
 	ap <- ap_cleanZeroValuesCheckExistenceDefaults(ap, dataset=getDataset(cube[[1]]), haveExc=FALSE) # just take the first dataset, as we mainly need the header (and the wavelengths are already checked.. )
 	apCu <- getAnproc(cube)
 	if (is.null(ap$classif$svm)) {
-		return(cat("*** SVM model not available or not selected for plotting \n"))
+		if (printEmpty) {
+			cat("*** SVM model not available or not selected for plotting \n")
+		}
+		return(NULL)
 	}
 	plot_classif_generalHandover(cube, ap, slotChar="svm", apCu$classif$svm, ap$classif$svm)
 } # EOF
 
 plot_nnet_cube <- function(cube, aps="def", ...) {
 	autoUpS()
+	printEmpty <- .ap2$stn$gen_plot_printEmptySlots
+	#	
 	ap <- doApsTrick(aps, cube, ...)
 	ap <- ap_cleanZeroValuesCheckExistenceDefaults(ap, dataset=getDataset(cube[[1]]), haveExc=FALSE) # just take the first dataset, as we mainly need the header (and the wavelengths are already checked.. )
 	apCu <- getAnproc(cube)
 	if (is.null(ap$classif$nnet)) {
-		return(cat("*** NNET model not available or not selected for plotting \n"))
+		if (printEmpty) {
+			cat("*** NNET model not available or not selected for plotting \n")
+		}
+		return(NULL)
 	}
 	plot_classif_generalHandover(cube, ap, slotChar="ann", apCu$classif$nnet, ap$classif$nnet)
 } # EOF

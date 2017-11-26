@@ -249,10 +249,15 @@ plot_pca_checkDefaultsParams <- function(ld.bandwidth, ld.adLines, ld.col, ld.lt
 #### CORE ###
 plot_pca_cube <- function(cube, aps="def", ld.bandwidth="def", ld.adLines="def", ld.col="def", ld.lty="def", ...) {
 	autoUpS()
+	printEmpty <- .ap2$stn$gen_plot_printEmptySlots
+	#
 	ap <- doApsTrick(aps, cube, ...)
 	ap <- ap_cleanZeroValuesCheckExistenceDefaults(ap, dataset=getDataset(cube[[1]]), haveExc=FALSE) # just take the first dataset, as we mainly need the header (and the wavelengths are already checked.. )
 	if (is.null(ap$pca)) {
-		return(cat("*** PCA model not available or not selected for plotting \n"))
+		if (printEmpty) {
+			cat("*** PCA model not available or not selected for plotting \n")
+		}
+		return(NULL)	
 	}
 	plot_pca_checkDefaultsParams(ld.bandwidth, ld.adLines, ld.col, ld.lty) # is assigning here !!
 	where <- ap$genPlot$where
