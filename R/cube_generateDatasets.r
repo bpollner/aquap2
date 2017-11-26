@@ -22,7 +22,14 @@ makeSingleBlock <- function(ClassVar, header, metaData) {
 	classCol <- matrix(ClassVar, nrow=length(levelsChar) , ncol=1)
 	valueCol <- matrix(levelsChar)
 	out <- cbind(classCol, valueCol)
-	out
+	# now resort if the value is all numeric
+	options(warn=-1)
+	nums <- as.numeric(out[,2])
+	options(warn=-0)
+	if (all(is.numeric(nums))) {
+		out[,2] <- out[,2][order(nums)]
+	}
+	return(out)
 } # EOF
 
 multiplyBlocks <- function(block1, block2) {

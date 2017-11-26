@@ -556,7 +556,7 @@ make_Xclass_models_inner <- function(cvData, testData, classFunc, classOn, md, a
 		if (enfCritVal) { # if the critical value should be enforced or not
 			if (critLowerValue > minNrowInCV ) {
 				doThisCV <- FALSE
-				message(paste0("Critical value (", critLowerValue, ") for crossvalidation not reached. Classification on `", classOn, "` not performed.\nTurn off this behaviour at `cl_gen_enforceCriticalValue` in the settings.r file."))
+				stop(paste0("Critical value (", critLowerValue, ") for crossvalidation not reached. Classification on `", classOn, "` not performed.\nTurn off this behaviour at `cl_gen_enforceCriticalValue` in the settings.r file."), call.=FALSE)
 			}
 		} # end if enfCritVal
 		if (doThisCV) {
@@ -571,7 +571,7 @@ make_Xclass_models_inner <- function(cvData, testData, classFunc, classOn, md, a
 		if (enfCritVal) { # if the critical value should be enforced or not
 			if (critLowerValue > floor(minNrow/3)) {
 				doThisBoot <- FALSE
-				message(paste0("Critical value (", critLowerValue, ") for boot-styled CV not reached. Classification on `", classOn, "` not performed.\nTurn off this behaviour at `cl_gen_enforceCriticalValue` in the settings.r file."))				
+				stop(paste0("Critical value (", critLowerValue, ") for boot-styled CV not reached. Classification on `", classOn, "` not performed.\nTurn off this behaviour at `cl_gen_enforceCriticalValue` in the settings.r file."), call.=FALSE)				
 			}
 		} # end if enfCritVal
 		if (doThisBoot) {
@@ -955,7 +955,6 @@ calculateIndepClassifXPrediction <- function(indepDataset, cube, ccv, icv, ap, c
 
 # next:
 # max in pcaRed is not working
-
 
 # future:
 # have chisqu.test

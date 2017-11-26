@@ -257,11 +257,11 @@ plot_classif_generalHandover <- function(cube, ap, slotChar, apClCube, apClUser)
 		height <- height/2
 	}
 	path <- .ap2$stn$fn_results
-	suffix <- paste0("classification_", slotChar)
+	suffix <- paste0("classification_")
 #	message <- paste0("classification")
 	expName <- getExpName(cube)
 	filename <- paste(expName, suffix, sep="_")
-	filename <- paste(path, "/", filename, fns, ".pdf", sep="")
+	filename <- paste(path, "/", filename, fns, "_", slotChar, ".pdf", sep="")
 	if (!.ap2$stn$allSilent & (where == "pdf" )) {cat(paste0("Plotting ", slotChar, " classification... "))}
 	if (where == "pdf") { pdf(file=filename, width, height, onefile=TRUE) }
 	if (where != "pdf" & Sys.getenv("RSTUDIO") != 1) {dev.new(height=height, width=width)}	
