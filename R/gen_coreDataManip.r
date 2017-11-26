@@ -709,7 +709,7 @@ do_blowup <- function(dataset, grp=NULL, tn="x10", an="100%", cst=TRUE, conf=TRU
 	colNameBlow <- "blowup"
 	colOrig <- 1
 	colBlow <- 2
-	lottoLoopN <- 2000
+	lottoLoopN <- .ap2$stn$cl_extDatPred_N_lottoLoop
 	#
 	header <- headerFac <- getHeader(dataset) # headerFac only used for grouping
 	colRep <- getColRep(dataset)
@@ -754,7 +754,9 @@ do_blowup <- function(dataset, grp=NULL, tn="x10", an="100%", cst=TRUE, conf=TRU
 	eachNPart <- lapply(splitList, function(x) 1: nrow(x)) # gives a list with a vector from 1:N, with N being the number of participants from each element of the splitList
 	indList <- newNirList <- newHeaderList <- newColRepList <- vector("list", length=length(splitList))
 	for (i in 1: length(splitList)) { # now for every element within the splitList (could be only 1) we perform tn iterations of the resampling
+		###### CORE ######
 		indList[[i]] <- lapply(1:requiredN, function(x, npa, ana) sample(npa[[i]], ana, replace=replace), npa=eachNPart, ana=an) # gives a list for each element of the splitList
+		###### CORE ######
 		newNirList[[i]] <- matrix(NA, nrow=requiredN , ncol=ncol(NIR))
 		newHeaderList[[i]] <- data.frame(matrix(NA, nrow=requiredN, ncol=ncol(header)))
 		newColRepList[[i]] <- data.frame(matrix(NA, nrow=requiredN, ncol=ncol(colRep)))
@@ -768,6 +770,7 @@ do_blowup <- function(dataset, grp=NULL, tn="x10", an="100%", cst=TRUE, conf=TRU
 		cat(paste0(requiredN, " observations will be added to each of ", length(indList), " subgroups (the smallest containing ", minPart, " observations) by drawing from ", an, " observations.\n", avgDoubleMsg, "\n\nPress enter to continue or escape to abort:"))		
 		scan(file = "", n = 1, quiet = TRUE)
 	}
+	# future: check here the IndList for doubles !!
 	# now we have indList containing the header segments, NIRsplitList containing the NIR segments, and the indList that contains the indices to be averaged for each segment
 	if (!.ap2$stn$allSilent) {cat(paste0("Calculating (draw from ", an, ") and adding ", requiredN, " new observations to each of ", length(indList), " subgroups:\n"))}
 	for (i in 1: length(indList)) { # i is the number of the splitSegment as defined by the grouping

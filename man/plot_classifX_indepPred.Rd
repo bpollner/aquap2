@@ -5,8 +5,8 @@
 \title{Plot Independent Predictions}
 \usage{
 plot_classifX_indepPred(indepDataset, cube, ccv = NULL, icv = NULL,
-  aps = "def", pl = TRUE, toxls = "def", info = "def",
-  confirm = "def", predList = NULL, ...)
+  pl = TRUE, toxls = "def", info = "def", confirm = "def",
+  predList = NULL, apPlot = "def", ...)
 }
 \arguments{
 \item{indepDataset}{The dataset containing the independent data. An object 
@@ -32,21 +32,6 @@ name(s) as specified in argument \code{ccv} are looked for and, if present,
 are used for validating the predictions. If a character vector is provided, 
 it has to have the same length as the one in \code{ccv}, and those variables 
 will be used, in the given sequence, for validating the predictions.}
-
-\item{aps}{Character length one. The default way to obtain the analysis 
-procedure for obtaining \strong{plotting} parameters. Defaults to "def". 
-Possible values are:
-\describe{
-\item{"def"}{The default from the settings.r file is taken. (Argument 
-\code{gen_plot_anprocSource})}
-\item{"cube"}{Take the analysis procedure from within the cube, i.e. the 
-analysis procedure that was used when creating the cube via \code{\link{gdmm}}
-is used.}
-\item{"defFile"}{Use the analysis procedure with the default filename as 
-specified in the settings.r file in \code{fn_anProcDefFile}.}
-\item{Custom filename}{Provide any valid filename for an analysis procedure to 
-use as input for specifying the plotting options.}
-}}
 
 \item{pl}{Logical, defaults to TRUE. If predicted data should be plotted 
 at all. If FALSE, only the calculation and the (possible) export to an excel 
@@ -74,6 +59,8 @@ dataset is used to make predictions on all available classification models,
 resulting in a list containing the predictions. If this list is in turn 
 provided to \code{predList}, no calculations are performed and the results 
 are plotted straight away.}
+
+\item{apPlot}{The analysis procedure used for plotting.}
 
 \item{...}{General plotting parameters, see XXX.}
 }

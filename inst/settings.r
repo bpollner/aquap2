@@ -259,6 +259,8 @@ stn <- list(
 	cl_indepPred_printPairingMsg = TRUE, 	## if a message with the pairing of model and independent variable for validation should be displayed
 	cl_indepPred_confirm = TRUE, 			## if confirmation is required after showing the pairing information (see below) and before continuing the independent predictions
 	cl_indepPred_showInfo = TRUE, 			## if information should be displayed regarding the pairing of model-variables and the variables in the independent dataset used for validation. 
+	cl_extDatPred_N_lottoLoop = 2000, 		## the replicates of the loop estimating the number of exact duplicates of spectra in the blowup function (?do_blowup)
+
 
 
 	## plotting, PDFs

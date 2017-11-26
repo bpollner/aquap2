@@ -320,41 +320,7 @@ getap_core <- function(fn, .lafw_fromWhere="load", cube=NULL, ...) {
 	}
 } # EOF
 
-#' @title Get Analysis Procedure
-#' @description Read in the analysis procedure from the default or a custom 
-#' analysis procedure file located in the metadata-folder. By providing any of 
-#' the arguments of the analysis procedure file (see \code{\link{anproc_file}}) 
-#' to the function you can override the values in the file with the provided 
-#' values.
-#' @details The name of the default analysis procedure file can be specified in 
-#' the settings. The provided value and defaults will be checked in 
-#' \code{\link{gdmm}} and the resulting \code{\link{aquap_cube}} contains the 
-#' final analysis procedure in its slot @@anproc.
-#' @param fn Character length one. The filename of the analysis procedure file 
-#' to load. If left at 'def', the default filename for an analysis procedure 
-#' file as specified in the settings (factory default is "anproc.r") is read in. 
-#' Provide any other valid name of an analysis procedure file to load it. (Do not 
-#' forget the '.r' at the end.)
-#' @param ... Any of the arguments of the analysis procedure - please see 
-#' \code{\link{anproc_file}}. Any argument/value provided via \code{...} will 
-#' override the value in the analysis procedure .r file.
-#' @return A list with the analysis procedure.
-#' @seealso \code{\link{anproc_file}}, \code{\link{getmd}}, \code{\link{gdmm}}
-#' @examples
-#' \dontrun{
-#' ap <- getap(); str(ap); names(ap)
-#' ap <- getap("myFile.r")
-#' ap <- getap(pca.colorBy="C_Group") # change the value of 'pca.colorBy'
-#' from the .r file to 'C_Group'
-#' ap <- getap(do.sim=FALSE) # switch off the calculation of SIMCA models
-#' ap <- getap(spl.var="C_Group") # change the split variable to "C_Group"
-#' }
-#' @export
-getap <- function(fn="def", ...) {
-	autoUpS()
-	ap <- getap_core(fn, ...) 	# first load the analysis procedure as defined in the .r file, then possibly modify it. If no additional arguments get supplied by the  user, the original values from the .r file get passed on.
-								# depending on a possible additional argument in ... (.lafw_fromWhere), either the ap from the file is loaded, or,  in case of a call from a plotting function, the ap from the cube (what then is also present in the ... argument) is taken
-	###
+modifyThisAp <- function(ap, ...) {
 	apMod <- new("aquap_ap")
 	###
 	UCL <- ap$ucl
@@ -494,5 +460,44 @@ getap <- function(fn="def", ...) {
 	###	
 	ap_check_dptModules(apMod)
 	###
+	return(apMod)
+} # EOF
+
+#' @title Get Analysis Procedure
+#' @description Read in the analysis procedure from the default or a custom 
+#' analysis procedure file located in the metadata-folder. By providing any of 
+#' the arguments of the analysis procedure file (see \code{\link{anproc_file}}) 
+#' to the function you can override the values in the file with the provided 
+#' values.
+#' @details The name of the default analysis procedure file can be specified in 
+#' the settings. The provided value and defaults will be checked in 
+#' \code{\link{gdmm}} and the resulting \code{\link{aquap_cube}} contains the 
+#' final analysis procedure in its slot @@anproc.
+#' @param fn Character length one. The filename of the analysis procedure file 
+#' to load. If left at 'def', the default filename for an analysis procedure 
+#' file as specified in the settings (factory default is "anproc.r") is read in. 
+#' Provide any other valid name of an analysis procedure file to load it. (Do not 
+#' forget the '.r' at the end.)
+#' @param ... Any of the arguments of the analysis procedure - please see 
+#' \code{\link{anproc_file}}. Any argument/value provided via \code{...} will 
+#' override the value in the analysis procedure .r file.
+#' @return A list with the analysis procedure.
+#' @seealso \code{\link{anproc_file}}, \code{\link{getmd}}, \code{\link{gdmm}}
+#' @examples
+#' \dontrun{
+#' ap <- getap(); str(ap); names(ap)
+#' ap <- getap("myFile.r")
+#' ap <- getap(pca.colorBy="C_Group") # change the value of 'pca.colorBy'
+#' from the .r file to 'C_Group'
+#' ap <- getap(do.sim=FALSE) # switch off the calculation of SIMCA models
+#' ap <- getap(spl.var="C_Group") # change the split variable to "C_Group"
+#' }
+#' @export
+getap <- function(fn="def", ...) {
+	autoUpS()
+	ap <- getap_core(fn, ...) 	# first load the analysis procedure as defined in the .r file, then possibly modify it. If no additional arguments get supplied by the  user, the original values from the .r file get passed on.
+								# depending on a possible additional argument in ... (.lafw_fromWhere), either the ap from the file is loaded, or,  in case of a call from a plotting function, the ap from the cube (what then is also present in the ... argument) is taken
+	###
+	apMod <- modifyThisAp(ap, ...)
 	return(apMod)
 } # EOF
