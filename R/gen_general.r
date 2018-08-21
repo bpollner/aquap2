@@ -433,22 +433,22 @@ updateAquap2 <- function(force=FALSE) {
 } # EOF
 
 
-#' @title Load the aquap2 data and examples package.
-#' @description Download and install the latest version of package 'aquapData' 
-#'  from its github repository. 
-#' 	Package 'aquapData' contains the data and examples used in package 'aquap2'.
-#' @details Always downloads and installs the latest available version, also 
-#'  if the same up-to-date version is already installed.
-#' @param branch Character, the name of the branch to downlaod. Defaults to 
-#'  "master".
-#' @examples
-#'  \dontrun{
-#'  loadAquapDatapackage()
-#'  }
+# @title Load the aquap2 data and examples package.
+# @description Download and install the latest version of package 'aquapData' 
+#  from its github repository. 
+# 	Package 'aquapData' contains the data and examples used in package 'aquap2'.
+# @details Always downloads and installs the latest available version, also 
+#  if the same up-to-date version is already installed.
+# @param branch Character, the name of the branch to downlaod. Defaults to 
+#  "master".
+# @examples
+#  \dontrun{
+#  loadAquapDatapackage()
+#  }
 ################ @export
-loadAquapDatapackage <- function(branch="master") {
+#loadAquapDatapackage <- function(branch="master") {
 #	devtools::install_github(repo="bpollner/aquapData", ref=branch, auth_token=NULL)
-} # EOF
+#} # EOF
 
 getStdColnames <- function() {
 	yPref <- .ap2$stn$p_yVarPref
