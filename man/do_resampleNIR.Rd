@@ -4,7 +4,8 @@
 \alias{do_resampleNIR}
 \title{Resample data to new Wavelengths}
 \usage{
-do_resampleNIR(dataset, targetWls = NULL, tby = 0.5, method = "linear")
+do_resampleNIR(dataset, targetWls = NULL, tby = 0.5,
+  method = "linear")
 }
 \arguments{
 \item{dataset}{An object of class 'aquap_data' as produced e.g. by 
@@ -49,3 +50,4 @@ Other Data pre-treatment functions: \code{\link{[,aquap_data-method}},
   \code{\link{dpt_modules}}, \code{\link{selectWls}},
   \code{\link{ssc}}
 }
+\concept{Data pre-treatment functions}

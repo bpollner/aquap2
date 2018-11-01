@@ -97,3 +97,6 @@ Other Classification functions: \code{\link{calc_NNET_args}},
 Other RNF documentation: \code{\link{plot_randomForest_args}},
   \code{\link{plot_rnf,aquap_cube-method}}
 }
+\concept{Calc. arguments}
+\concept{Classification functions}
+\concept{RNF documentation}

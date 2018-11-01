@@ -52,3 +52,4 @@ Other Helper Functions: \code{\link{genFolderStr}},
   \code{\link{saveAQdata}}, \code{\link{siWlg}},
   \code{\link{updateAquap2}}
 }
+\concept{Helper Functions}

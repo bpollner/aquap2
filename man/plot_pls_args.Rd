@@ -71,3 +71,5 @@ Other PLSR documentation: \code{\link{calc_pls_args}},
   \code{\link{plot_pls,aquap_cube-method}},
   \code{\link{plot_pls_indepPred}}
 }
+\concept{PLSR documentation}
+\concept{Plot arguments}

@@ -66,3 +66,5 @@ Other Core functions: \code{\link{gdmm}},
   \code{\link{plot,aquap_cube,missing-method}},
   \code{\link{plot,aquap_data,missing-method}}
 }
+\concept{Core functions}
+\concept{Import-Export}

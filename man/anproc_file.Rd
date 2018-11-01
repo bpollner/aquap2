@@ -652,3 +652,4 @@ can lead to unexpected and distorted results in the Aquagram.
 Other fileDocs: \code{\link{metadata_file}},
   \code{\link{settings_file}}
 }
+\concept{fileDocs}

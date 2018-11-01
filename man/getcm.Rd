@@ -68,3 +68,5 @@ Other Extract Elements: \code{\link{getHeader}},
   \code{\link{getcd}}, \code{\link{siWlg}},
   \code{\link{siWl}}
 }
+\concept{Extract Elements}
+\concept{Helper Functions}

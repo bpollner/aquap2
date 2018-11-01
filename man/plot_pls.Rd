@@ -96,3 +96,5 @@ Other PLSR documentation: \code{\link{calc_pls_args}},
   \code{\link{plot_pls_args}},
   \code{\link{plot_pls_indepPred}}
 }
+\concept{PLSR documentation}
+\concept{Plot functions}

@@ -51,3 +51,5 @@ Other Plot functions: \code{\link{plot,aquap_cube,missing-method}},
 Other DA documentation: \code{\link{calc_discrimAnalysis_args}},
   \code{\link{plot_discrimAnalysis_args}}
 }
+\concept{DA documentation}
+\concept{Plot functions}

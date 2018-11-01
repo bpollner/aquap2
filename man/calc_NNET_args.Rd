@@ -98,3 +98,6 @@ Other Classification functions: \code{\link{calc_SVM_args}},
 Other NNET documentation: \code{\link{plot_NNET_args}},
   \code{\link{plot_nnet,aquap_cube-method}}
 }
+\concept{Calc. arguments}
+\concept{Classification functions}
+\concept{NNET documentation}

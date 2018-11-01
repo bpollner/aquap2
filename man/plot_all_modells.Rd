@@ -97,3 +97,5 @@ Other Plot functions: \code{\link{plot,aquap_data,missing-method}},
   \code{\link{plot_simca,aquap_cube-method}},
   \code{\link{plot_svm,aquap_cube-method}}
 }
+\concept{Core functions}
+\concept{Plot functions}

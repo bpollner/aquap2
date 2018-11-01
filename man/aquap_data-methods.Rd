@@ -76,3 +76,4 @@ Other Data pre-treatment functions: \code{\link{do_addNoise}},
   \code{\link{dpt_modules}}, \code{\link{selectWls}},
   \code{\link{ssc}}
 }
+\concept{Data pre-treatment functions}

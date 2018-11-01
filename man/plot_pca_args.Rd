@@ -91,3 +91,5 @@ Other Plot arguments: \code{\link{plot,aquap_data,missing-method}},
 Other PCA documentation: \code{\link{calc_pca_args}},
   \code{\link{plot_pca,aquap_cube-method}}
 }
+\concept{PCA documentation}
+\concept{Plot arguments}

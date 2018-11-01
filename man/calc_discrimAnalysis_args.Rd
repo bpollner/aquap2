@@ -112,3 +112,6 @@ Other Classification functions: \code{\link{calc_NNET_args}},
 Other DA documentation: \code{\link{plot_da,aquap_cube-method}},
   \code{\link{plot_discrimAnalysis_args}}
 }
+\concept{Calc. arguments}
+\concept{Classification functions}
+\concept{DA documentation}

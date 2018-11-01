@@ -51,3 +51,5 @@ Other Data pre-treatment functions: \code{\link{[,aquap_data-method}},
   \code{\link{dpt_modules}}, \code{\link{selectWls}},
   \code{\link{ssc}}
 }
+\concept{Data pre-treatment functions}
+\concept{Noise procedures}

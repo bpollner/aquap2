@@ -86,3 +86,5 @@ Other Plot functions: \code{\link{plot,aquap_cube,missing-method}},
 Other SIMCA documentation: \code{\link{calc_sim_args}},
   \code{\link{plot_sim_args}}
 }
+\concept{Plot functions}
+\concept{SIMCA documentation}

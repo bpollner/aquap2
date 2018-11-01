@@ -39,3 +39,5 @@ Other Helper Functions: \code{\link{genFolderStr}},
 Other Noise procedures: \code{\link{do_addNoise}},
   \code{\link{noise_procedures}}
 }
+\concept{Helper Functions}
+\concept{Noise procedures}

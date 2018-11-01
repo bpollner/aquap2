@@ -51,3 +51,5 @@ Other Plot functions: \code{\link{plot,aquap_cube,missing-method}},
 Other SVM documentation: \code{\link{calc_SVM_args}},
   \code{\link{plot_SVM_args}}
 }
+\concept{Plot functions}
+\concept{SVM documentation}

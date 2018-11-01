@@ -92,3 +92,4 @@ Other Calc. arguments: \code{\link{calc_NNET_args}},
   \code{\link{calc_randomForest_args}},
   \code{\link{calc_sim_args}}
 }
+\concept{Calc. arguments}

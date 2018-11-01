@@ -56,3 +56,6 @@ Other Helper Functions: \code{\link{genFolderStr}},
   \code{\link{saveAQdata}}, \code{\link{updateAquap2}},
   \code{\link{updateSettings}}
 }
+\concept{Classification Helpers}
+\concept{Extract Elements}
+\concept{Helper Functions}

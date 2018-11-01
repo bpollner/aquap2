@@ -75,3 +75,6 @@ Other Core functions: \code{\link{exportSampleList}},
   \code{\link{gdmm}}, \code{\link{getFullData}},
   \code{\link{plot,aquap_cube,missing-method}}
 }
+\concept{Core functions}
+\concept{Plot arguments}
+\concept{Plot functions}

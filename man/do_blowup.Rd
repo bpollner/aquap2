@@ -4,8 +4,8 @@
 \alias{do_blowup}
 \title{Increase the Numbers of Observation in Dataset}
 \usage{
-do_blowup(dataset, grp = NULL, tn = "x10", an = "100\%", cst = TRUE,
-  conf = TRUE, pred = TRUE, replace = TRUE)
+do_blowup(dataset, grp = NULL, tn = "x10", an = "100\%",
+  cst = TRUE, conf = TRUE, pred = TRUE, replace = TRUE)
 }
 \arguments{
 \item{dataset}{An object of class 'aquap_data' as produced e.g. by 
@@ -83,3 +83,4 @@ Other Data pre-treatment functions: \code{\link{[,aquap_data-method}},
   \code{\link{dpt_modules}}, \code{\link{selectWls}},
   \code{\link{ssc}}
 }
+\concept{Data pre-treatment functions}

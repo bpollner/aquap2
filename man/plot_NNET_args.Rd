@@ -54,3 +54,5 @@ Other Plot arguments: \code{\link{plot,aquap_data,missing-method}},
 Other NNET documentation: \code{\link{calc_NNET_args}},
   \code{\link{plot_nnet,aquap_cube-method}}
 }
+\concept{NNET documentation}
+\concept{Plot arguments}

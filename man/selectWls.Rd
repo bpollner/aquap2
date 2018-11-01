@@ -39,3 +39,4 @@ Other Data pre-treatment functions: \code{\link{[,aquap_data-method}},
   \code{\link{do_sgolay}}, \code{\link{dpt_modules}},
   \code{\link{ssc}}
 }
+\concept{Data pre-treatment functions}

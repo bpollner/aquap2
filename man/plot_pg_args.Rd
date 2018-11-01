@@ -58,3 +58,4 @@ Other Plot arguments: \code{\link{plot,aquap_data,missing-method}},
   \code{\link{plot_randomForest_args}},
   \code{\link{plot_sim_args}}
 }
+\concept{Plot arguments}

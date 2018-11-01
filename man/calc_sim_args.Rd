@@ -57,3 +57,5 @@ Other Calc. arguments: \code{\link{calc_NNET_args}},
 Other SIMCA documentation: \code{\link{plot_sim_args}},
   \code{\link{plot_simca,aquap_cube-method}}
 }
+\concept{Calc. arguments}
+\concept{SIMCA documentation}

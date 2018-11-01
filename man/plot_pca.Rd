@@ -106,3 +106,5 @@ Other Plot functions: \code{\link{plot,aquap_cube,missing-method}},
 Other PCA documentation: \code{\link{calc_pca_args}},
   \code{\link{plot_pca_args}}
 }
+\concept{PCA documentation}
+\concept{Plot functions}

@@ -139,3 +139,5 @@ Other Aquagram documentation: \code{\link{plot_aqg_args}},
   \code{\link{plot_aqg}},
   \code{\link{tempCalib_procedures}}
 }
+\concept{Aquagram documentation}
+\concept{Calc. arguments}

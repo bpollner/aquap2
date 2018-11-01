@@ -105,3 +105,4 @@ Other Development Functions: \code{\link{custom_TRH}},
   \code{\link{imp_searchAskColumns}},
   \code{\link{readHeader}}, \code{\link{readSpectra}}
 }
+\concept{Development Functions}

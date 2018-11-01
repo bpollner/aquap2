@@ -46,3 +46,5 @@ Other Calc. arguments: \code{\link{calc_NNET_args}},
 Other PCA documentation: \code{\link{plot_pca,aquap_cube-method}},
   \code{\link{plot_pca_args}}
 }
+\concept{Calc. arguments}
+\concept{PCA documentation}

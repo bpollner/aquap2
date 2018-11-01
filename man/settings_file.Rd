@@ -26,3 +26,4 @@ Once you have specified a folder under the variable \code{AQUAP2SH} in
 Other fileDocs: \code{\link{anproc_file}},
   \code{\link{metadata_file}}
 }
+\concept{fileDocs}

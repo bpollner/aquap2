@@ -21,3 +21,4 @@ Obtain the indices of outliers based on a boxplot of plsr data.
 \details{
 Function in development, for internal use only.
 }
+\concept{Internal functions}

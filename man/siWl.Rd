@@ -40,3 +40,4 @@ Other Extract Elements: \code{\link{getHeader}},
   \code{\link{getcd}}, \code{\link{getcm}},
   \code{\link{siWlg}}
 }
+\concept{Extract Elements}

@@ -28,3 +28,4 @@ Other Helper Functions: \code{\link{genFolderStr}},
   \code{\link{saveAQdata}}, \code{\link{siWlg}},
   \code{\link{updateSettings}}
 }
+\concept{Helper Functions}

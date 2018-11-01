@@ -53,3 +53,5 @@ Other Plot arguments: \code{\link{plot,aquap_data,missing-method}},
 Other RNF documentation: \code{\link{calc_randomForest_args}},
   \code{\link{plot_rnf,aquap_cube-method}}
 }
+\concept{Plot arguments}
+\concept{RNF documentation}

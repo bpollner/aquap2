@@ -4,7 +4,8 @@
 \alias{do_gapDer}
 \title{Perform gap-segment derivatives}
 \usage{
-do_gapDer(dataset, m = 1, w = 1, s = 1, deltaW, exportModel = FALSE)
+do_gapDer(dataset, m = 1, w = 1, s = 1, deltaW,
+  exportModel = FALSE)
 }
 \arguments{
 \item{dataset}{An object of class 'aquap_data" as produced by 
@@ -67,3 +68,5 @@ Other dpt modules documentation: \code{\link{do_detrend}},
   \code{\link{do_sgolay}}, \code{\link{do_snv}},
   \code{\link{dpt_modules}}
 }
+\concept{Data pre-treatment functions}
+\concept{dpt modules documentation}

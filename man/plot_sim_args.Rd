@@ -59,3 +59,5 @@ Other Plot arguments: \code{\link{plot,aquap_data,missing-method}},
 Other SIMCA documentation: \code{\link{calc_sim_args}},
   \code{\link{plot_simca,aquap_cube-method}}
 }
+\concept{Plot arguments}
+\concept{SIMCA documentation}
