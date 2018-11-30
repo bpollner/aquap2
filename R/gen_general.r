@@ -243,6 +243,7 @@ checkCreateSHfolder <- function(systemHome, fn_aquap2SH) {
 			return(TRUE)
 		}
 	} # end if !dir.exists aquap2SH
+	return(TRUE) 
 } # EOF
 
 checkSettings <- function() {
