@@ -110,7 +110,7 @@ expandFillInLocalTxt <- function(ftPack, ftLocal, missNames) {
 		newTxt <- rep(TRUE, (length(ftLocal)+length(missNames)))
 		newValInd <- apply(indF[,-1, drop=FALSE], 1, sum) # gives the position in the expanded file where the new values will be placed
 		newTxt[newValInd] <- FALSE
-		newTxt[newTxt==TRUE] <- ftLocal  # fill in the user´s local text in the expanded vector
+		newTxt[newTxt==TRUE] <- ftLocal  # fill in the users local text in the expanded vector
 		newTxt[newValInd] <- ftPack[indF[,1]] # get the rows from the package text
 	} else { # so we have nothing to add
 		newTxt <- ftLocal
@@ -238,7 +238,7 @@ checkCreateSHfolder <- function(systemHome, fn_aquap2SH) {
 			message(msg)
 			return(FALSE)
 		} else { # so we created the .Renviron file AND created the aquap2SH folder
-			msg <- paste0("The folder `", fn_aquap2SH, "´ as settings-home directory has been created in `", systemHome, "´.")
+			msg <- paste0("The folder `", fn_aquap2SH, "` as settings-home directory has been created in `", systemHome, "`.")
 			message(msg)
 			return(TRUE)
 		}
@@ -316,7 +316,7 @@ checkSettings <- function() {
 					message(restartMsg)
 					return(FALSE)
 				}				
-				msg <- paste0("Sorry, the path `", AP2SH_system, "` specified in the `AQUAP2SH` variable is not pointing to a valid directory.\nPlease change the value of `AQUAP2SH` in the .Renviron file (`", fullRenvPath, "`).")
+				msg <- paste0("Sorry, the path `", AP2SH_system, "` specified in the `AQUAP2SH` variable is not pointing to a valid directory.\nPlease change the value of `AQUAP2SH` in the .Renviron file (`", fullRenvPath, "`), or create the appropriate file structure.")
 				message(msg)
 				return(FALSE)
 			} else { # end if !dir.exists
@@ -648,7 +648,7 @@ ssc_s <- function(dataset, variable, value, keepEC=TRUE) {
 	indEC <- which(colnames(dataset$header) == paste(cPref, ecrmCol, sep=""))
 	selIndOut <-  NULL
 	#
-#	getECInd <- function(variable) { # because we must not add the ec´s if they are already present in the case of the no-split column
+#	getECInd <- function(variable) { # because we must not add the ecs if they are already present in the case of the no-split column
 #		nsc <- any(noSplitCol %in% variable)
 #		if (keepEC & !nsc) {
 #			return(which(dataset$header[,indEC] == ecLabel))
