@@ -230,63 +230,118 @@ checkFileVersionPossiblyModify <- function(pathToPack, pathToLocal, folderLocal,
 	stop(paste0("Sorry, there is an unexpected error in file check (", nameLocal, ")")) # theoretically this should never happen...
 } # EOF
 
-checkSettings <- function() {
-	defaultFillForRenviron <- "\n\n# Please provide below a valid path to a folder of your liking, \n# with 'XX' being the folder where finally the 'settings.r' file will reside. \nAQUAP2SH = /Users/Name/Documents/path/to/some/folder/XX"
-	addInfo <- "\nRestart R for the changes to become effective. \nSee the help for '?updateSettings' for additional information."
-	sFile <- "settings.r"
-	#
-	pathSH <- Sys.getenv("AQUAP2SH")
-	pspath <- paste(path.package("aquap2"), sFile, sep="/")
-	if (nchar(pathSH) == 0) { 			## so the variable is *not* defined in .Renviron, or maybe we do not even have an .Renviron file
-		homePath <- hoPa <-  "user/home"
-		hp <- try(path.expand("~"), silent=TRUE)
-		if (class(hp) != "try-Error") {
-			homePath <- hoPa <-   hp
-			hoPaAdd <- paste0("in '", homePath, "'")
-		} else {
-			hoPaAdd <- ""
+checkCreateSHfolder <- function(systemHome, fn_aquap2SH) {
+	if (!dir.exists(paste0(systemHome, "/", fn_aquap2SH))) {
+		dirCreaOk <- dir.create(paste0(systemHome, "/", fn_aquap2SH))
+		if (!dirCreaOk) {
+			msg <- paste0("Sorry, the required settings-home directory `", fn_aquap2SH, "` could not be created in `", systemHome, "`.")
+			message(msg)
+			return(FALSE)
+		} else { # so we created the .Renviron file AND created the aquap2SH folder
+			msg <- paste0("The folder `", fn_aquap2SH, "´ as settings-home directory has been created in `", systemHome, "´.")
+			message(msg)
+			return(TRUE)
 		}
-		homePath <- paste(homePath, ".Renviron", sep="/")
-		if (!file.exists(homePath)) {
-			ok <- file.create(homePath, showWarnings=FALSE)
-			if (ok) {
-				fcon <- file(homePath, open="w")
-				writeLines(defaultFillForRenviron, fcon)
-				close(fcon)
-				creMsg <- paste0("The required '.Renviron' file in '", hoPa, "' has been created for you. Please open it (e.g. using R-Studio) and modify the variable 'AQUAP2SH' so that it points to a folder of your liking.", addInfo)
-			} else { # file creation did NOT work
-				creMsg <- paste0("Sorry, it was not possible to create the '.Renviron' file for you. Please do this manually by going to your home-directory and there saving a new plain text file under the name '.Renviron'. Open the file and define the variable 'AQUAP2SH' as the path to a folder of your liking.", addInfo)
-			}
+	} # end if !dir.exists aquap2SH
+} # EOF
+
+checkSettings <- function() {
+	systemHome <- Sys.getenv("HOME")
+	fullRenvPath <- paste0(systemHome, "/.Renviron")
+	fn_aquap2SH <- "aquap2SH"
+	AQUAP2SH_creationMsg <- paste0("The initial path of `AQUAP2SH` in the .Renviron file (`", fullRenvPath, "`) has been set to `", systemHome, "/", fn_aquap2SH, "`. \nIf you want, you can open the .Renviron file (e.g. using R-Studio) and modify the variable `AQUAP2SH` (holding the path to the  `settings-home` directory) so that it points to a folder of your liking.")
+	addInfo <- "Restart R for the changes to become effective. \nSee the help for '?updateSettings' for additional information."
+	restartMsg <- "Please restart R for the changes in the .Renviron file to become effective."
+	#
+	# first check for existence of the .Renviron file
+	renvExists <- file.exists(fullRenvPath)
+	if (!renvExists) { # we have NO .Renviron file, so we simply make one
+		createOK <- file.create(fullRenvPath, showWarnings=FALSE)
+		if (!createOK) {  #  if .Renviron could not be created
+			msg <- paste0("Sorry, for unknown reasons the creation of the .Renviron file in `", systemHome, "` failed.")
+			message(msg)
+			return(FALSE)
+		} else { # so we could create the .Renviron file
+			# if no .Renviron file, then also no settings home diretory --> create one
+			ok <- checkCreateSHfolder(systemHome, fn_aquap2SH)
+				if (!ok) {
+					return(FALSE)
+				}
+			# now we have to fill the newly created .Renviron file and point AQUAP2SH to the newly created folder
+			defaultFillForRenviron <- paste0("\n\nAQUAP2SH = ", systemHome, "/", fn_aquap2SH)
+			fcon <- file(fullRenvPath, open="w")
+			writeLines(defaultFillForRenviron, fcon)
+			close(fcon)
+			creMsg <- paste0("The required '.Renviron' file in '", systemHome, "' has been created for you.\n", AQUAP2SH_creationMsg, "\n", addInfo)
 			message(creMsg)
 			return(FALSE)
-		} else { # so the .Renviron file is existing
-		msg <- paste0("It appears you did not yet define the path to your aquap2 settings.r home directory in your '.Renviron' file ", hoPaAdd, ". \nPlease do this by going to the .Renviron file in your home directory and there define the variable 'AQUAP2SH' as the path to a folder of your liking.", addInfo)
-		}
-		message(msg)
-		return(FALSE)
-	} else { ## so we have something defined under AQUAP2SH
-		if (!file.exists(pathSH)) {
-			msg <- paste0("The folder \"", pathSH, "\" does not seem to exist. Please check the path defined in the '.Renviron' file.", addInfo)
-			message(msg)
-			return(FALSE)
-		}
-		pathToSettings <- paste(pathSH, sFile, sep="/")
-		if (!file.exists(pathToSettings)) {
-			msg <- paste("The required settings.r file does not seem to exist in the provided directory \n\"", pathSH, "\".\nWould like to copy a factory-fresh version of the settings.r file there now? \n( y / n)", sep="")
-			message(msg)
-			a <- readLines(n=1)
-			if (a != "y" & a != "Y") {
-				msg <- paste("Please see to it that a valid settings.r file will be in the directory shown above.")
+		} # end else (where we could create and fill the .Renviron file and create the settings home folder
+	}  else { # so the .Renviron file is existing
+		# check if AQUAP2SH is existing in the system: if yes, check if pointing to a valid directory; if no check if it is existing on the .Renviron file
+		AP2SH_system <- Sys.getenv("AQUAP2SH") # returns `""` if not existing in Sys.getenv()
+		if (AP2SH_system == "") { # so it is not existing in the system, and we have to check if it exists in the .Renviron file
+			fcon <- file(fullRenvPath, open="r")
+			content <- readLines(fcon)
+			close(fcon)
+			if (any(grepl("AQUAP2SH", content))) { # returns TRUE if AQUAP2SH is present in the .Renviron file
+				# so not in the system, but on the file --> that means we have to restart R
+				message(restartMsg)
+				return(FALSE)
+			} else { # so not in the system, and not on the file (but the .Renviron was present
+				# now we have to ADD the AQUAP2SH to the existing .Renviron file
+				# first check for existence / create the settings home folder
+				ok <- checkCreateSHfolder(systemHome, fn_aquap2SH)
+				if (!ok) {
+					return(FALSE)
+				}
+				fcon <- file(fullRenvPath, open="r+b")
+				content <- readLines(fcon)
+				newContent <- c(content, "\n\n## aquap2", paste0("AQUAP2SH = ", systemHome, "/", fn_aquap2SH), "\n")
+				writeLines(newContent, fcon)
+				close(fcon)
+				msg <- paste0(AQUAP2SH_creationMsg, "\n", addInfo)
 				message(msg)
 				return(FALSE)
-			} else {  # so we do want to copy the file
-				copySettingsFile(pspath, pathSH)
-				return(TRUE)
-			}
-		} else { ## so the file does exist
-			return(checkFileVersionPossiblyModify(pathToPack=pspath, pathToLocal=pathToSettings, folderLocal=pathSH, nameLocal=sFile, pm="stn"))  # returns TRUE or FALSE
-		} # end else file exists
-	} # end else nchar == 0
+			} # end else
+		} else { # (AP2SH_system != "") --> so AQUAP2SH IS existing in the system
+			# check if pointing to a valid folder
+			if (!dir.exists(AP2SH_system)) {
+				# first check if the content of AQUAP2SH in the file and in the system are the same
+				fcon <- file(fullRenvPath, open="r")
+				content <- readLines(fcon)
+				close(fcon)
+				AP2SH_file <- content[which(grepl("AQUAP2SH", content))] # get only the one string that is the AQUAP2SH
+				fileValue <- trimws(strsplit(AP2SH_file, "=")[[1]][[2]])
+				if (fileValue != AP2SH_system) { # so the content of AQUAP2SH is different in the system and in the file, we have to restart R
+					message(restartMsg)
+					return(FALSE)
+				}				
+				msg <- paste0("Sorry, the path `", AP2SH_system, "` specified in the `AQUAP2SH` variable is not pointing to a valid directory.\nPlease change the value of `AQUAP2SH` in the .Renviron file (`", fullRenvPath, "`).")
+				message(msg)
+				return(FALSE)
+			} else { # end if !dir.exists
+				# so now everything should be good, file and system unisono etc.
+				# check if a settings file is here, If no, please copy it.
+				sFile <- "settings.r"
+				pathSH <- Sys.getenv("AQUAP2SH")
+				pspath <- paste(path.package("aquap2"), sFile, sep="/")
+				pathToSettings <- paste(pathSH, sFile, sep="/")
+				if (!file.exists(pathToSettings)) {
+					# please simply copy the settings
+					ok <- file.copy(pspath, pathSH)
+					if (!ok) {
+						message(paste0("Sorry, for unknown reasons it was not possible to copy the `settings.r` file from `", pspath, "` to `", pathSH, "`."))
+						return(FALSE)
+					} else { # so we could copy the settings.r file
+						message(paste0("The settings.r file has been copied into `", pathSH, "`."))
+						return(TRUE)
+					} # end else
+				} else { # so the settings.r file does exist  - we can, finally, go to checking the content of the settings.r file		
+					return(checkFileVersionPossiblyModify(pathToPack=pspath, pathToLocal=pathToSettings, folderLocal=pathSH, nameLocal=sFile, pm="stn"))  # returns TRUE or FALSE
+				} # end else
+			} # end else !dir.exists
+		} # end else AP2SH_system == ""
+	} # end else if !renvExists	
 } # EOF
 
 #' @title Update aquap2 settings.
@@ -295,11 +350,14 @@ checkSettings <- function() {
 #' @details If you leave 'autoUpdateSettings' in settings.r to 'TRUE', the 
 #' settings will be checked resp. updated automatically every time you call any 
 #' function from package 'aquap2'.
-#' @section Note: You have to set the path to where you want the settings.r file 
-#' to be stored once in your .Renviron file by defining 
-#' \code{AQUAP2SH = path/to/any/folder/XX} , with XX being any folder where then the 
-#' settings.r file will reside in. If you do not have a '.Renviron' file in your 
-#' home directory (user/home) you have to create one.
+#' @section Note: If not present, the required `.Renviron` file will be 
+#' automatically created. If the variable `AQUAP2SH` is not defined in the 
+#' .Renviron file, it will be automatically added, and its default path is 
+#' pointing to the (possibly also created) folder `aquap2SH` in the users home 
+#' directory, where the `settings.r` file is automatically copied to if not 
+#' already present. It is possible to manually provide a different path in the 
+#' variable `AQUAP2SH` in the .Renviron file, pointing to any folder where then 
+#' the settings.r file and all other relevant general files will reside.
 #' @param packageName Character, the name of the package where settings 
 #' should be updated. Defaults to "aquap2".
 #' @param silent Logical. If a confirmation should be printed. Defaults 
