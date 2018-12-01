@@ -43,7 +43,7 @@ stn <- list(
 	p_groupCol = "Group", 					## the name of the column containing the groups (like e.g. experiment and control)
 	p_deleteCol = "DELETE", 				## the character indicating that this column should be omitted at the time of creating the sample list, usually needed for L2-columns that are identical to their L1-columns
 	p_noTimePointsLabel = "NT", 			## the value assigned to every observation when there is no splitting into time points
-	p_sampleListExportFormat = "txt", 		## the format for the generated sample list, possible values are "txt" for a tab-delimited text file and "xls" for an Excel-file.
+	p_sampleListExportFormat = "xls", 		## the format for the generated sample list, possible values are "txt" for a tab-delimited text file and "xls" for an Excel-file.
 	p_outlierCol = "outlier", 				## the name of any column containing the flags showing outliers
 	p_outlierCol_allSuffix = "_all", 		## the suffix being added to the outlier column containing the flags for outliers based on the whole dataset.
 
@@ -69,8 +69,8 @@ stn <- list(
 
 	## Import Data
 	imp_specFileType = "vision_NSAS.da",	## the filetype of the spectral data. Refer to the help for 'getFullData'  for possible values
-	imp_startDate = "2014-06-01 00:00:00",	## the start-date used to calculate the absolute number of minutes since then
-	imp_sampleListType = "csv", 			## the filetype of the sample list in the sampleLists/sl_in folder. Please refer to the help for "getFullData" for possible values.
+	imp_startDate = "2013-11-01 00:00:00",	## the start-date used to calculate the absolute number of minutes since then
+	imp_sampleListType = "xls", 			## the filetype of the sample list in the sampleLists/sl_in folder. Please refer to the help for "getFullData" for possible values.
 	imp_multiplyRows = TRUE,				## if all the rows in the sample list should be multiplied by the number of consecutive scans.
 	imp_autoCopyYvarsAsClass = TRUE, 		## if all available Y-Variables should be automatically copied as a class variable at the time of importing the data. Recommended value is TRUE.
 	imp_alwaysReduceTRHClasses = FALSE,		## if the T and rel. humidity classes should be always reduced, even if the values only contain a single decimal point. If set to FALSE, the T and rel. hum. classes will not be reduced if the values contain only a single decimal point.
@@ -80,7 +80,7 @@ stn <- list(
 	imp_RHRounding = 1, 					## digits precision for rounding when re-factoring the rel. humidity
 	imp_makeExpNameColumn = FALSE, 			## if a column containing the name of the experiment in every row should be added to the dataset. This is useful if you plan to fuse datasets from several experiments.
 	imp_makeTimeDistanceColumn = TRUE, 		## if, should a timestamp be available, a column with the time-distance from a user-defined point in time and an other with the chronological order (1:nrow enumeration) should be generated
-	imp_use_TRH_logfile = FALSE, 			## if and how values for temperature and relative humidity should be imported from an external logfile. See the help for 'getFullData' for information on possible values
+	imp_use_TRH_logfile = "ESPEC", 			## if and how values for temperature and relative humidity should be imported from an external logfile. See the help for 'getFullData' for information on possible values
 	imp_TRH_logfile_name = "TRHlog", 		## the name of the logfile for temperatur and rel.humidity in the rawdata folder.
 	imp_narrowMinutes = 3, 					## how many minutes ahead should be looked for matching log-data before going through the whole log file?
 	imp_secsNarrowPrecision = 10, 			## precision in seconds that log-data have to be within spectral acquisition time in the first, the narrowed-down search step (there is no precision step in the second search through the whole log file)
@@ -173,7 +173,7 @@ stn <- list(
 	plsr_limitNcompToLevels = TRUE, 		## if the max. nr of components (when determining the optimal number of components) should be limited to the number of levels in the y-variable to regress on, i.e. the uniques (excluding NAs)
 	plsr_percentObservAsMaxNcomp = 25,		## the percentage of the available number of observations indicating the maximally allowed number of components for the test-runs to determine the optimal number of components
 	plsr_nrCompsSwitchToNrObserv = 12,		## the number of maximum allowed number of components below which to the number of observations for defining the max. nr. of allowed components for the test-runs to determine the optimal number of components is switched     XXX explain better !!
-	plsr_nrTestIterations = 12, 			## how many repetitions should be calculated when getting the optimal number of components. Not the lowest number of components is chosen, but the one that comes up most often as the lowest.
+	plsr_nrTestIterations = 7,	 			## how many repetitions should be calculated when getting the optimal number of components. Not the lowest number of components is chosen, but the one that comes up most often as the lowest.
 	plsr_nrDigitsRMSEx = 4,					## rounding for the error values
 	plsr_nrDigitsPercentage = 1, 			## rounding for the display of percentage of total nr. of observations in the dataset after NAs have been removed
 	plsr_colorForBestNumberComps = "blue",	## the color for the vertical line in the error plot showing the best number of components
@@ -208,7 +208,7 @@ stn <- list(
 	aqg_plotWamacsLines = TRUE, 			## logical, if vertical lines for the WAMACs should be plotted. (Only applies to the linear Aquagram.)
 	aqg_linearXaxisTitle = "WAMACs", 		## the title for the X-axis in the linear type of Aquagram
 	aqg_nrDigitsAquagram = 2,				## the number of digits displayed in the standard Aquagram
-	aqg_linetypes = c(1,2,3),				## the default vector for the line-types to be used in the aquagram. Gets recycled.
+	aqg_linetypes = c(1),					## the default vector for the line-types to be used in the aquagram. Gets recycled.
 	aqg_correctNrOfObs = FALSE,				## if the number of observations in each spectral pattern should be corrected (if necessary by random sampling) so that all the spectral pattern are calculated out from the same number of observations
 	aqg_adPeakPlot = TRUE,					## if, should subtraction spectra be plotted, an additional plot with picked peaks should be added
 	aqg_AdLines = TRUE, 					## if the additional lines should be added to the plot (see XXX for details)
@@ -217,7 +217,7 @@ stn <- list(
 	aqg_bootCI = FALSE, 					## if confidence intervalls for the selected wavelengths should be calculated within each group (using bootstrap)
 	aqg_bootUseParallel = TRUE, 			## if, should the CIs be calculated, this should be done in parallel
 	aqg_bootR = "nrow@3",					## if aqg_bootCI = TRUE, how many bootstrap replicates should be performed? leave at "nrow@3" for e.g. 3 x nrow(samples) or provide a length one numeric
-	aqg_saveBootRes = TRUE, 				## if the bootstrap result should be saved under "bootResult" to the analysis-data folder
+	aqg_saveBootRes = FALSE, 				## if the bootstrap result should be saved under "bootResult" to the analysis-data folder
 	aqg_smoothCalib = 17,					## the smoothing (sav. golay) applied for the aucs ("area-under-the-curve-stabilization") calibration data
 	aqg_calibTRange = "symm@2", 			## the temperatur range picked out from the calibration data. Either numeric length two [e.g. c(28,32)], or character starting with 'symm@x', with 'x' being the plus and minus delta in temperature from the temperature of the experiment
 	aqg_Texp = 28.6,						## the temperature at which the measurements were done
