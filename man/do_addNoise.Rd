@@ -44,9 +44,12 @@ Other Noise procedures: \code{\link{genNoiseRecExp}},
   \code{\link{noise_procedures}}
 
 Other Data pre-treatment functions: \code{\link{[,aquap_data-method}},
-  \code{\link{do_avg}}, \code{\link{do_detrend}},
-  \code{\link{do_emsc}}, \code{\link{do_gapDer}},
-  \code{\link{do_msc}}, \code{\link{do_resampleNIR}},
-  \code{\link{do_sgolay}}, \code{\link{dpt_modules}},
-  \code{\link{selectWls}}, \code{\link{ssc}}
+  \code{\link{do_avg}}, \code{\link{do_blowup}},
+  \code{\link{do_detrend}}, \code{\link{do_emsc}},
+  \code{\link{do_gapDer}}, \code{\link{do_msc}},
+  \code{\link{do_resampleNIR}}, \code{\link{do_sgolay}},
+  \code{\link{dpt_modules}}, \code{\link{selectWls}},
+  \code{\link{ssc}}
 }
+\concept{Data pre-treatment functions}
+\concept{Noise procedures}

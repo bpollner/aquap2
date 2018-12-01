@@ -104,6 +104,48 @@ calculateAquagram <- function(dataset, md, ap, idString, tempFile) {
 	return(aquCalcRes)
 } # EOF
 
+calculate_XDA <- function(dataset, md, ap, idString) {
+	if (is.null(ap$classif$da)) {
+		return(NULL)
+	}
+	apCl <- ap$classif$da
+	daTypes <- apCl$type
+	pri <- "DA"
+	priTy <- daTypes
+	return(make_X_classif_handoverType(dataset, md, apCl, types=daTypes, idString, priInfo=pri, priTy))
+} # EOF
+
+calculate_RNF <- function(dataset, md, ap, idString) {
+	if (is.null(ap$classif$rnf)) {
+		return(NULL)
+	}	
+	apCl <- ap$classif$rnf
+	types <- pv_nonDAClassifiers[1]  # pv_nonDAClassifiers <- c("rndforest", "svm", "nnet")
+	apCl$type <- types
+	return(make_X_classif_handoverType(dataset, md, apCl, types, idString, priInfo="RNF", priTy=types))
+} # EOF
+
+calculate_SVM <- function(dataset, md, ap, idString) {
+	if (is.null(ap$classif$svm)) {
+		return(NULL)
+	}
+	apCl <- ap$classif$svm
+	types <- pv_nonDAClassifiers[2]  # pv_nonDAClassifiers <- c("rndforest", "svm", "nnet")
+	apCl$type <- types
+	return(make_X_classif_handoverType(dataset, md, apCl, types, idString, priInfo="SVM", priTy=types))
+} # EOF
+
+calculate_ANN <- function(dataset, md, ap, idString) {
+	if (is.null(ap$classif$nnet)) {
+		return(NULL)
+	}
+	apCl <- ap$classif$nnet
+	types <- pv_nonDAClassifiers[3]  # pv_nonDAClassifiers <- c("rndforest", "svm", "nnet")
+	apCl$type <- types	
+	return(make_X_classif_handoverType(dataset, md, apCl, types, idString, priInfo="NNET", priTy=types))
+} # EOF
+
+
 # works on a single element of the list in the cube
 makeAllModels <- function(set, md, ap, tempFile) {
 #	dataset <- set@dataset
@@ -115,5 +157,11 @@ makeAllModels <- function(set, md, ap, tempFile) {
 	newSet@dataset <- getDataset(set)
 	newSet@idString <- set@idString
 	newSet@extraModels <- set@extraModels
+	# classifiers
+	newSet@xda <- calculate_XDA(getDataset(set), md, ap, getIdString(set))
+	newSet@rnf <- calculate_RNF(getDataset(set), md, ap, getIdString(set))
+	newSet@svm <- calculate_SVM(getDataset(set), md, ap, getIdString(set))
+	newSet@ann <- calculate_ANN(getDataset(set), md, ap, getIdString(set))
+	#
 	return(newSet)
 } # EOF

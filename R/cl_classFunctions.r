@@ -213,3 +213,20 @@ plot_pls_cube_M <- function(object, ...) {
 plot_simca_cube_M <- function(object, ...) {
 	plot_simca_cube(cube=object, ...)
 } # EOF
+
+# classification -----------
+plot_da_cube_M <- function(object, ...) {
+	plot_da_cube(cube=object, ...)
+} # EOF
+
+plot_rnf_cube_M <- function(object, ...) {
+	plot_rnf_cube(cube=object, ...)
+} # EOF
+
+plot_svm_cube_M <- function(object, ...) {
+	plot_svm_cube(cube=object, ...)
+} # EOF
+
+plot_nnet_cube_M <- function(object, ...) {
+	plot_nnet_cube(cube=object, ...)
+} # EOF

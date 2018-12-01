@@ -1,4 +1,23 @@
 #############################
+Version 0.2.0
+New:
+	Added classifiers.
+	Function to select and possibly average groups of wavelengths (function siWlg).
+
+
+Improved:
+	
+	
+	
+
+Bugfix:
+
+
+#############################
+
+
+
+#############################
 Version 0.1.9
 New:
 	Values on the X-Axis can be others than wavelengths; the denominator can be specified in the metadata.

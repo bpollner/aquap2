@@ -60,10 +60,13 @@ Other Helper Functions: \code{\link{genFolderStr}},
   \code{\link{genTempCalibExp}}, \code{\link{getcd}},
   \code{\link{instAquap2Examples}},
   \code{\link{printStdColnames}}, \code{\link{reColor}},
-  \code{\link{saveAQdata}}, \code{\link{updateAquap2}},
-  \code{\link{updateSettings}}
+  \code{\link{saveAQdata}}, \code{\link{siWlg}},
+  \code{\link{updateAquap2}}, \code{\link{updateSettings}}
 
 Other Extract Elements: \code{\link{getHeader}},
   \code{\link{getWavelengths,aquap_data-method}},
-  \code{\link{getcd}}, \code{\link{siWl}}
+  \code{\link{getcd}}, \code{\link{siWlg}},
+  \code{\link{siWl}}
 }
+\concept{Extract Elements}
+\concept{Helper Functions}

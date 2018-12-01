@@ -38,7 +38,7 @@ use as input for specifying the plotting options.}
 }}}}
 
 \item{what}{Character length one. What type of analysis to plot. Possible 
-values are 'all', 'pca', 'sim', 'pls', 'aqg'.}
+values are 'all', 'pca', 'sim', 'pls', 'aqg', 'da', 'rnf', 'svm', 'nnet'.}
 }
 \value{
 A PDF or graphic device.
@@ -87,8 +87,15 @@ Other Core functions: \code{\link{exportSampleList}},
 
 Other Plot functions: \code{\link{plot,aquap_data,missing-method}},
   \code{\link{plot_aqg}},
+  \code{\link{plot_classifX_indepPred}},
+  \code{\link{plot_da,aquap_cube-method}},
+  \code{\link{plot_nnet,aquap_cube-method}},
   \code{\link{plot_pca,aquap_cube-method}},
   \code{\link{plot_pls,aquap_cube-method}},
   \code{\link{plot_pls_indepPred}},
-  \code{\link{plot_simca,aquap_cube-method}}
+  \code{\link{plot_rnf,aquap_cube-method}},
+  \code{\link{plot_simca,aquap_cube-method}},
+  \code{\link{plot_svm,aquap_cube-method}}
 }
+\concept{Core functions}
+\concept{Plot functions}

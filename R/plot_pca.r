@@ -249,10 +249,15 @@ plot_pca_checkDefaultsParams <- function(ld.bandwidth, ld.adLines, ld.col, ld.lt
 #### CORE ###
 plot_pca_cube <- function(cube, aps="def", ld.bandwidth="def", ld.adLines="def", ld.col="def", ld.lty="def", ...) {
 	autoUpS()
+	printEmpty <- .ap2$stn$gen_plot_printEmptySlots
+	#
 	ap <- doApsTrick(aps, cube, ...)
 	ap <- ap_cleanZeroValuesCheckExistenceDefaults(ap, dataset=getDataset(cube[[1]]), haveExc=FALSE) # just take the first dataset, as we mainly need the header (and the wavelengths are already checked.. )
 	if (is.null(ap$pca)) {
-		return(cat("*** PCA model not available or not selected for plotting \n"))
+		if (printEmpty) {
+			cat("*** PCA model not available or not selected for plotting \n")
+		}
+		return(NULL)	
 	}
 	plot_pca_checkDefaultsParams(ld.bandwidth, ld.adLines, ld.col, ld.lty) # is assigning here !!
 	where <- ap$genPlot$where
@@ -341,7 +346,7 @@ plot_pca_data <- function(dataset, aps="def", ...) {
 #' specified in the settings.r file in \code{fn_anProcDefFile}.}
 #' \item{Custom filename}{Provide any valid filename for an analysis procedure to 
 #' use as input for specifying the plotting options.}
-#' }}
+#' }} 
 #' \item{ld.bandwidth}{Character "def", or numeric length one. The bandwidth of 
 #' wavelengths used in the peak-picking process when plotting the loadings. If 
 #' left at the default "def", the value from the settings.r file 
@@ -360,7 +365,7 @@ plot_pca_data <- function(dataset, aps="def", ...) {
 #'  \item{ld.lty}{Character "def" or a positive integer vector indicating the 
 #' desired line types. When left at the default "def" the value from the 
 #' settings.r file is read in (parameter \code{pca_ld_customLinetype}).}
-#'  }
+#'  } 
 #' @return A pdf or graphic device.
 #' @family Plot functions
 #' @family PCA documentation

@@ -1,8 +1,8 @@
 Package: aquap2
 Type: Package
 Title: Multivariate Data Analysis Tools for R including Aquaphotomics Methods
-Version: 0.1.9
-Date: 2016-11-26
+Version: 0.3.0
+Date: 2018-12-02
 Author: Bernhard Pollner, Zoltan Kovacs
 Maintainer: Bernhard Pollner <bernhard.pollner@mac.com>
 Description: Methods and tools for multivariate data analysis in R, with an 
@@ -10,7 +10,8 @@ Description: Methods and tools for multivariate data analysis in R, with an
 License: GPL (>=2)
 LazyLoad: yes
 Depends:
-    R (>= 3.3.2)
+    R (>= 3.3.0)
+Encoding: UTF-8
 Imports:
     methods,
     foreach,
@@ -34,13 +35,22 @@ Imports:
     beeswarm,
     devtools,
     grid,
-    gridExtra
+    gridExtra,
+    ggplot2,
+    gtable,
+    MASS,
+    mda,
+    mclust,
+    randomForest,
+    e1071,
+    nnet
 Suggests:
     knitr
 VignetteBuilder: knitr
-Collate:
+Collate: 
     'aquap2.r'
     'calc_aqg.r'
+    'calc_classif_gen.r'
     'calc_noise.r'
     'calc_plsr.r'
     'calc_simca.r'
@@ -50,6 +60,7 @@ Collate:
     'cube_makeModels.r'
     'doc_anproc.r'
     'doc_classes.r'
+    'doc_classification.r'
     'doc_customImport.r'
     'doc_customTRH.r'
     'doc_dptModules.r'
@@ -64,6 +75,8 @@ Collate:
     'peaks_pick+plot.r'
     'plot_all.r'
     'plot_aqg.r'
+    'plot_classif_gen.r'
+    'plot_classif_spec.r'
     'plot_pca.r'
     'plot_plsr.r'
     'plot_simca.r'
@@ -76,4 +89,4 @@ Collate:
     'prep_transformToAp2.r'
     'prep_writeMfiles.r'
     'zzz.r'
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.0

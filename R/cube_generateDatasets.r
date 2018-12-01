@@ -22,7 +22,14 @@ makeSingleBlock <- function(ClassVar, header, metaData) {
 	classCol <- matrix(ClassVar, nrow=length(levelsChar) , ncol=1)
 	valueCol <- matrix(levelsChar)
 	out <- cbind(classCol, valueCol)
-	out
+	# now resort if the value is all numeric
+	options(warn=-1)
+	nums <- as.numeric(out[,2])
+	options(warn=-0)
+	if (all(is.numeric(nums))) {
+		out[,2] <- out[,2][order(nums)]
+	}
+	return(out)
 } # EOF
 
 multiplyBlocks <- function(block1, block2) {
@@ -613,6 +620,109 @@ ap_check_plsr_Input <- function(ap, header) {
 	return(ap)
 } # EOF
 
+ap_check_classifier_Input <- function(ap, header) {
+	if (!is.null(ap$classif)) {
+		pvAllXDA <- pv_classificationFuncs_XDA
+		pvNonDA <- pv_nonDAClassifiers
+		pvAllClassif <- pv_allClassificationFuncs
+		cns <- colnames(header)
+		cPref <- .ap2$stn$p_ClassVarPref
+		cns <- cns[grep(cPref, cns)]
+		###
+		checkClassExistence <- function(X, char, ppv=FALSE) {
+			if (!all(is.character(X))) {
+				stop(paste0("Please only provide characters as input for the argument '", char, "'. Please check your input resp. the analysis procedure."), call.=FALSE)
+			}
+			for (i in 1: length(X)) {
+				if (!X[i] %in% cns) {
+					msg1 <- paste0("Sorry, it seems that the class-variable `", X[i], "` as target variable for classification (", char, ") does not exist in the provided dataset.")
+					msg2 <- "";  if (ppv) { msg2 <- paste0("\nPossible values are: '", paste(cns, collapse="', '"), ".") }
+					stop(paste0(msg1, msg2), call.=FALSE)
+				}
+				if (nlevels(header[, X[i]]) < 2) {
+					stop(paste0("Sorry, you need to have at least two distinct groups for classification (", char, "). The selected variable '", X[i], "' contains only one group in the current dataset."), call.=FALSE)
+				}
+			} # end for i
+		} # EOIF
+		checkTestCV <- function(x, char) {
+			if (!all(is.logical(x)) | length(x) != 1) {
+				stop(paste0("Please provide either `TRUE` `FALSE` to the argument `", char, "`."), call.=FALSE)
+			}
+		} # EOIF
+		checkPercTest <- function(x, char, lim=50) {
+			if (!all(is.numeric(x)) | length(x) != 1) {
+				stop(paste0("Please provide a numeric length one between ", lim, " and 100 to the argument `", char, "`."), call.=FALSE)
+			}
+			if (x < 0 | x > lim) {
+				stop(paste0("Please provide a numeric between 0 and ", lim, " to the argument `", char, "`."), call.=FALSE)
+			}
+		} # EOIF
+		checkForNumericLengthOne <- function(x, char) {
+			if (!all(is.numeric(x)) | length(x) != 1) {
+				stop(paste0("Please provide a numeric length one to the argument `", char, "`."), call.=FALSE)
+			}
+		} # EOIF
+		checkPCAred <- function(mo, prLog, prNC) {
+			if (!all(is.logical(prLog)) | length(prLog) != 1) {
+				stop(paste0("Please provide either TRUE or FALSE to the argument `", mo, "pcaRed` in the analysis procedure / your input."), call.=FALSE)
+			}
+			if (any(is.character(prNC))) {
+				if (length(prNC) != 1 | !all(prNC == "max")) {
+					stop(paste0("For using the maximum number of components resp. their scores for subsequent classification, please provide `max` to the argument `", mo, "pcaNComp`in the analysis procedure / your input."), call.=FALSE)
+				}
+			} else { # end if any character
+				if (!all(is.wholenumber(prNC))) {
+					stop(paste0("In order to specify the components resp. their scores for subsequent classification, please provide only integers to the argument `", mo, "pcaNComp` in the analysis procedure / your input."), call.=FALSE)
+				}
+			} # end else
+		} # EOIF
+		checkThings <- function(mo, testCV, percTest, bootCutoff, BootFactor, valid) {
+			checkTestCV(testCV, paste0(mo, "testCV"))
+			checkPercTest(percTest, paste0(mo, "percTest"))
+			checkForNumericLengthOne(bootCutoff, paste0(mo, "cvBootCutoff"))
+			checkForNumericLengthOne(BootFactor, paste0(mo, "cvBootFactor"))
+			checkForNumericLengthOne(valid, paste0(mo, "valid"))
+		} # EOIF
+		###
+		# XDA
+		da <- ap$classif$da
+		if (!is.null(da)) {
+			if (!all(is.character(da$type))) {
+				stop(paste0("Please only provide characters as input for the argument 'da.type'. Please check your input resp. the analysis procedure."), call.=FALSE)
+			}
+			if (!all(da$type %in% pvAllXDA)) {
+				stop(paste0("Please provide one or more of '", paste(pvAllXDA, collapse="`, `"), "' to the argument 'da.type' in the analysis procedure / your input."), call.=FALSE)
+			}
+			checkClassExistence(da$classOn, "da.classOn")
+			checkThings("da.", da$testCV, da$percTest, da$bootCutoff, da$bootFactor, da$valid)
+			checkPCAred("da.", da$pcaRed, da$pcaNComp)
+		} # end !is null
+		#
+		rnf <- ap$classif$rnf
+		if (!is.null(rnf)) {
+			checkClassExistence(rnf$classOn, "rnf.classOn")
+			checkThings("rnf.", rnf$testCV, rnf$percTest, rnf$bootCutoff, rnf$bootFactor, rnf$valid)
+			checkPCAred("rnf.", rnf$pcaRed, rnf$pcaNComp)
+		} # end !is null
+		#
+		svm <- ap$classif$svm
+		if (!is.null(svm)) {
+			checkClassExistence(svm$classOn, "svm.classOn")
+			checkThings("svm.", svm$testCV, svm$percTest, svm$bootCutoff, svm$bootFactor, svm$valid)
+			checkPCAred("svm.", svm$pcaRed, svm$pcaNComp)
+		} # end !is null
+		#
+		ann <- ap$classif$nnet
+		if (!is.null(ann)) {
+			checkClassExistence(ann$classOn, "nnet.classOn")
+			checkThings("nnet.", ann$testCV, ann$percTest, ann$bootCutoff, ann$bootFactor, ann$valid)
+			checkPCAred("nnet.", ann$pcaRed, ann$pcaNComp)			
+		} # end !is null
+		#
+	} # end not null
+	return(ap)
+} # EOF
+
 ap_checExistence_Defaults <- function(ap, dataset, haveExc, checkWlsRange) {
 	cPref <- .ap2$stn$p_ClassVarPref
 	yPref <- .ap2$stn$p_yVarPref
@@ -692,6 +802,7 @@ ap_checExistence_Defaults <- function(ap, dataset, haveExc, checkWlsRange) {
 	ap <- ap_check_gp_generalPlottingDefaults(ap)
 	ap_check_dptModules(ap)
 	ap <- ap_check_plsr_Input(ap, dataset$header)
+	ap <- ap_check_classifier_Input(ap, dataset$header)
 	# add more default checking for other statistics here
 	return(ap)
 } # EOF
@@ -703,7 +814,7 @@ ap_cleanZeroValuesCheckExistenceDefaults <- function(ap, dataset, haveExc, check
 } # EOF
 
 #' @title Select Wavelengths
-#' @description Select wavelenghts from a dataset.
+#' @description Select wavelengths from a dataset.
 #' @details It is not necessary to exactly know the numbers of the wavelengths 
 #' present in the dataset, as for the lower limit the same or the next highest 
 #' wavelength as \code{from}, and for the upper limit the same or the next 
@@ -713,7 +824,7 @@ ap_cleanZeroValuesCheckExistenceDefaults <- function(ap, dataset, haveExc, check
 #' selected.
 #' @param to Numeric lengtho one. The upper limit of the wavelengths to be 
 #' selected.
-#' @seealso \code{\link{siWl}}
+#' @seealso \code{\link{siWl}}, \code{\link{siWlg}}
 #' @return The standard dataset (class 'aquap_data') containing only the 
 #' selected wavelengths.
 #' @family Data pre-treatment functions
@@ -1165,6 +1276,10 @@ checkForStats <- function(ap) {
 		cnt <- cnt + 1
 		char <- c(char, "Aquagram")
 	}
+	if (!is.null(ap$classif)) {
+		cnt <- cnt + 1
+		char <- c(char, "classification")
+	}
 	return(list(cnt=cnt, char=char))
 } # EOF
 
@@ -1189,6 +1304,22 @@ checkCubeForRealStats <- function(cube) {
 	if (cle("aquagr")) {
 		cnt <- cnt + 1
 		char <- c(char, "Aquagram")
+	}
+	if (cle("xda")) {
+		cnt <- cnt + 1
+		char <- c(char, "X.DA")
+	}
+	if (cle("rnf")) {
+		cnt <- cnt + 1
+		char <- c(char, "RNF")
+	}
+	if (cle("svm")) {
+		cnt <- cnt + 1
+		char <- c(char, "SVM")
+	}
+	if (cle("ann")) {
+		cnt <- cnt + 1
+		char <- c(char, "NNET")
 	}
 	return(list(cnt=cnt, char=char))
 #	return(checkForStats(cube@anproc))
@@ -1492,6 +1623,7 @@ gdmm <- function(dataset, ap=getap(), noiseFile="def", tempFile="def") {
 	cube@cp <- cp
 	cube@cpt <- cpt
 	cube@aqgRan <- rangesColl
+	cube@timestamp <- as.character(Sys.time())
 	return(cube)
 } # EOF
 

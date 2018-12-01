@@ -121,3 +121,4 @@ plot_pca(cu)
 Other Noise procedures: \code{\link{do_addNoise}},
   \code{\link{genNoiseRecExp}}
 }
+\concept{Noise procedures}

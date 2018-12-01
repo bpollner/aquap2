@@ -566,10 +566,10 @@ readInAquagramPSettings <- function() {
 		File <- "/pData/aqugrStngs"
 		filepath <- paste(a, File, sep="")
 	}
-	load(filepath)
-	out <- get(".aquagramPSettings")
-#	rm(.aquagramPSettings)
-	return(out)
+#	load(filepath)
+	return(eval(parse(text=load(filepath))))
+#	out <- get(".aquagramPSettings")
+#	return(out)
 } #EOF
 
 getOvertoneCut <- function(otNumberChar) {

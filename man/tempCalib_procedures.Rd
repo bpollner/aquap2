@@ -74,3 +74,5 @@ Other Temperature procedures: \code{\link{genTempCalibExp}}
 Other Aquagram documentation: \code{\link{calc_aqg_args}},
   \code{\link{plot_aqg_args}}, \code{\link{plot_aqg}}
 }
+\concept{Aquagram documentation}
+\concept{Temperature procedures}

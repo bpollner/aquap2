@@ -53,16 +53,28 @@ plot_spectra(cube)
 
 Other Plot functions: \code{\link{plot,aquap_cube,missing-method}},
   \code{\link{plot_aqg}},
+  \code{\link{plot_classifX_indepPred}},
+  \code{\link{plot_da,aquap_cube-method}},
+  \code{\link{plot_nnet,aquap_cube-method}},
   \code{\link{plot_pca,aquap_cube-method}},
   \code{\link{plot_pls,aquap_cube-method}},
   \code{\link{plot_pls_indepPred}},
-  \code{\link{plot_simca,aquap_cube-method}}
+  \code{\link{plot_rnf,aquap_cube-method}},
+  \code{\link{plot_simca,aquap_cube-method}},
+  \code{\link{plot_svm,aquap_cube-method}}
 
-Other Plot arguments: \code{\link{plot_aqg_args}},
+Other Plot arguments: \code{\link{plot_NNET_args}},
+  \code{\link{plot_SVM_args}}, \code{\link{plot_aqg_args}},
+  \code{\link{plot_discrimAnalysis_args}},
   \code{\link{plot_pca_args}}, \code{\link{plot_pg_args}},
-  \code{\link{plot_pls_args}}, \code{\link{plot_sim_args}}
+  \code{\link{plot_pls_args}},
+  \code{\link{plot_randomForest_args}},
+  \code{\link{plot_sim_args}}
 
 Other Core functions: \code{\link{exportSampleList}},
   \code{\link{gdmm}}, \code{\link{getFullData}},
   \code{\link{plot,aquap_cube,missing-method}}
 }
+\concept{Core functions}
+\concept{Plot arguments}
+\concept{Plot functions}

@@ -36,3 +36,4 @@ element.}
 Other Class documentations: \code{\link{aquap_cube}},
   \code{\link{aquap_set}}
 }
+\concept{Class documentations}

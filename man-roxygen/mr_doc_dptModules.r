@@ -75,7 +75,7 @@
 #' \item{@@S1-S2-all}{Format: 
 #' "<%=pv_dptModules[6]%>@@S1-S2-all", set the source wavelength 
 #' from S1 to S2, with S1 and S2 being existing wavelengths in the current dataset,
-#' and apply the resulting de-trend to \strong{all} of the wavelenghts present in 
+#' and apply the resulting de-trend to \strong{all} of the wavelengths present in 
 #' the current dataset.}
 #' \item{@@S1-S2-T1-T2}{Format: 
 #' "<%=pv_dptModules[6]%>@@S1-S2-T1-T2", set the source wavelengths 

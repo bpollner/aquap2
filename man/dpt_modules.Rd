@@ -69,7 +69,7 @@ target at its default, i.e. use the same target as the source.}
 \item{@S1-S2-all}{Format: 
 "deTr@S1-S2-all", set the source wavelength 
 from S1 to S2, with S1 and S2 being existing wavelengths in the current dataset,
-and apply the resulting de-trend to \strong{all} of the wavelenghts present in 
+and apply the resulting de-trend to \strong{all} of the wavelengths present in 
 the current dataset.}
 \item{@S1-S2-T1-T2}{Format: 
 "deTr@S1-S2-T1-T2", set the source wavelengths 
@@ -153,8 +153,11 @@ Other dpt modules documentation: \code{\link{do_detrend}},
 
 Other Data pre-treatment functions: \code{\link{[,aquap_data-method}},
   \code{\link{do_addNoise}}, \code{\link{do_avg}},
-  \code{\link{do_detrend}}, \code{\link{do_emsc}},
-  \code{\link{do_gapDer}}, \code{\link{do_msc}},
-  \code{\link{do_resampleNIR}}, \code{\link{do_sgolay}},
-  \code{\link{selectWls}}, \code{\link{ssc}}
+  \code{\link{do_blowup}}, \code{\link{do_detrend}},
+  \code{\link{do_emsc}}, \code{\link{do_gapDer}},
+  \code{\link{do_msc}}, \code{\link{do_resampleNIR}},
+  \code{\link{do_sgolay}}, \code{\link{selectWls}},
+  \code{\link{ssc}}
 }
+\concept{Data pre-treatment functions}
+\concept{dpt modules documentation}

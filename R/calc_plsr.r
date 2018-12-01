@@ -204,11 +204,12 @@ makePLSRModels <- function(dataset, md, ap) {
 			if (i == leng) {coa <- ". "} else {coa <- ", "}
 			if (!stnLoc$allSilent) {cat(paste(regrOnList[i]), coa, sep="" )}
 		}
+		dataUse <- dataset
 		if (exOut[i]) { # is logical vector, determining whether we want to do the plsr specific outlier detection or not
 			origMods <- makePLSRModel_inner(dataset, regrOnList[i], niter, ncomp, valid[i], stnLoc, exOut[i])
-			dataset <- excludePlsrOutliers(dataset, origMods, stnLoc) # we make a custom dataset for each element in the regress on list
+			dataUse <- excludePlsrOutliers(dataset, origMods, stnLoc) # we make a custom dataset for each element in the regress on list
 		}
-		out <- makePLSRModel_inner(dataset, regrOnList[i], niter, ncomp, valid[i], stnLoc, exOut[i])	 ####### CORE ###### CORE !!!!
+		out <- makePLSRModel_inner(dataUse, regrOnList[i], niter, ncomp, valid[i], stnLoc, exOut[i])	 ####### CORE ###### CORE !!!!
 	} # end foreach i
 	modCorr <- modPlus <- regrOn <- usedDataset <- exOut <- list()
 	for (i in 1: length(modelList)) { # resort the list from modelList
@@ -334,7 +335,7 @@ check_indPlsPrediction_input <- function(indepDataset, cube, cnv=NULL, inv=NULL,
 		if (!all(inv %in% YvarCns)) {
 			indNo <- which(!inv %in% YvarCns)
 			if (length(indNo) == 1) {ad1 <- ""; ad2 <- "s"; ad3 <- "has" } else {ad1 <- "s"; ad2 <- ""; ad3 <- "have"}
-			stop(paste0("Sorry, the numerical variable", ad1, " '", paste(inv[indNo], collapse="', '"), "' seem", ad2, " not to be present in the independent dataset '", dsName, "'. Please check your input at the argument 'inv' of leave at the default NULL.\nPossible values are: '", paste(YvarCns, collapse="', '"), "'."), call.=FALSE)
+			stop(paste0("Sorry, the numerical variable", ad1, " '", paste(inv[indNo], collapse="', '"), "' seem", ad2, " not to be present in the independent dataset '", dsName, "'. Please check your input at the argument 'inv' or leave at the default NULL.\nPossible values are: '", paste(YvarCns, collapse="', '"), "'."), call.=FALSE)
 		}
 		indNo <- which(sapply(inv, function(x) !all(is.numeric(dataset$header[,x])) ))
 		if (length(indNo) > 0) {

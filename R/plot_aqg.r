@@ -633,6 +633,8 @@ aq_checkTrippleDotsCalc <- function(...) {
 #' @export
 plot_aqg <- function(cube, aps="def", ...) {
   	autoUpS()
+	printEmpty <- .ap2$stn$gen_plot_printEmptySlots
+	#  	
   	if (class(cube) != "aquap_cube") {
   		stop("Please provide an object of class 'aquap_cube' to the argument 'cube'", call.=FALSE)
   	}
@@ -641,8 +643,11 @@ plot_aqg <- function(cube, aps="def", ...) {
   	ap <- ap_cleanZeroValuesCheckExistenceDefaults(ap, dataset=getDataset(cube[[1]]), haveExc=FALSE) # just take the first dataset, as we mainly need the header (and the wavelengths are already checked.. )
   	apCube <- getap(.lafw_fromWhere="cube", cube=cube)	
   	if (is.null(ap$aquagr)) {
-  	 	return(cat("*** Aquagram not available or not selected for plotting \n"))
- 	}
+ 		if (printEmpty) {
+			cat("*** Aquagram not available or not selected for plotting \n")
+		}	
+		return(NULL)
+  	}
   	where <- ap$genPlot$where
   	fns <- ap$genPlot$fns
  	#

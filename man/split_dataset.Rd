@@ -85,7 +85,11 @@ cube <- gdmm(dataset, getap(spl.wl="1300-to-1600")) # override 'spl.wl' in the
 \seealso{
 \code{\link{dpt_modules}}
 
-Other Calc. arguments: \code{\link{calc_aqg_args}},
+Other Calc. arguments: \code{\link{calc_NNET_args}},
+  \code{\link{calc_SVM_args}}, \code{\link{calc_aqg_args}},
+  \code{\link{calc_discrimAnalysis_args}},
   \code{\link{calc_pca_args}}, \code{\link{calc_pls_args}},
+  \code{\link{calc_randomForest_args}},
   \code{\link{calc_sim_args}}
 }
+\concept{Calc. arguments}

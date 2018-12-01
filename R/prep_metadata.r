@@ -265,9 +265,14 @@ getap_core_file <- function(fn="def") {
 	simca <- list(doSIMCA=e$do.sim, simcOn=e$sim.vars, simcK=e$sim.K)
 	plsr <- list(doPLSR=e$do.pls, regressOn=e$pls.regOn, ncomp=e$pls.ncomp, valid=e$pls.valid, exOut=e$pls.exOut, colorBy=e$pls.colorBy, what=e$pls.what, inRdp=e$pls.rdp)	
 	aquagr <- list(doAqg=e$do.aqg, vars=e$aqg.vars, nrCorr=e$aqg.nrCorr, spectra=e$aqg.spectra, minus=e$aqg.minus, mod=e$aqg.mod, TCalib=e$aqg.TCalib, Texp=e$aqg.Texp, bootCI=e$aqg.bootCI, R=e$aqg.R, smoothN=e$aqg.smoothN, selWls=e$aqg.selWls, msc=e$aqg.msc, reference=e$aqg.reference, fsa=e$aqg.fsa, fss=e$aqg.fss, ccol=e$aqg.ccol, clt=e$aqg.clt, pplot=e$aqg.pplot, plines=e$aqg.plines, discr=e$aqg.discr)	
+	da <- list(doDa=e$do.da, type=e$da.type, classOn=e$da.classOn, testCV=e$da.testCV, percTest=e$da.percTest, bootCutoff=e$da.cvBootCutoff, bootFactor=e$da.cvBootFactor, valid=e$da.valid, pcaRed=e$da.pcaRed, pcaNComp=e$da.pcaNComp)
+	rnf <- list(doRnf=e$do.rnf, classOn=e$rnf.classOn, testCV=e$rnf.testCV, percTest=e$rnf.percTest, bootCutoff=e$rnf.cvBootCutoff, bootFactor=e$rnf.cvBootFactor, valid=e$rnf.valid, pcaRed=e$rnf.pcaRed, pcaNComp=e$rnf.pcaNComp)
+	svm <- list(doSvm=e$do.svm, classOn=e$svm.classOn, testCV=e$svm.testCV, percTest=e$svm.percTest, bootCutoff=e$svm.cvBootCutoff, bootFactor=e$svm.cvBootFactor, valid=e$svm.valid, pcaRed=e$svm.pcaRed, pcaNComp=e$svm.pcaNComp)
+	nnet <- list(doNnet=e$do.nnet, classOn=e$nnet.classOn, testCV=e$nnet.testCV, percTest=e$nnet.percTest, bootCutoff=e$nnet.cvBootCutoff, bootFactor=e$nnet.cvBootFactor, valid=e$nnet.valid, pcaRed=e$nnet.pcaRed, pcaNComp=e$nnet.pcaNComp)
+	classif <- list(da=da, rnf=rnf, svm=svm, nnet=nnet)
 	genPlot <- list(where=e$pg.where, onMain=e$pg.main, onSub=e$pg.sub, fns=e$pg.fns)
 	##
-	ap <- list(ucl=ucl, dpt=dpt, pca=pca, simca=simca, plsr=plsr, aquagr=aquagr, genPlot=genPlot)
+	ap <- list(ucl=ucl, dpt=dpt, pca=pca, simca=simca, plsr=plsr, aquagr=aquagr, classif=classif, genPlot=genPlot)
 	return(new("aquap_ap", ap))
 } #EOF
 
@@ -315,41 +320,7 @@ getap_core <- function(fn, .lafw_fromWhere="load", cube=NULL, ...) {
 	}
 } # EOF
 
-#' @title Get Analysis Procedure
-#' @description Read in the analysis procedure from the default or a custom 
-#' analysis procedure file located in the metadata-folder. By providing any of 
-#' the arguments of the analysis procedure file (see \code{\link{anproc_file}}) 
-#' to the function you can override the values in the file with the provided 
-#' values.
-#' @details The name of the default analysis procedure file can be specified in 
-#' the settings. The provided value and defaults will be checked in 
-#' \code{\link{gdmm}} and the resulting \code{\link{aquap_cube}} contains the 
-#' final analysis procedure in its slot @@anproc.
-#' @param fn Character length one. The filename of the analysis procedure file 
-#' to load. If left at 'def', the default filename for an analysis procedure 
-#' file as specified in the settings (factory default is "anproc.r") is read in. 
-#' Provide any other valid name of an analysis procedure file to load it. (Do not 
-#' forget the '.r' at the end.)
-#' @param ... Any of the arguments of the analysis procedure - please see 
-#' \code{\link{anproc_file}}. Any argument/value provided via \code{...} will 
-#' override the value in the analysis procedure .r file.
-#' @return A list with the analysis procedure.
-#' @seealso \code{\link{anproc_file}}, \code{\link{getmd}}, \code{\link{gdmm}}
-#' @examples
-#' \dontrun{
-#' ap <- getap(); str(ap); names(ap)
-#' ap <- getap("myFile.r")
-#' ap <- getap(pca.colorBy="C_Group") # change the value of 'pca.colorBy'
-#' from the .r file to 'C_Group'
-#' ap <- getap(do.sim=FALSE) # switch off the calculation of SIMCA models
-#' ap <- getap(spl.var="C_Group") # change the split variable to "C_Group"
-#' }
-#' @export
-getap <- function(fn="def", ...) {
-	autoUpS()
-	ap <- getap_core(fn, ...) 	# first load the analysis procedure as defined in the .r file, then possibly modify it. If no additional arguments get supplied by the  user, the original values from the .r file get passed on.
-								# depending on a possible additional argument in ... (.lafw_fromWhere), either the ap from the file is loaded, or,  in case of a call from a plotting function, the ap from the cube (what then is also present in the ... argument) is taken
-	###
+modifyThisAp <- function(ap, ...) {
 	apMod <- new("aquap_ap")
 	###
 	UCL <- ap$ucl
@@ -431,6 +402,50 @@ getap <- function(fn="def", ...) {
 	} # EOIF
 	apMod$aquagr <- modifyAquagram(...)
 	###
+	DA <- ap$classif$da
+	doIt <- checkDo(DA, "doDa")
+	modifyDA <- function(do.da=doIt, da.type=DA$type, da.classOn=DA$classOn, da.testCV=DA$testCV, da.percTest=DA$percTest, da.cvBootCutoff=DA$bootCutoff, da.cvBootFactor=DA$bootFactor, da.valid=DA$valid, da.pcaRed=DA$pcaRed, da.pcaNComp=DA$pcaNComp, ...) {
+		if (!do.da) { 
+			return(NULL)
+		} else {
+			return(list(type=da.type, classOn=da.classOn, testCV=da.testCV, percTest=da.percTest, bootCutoff=da.cvBootCutoff, bootFactor=da.cvBootFactor, valid=da.valid, pcaRed=da.pcaRed, pcaNComp=da.pcaNComp))
+		}
+	} # EOIF
+	apMod$classif$da <- modifyDA(...)
+	###
+	RNF <- ap$classif$rnf
+	doIt <- checkDo(RNF, "doRnf")
+	modifyRnf <- function(do.rnf=doIt, rnf.classOn=RNF$classOn, rnf.testCV=RNF$testCV, rnf.percTest=RNF$percTest, rnf.cvBootCutoff=RNF$bootCutoff, rnf.cvBootFactor=RNF$bootFactor, rnf.valid=RNF$valid,  rnf.pcaRed=RNF$pcaRed, rnf.pcaNComp=RNF$pcaNComp, ...) {
+		if (!do.rnf) { 
+			return(NULL)
+		} else {
+			return(list(classOn=rnf.classOn, testCV=rnf.testCV, percTest=rnf.percTest, bootCutoff=rnf.cvBootCutoff, bootFactor=rnf.cvBootFactor, valid=rnf.valid, pcaRed=rnf.pcaRed, pcaNComp=rnf.pcaNComp))
+		}
+	} # EOIF
+	apMod$classif$rnf <- modifyRnf(...)
+	###
+	SVM <- ap$classif$svm
+	doIt <- checkDo(SVM, "doSvm")
+	modifySVM <- function(do.svm=doIt, svm.classOn=SVM$classOn, svm.testCV=SVM$testCV, svm.percTest=SVM$percTest, svm.cvBootCutoff=SVM$bootCutoff, svm.cvBootFactor=SVM$bootFactor, svm.valid=SVM$valid, svm.pcaRed=SVM$pcaRed, svm.pcaNComp=SVM$pcaNComp, ...) {
+		if (!do.svm) { 
+			return(NULL)
+		} else {
+			return(list(classOn=svm.classOn, testCV=svm.testCV, percTest=svm.percTest, bootCutoff=svm.cvBootCutoff, bootFactor=svm.cvBootFactor, valid=svm.valid, pcaRed=svm.pcaRed, pcaNComp=svm.pcaNComp))
+		}
+	} # EOIF
+	apMod$classif$svm <- modifySVM(...)
+	###
+	NN <- ap$classif$nnet
+	doIt <- checkDo(NN, "doNnet")
+	modifyNnet <- function(do.nnet=doIt, nnet.classOn=NN$classOn, nnet.testCV=NN$testCV, nnet.percTest=NN$percTest, nnet.cvBootCutoff=NN$bootCutoff, nnet.cvBootFactor=NN$bootFactor, nnet.valid=NN$valid,  nnet.pcaRed=NN$pcaRed, nnet.pcaNComp=NN$pcaNComp, ...) {
+		if (!do.nnet) { 
+			return(NULL)
+		} else {
+			return(list(classOn=nnet.classOn, testCV=nnet.testCV, percTest=nnet.percTest, bootCutoff=nnet.cvBootCutoff, bootFactor=nnet.cvBootFactor, valid=nnet.valid, pcaRed=nnet.pcaRed, pcaNComp=nnet.pcaNComp))
+		}
+	} # EOIF
+	apMod$classif$nnet <- modifyNnet(...)
+	###
 	cnt <- checkForStats(apMod)$cnt # returns 0 if not a single model has been calculated; we have do check at the modified ap !!
 	GP <- ap$genPlot
 	modifyGenPlot <- function(pg.where=GP$where, pg.main=GP$onMain, pg.sub=GP$onSub, pg.fns=GP$fns, ...) {
@@ -445,5 +460,44 @@ getap <- function(fn="def", ...) {
 	###	
 	ap_check_dptModules(apMod)
 	###
+	return(apMod)
+} # EOF
+
+#' @title Get Analysis Procedure
+#' @description Read in the analysis procedure from the default or a custom 
+#' analysis procedure file located in the metadata-folder. By providing any of 
+#' the arguments of the analysis procedure file (see \code{\link{anproc_file}}) 
+#' to the function you can override the values in the file with the provided 
+#' values.
+#' @details The name of the default analysis procedure file can be specified in 
+#' the settings. The provided value and defaults will be checked in 
+#' \code{\link{gdmm}} and the resulting \code{\link{aquap_cube}} contains the 
+#' final analysis procedure in its slot @@anproc.
+#' @param fn Character length one. The filename of the analysis procedure file 
+#' to load. If left at 'def', the default filename for an analysis procedure 
+#' file as specified in the settings (factory default is "anproc.r") is read in. 
+#' Provide any other valid name of an analysis procedure file to load it. (Do not 
+#' forget the '.r' at the end.)
+#' @param ... Any of the arguments of the analysis procedure - please see 
+#' \code{\link{anproc_file}}. Any argument/value provided via \code{...} will 
+#' override the value in the analysis procedure .r file.
+#' @return A list with the analysis procedure.
+#' @seealso \code{\link{anproc_file}}, \code{\link{getmd}}, \code{\link{gdmm}}
+#' @examples
+#' \dontrun{
+#' ap <- getap(); str(ap); names(ap)
+#' ap <- getap("myFile.r")
+#' ap <- getap(pca.colorBy="C_Group") # change the value of 'pca.colorBy'
+#' from the .r file to 'C_Group'
+#' ap <- getap(do.sim=FALSE) # switch off the calculation of SIMCA models
+#' ap <- getap(spl.var="C_Group") # change the split variable to "C_Group"
+#' }
+#' @export
+getap <- function(fn="def", ...) {
+	autoUpS()
+	ap <- getap_core(fn, ...) 	# first load the analysis procedure as defined in the .r file, then possibly modify it. If no additional arguments get supplied by the  user, the original values from the .r file get passed on.
+								# depending on a possible additional argument in ... (.lafw_fromWhere), either the ap from the file is loaded, or,  in case of a call from a plotting function, the ap from the cube (what then is also present in the ... argument) is taken
+	###
+	apMod <- modifyThisAp(ap, ...)
 	return(apMod)
 } # EOF

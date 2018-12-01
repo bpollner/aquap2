@@ -74,10 +74,17 @@ The width and height of the resulting pdf can be set in the
 Other Plot functions: \code{\link{plot,aquap_cube,missing-method}},
   \code{\link{plot,aquap_data,missing-method}},
   \code{\link{plot_aqg}},
+  \code{\link{plot_classifX_indepPred}},
+  \code{\link{plot_da,aquap_cube-method}},
+  \code{\link{plot_nnet,aquap_cube-method}},
   \code{\link{plot_pca,aquap_cube-method}},
   \code{\link{plot_pls,aquap_cube-method}},
-  \code{\link{plot_pls_indepPred}}
+  \code{\link{plot_pls_indepPred}},
+  \code{\link{plot_rnf,aquap_cube-method}},
+  \code{\link{plot_svm,aquap_cube-method}}
 
 Other SIMCA documentation: \code{\link{calc_sim_args}},
   \code{\link{plot_sim_args}}
 }
+\concept{Plot functions}
+\concept{SIMCA documentation}

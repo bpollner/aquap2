@@ -50,7 +50,7 @@
 #'      (if any) before the actual wavelength. Set to '0' if you do not have 
 #'      characters before the wavelength.
 #'    }
-#'  \item NIR A matrix containing the NIR-spectra, with the wavelenghts as column 
+#'  \item NIR A matrix containing the NIR-spectra, with the wavelengths as column 
 #'  names and the sample-names as the rownames.
 #' }
 #' You can use the function \code{\link{imp_searchAskColumns}} to automatize column 

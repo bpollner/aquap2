@@ -110,7 +110,7 @@ expandFillInLocalTxt <- function(ftPack, ftLocal, missNames) {
 		newTxt <- rep(TRUE, (length(ftLocal)+length(missNames)))
 		newValInd <- apply(indF[,-1, drop=FALSE], 1, sum) # gives the position in the expanded file where the new values will be placed
 		newTxt[newValInd] <- FALSE
-		newTxt[newTxt==TRUE] <- ftLocal  # fill in the user´s local text in the expanded vector
+		newTxt[newTxt==TRUE] <- ftLocal  # fill in the users local text in the expanded vector
 		newTxt[newValInd] <- ftPack[indF[,1]] # get the rows from the package text
 	} else { # so we have nothing to add
 		newTxt <- ftLocal
@@ -230,63 +230,119 @@ checkFileVersionPossiblyModify <- function(pathToPack, pathToLocal, folderLocal,
 	stop(paste0("Sorry, there is an unexpected error in file check (", nameLocal, ")")) # theoretically this should never happen...
 } # EOF
 
-checkSettings <- function() {
-	defaultFillForRenviron <- "\n\n# Please provide below a valid path to a folder of your liking, \n# with 'XX' being the folder where finally the 'settings.r' file will reside. \nAQUAP2SH = /Users/Name/Documents/path/to/some/folder/XX"
-	addInfo <- "\nRestart R for the changes to become effective. \nSee the help for '?updateSettings' for additional information."
-	sFile <- "settings.r"
-	#
-	pathSH <- Sys.getenv("AQUAP2SH")
-	pspath <- paste(path.package("aquap2"), sFile, sep="/")
-	if (nchar(pathSH) == 0) { 			## so the variable is *not* defined in .Renviron, or maybe we do not even have an .Renviron file
-		homePath <- hoPa <-  "user/home"
-		hp <- try(path.expand("~"), silent=TRUE)
-		if (class(hp) != "try-Error") {
-			homePath <- hoPa <-   hp
-			hoPaAdd <- paste0("in '", homePath, "'")
-		} else {
-			hoPaAdd <- ""
+checkCreateSHfolder <- function(systemHome, fn_aquap2SH) {
+	if (!dir.exists(paste0(systemHome, "/", fn_aquap2SH))) {
+		dirCreaOk <- dir.create(paste0(systemHome, "/", fn_aquap2SH))
+		if (!dirCreaOk) {
+			msg <- paste0("Sorry, the required settings-home directory `", fn_aquap2SH, "` could not be created in `", systemHome, "`.")
+			message(msg)
+			return(FALSE)
+		} else { # so we created the .Renviron file AND created the aquap2SH folder
+			msg <- paste0("The folder `", fn_aquap2SH, "` as settings-home directory has been created in `", systemHome, "`.")
+			message(msg)
+			return(TRUE)
 		}
-		homePath <- paste(homePath, ".Renviron", sep="/")
-		if (!file.exists(homePath)) {
-			ok <- file.create(homePath, showWarnings=FALSE)
-			if (ok) {
-				fcon <- file(homePath, open="w")
-				writeLines(defaultFillForRenviron, fcon)
-				close(fcon)
-				creMsg <- paste0("The required '.Renviron' file in '", hoPa, "' has been created for you. Please open it (e.g. using R-Studio) and modify the variable 'AQUAP2SH' so that it points to a folder of your liking.", addInfo)
-			} else { # file creation did NOT work
-				creMsg <- paste0("Sorry, it was not possible to create the '.Renviron' file for you. Please do this manually by going to your home-directory and there saving a new plain text file under the name '.Renviron'. Open the file and define the variable 'AQUAP2SH' as the path to a folder of your liking.", addInfo)
-			}
+	} # end if !dir.exists aquap2SH
+	return(TRUE) 
+} # EOF
+
+checkSettings <- function() {
+	systemHome <- Sys.getenv("HOME")
+	fullRenvPath <- paste0(systemHome, "/.Renviron")
+	fn_aquap2SH <- "aquap2SH"
+	AQUAP2SH_creationMsg <- paste0("The initial path of `AQUAP2SH` in the .Renviron file (`", fullRenvPath, "`) has been set to `", systemHome, "/", fn_aquap2SH, "`. \nIf you want, you can open the .Renviron file (e.g. using R-Studio) and modify the variable `AQUAP2SH` (holding the path to the  `settings-home` directory) so that it points to a folder of your liking.")
+	addInfo <- "Restart R for the changes to become effective. \nSee the help for '?updateSettings' for additional information."
+	restartMsg <- "Please restart R for the changes in the .Renviron file to become effective."
+	#
+	# first check for existence of the .Renviron file
+	renvExists <- file.exists(fullRenvPath)
+	if (!renvExists) { # we have NO .Renviron file, so we simply make one
+		createOK <- file.create(fullRenvPath, showWarnings=FALSE)
+		if (!createOK) {  #  if .Renviron could not be created
+			msg <- paste0("Sorry, for unknown reasons the creation of the .Renviron file in `", systemHome, "` failed.")
+			message(msg)
+			return(FALSE)
+		} else { # so we could create the .Renviron file
+			# if no .Renviron file, then also no settings home diretory --> create one
+			ok <- checkCreateSHfolder(systemHome, fn_aquap2SH)
+				if (!ok) {
+					return(FALSE)
+				}
+			# now we have to fill the newly created .Renviron file and point AQUAP2SH to the newly created folder
+			defaultFillForRenviron <- paste0("\n\nAQUAP2SH = ", systemHome, "/", fn_aquap2SH)
+			fcon <- file(fullRenvPath, open="w")
+			writeLines(defaultFillForRenviron, fcon)
+			close(fcon)
+			creMsg <- paste0("The required '.Renviron' file in '", systemHome, "' has been created for you.\n", AQUAP2SH_creationMsg, "\n", addInfo)
 			message(creMsg)
 			return(FALSE)
-		} else { # so the .Renviron file is existing
-		msg <- paste0("It appears you did not yet define the path to your aquap2 settings.r home directory in your '.Renviron' file ", hoPaAdd, ". \nPlease do this by going to the .Renviron file in your home directory and there define the variable 'AQUAP2SH' as the path to a folder of your liking.", addInfo)
-		}
-		message(msg)
-		return(FALSE)
-	} else { ## so we have something defined under AQUAP2SH
-		if (!file.exists(pathSH)) {
-			msg <- paste0("The folder \"", pathSH, "\" does not seem to exist. Please check the path defined in the '.Renviron' file.", addInfo)
-			message(msg)
-			return(FALSE)
-		}
-		pathToSettings <- paste(pathSH, sFile, sep="/")
-		if (!file.exists(pathToSettings)) {
-			msg <- paste("The required settings.r file does not seem to exist in the provided directory \n\"", pathSH, "\".\nWould like to copy a factory-fresh version of the settings.r file there now? \n( y / n)", sep="")
-			message(msg)
-			a <- readLines(n=1)
-			if (a != "y" & a != "Y") {
-				msg <- paste("Please see to it that a valid settings.r file will be in the directory shown above.")
+		} # end else (where we could create and fill the .Renviron file and create the settings home folder
+	}  else { # so the .Renviron file is existing
+		# check if AQUAP2SH is existing in the system: if yes, check if pointing to a valid directory; if no check if it is existing on the .Renviron file
+		AP2SH_system <- Sys.getenv("AQUAP2SH") # returns `""` if not existing in Sys.getenv()
+		if (AP2SH_system == "") { # so it is not existing in the system, and we have to check if it exists in the .Renviron file
+			fcon <- file(fullRenvPath, open="r")
+			content <- readLines(fcon)
+			close(fcon)
+			if (any(grepl("AQUAP2SH", content))) { # returns TRUE if AQUAP2SH is present in the .Renviron file
+				# so not in the system, but on the file --> that means we have to restart R
+				message(restartMsg)
+				return(FALSE)
+			} else { # so not in the system, and not on the file (but the .Renviron was present
+				# now we have to ADD the AQUAP2SH to the existing .Renviron file
+				# first check for existence / create the settings home folder
+				ok <- checkCreateSHfolder(systemHome, fn_aquap2SH)
+				if (!ok) {
+					return(FALSE)
+				}
+				fcon <- file(fullRenvPath, open="r+b")
+				content <- readLines(fcon)
+				newContent <- c(content, "\n\n## aquap2", paste0("AQUAP2SH = ", systemHome, "/", fn_aquap2SH), "\n")
+				writeLines(newContent, fcon)
+				close(fcon)
+				msg <- paste0(AQUAP2SH_creationMsg, "\n", addInfo)
 				message(msg)
 				return(FALSE)
-			} else {  # so we do want to copy the file
-				copySettingsFile(pspath, pathSH)
-				return(TRUE)
-			}
-		} else { ## so the file does exist
-			return(checkFileVersionPossiblyModify(pathToPack=pspath, pathToLocal=pathToSettings, folderLocal=pathSH, nameLocal=sFile, pm="stn"))  # returns TRUE or FALSE
-		} # end else file exists
-	} # end else nchar == 0
+			} # end else
+		} else { # (AP2SH_system != "") --> so AQUAP2SH IS existing in the system
+			# check if pointing to a valid folder
+			if (!dir.exists(AP2SH_system)) {
+				# first check if the content of AQUAP2SH in the file and in the system are the same
+				fcon <- file(fullRenvPath, open="r")
+				content <- readLines(fcon)
+				close(fcon)
+				AP2SH_file <- content[which(grepl("AQUAP2SH", content))] # get only the one string that is the AQUAP2SH
+				fileValue <- trimws(strsplit(AP2SH_file, "=")[[1]][[2]])
+				if (fileValue != AP2SH_system) { # so the content of AQUAP2SH is different in the system and in the file, we have to restart R
+					message(restartMsg)
+					return(FALSE)
+				}				
+				msg <- paste0("Sorry, the path `", AP2SH_system, "` specified in the `AQUAP2SH` variable is not pointing to a valid directory.\nPlease change the value of `AQUAP2SH` in the .Renviron file (`", fullRenvPath, "`), or create the appropriate file structure.")
+				message(msg)
+				return(FALSE)
+			} else { # end if !dir.exists
+				# so now everything should be good, file and system unisono etc.
+				# check if a settings file is here, If no, please copy it.
+				sFile <- "settings.r"
+				pathSH <- Sys.getenv("AQUAP2SH")
+				pspath <- paste(path.package("aquap2"), sFile, sep="/")
+				pathToSettings <- paste(pathSH, sFile, sep="/")
+				if (!file.exists(pathToSettings)) {
+					# please simply copy the settings
+					ok <- file.copy(pspath, pathSH)
+					if (!ok) {
+						message(paste0("Sorry, for unknown reasons it was not possible to copy the `settings.r` file from `", pspath, "` to `", pathSH, "`."))
+						return(FALSE)
+					} else { # so we could copy the settings.r file
+						message(paste0("The settings.r file has been copied into `", pathSH, "`."))
+						return(TRUE)
+					} # end else
+				} else { # so the settings.r file does exist  - we can, finally, go to checking the content of the settings.r file		
+					return(checkFileVersionPossiblyModify(pathToPack=pspath, pathToLocal=pathToSettings, folderLocal=pathSH, nameLocal=sFile, pm="stn"))  # returns TRUE or FALSE
+				} # end else
+			} # end else !dir.exists
+		} # end else AP2SH_system == ""
+	} # end else if !renvExists	
 } # EOF
 
 #' @title Update aquap2 settings.
@@ -295,11 +351,14 @@ checkSettings <- function() {
 #' @details If you leave 'autoUpdateSettings' in settings.r to 'TRUE', the 
 #' settings will be checked resp. updated automatically every time you call any 
 #' function from package 'aquap2'.
-#' @section Note: You have to set the path to where you want the settings.r file 
-#' to be stored once in your .Renviron file by defining 
-#' \code{AQUAP2SH = path/to/any/folder/XX} , with XX being any folder where then the 
-#' settings.r file will reside in. If you do not have a '.Renviron' file in your 
-#' home directory (user/home) you have to create one.
+#' @section Note: If not present, the required `.Renviron` file will be 
+#' automatically created. If the variable `AQUAP2SH` is not defined in the 
+#' .Renviron file, it will be automatically added, and its default path is 
+#' pointing to the (possibly also created) folder `aquap2SH` in the users home 
+#' directory, where the `settings.r` file is automatically copied to if not 
+#' already present. It is possible to manually provide a different path in the 
+#' variable `AQUAP2SH` in the .Renviron file, pointing to any folder where then 
+#' the settings.r file and all other relevant general files will reside.
 #' @param packageName Character, the name of the package where settings 
 #' should be updated. Defaults to "aquap2".
 #' @param silent Logical. If a confirmation should be printed. Defaults 
@@ -590,7 +649,7 @@ ssc_s <- function(dataset, variable, value, keepEC=TRUE) {
 	indEC <- which(colnames(dataset$header) == paste(cPref, ecrmCol, sep=""))
 	selIndOut <-  NULL
 	#
-#	getECInd <- function(variable) { # because we must not add the ec´s if they are already present in the case of the no-split column
+#	getECInd <- function(variable) { # because we must not add the ecs if they are already present in the case of the no-split column
 #		nsc <- any(noSplitCol %in% variable)
 #		if (keepEC & !nsc) {
 #			return(which(dataset$header[,indEC] == ecLabel))
@@ -793,6 +852,22 @@ makeFlatDataFrame <- function(dataset, groupBy, fusionGroupBy=NULL) {
 	out <- cbind(grouping, NIR)
 	colnames(out) <- c("grouping", colnames(dataset$NIR))
 	rownames(out) <- rownames(dataset)
+	return(out)
+} # EOF
+
+makeDataFrameForClassification <- function(dataset, groupBy, fusionGroupBy=NULL) { # ! is not flat !
+	if (is.null(fusionGroupBy)) {
+		colInd <- which(colnames(dataset$header) == groupBy)
+		grouping <- dataset$header[, colInd]
+		class(grouping) <- "factor" # to get rid of the "AsIs" that, strangely, got smuggled in..
+	} else {
+		grouping <- fusionGroupBy
+	}
+	NIR <- matrix(dataset$NIR, nrow=(nrow(dataset$NIR)))
+	rownames(NIR) <- rownames(dataset$NIR)
+	colnames(NIR) <- colnames(dataset$NIR)
+	out <- data.frame(I(grouping), I(NIR))
+	rownames(out) <- rownames(dataset$header)
 	return(out)
 } # EOF
 
@@ -1018,6 +1093,88 @@ siWl <- function(dataset, wl, getMax=FALSE) {
 	return(dataset)
 } # EOF
 
+#' @title Reduce Number of Wavelengths
+#' @description Reduces the number of wavelengths in a provided dataset, either 
+#' by simply keeping only the wavelengths of the 12 or 15 water matrix coordinates 
+#' in the first overtone (1300nm - 1400nm), or by providing a user-defined list 
+#' containing the wavelengths to be kept.
+#' @param dataset The standard dataset as produced by \code{\link{gfd}}.
+#' @param wlg List or character. Provide an integer matrix with two columns and n 
+#' rows to keep the ranges of wavelengths defined in each row - see examples. 
+#' Provide either \code{ot1.12} or \code{ot1.15} to only keep the respective 
+#' wavelengths of the 12 or 15 water matrix coordinates in the first overtone. 
+#' (The definition of the wavelengths is in root of the package aquap2.)
+#' @param avg Logical If, for further reduction of wavelengths, the values of the 
+#' wavelengths in each group (as defined in each row of the matrix) should be 
+#' averaged.
+#' @seealso \code{\link{selectWls}}, \code{\link{siWl}} 
+#' @return The transformed dataset.
+#' @examples
+#' \dontrun{
+#' fd <- gfd()
+#' m <- matrix(c(300, 320, 400, 450, 530, 570), ncol=2, byrow=TRUE)
+#' fdc <- siWlg(fd, wlg=m) 
+#' fdc <- siWlg(fd) # using all the 12 wavelength ranges in the first overtone
+#' fdc <- siWlg(fd, TRUE) # averaging within the 12 ranges, resulting in only 12
+#' # wavelengths in the dataset
+#' }
+#' @family Classification Helpers
+#' @family Extract Elements
+#' @family Helper Functions
+#' @export
+siWlg <- function(dataset, avg=FALSE, wlg="ot1.12") {
+	errMsg <- c("Please provide either a matrix with 2 columns and n rows, or a character length one (`ot1.12` or `ot1.15`) to the argument `wlg`.")
+	useWls <- wlg
+	if (any(is.character(wlg))) {
+		if (!all(is.character(wlg)) | length(wlg) != 1) {
+			stop(paste0(errMsg, "\nThanks for your consideration, and have a good day."), call.=FALSE)
+		} # end if
+		aqs <- readInAquagramPSettings()
+		if (wlg == "ot1.12") {
+			useWls <- aqs$ot1$wls$wls12
+		} else {
+			if (wlg == "ot1.15") {
+				useWls <- aqs$ot1$wls$wls15
+			} else {
+				stop(errMsg, call.=FALSE)
+			}
+		}
+	} # end if any is character
+	# now we should have only numbers as input
+	if (ncol(useWls) != 2 | !all(is.numeric(useWls)) ) {stop(errMsg, call.=FALSE)}
+	# now everything should be good
+	wls <- getWavelengths(dataset)
+	inds <- apply(useWls, 1, function(x, wls) which(wls >= x[1] & wls <= x[2]), wls=wls) # is a list !
+	if (!avg) {
+		inds <- unlist(inds)
+		cns <- colnames(dataset$NIR)[inds]
+		rns <- rownames(dataset$NIR)
+		NIR <- dataset$NIR[,inds, drop=FALSE]
+		colnames(NIR) <- cns
+		rownames(NIR) <- rns
+		dataset$NIR <- I(NIR)
+		return(dataset)
+	} else { # so we want to average within each group
+		NIR <- dataset$NIR
+		rns <- rownames(NIR)
+		outMat <- matrix(NA, nrow=nrow(NIR), ncol=length(inds))
+		for (i in 1: nrow(NIR)) {
+			obsAvg <- vector("numeric", length(inds))
+			for (k in 1: length(inds)) {
+				obsAvg[k] <- mean(NIR[i,inds[[k]]]) # averaging all the absorbance values within the single elements defined by inds
+			} # end for k
+			outMat[i,] <- obsAvg
+		} # end for i
+		cpwl <- substr(colnames(NIR)[1], dataset@ncpwl, dataset@ncpwl)
+		wlsAvg <- round(unlist(lapply(lapply(inds, function(x, wls) wls[x], wls=wls) , mean)),0) # averages the wavelength names (number), for a central wavelength for the colnames
+		rownames(outMat) <- rns
+		colnames(outMat) <- paste0(cpwl, wlsAvg)
+		NIR <- outMat
+		dataset$NIR <- I(NIR)
+		return(dataset)
+	}
+} # EOF
+
 setCheck_NumericLengthOne <- function(num, char) {
 	if (!all(is.numeric(num)) | length(num) != 1) {
 		stop(paste0("Please provide a numeric length one to the argument '", char, "' in the settings.r file."), call.=FALSE)
@@ -1029,6 +1186,7 @@ doApsTrick <- function(aps, cube, ...) {
 	if (aps == "cube") {
 		ap <- getap(.lafw_fromWhere="cube", cube=cube, ...)			 # the ... are here used for additionally modifying (if matching arguments) the analysis procedure obtained from the cube
 	} else {
+	#	if (aps == "cube") {aps <- "defFile"}
 		check_apDefaults(fn=aps)
 		ap <- getap(fn=aps, ...) # load from file, possibly modify via ...
 	}

@@ -60,10 +60,16 @@ plot_pls(cube, pls.colorBy="C_Temp")
 \code{\link{plot_pls}}
 
 Other Plot arguments: \code{\link{plot,aquap_data,missing-method}},
-  \code{\link{plot_aqg_args}}, \code{\link{plot_pca_args}},
-  \code{\link{plot_pg_args}}, \code{\link{plot_sim_args}}
+  \code{\link{plot_NNET_args}},
+  \code{\link{plot_SVM_args}}, \code{\link{plot_aqg_args}},
+  \code{\link{plot_discrimAnalysis_args}},
+  \code{\link{plot_pca_args}}, \code{\link{plot_pg_args}},
+  \code{\link{plot_randomForest_args}},
+  \code{\link{plot_sim_args}}
 
 Other PLSR documentation: \code{\link{calc_pls_args}},
   \code{\link{plot_pls,aquap_cube-method}},
   \code{\link{plot_pls_indepPred}}
 }
+\concept{PLSR documentation}
+\concept{Plot arguments}

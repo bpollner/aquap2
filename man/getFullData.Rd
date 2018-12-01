@@ -9,9 +9,9 @@ getFullData(md = getmd(), filetype = "def", naString = "NA",
   slType = "def", trhLog = "def", multiplyRows = "def", ttl = TRUE,
   stf = TRUE, dol = "def")
 
-gfd(md = getmd(), filetype = "def", naString = "NA", slType = "def",
-  trhLog = "def", multiplyRows = "def", ttl = TRUE, stf = TRUE,
-  dol = "def")
+gfd(md = getmd(), filetype = "def", naString = "NA",
+  slType = "def", trhLog = "def", multiplyRows = "def", ttl = TRUE,
+  stf = TRUE, dol = "def")
 }
 \arguments{
 \item{md}{List. The object with the metadat of the experiment. 
@@ -177,3 +177,4 @@ Other Core functions: \code{\link{exportSampleList}},
   \code{\link{plot,aquap_cube,missing-method}},
   \code{\link{plot,aquap_data,missing-method}}
 }
+\concept{Core functions}

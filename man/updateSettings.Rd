@@ -27,11 +27,14 @@ settings will be checked resp. updated automatically every time you call any
 function from package 'aquap2'.
 }
 \section{Note}{
- You have to set the path to where you want the settings.r file 
-to be stored once in your .Renviron file by defining 
-\code{AQUAP2SH = path/to/any/folder/XX} , with XX being any folder where then the 
-settings.r file will reside in. If you do not have a '.Renviron' file in your 
-home directory (user/home) you have to create one.
+ If not present, the required `.Renviron` file will be 
+automatically created. If the variable `AQUAP2SH` is not defined in the 
+.Renviron file, it will be automatically added, and its default path is 
+pointing to the (possibly also created) folder `aquap2SH` in the users home 
+directory, where the `settings.r` file is automatically copied to if not 
+already present. It is possible to manually provide a different path in the 
+variable `AQUAP2SH` in the .Renviron file, pointing to any folder where then 
+the settings.r file and all other relevant general files will reside.
 }
 
 \examples{
@@ -49,5 +52,7 @@ Other Helper Functions: \code{\link{genFolderStr}},
   \code{\link{genTempCalibExp}}, \code{\link{getcd}},
   \code{\link{getcm}}, \code{\link{instAquap2Examples}},
   \code{\link{printStdColnames}}, \code{\link{reColor}},
-  \code{\link{saveAQdata}}, \code{\link{updateAquap2}}
+  \code{\link{saveAQdata}}, \code{\link{siWlg}},
+  \code{\link{updateAquap2}}
 }
+\concept{Helper Functions}

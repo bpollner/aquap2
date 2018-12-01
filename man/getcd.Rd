@@ -41,10 +41,13 @@ Other Helper Functions: \code{\link{genFolderStr}},
   \code{\link{genTempCalibExp}}, \code{\link{getcm}},
   \code{\link{instAquap2Examples}},
   \code{\link{printStdColnames}}, \code{\link{reColor}},
-  \code{\link{saveAQdata}}, \code{\link{updateAquap2}},
-  \code{\link{updateSettings}}
+  \code{\link{saveAQdata}}, \code{\link{siWlg}},
+  \code{\link{updateAquap2}}, \code{\link{updateSettings}}
 
 Other Extract Elements: \code{\link{getHeader}},
   \code{\link{getWavelengths,aquap_data-method}},
-  \code{\link{getcm}}, \code{\link{siWl}}
+  \code{\link{getcm}}, \code{\link{siWlg}},
+  \code{\link{siWl}}
 }
+\concept{Extract Elements}
+\concept{Helper Functions}

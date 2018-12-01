@@ -40,5 +40,6 @@ wls <- getWavelengths(cu[[1]]) # extract the wavelengths from the dataset
 \seealso{
 Other Extract Elements: \code{\link{getHeader}},
   \code{\link{getcd}}, \code{\link{getcm}},
-  \code{\link{siWl}}
+  \code{\link{siWlg}}, \code{\link{siWl}}
 }
+\concept{Extract Elements}

@@ -53,7 +53,7 @@ convertToRDP <- function(errorValue, ClassVar, header) {	# the dataset with all 
 } # EOF
 
 # plotting ----------------------------------------
-plot_plsr_error <- function(plsModel, plsPlusModel, dataset, ClassVar, onMain="", onSub="", inRDP=FALSE, exOut) { # ClassVar = regrOn
+plot_plsr_error <- function(plsModel, plsPlusModel, dataset, ClassVar, onMain="", onSub="", inRDP=FALSE, exOut, valid="") { # ClassVar = regrOn
 	modCorrCol <- .ap2$stn$plsr_colorForBestNumberComps
 	percRound <- .ap2$stn$plsr_nrDigitsPercentage
 	#
@@ -116,7 +116,8 @@ plot_plsr_error <- function(plsModel, plsPlusModel, dataset, ClassVar, onMain=""
 	yax <- vecsPlus
 #	xax <- 0:plsModel$ncomp
 #	yax <- vecsCorr
-	matplot(xax, yax, type="l", xlab="Nr of components", ylab=ylab, main=onMain, sub=subText)
+	mainText <- paste0(onMain, " (valid. ", valid, ")")
+	matplot(xax, yax, type="l", xlab="Nr of components", ylab=ylab, main=mainText, cex.main=1, sub=subText)
 	abline(v=plsModel$ncomp, col=modCorrCol, lwd=0.4)
 	legBgCol <- rgb(255,255,255, alpha=.ap2$stn$col_alphaForLegends, maxColorValue=255) # is a white with alpha to be determined in the settings
 	legend(legPos, legend=c("RMSEC", "RMSECV", "RMSECV_adj"), col=1:3, lty=1:3, bg=legBgCol)
@@ -369,17 +370,16 @@ plot_plsr_errorBars <- function(errorFrame, groupBy=FALSE, whichB="R2CV", onMain
 	} # end for indE
 } # EOF
 ####
-makePLSRRegressionVectorPlots_inner <- function(plsModels, regrOn, onMain, onSub, dataset, idString, inRDP, bw, adLines, ccol, clty) { # is cycling through all the regrOn of a single set;
+makePLSRRegressionVectorPlots_inner <- function(plsModels, regrOn, onMain, onSub, usedDatasets, idString, inRDP, bw, adLines, ccol, clty, finalValid, exOuts, wavelengths) { # is cycling through all the regrOn of a single set;
 	discrim <- .ap2$stn$plsr_regressionVector_discrim
 	percRound <- .ap2$stn$plsr_nrDigitsPercentage
 	bandwidth <- bw
 	##
-	wls <- getWavelengths(dataset)
 	mainTxt <- paste(onMain, idString)
-#	header <- getHeader(dataset)
-	nro <- nrow(dataset)
 	##
 	for (i in 1: length(plsModels)) { 
+		dataset <- usedDatasets[[i]]
+		nro <- nrow(dataset)
 		#
 		dataset <- dataset[which(!is.na(dataset$header[regrOn[[i]]]))]
 		perc <- round((nrow(dataset)*100)/nro, percRound)
@@ -388,6 +388,19 @@ makePLSRRegressionVectorPlots_inner <- function(plsModels, regrOn, onMain, onSub
 		RMSECV <- getRMSECV(plsModels[[i]])
 		RMSECV_rdp <- convertToRDP(RMSECV, regrOn[[i]], header)
 		R2CV <- getR2CV(plsModels[[i]])
+		#
+		validChar <- plsModels[[i]]$validation$method
+		foldnes <- length(plsModels[[i]]$validation$segments)
+		valid <- paste(validChar, " ", foldnes, "", sep="")
+		if (foldnes == nrow(dataset)) { ## XXX had problems here ??
+			valid <- "LOO"
+		}
+		if (is.character(finalValid[i])) {
+			if (finalValid[i] %in% colnames(dataset$header)) {
+				valid <- paste0(valid, " by ", finalValid[i])
+			}
+		}		
+		#
 		if (inRDP) {
 			legendText <- paste("   RMSECV: ", RMSECV, ", RMSECV[RDP]: ", RMSECV_rdp, ", R2CV: ", R2CV, "", sep="")
 		} else {
@@ -407,20 +420,26 @@ makePLSRRegressionVectorPlots_inner <- function(plsModels, regrOn, onMain, onSub
 			percAdd <- paste0(" (", perc, "%)")
 			NmsgAdd <- paste0(" of ", nro)
 		}
-		Nmsg <- paste0("   N = ", nrow(header), NmsgAdd, percAdd)
-		subText <- paste0(onSub, " regr. on: ", regrOn[[i]], Nmsg, ncompAdd, "   ", legendText)
+		if (exOuts[[i]]) {
+			exOutChar <- " exOut "
+		} else {
+			exOutChar <- ""
+		}	
+		Nmsg <- paste0("   N = ", nrow(header), NmsgAdd, percAdd) 
+		mainTxtUse <- paste0(mainTxt, " (valid. ", valid, ")")
+		subText <- paste0(onSub, " regr. on: ", regrOn[[i]], Nmsg, ncompAdd, exOutChar, "   ", legendText)
 		##	
-		pickResults <- pickPeaks(plsModels[[i]], bandwidth, comps=NULL, discrim, wavelengths=wls)
-		plotPeaks(pickResults, onMain=mainTxt, onSub=subText, adLines, pcaVariances=NULL, customColor=ccol, ylim=NULL, wavelengths=wls, clty)		### !! here the plotting !!!	
+		pickResults <- pickPeaks(plsModels[[i]], bandwidth, comps=NULL, discrim, wavelengths=wavelengths)
+		plotPeaks(pickResults, onMain=mainTxtUse, onSub=subText, adLines, pcaVariances=NULL, customColor=ccol, ylim=NULL, wavelengths=wavelengths, clty)		### !! here the plotting !!!	
 	} # end for i
 } # EOF
 
 makePLSRRegressionVectorPlots <- function(cube, ap, onMain, onSub, inRDP, bw, adLines, ccol, clty) {
 	for (i in 1: length(cube)) {
 		aa <- getPLSRObjects(cube[[i]])
-		dataset <- getDataset(cube[[i]])
+		wavelengths <- getWavelengths(getDataset(cube[[i]])) # need later for peak picking
 		idString <- adaptIdStringForDpt(ap, getIdString(cube[[i]]))
-		makePLSRRegressionVectorPlots_inner(aa$model, aa$regrOn, onMain, onSub, dataset, idString, inRDP, bw, adLines, ccol, clty) #### handing down data from a single set; model, modelPlus and RegrOn are each a list having 1 to n elements !!
+		makePLSRRegressionVectorPlots_inner(aa$model, aa$regrOn, onMain, onSub, usedDatasets=aa$usedDS, idString, inRDP, bw, adLines, ccol, clty, aa$valid, aa$exOut, wavelengths) #### handing down data from a single set; model, modelPlus and RegrOn are each a list having 1 to n elements !!
 	} # end for i
 } # EOF
 
@@ -468,7 +487,7 @@ makePLSRErrorPlots_inner <- function(plsModels, plsPlusModels, regrOn, onMain, o
 		onMain <- paste(onMainOrig, idString)
 		#
 		plot_plsr_calibValidSwarm(plsModels[[i]], dataset, regrOn[[i]], classForColoring, onMain, onSub, inRDP, valid, psd, exOuts[[i]])
-		plot_plsr_error(plsModels[[i]], plsPlusModels[[i]], dataset, regrOn[[i]], onMain, onSub, inRDP, exOuts[[i]])
+		plot_plsr_error(plsModels[[i]], plsPlusModels[[i]], dataset, regrOn[[i]], onMain, onSub, inRDP, exOuts[[i]], valid)
 		if (FALSE) { # abandoned !!
 			plot_plsr_calibration_classic(plsModels[[i]], dataset, regrOn[[i]], classForColoring, onMain, onSub, inRDP)
 			plot_plsr_validation_classic(plsModels[[i]], dataset, regrOn[[i]], classForColoring, onMain, onSub, inRDP, valid)
@@ -564,10 +583,15 @@ plot_plsr_checkDefaultsParams <- function(rv.bandwidth, rv.adLine, rv.col, rv.lt
 ### CORE ### CORE ###
 plot_pls_cube <- function(cube, aps="def", rv.bandwidth="def", rv.adLine="def", rv.col="def", rv.lty="def", psd="def", ...) {
 	autoUpS()
+	printEmpty <- .ap2$stn$gen_plot_printEmptySlots
+	#	
 	ap <- doApsTrick(aps, cube, ...)	
 	ap <- ap_cleanZeroValuesCheckExistenceDefaults(ap, dataset=getDataset(cube[[1]]), haveExc=FALSE) # just take the first dataset, as we mainly need the header (and the wavelengths are already checked.. )
 	if (is.null(ap$plsr)) {
-		return(cat("*** PLSR model not available or not selected for plotting \n"))
+		if (printEmpty) {
+			cat("*** PLSR model not available or not selected for plotting \n")
+		}	
+		return(NULL)
 	}
 	plot_plsr_checkDefaultsParams(rv.bandwidth, rv.adLine, rv.col, rv.lty, psd) # is assigning here !!
 	##

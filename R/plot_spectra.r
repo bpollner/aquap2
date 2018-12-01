@@ -129,7 +129,7 @@ plot_spectra_Cube <- function(x, colorBy=NULL, ...) {
 	suffix <- "rawSpectra"
 	filename <- paste(expName, suffix, sep="_")
 	filename <- paste(path, "/", filename, fns, ".pdf", sep="")
-	onMain <- paste(expName, onMain, sep=" ")
+	onMain <- paste0(expName, " ", onMain, " ")
 	if (where == "pdf") { pdf(file=filename, width, height, onefile=TRUE, family='Helvetica', pointsize=12) }
 	if (where != "pdf" & (Sys.getenv("RSTUDIO") != 1)) {dev.new(height=height, width=width)}	
 	for (i in 1: length(x)) {
