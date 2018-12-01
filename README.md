@@ -21,8 +21,8 @@ updateSettings()
 ```
 
 ## Course Material
-The repository XX contains a demo dataset with some exploratory and quantitative data analysis steps designed to give a first impression of some of the functions of aquap2.
-This is the same demo-dataset as handed out at the 3rd Aquaphotomics Symposium in Japan in December 2018.
+The repository [aquap2_courseMaterial](https://github.com/bpollner/aquap2_courseMaterial) contains a demo dataset with some exploratory and quantitative data analysis steps designed to give a first impression of some of the functions of aquap2.
+This is the same demo-dataset as handed out at [The 3rd Aquaphotomics Symposium](http://conference.aquaphotomics.com/) in Japan in December 2018.
 
 
 ## Note
