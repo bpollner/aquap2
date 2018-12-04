@@ -54,13 +54,13 @@ aquCoreCalc_Classic_diff <- function(dataset, smoothN, reference, msc, selIndsWL
 	out <- t(apply(classic, 1, function(x) x-subtr))
 } # EOF
 
-aquCoreCalc_AUCstabilized <- function(dataset, smoothN, colInd) {
+aquCoreCalc_AUCstabilized <- function(dataset, smoothN, colInd, apLoc) {
 	if (is.numeric(smoothN)){
 		dataset <- do_sgolay(dataset, p=2, n=smoothN, m=0)
 	}
 	dataset$NIR <- calcAUCtable(dataset$NIR)$aucd 		## "NIR" being actually the area under the curve divided by its fullArea for every row in every coordinate
 	groupAverages <- do_ddply(dataset, colInd)	## the group averages of the area under the curve, still in raw area units
-	perc <- calcAUCPercent(groupAverages, .ap2$aucEx) ## .aucEx being the package-based calibration data for the min. and max. AUC for each coordinate.
+	perc <- calcAUCPercent(groupAverages, apLoc$aucEx) ## .aucEx being the package-based calibration data for the min. and max. AUC for each coordinate.
 } #EOF
 
 aquCoreCalc_AUCstabilized_diff <- function(dataset, smoothN, colInd, minus) {
@@ -75,7 +75,7 @@ aquCoreCalc_AUCstabilized_diff <- function(dataset, smoothN, colInd, minus) {
 	out
 } # EOF
 
-aquCoreCalc_NormForeignCenter <- function(dataset, smoothN, reference, msc, selIndsWL, colInd) {
+aquCoreCalc_NormForeignCenter <- function(dataset, smoothN, reference, msc, selIndsWL, colInd, apLoc) {
 	if (is.numeric(smoothN)){
 		dataset <- do_sgolay(dataset, p=2, n=smoothN, m=0)
 	}
@@ -83,7 +83,7 @@ aquCoreCalc_NormForeignCenter <- function(dataset, smoothN, reference, msc, selI
 		dataset <- do_msc(dataset, reference)
 	}
 	dataset$NIR <- dataset$NIR[,selIndsWL]
-	dataset <- do_scale_fc(dataset, .ap2$tempCalibFCtable[, selIndsWL])
+	dataset <- do_scale_fc(dataset, apLoc$tempCalibFCtable[, selIndsWL])
 	groupAverage <- do_ddply(dataset, colInd)
 } # EOF
 
@@ -98,9 +98,9 @@ aquCoreCalc_NormForeignCenter_diff <- function(dataset, smoothN, reference, msc,
 	out <- t(apply(values, 1, function(x) x-subtr))
 } # EOF
 
-aquCoreCalc_aucs_tempNorm <- function(dataset, smoothN, colInd) {
+aquCoreCalc_aucs_tempNorm <- function(dataset, smoothN, colInd, apLoc) {
 	perc <- aquCoreCalc_AUCstabilized(dataset, smoothN, colInd) ## this is the percentage from the real data, the measurement
-	percDiff <- sweep(perc, 2, .ap2$tempNormAUCPerc)		## .tempNormAUCPerc is the percentage of AUC of a selection of calibration data with only the T of the experiment
+	percDiff <- sweep(perc, 2, apLoc$tempNormAUCPerc)		## .tempNormAUCPerc is the percentage of AUC of a selection of calibration data with only the T of the experiment
 } # EOF
 
 aquCoreCalc_aucs_tempNorm_diff <- function(dataset, smoothN, colInd, minus) {
@@ -159,18 +159,18 @@ aquCoreCalc_aucs_DCE_diff <- function(dataset, smoothN, colInd, TCalib, minus) {
 } # EOF
 
 ##############
-calc_aquagr_CORE <- function(dataset, smoothN, reference, msc, selIndsWL, colInd, mod, minus, TCalib, Texp) {
+calc_aquagr_CORE <- function(dataset, smoothN, reference, msc, selIndsWL, colInd, mod, minus, TCalib, Texp, apLoc) {
 	if (mod == "classic") {
 		return(aquCoreCalc_Classic(dataset, smoothN, reference, msc, selIndsWL, colInd))
 	}
 	if (mod == "aucs") {
-		return(aquCoreCalc_AUCstabilized(dataset, smoothN, colInd))
+		return(aquCoreCalc_AUCstabilized(dataset, smoothN, colInd, apLoc))
 	}
 	if (mod == "aucs-diff") {
 		return(aquCoreCalc_AUCstabilized_diff(dataset, smoothN, colInd, minus))
 	}
 	if (mod == "sfc") {
-		return(aquCoreCalc_NormForeignCenter(dataset, smoothN, reference, msc, selIndsWL, colInd))
+		return(aquCoreCalc_NormForeignCenter(dataset, smoothN, reference, msc, selIndsWL, colInd, apLoc))
 	}
 	if (mod == "sfc-diff") {
 		return(aquCoreCalc_NormForeignCenter_diff(dataset, smoothN, reference, msc, selIndsWL, colInd, minus))
@@ -179,7 +179,7 @@ calc_aquagr_CORE <- function(dataset, smoothN, reference, msc, selIndsWL, colInd
 		return(aquCoreCalc_Classic_diff(dataset, smoothN, reference, msc, selIndsWL, colInd, minus))
 	}
 	if (mod == "aucs.tn") {
-		return(aquCoreCalc_aucs_tempNorm(dataset, smoothN, colInd))
+		return(aquCoreCalc_aucs_tempNorm(dataset, smoothN, colInd, apLoc))
 	}
 	if (mod == "aucs.tn.dce") {
 		return(aquCoreCalc_aucs_tempNorm_DCE(dataset, smoothN, colInd, TCalib, Texp))
@@ -200,9 +200,9 @@ calc_aquagr_CORE <- function(dataset, smoothN, reference, msc, selIndsWL, colInd
 } # EOF
 ##############
 
-calc_aquagr_bootCI <- function(dataset, smoothN, reference, msc, selIndsWL, colInd, useMC, R, mod, minus, TCalib, Texp, parChar, stnLoc) {
-	fnAnD <- stnLoc$fn_analysisData
-	saveBootResult <- stnLoc$aqg_saveBootRes
+calc_aquagr_bootCI <- function(dataset, smoothN, reference, msc, selIndsWL, colInd, useMC, R, mod, minus, TCalib, Texp, parChar, apLoc) {
+	fnAnD <- apLoc$stn$fn_analysisData
+	saveBootResult <- apLoc$stn$aqg_saveBootRes
 	path <- paste(fnAnD, "bootResult", sep="/")
 	#
 	if (!dir.exists(fnAnD)) {
@@ -212,13 +212,13 @@ calc_aquagr_bootCI <- function(dataset, smoothN, reference, msc, selIndsWL, colI
 		}
 	}
 	innerWorkings <- function(x, ind) {
-		out <- as.matrix(calc_aquagr_CORE(x[ind,], smoothN, reference, msc, selIndsWL, colInd, mod, minus, TCalib, Texp))
+		out <- as.matrix(calc_aquagr_CORE(x[ind,], smoothN, reference, msc, selIndsWL, colInd, mod, minus, TCalib, Texp, apLoc))
 	} # EOIF
-	if (!stnLoc$allSilent) {cat(paste0("      calc.", R, " bootstrap replicates (", parChar, ") ... ")) }
+	if (!apLoc$stn$allSilent) {cat(paste0("      calc.", R, " bootstrap replicates (", parChar, ") ... ")) }
 	thisR <- R
 	nCPUs <- getDesiredNrCPUs(allowNA=FALSE)
 	bootResult <- boot::boot(dataset, innerWorkings, R=thisR, strata=dataset$header[,colInd], parallel=useMC, ncpus=nCPUs)   	### here the bootstrap replicates happen
-	if (!stnLoc$allSilent) {cat("ok\n")}
+	if (!apLoc$stn$allSilent) {cat("ok\n")}
 	if (saveBootResult) {
 		save(bootResult, file=path)
 	}
@@ -240,7 +240,7 @@ calc_aquagr_bootCI <- function(dataset, smoothN, reference, msc, selIndsWL, colI
 #	print(str(bootResult)); print(bootResult$t0); print(bootResult$t[1:5, 1:12]); wait()
 	nRows <- dim(bootResult$t0)[1]
 	nCols <- dim(bootResult$t0)[2]
-	if (!stnLoc$allSilent) {cat("      calc. confidence intervals... ")}
+	if (!apLoc$stn$allSilent) {cat("      calc. confidence intervals... ")}
 #	ciMat <- matrix(NA, nRows*2, nCols)
 #	kseq <- seq(1, nRows*2, by=2)
 #	for (i in 1: nCols) {
@@ -253,7 +253,7 @@ calc_aquagr_bootCI <- function(dataset, smoothN, reference, msc, selIndsWL, colI
 	mat2er <- foreach(i = 1: (nRows*nCols), .combine="cbind") %dopar% {
 			a <- boot::boot.ci(bootResult, index = i, type="bca")$bca[,4:5]    #### here the CIs are calculated 
 	} # end dopar i
-	if (!stnLoc$allSilent) {cat("ok\n")}
+	if (!apLoc$stn$allSilent) {cat("ok\n")}
 	ciMat <- matrix(mat2er, ncol=nCols) 
 	####
 	origMat <- bootResult$t0
@@ -748,7 +748,7 @@ aq_calculateCItable <- function(bootRes, groupAvg) {
 	} # end !is.null(bootRes)	
 } # EOF
 
-calcAquagramSingle <- function(dataset, md, ap, classVar, minus, idString, stnLoc) {
+calcAquagramSingle <- function(dataset, md, ap, classVar, minus, idString, apLoc) {
 	##
 	a <- ap$aquagr
 	nrCorr <- a$nrCorr
@@ -791,7 +791,7 @@ calcAquagramSingle <- function(dataset, md, ap, classVar, minus, idString, stnLo
 		subtrSpec <- a$subtrSpec
 	} # end calc spectra
 	if (bootCI) {
-		if (stnLoc$aqg_bootUseParallel == TRUE) {
+		if (apLoc$stn$aqg_bootUseParallel == TRUE) {
 			if (Sys.info()["sysname"] == "Windows") {
 				useMC <- "snow"
 			} else {
@@ -802,7 +802,7 @@ calcAquagramSingle <- function(dataset, md, ap, classVar, minus, idString, stnLo
 			useMC <- "no"
 			parChar <- "ser."
 		}
-		bootRes <- try(calc_aquagr_bootCI(dataset, smoothN, reference, msc, selIndsWL, colInd, useMC, R, mod, minus, TCalib, Texp, parChar, stnLoc))
+		bootRes <- try(calc_aquagr_bootCI(dataset, smoothN, reference, msc, selIndsWL, colInd, useMC, R, mod, minus, TCalib, Texp, parChar, apLoc))
 		if (class(bootRes) == "try-error") {
 			bootRes <- NULL
 		}
