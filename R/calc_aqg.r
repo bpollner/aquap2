@@ -395,11 +395,11 @@ tempCalibMakeAvgTable <- function(fdata, smoothN=17, TRange=NULL, ot=c(1300, 160
 	return(avgSpect[, -1])
 } # EOF
 
-calcUnivAucTable <- function(smoothN=17, ot=c(1300, 1600), tcdName, apLoc) {
+calcUnivAucTable <- function(smoothN=17, ot=c(1300, 1600), tcdName) {
 	dataset <- get(tcdName, pos=.ap2)
 	if (!apLoc$stn$allSilent) {cat(" * Calculating universal AUC table... ")}
 	avgTable <- tempCalibMakeAvgTable(dataset, smoothN, TRange=NULL, ot)
-	aucd <- calcAUCtable(avgTable, apLoc)$aucd
+	aucd <- calcAUCtable(avgTable, .ap2)$aucd
 	if (!apLoc$stn$allSilent) {cat("ok\n")}
 	return(aucd)
 } #EOF
@@ -538,7 +538,7 @@ getTempNormAUCPercTable <- function(univAucTable, Texp, aucExtrema) {
 } # EOF
 
 ## gets called once in gdmm only if we will calculate an aquagram, so if tempCalibDataset does NOT come in as NULL
-aq_loadGlobalAquagramCalibData <- function(tempCalibDataset, tempFile, apLoc) {
+aq_loadGlobalAquagramCalibData <- function(tempCalibDataset, tempFile) {
 	if (!is.null(tempCalibDataset)) {
 		tcdName <- paste0(tempFile, "_tcd")
 		if (!exists(tcdName, where=.ap2)) {
@@ -549,7 +549,7 @@ aq_loadGlobalAquagramCalibData <- function(tempCalibDataset, tempFile, apLoc) {
 		}
 		univAucTableName <- paste0(tempFile, "_univAucTable")
 		if (!exists(univAucTableName, where=.ap2)) {
-			aut <-  calcUnivAucTable(smoothN=.ap2$stn$aqg_smoothCalib, ot=getOvertoneCut(.ap2$stn$aqg_OT), tcdName, apLoc)
+			aut <-  calcUnivAucTable(smoothN=.ap2$stn$aqg_smoothCalib, ot=getOvertoneCut(.ap2$stn$aqg_OT), tcdName)
 			assign(univAucTableName, aut, pos=.ap2)
 		}
 	} # end !is.null(tempCalibDataset)
