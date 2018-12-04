@@ -58,7 +58,7 @@ aquCoreCalc_AUCstabilized <- function(dataset, smoothN, colInd, apLoc) {
 	if (is.numeric(smoothN)){
 		dataset <- do_sgolay(dataset, p=2, n=smoothN, m=0)
 	}
-	dataset$NIR <- calcAUCtable(dataset$NIR)$aucd 		## "NIR" being actually the area under the curve divided by its fullArea for every row in every coordinate
+	dataset$NIR <- calcAUCtable(dataset$NIR, apLoc)$aucd 		## "NIR" being actually the area under the curve divided by its fullArea for every row in every coordinate
 	groupAverages <- do_ddply(dataset, colInd)	## the group averages of the area under the curve, still in raw area units
 	perc <- calcAUCPercent(groupAverages, apLoc$aucEx) ## .aucEx being the package-based calibration data for the min. and max. AUC for each coordinate.
 } #EOF
@@ -202,8 +202,8 @@ calc_aquagr_CORE <- function(dataset, smoothN, reference, msc, selIndsWL, colInd
 ##############
 
 calc_aquagr_bootCI <- function(dataset, smoothN, reference, msc, selIndsWL, colInd, useMC, R, mod, minus, TCalib, Texp, ap, parChar, apLoc) {
-	fnAnD <- .ap2$stn$fn_analysisData
-	saveBootResult <- .ap2$stn$aqg_saveBootRes
+	fnAnD <- apLoc$stn$fn_analysisData
+	saveBootResult <- apLoc$stn$aqg_saveBootRes
 	path <- paste(fnAnD, "bootResult", sep="/")
 	#
 	if (!dir.exists(fnAnD)) {
@@ -395,21 +395,21 @@ tempCalibMakeAvgTable <- function(fdata, smoothN=17, TRange=NULL, ot=c(1300, 160
 	return(avgSpect[, -1])
 } # EOF
 
-calcUnivAucTable <- function(smoothN=17, ot=c(1300, 1600), tcdName) {
+calcUnivAucTable <- function(smoothN=17, ot=c(1300, 1600), tcdName, apLoc) {
 	dataset <- get(tcdName, pos=.ap2)
-	if (!.ap2$stn$allSilent) {cat(" * Calculating universal AUC table... ")}
+	if (!apLoc$stn$allSilent) {cat(" * Calculating universal AUC table... ")}
 	avgTable <- tempCalibMakeAvgTable(dataset, smoothN, TRange=NULL, ot)
-	aucd <- calcAUCtable(avgTable)$aucd
-	if (!.ap2$stn$allSilent) {cat("ok\n")}
+	aucd <- calcAUCtable(avgTable, apLoc)$aucd
+	if (!apLoc$stn$allSilent) {cat("ok\n")}
 	return(aucd)
 } #EOF
 
 ## !gives back a list!; 
 ## calculates the AUC-value in every coordinate for every single row (so we get back same number of rows, but only e.g. 15 columns)
-calcAUCtable <- function(NIRdata) { 
+calcAUCtable <- function(NIRdata, apLoc) { 
 	wls <- as.numeric(substr(colnames(NIRdata), 2, nchar(colnames(NIRdata)) ))
 #	Call <- t(readInSpecAreasFromSettings())
-	Call <- getOvertoneWls(.ap2$stn$aqg_OT)
+	Call <- getOvertoneWls(apLoc$stn$aqg_OT)
 #	wlCrossPoint=1438
 #	indCrossPoint <- which(wlsOt == wlCrossPoint)
 	saCorRes <- NULL
