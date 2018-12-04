@@ -455,7 +455,7 @@ calcAUCextrema <- function(aucList) {
 	out
 } # EOF
 
-calcAUCPercent <- function(aucTable, aucCalibExtrema=apLoc$aucEx) {
+calcAUCPercent <- function(aucTable, aucCalibExtrema) {
 	diffs <- apply(aucCalibExtrema, 2, diff)
 	exMins <- aucCalibExtrema[1,]
 	aa <- sweep(aucTable, 2, exMins)	## subtract the minimum
