@@ -60,7 +60,7 @@ aquCoreCalc_AUCstabilized <- function(dataset, smoothN, colInd, apLoc) {
 	}
 	dataset$NIR <- calcAUCtable(dataset$NIR)$aucd 		## "NIR" being actually the area under the curve divided by its fullArea for every row in every coordinate
 	groupAverages <- do_ddply(dataset, colInd)	## the group averages of the area under the curve, still in raw area units
-	perc <- calcAUCPercent(groupAverages, apLoc$aucEx) ## .aucEx being the package-based calibration data for the min. and max. AUC for each coordinate.
+	perc <- calcAUCPercent(groupAverages, aucCalibExtrema=apLoc$aucEx) ## .aucEx being the package-based calibration data for the min. and max. AUC for each coordinate.
 } #EOF
 
 aquCoreCalc_AUCstabilized_diff <- function(dataset, smoothN, colInd, minus, apLoc) {
