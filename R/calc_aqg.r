@@ -397,7 +397,7 @@ tempCalibMakeAvgTable <- function(fdata, smoothN=17, TRange=NULL, ot=c(1300, 160
 
 calcUnivAucTable <- function(smoothN=17, ot=c(1300, 1600), tcdName) {
 	dataset <- get(tcdName, pos=.ap2)
-	if (!apLoc$stn$allSilent) {cat(" * Calculating universal AUC table... ")}
+	if (!.ap2$stn$allSilent) {cat(" * Calculating universal AUC table... ")}
 	avgTable <- tempCalibMakeAvgTable(dataset, smoothN, TRange=NULL, ot)
 	aucd <- calcAUCtable(avgTable, .ap2)$aucd
 	if (!apLoc$stn$allSilent) {cat("ok\n")}
