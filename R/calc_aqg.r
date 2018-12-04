@@ -215,11 +215,11 @@ calc_aquagr_bootCI <- function(dataset, smoothN, reference, msc, selIndsWL, colI
 	innerWorkings <- function(x, ind) {
 		out <- as.matrix(calc_aquagr_CORE(x[ind,], smoothN, reference, msc, selIndsWL, colInd, mod, minus, TCalib, Texp, apLoc))
 	} # EOIF
-	if (!.ap2$stn$allSilent) {cat(paste0("      calc.", R, " bootstrap replicates (", parChar, ")... ")) }
+	if (!apLoc$stn$allSilent) {cat(paste0("      calc.", R, " bootstrap replicates (", parChar, ")... ")) }
 	thisR <- R
 	nCPUs <- getDesiredNrCPUs(allowNA=FALSE)
 	bootResult <- boot::boot(dataset, innerWorkings, R=thisR, strata=dataset$header[,colInd], parallel=useMC, ncpus=nCPUs)   	### here the bootstrap replicates happen
-	if (!.ap2$stn$allSilent) {cat("ok\n")}
+	if (!apLoc$stn$allSilent) {cat("ok\n")}
 	if (saveBootResult) {
 		save(bootResult, file=path)
 	}
@@ -538,7 +538,7 @@ getTempNormAUCPercTable <- function(univAucTable, Texp, aucExtrema) {
 } # EOF
 
 ## gets called once in gdmm only if we will calculate an aquagram, so if tempCalibDataset does NOT come in as NULL
-aq_loadGlobalAquagramCalibData <- function(tempCalibDataset, tempFile) {
+aq_loadGlobalAquagramCalibData <- function(tempCalibDataset, tempFile, apLoc) {
 	if (!is.null(tempCalibDataset)) {
 		tcdName <- paste0(tempFile, "_tcd")
 		if (!exists(tcdName, where=.ap2)) {
@@ -549,7 +549,7 @@ aq_loadGlobalAquagramCalibData <- function(tempCalibDataset, tempFile) {
 		}
 		univAucTableName <- paste0(tempFile, "_univAucTable")
 		if (!exists(univAucTableName, where=.ap2)) {
-			aut <-  calcUnivAucTable(smoothN=.ap2$stn$aqg_smoothCalib, ot=getOvertoneCut(.ap2$stn$aqg_OT), tcdName)
+			aut <-  calcUnivAucTable(smoothN=.ap2$stn$aqg_smoothCalib, ot=getOvertoneCut(.ap2$stn$aqg_OT), tcdName, apLoc)
 			assign(univAucTableName, aut, pos=.ap2)
 		}
 	} # end !is.null(tempCalibDataset)
