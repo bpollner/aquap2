@@ -32,7 +32,7 @@ do_ddply <- function(dataset, colInd) {
 	return(res[,-1])	## leave out the first column with the group
 } # EOF
 
-aquCoreCalc_Classic <- function(dataset, smoothN, reference, msc, selIndsWL, colInd) {
+aquCoreCalc_Classic <- function(dataset, smoothN, reference, msc, selIndsWL, colInd, apLoc) {
 	if (is.numeric(smoothN)){
 		dataset <- do_sgolay(dataset, p=2, n=smoothN, m=0)
 	}
@@ -44,8 +44,8 @@ aquCoreCalc_Classic <- function(dataset, smoothN, reference, msc, selIndsWL, col
 	groupAverage <- do_ddply(dataset, colInd)
 } #EOF
 
-aquCoreCalc_Classic_diff <- function(dataset, smoothN, reference, msc, selIndsWL, colInd, minus) {
-	classic <- aquCoreCalc_Classic(dataset, smoothN, reference, msc, selIndsWL, colInd)
+aquCoreCalc_Classic_diff <- function(dataset, smoothN, reference, msc, selIndsWL, colInd, minus, apLoc) {
+	classic <- aquCoreCalc_Classic(dataset, smoothN, reference, msc, selIndsWL, colInd, apLoc)
 	ind <- which(rownames(classic) == minus)
 	if (length(ind) < 1) {
 		stop("\nI am sorry, please provide a valid value for 'minus' to perform subtractions within the aquagram. Thanks.", call.=FALSE)
@@ -63,8 +63,8 @@ aquCoreCalc_AUCstabilized <- function(dataset, smoothN, colInd, apLoc) {
 	perc <- calcAUCPercent(groupAverages, apLoc$aucEx) ## .aucEx being the package-based calibration data for the min. and max. AUC for each coordinate.
 } #EOF
 
-aquCoreCalc_AUCstabilized_diff <- function(dataset, smoothN, colInd, minus) {
-	perc <- aquCoreCalc_AUCstabilized(dataset, smoothN, colInd)
+aquCoreCalc_AUCstabilized_diff <- function(dataset, smoothN, colInd, minus, apLoc) {
+	perc <- aquCoreCalc_AUCstabilized(dataset, smoothN, colInd, apLoc, apLoc)
 	ind <- which(rownames(perc) == minus)
 	if (length(ind) < 1) {
 		stop("\nI am sorry, please provide a valid value for 'minus' to perform subtractions within the aquagram. Thanks.", call.=FALSE)
@@ -87,8 +87,8 @@ aquCoreCalc_NormForeignCenter <- function(dataset, smoothN, reference, msc, selI
 	groupAverage <- do_ddply(dataset, colInd)
 } # EOF
 
-aquCoreCalc_NormForeignCenter_diff <- function(dataset, smoothN, reference, msc, selIndsWL, colInd, minus) {
-	values <- aquCoreCalc_NormForeignCenter(dataset, smoothN, reference, msc, selIndsWL, colInd)
+aquCoreCalc_NormForeignCenter_diff <- function(dataset, smoothN, reference, msc, selIndsWL, colInd, minus, apLoc) {
+	values <- aquCoreCalc_NormForeignCenter(dataset, smoothN, reference, msc, selIndsWL, colInd, apLoc)
 	ind <- which(rownames(values) == minus)
 	if (length(ind) < 1) {
 		stop("\nI am sorry, please provide a valid value for 'minus' to perform subtractions within the aquagram. Thanks.", call.=FALSE)
@@ -99,12 +99,12 @@ aquCoreCalc_NormForeignCenter_diff <- function(dataset, smoothN, reference, msc,
 } # EOF
 
 aquCoreCalc_aucs_tempNorm <- function(dataset, smoothN, colInd, apLoc) {
-	perc <- aquCoreCalc_AUCstabilized(dataset, smoothN, colInd) ## this is the percentage from the real data, the measurement
+	perc <- aquCoreCalc_AUCstabilized(dataset, smoothN, colInd, apLoc) ## this is the percentage from the real data, the measurement
 	percDiff <- sweep(perc, 2, apLoc$tempNormAUCPerc)		## .tempNormAUCPerc is the percentage of AUC of a selection of calibration data with only the T of the experiment
 } # EOF
 
-aquCoreCalc_aucs_tempNorm_diff <- function(dataset, smoothN, colInd, minus) {
-	values <- aquCoreCalc_aucs_tempNorm(dataset, smoothN, colInd)
+aquCoreCalc_aucs_tempNorm_diff <- function(dataset, smoothN, colInd, minus, apLoc) {
+	values <- aquCoreCalc_aucs_tempNorm(dataset, smoothN, colInd, apLoc)
 	ind <- which(rownames(values) == minus)
 	if (length(ind) < 1) {
 		stop("\nI am sorry, please provide a valid value for 'minus' to perform subtractions within the aquagram. Thanks.", call.=FALSE)
@@ -113,8 +113,8 @@ aquCoreCalc_aucs_tempNorm_diff <- function(dataset, smoothN, colInd, minus) {
 	out <- t(apply(values, 1, function(x) x-subtr))
 } # EOF
 
-aquCoreCalc_aucs_tempNorm_DCE <- function(dataset, smoothN, colInd, TCalib, Texp) {
-	percDiff <- aquCoreCalc_aucs_tempNorm(dataset, smoothN, colInd)
+aquCoreCalc_aucs_tempNorm_DCE <- function(dataset, smoothN, colInd, TCalib, Texp, apLoc) {
+	percDiff <- aquCoreCalc_aucs_tempNorm(dataset, smoothN, colInd, apLoc)
 	if (is.null(TCalib)) {
 		stop("Please provide two numerical values for the temperature calibration range for this mode", call.=FALSE)
 	}
@@ -126,8 +126,8 @@ aquCoreCalc_aucs_tempNorm_DCE <- function(dataset, smoothN, colInd, TCalib, Texp
 	deltaTemp <- t(deltaTemp)
 } # EOF
 
-aquCoreCalc_aucs_tempNorm_DCE_diff <- function(dataset, smoothN, colInd, TCalib, Texp, minus) {
-	values <- aquCoreCalc_aucs_tempNorm_DCE(dataset, smoothN, colInd, TCalib, Texp)
+aquCoreCalc_aucs_tempNorm_DCE_diff <- function(dataset, smoothN, colInd, TCalib, Texp, minus, apLoc) {
+	values <- aquCoreCalc_aucs_tempNorm_DCE(dataset, smoothN, colInd, TCalib, Texp, apLoc)
 	ind <- which(rownames(values) == minus)
 	if (length(ind) < 1) {
 		stop("\nI am sorry, please provide a valid value for 'minus' to perform subtractions within the aquagram. Thanks.", call.=FALSE)
@@ -136,8 +136,8 @@ aquCoreCalc_aucs_tempNorm_DCE_diff <- function(dataset, smoothN, colInd, TCalib,
 	out <- t(apply(values, 1, function(x) x-subtr))
 } # EOF
 
-aquCoreCalc_aucs_DCE <- function(dataset, smoothN, colInd, TCalib) {
-	perc <- aquCoreCalc_AUCstabilized(dataset, smoothN, colInd)
+aquCoreCalc_aucs_DCE <- function(dataset, smoothN, colInd, TCalib, apLoc) {
+	perc <- aquCoreCalc_AUCstabilized(dataset, smoothN, colInd, apLoc)
 	if (is.null(TCalib)) {
 		stop("Please provide two numerical values for the temperature calibration range for this mode", call.=FALSE)
 	}
@@ -148,8 +148,8 @@ aquCoreCalc_aucs_DCE <- function(dataset, smoothN, colInd, TCalib) {
 	out <- out + min(TCalib)
 } # EOF
 
-aquCoreCalc_aucs_DCE_diff <- function(dataset, smoothN, colInd, TCalib, minus) {
-	values <- aquCoreCalc_aucs_DCE(dataset, smoothN, colInd, TCalib)
+aquCoreCalc_aucs_DCE_diff <- function(dataset, smoothN, colInd, TCalib, minus, apLoc) {
+	values <- aquCoreCalc_aucs_DCE(dataset, smoothN, colInd, TCalib, apLoc)
 	ind <- which(rownames(values) == minus)
 	if (length(ind) < 1) {
 		stop("\nI am sorry, please provide a valid value for 'minus' to perform subtractions within the aquagram. Thanks.", call.=FALSE)
@@ -161,40 +161,40 @@ aquCoreCalc_aucs_DCE_diff <- function(dataset, smoothN, colInd, TCalib, minus) {
 ##############
 calc_aquagr_CORE <- function(dataset, smoothN, reference, msc, selIndsWL, colInd, mod, minus, TCalib, Texp, apLoc) {
 	if (mod == "classic") {
-		return(aquCoreCalc_Classic(dataset, smoothN, reference, msc, selIndsWL, colInd))
+		return(aquCoreCalc_Classic(dataset, smoothN, reference, msc, selIndsWL, colInd, apLoc))
 	}
 	if (mod == "aucs") {
 		return(aquCoreCalc_AUCstabilized(dataset, smoothN, colInd, apLoc))
 	}
 	if (mod == "aucs-diff") {
-		return(aquCoreCalc_AUCstabilized_diff(dataset, smoothN, colInd, minus))
+		return(aquCoreCalc_AUCstabilized_diff(dataset, smoothN, colInd, minus, apLoc))
 	}
 	if (mod == "sfc") {
 		return(aquCoreCalc_NormForeignCenter(dataset, smoothN, reference, msc, selIndsWL, colInd, apLoc))
 	}
 	if (mod == "sfc-diff") {
-		return(aquCoreCalc_NormForeignCenter_diff(dataset, smoothN, reference, msc, selIndsWL, colInd, minus))
+		return(aquCoreCalc_NormForeignCenter_diff(dataset, smoothN, reference, msc, selIndsWL, colInd, minus, apLoc))
 	}
 	if (mod == "classic-diff") {
-		return(aquCoreCalc_Classic_diff(dataset, smoothN, reference, msc, selIndsWL, colInd, minus))
+		return(aquCoreCalc_Classic_diff(dataset, smoothN, reference, msc, selIndsWL, colInd, minus, apLoc))
 	}
 	if (mod == "aucs.tn") {
 		return(aquCoreCalc_aucs_tempNorm(dataset, smoothN, colInd, apLoc))
 	}
 	if (mod == "aucs.tn.dce") {
-		return(aquCoreCalc_aucs_tempNorm_DCE(dataset, smoothN, colInd, TCalib, Texp))
+		return(aquCoreCalc_aucs_tempNorm_DCE(dataset, smoothN, colInd, TCalib, Texp, apLoc))
 	}
 	if (mod == "aucs.tn-diff") {
-		return(aquCoreCalc_aucs_tempNorm_diff(dataset, smoothN, colInd, minus))
+		return(aquCoreCalc_aucs_tempNorm_diff(dataset, smoothN, colInd, minus, apLoc))
 	}
 	if (mod == "aucs.tn.dce-diff") {
-		return(aquCoreCalc_aucs_tempNorm_DCE_diff(dataset, smoothN, colInd, TCalib, Texp, minus))
+		return(aquCoreCalc_aucs_tempNorm_DCE_diff(dataset, smoothN, colInd, TCalib, Texp, minus, apLoc))
 	}
 	if (mod == "aucs.dce") {
-		return(aquCoreCalc_aucs_DCE(dataset, smoothN, colInd, TCalib))
+		return(aquCoreCalc_aucs_DCE(dataset, smoothN, colInd, TCalib, apLoc))
 	}
 	if (mod == "aucs.dce-diff") {
-		return(aquCoreCalc_aucs_DCE_diff(dataset, smoothN, colInd, TCalib, minus))
+		return(aquCoreCalc_aucs_DCE_diff(dataset, smoothN, colInd, TCalib, minus, apLoc))
 	}	
 	stop("Please provide a valid value for the 'mod' argument", call.=FALSE)											
 } # EOF
