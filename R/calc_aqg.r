@@ -409,7 +409,7 @@ calcUnivAucTable <- function(smoothN=17, ot=c(1300, 1600), tcdName) {
 calcAUCtable <- function(NIRdata, apLoc) { 
 	wls <- as.numeric(substr(colnames(NIRdata), 2, nchar(colnames(NIRdata)) ))
 #	Call <- t(readInSpecAreasFromSettings())
-	Call <- getOvertoneWls(apLoc$stn$aqg_OT, apLoc)
+	Call <- getOvertoneWls(apLoc$stn$aqg_OT, apLoc=apLoc)
 #	wlCrossPoint=1438
 #	indCrossPoint <- which(wlsOt == wlCrossPoint)
 	saCorRes <- NULL
@@ -443,7 +443,7 @@ calcAUCtable <- function(NIRdata, apLoc) {
 		saCorRes_d <- rbind(saCorRes_d, saCorOut_d)
 	} # end for i
 	rownames(saCorRes) <- rownames(saCorRes_d) <- rownames(NIRdata)
-	colnames(saCorRes) <- colnames(saCorRes_d) <- getOvertoneColnames(apLoc$stn$aqg_OT, apLoc)
+	colnames(saCorRes) <- colnames(saCorRes_d) <- getOvertoneColnames(apLoc$stn$aqg_OT, apLoc=apLoc)
 	return(list(auc=saCorRes, aucd=saCorRes_d))
 } # EOF
 	
