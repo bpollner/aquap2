@@ -214,11 +214,11 @@ calc_aquagr_bootCI <- function(dataset, smoothN, reference, msc, selIndsWL, colI
 	innerWorkings <- function(x, ind) {
 		out <- as.matrix(calc_aquagr_CORE(x[ind,], smoothN, reference, msc, selIndsWL, colInd, mod, minus, TCalib, Texp))
 	} # EOIF
-	if (!stnLoc$allSilent) {cat(paste0("      calc.", R, "bootstrap replicates (", parChar, ") ... ")) }
+	if (!stnLoc$allSilent) {cat(paste0("      calc.", R, " bootstrap replicates (", parChar, ") ... ")) }
 	thisR <- R
 	nCPUs <- getDesiredNrCPUs(allowNA=FALSE)
 	bootResult <- boot::boot(dataset, innerWorkings, R=thisR, strata=dataset$header[,colInd], parallel=useMC, ncpus=nCPUs)   	### here the bootstrap replicates happen
-	if (!stnLoc$stn$allSilent) {cat("ok\n")}
+	if (!stnLoc$allSilent) {cat("ok\n")}
 	if (saveBootResult) {
 		save(bootResult, file=path)
 	}
