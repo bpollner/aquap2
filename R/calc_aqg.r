@@ -75,7 +75,7 @@ aquCoreCalc_AUCstabilized_diff <- function(dataset, smoothN, colInd, minus, apLo
 	out
 } # EOF
 
-aquCoreCalc_NormForeignCenter <- function(dataset, smoothN, reference, msc, selIndsWL, colInd) {
+aquCoreCalc_NormForeignCenter <- function(dataset, smoothN, reference, msc, selIndsWL, colInd, apLoc) {
 	if (is.numeric(smoothN)){
 		dataset <- do_sgolay(dataset, p=2, n=smoothN, m=0)
 	}
@@ -83,12 +83,12 @@ aquCoreCalc_NormForeignCenter <- function(dataset, smoothN, reference, msc, selI
 		dataset <- do_msc(dataset, reference)
 	}
 	dataset$NIR <- dataset$NIR[,selIndsWL]
-	dataset <- do_scale_fc(dataset, .ap2$tempCalibFCtable[, selIndsWL])
+	dataset <- do_scale_fc(dataset, apLoc$tempCalibFCtable[, selIndsWL])
 	groupAverage <- do_ddply(dataset, colInd)
 } # EOF
 
-aquCoreCalc_NormForeignCenter_diff <- function(dataset, smoothN, reference, msc, selIndsWL, colInd, minus) {
-	values <- aquCoreCalc_NormForeignCenter(dataset, smoothN, reference, msc, selIndsWL, colInd)
+aquCoreCalc_NormForeignCenter_diff <- function(dataset, smoothN, reference, msc, selIndsWL, colInd, minus, apLoc) {
+	values <- aquCoreCalc_NormForeignCenter(dataset, smoothN, reference, msc, selIndsWL, colInd, apLoc)
 	ind <- which(rownames(values) == minus)
 	if (length(ind) < 1) {
 		stop("\nI am sorry, please provide a valid value for 'minus' to perform subtractions within the aquagram. Thanks.", call.=FALSE)
@@ -170,7 +170,7 @@ calc_aquagr_CORE <- function(dataset, smoothN, reference, msc, selIndsWL, colInd
 		return(aquCoreCalc_AUCstabilized_diff(dataset, smoothN, colInd, minus, apLoc))
 	}
 	if (mod == "sfc") {
-		return(aquCoreCalc_NormForeignCenter(dataset, smoothN, reference, msc, selIndsWL, colInd))
+		return(aquCoreCalc_NormForeignCenter(dataset, smoothN, reference, msc, selIndsWL, colInd, apLoc))
 	}
 	if (mod == "sfc-diff") {
 		return(aquCoreCalc_NormForeignCenter_diff(dataset, smoothN, reference, msc, selIndsWL, colInd, minus))
