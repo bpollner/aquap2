@@ -1561,8 +1561,7 @@ gdmm <- function(dataset, ap=getap(), noiseFile="def", tempFile="def") {
 	noi_calculateNoiseDistribution(noiseDataset, noiseFile) # only if noise: calculate noise distribution, save as global variable in .ap2
 	##
 	tempCalibDataset <- checkTempCalibFile(tempFile, ap, md) # only if we are calculating an aquagram; if not returns NULL; is assigning tempFile
-	apLoc <- .ap2
-	aq_loadGlobalAquagramCalibData(tempCalibDataset, tempFile, apLoc) # only if aquagram: calculate AUC etc., save as global variable in .ap2
+	aq_loadGlobalAquagramCalibData(tempCalibDataset, tempFile) # only if aquagram: calculate AUC etc., save as global variable in .ap2
 	ap <- aq_checkTCalibRange(ap, tempFile) # only if Aquagram: is stopping if the temperatuer range is out of reach
 	##
 	a <- makeCompPattern(dataset$header, md, ap)
