@@ -443,7 +443,7 @@ calcAUCtable <- function(NIRdata, apLoc) {
 		saCorRes_d <- rbind(saCorRes_d, saCorOut_d)
 	} # end for i
 	rownames(saCorRes) <- rownames(saCorRes_d) <- rownames(NIRdata)
-	colnames(saCorRes) <- colnames(saCorRes_d) <- getOvertoneColnames(.ap2$stn$aqg_OT)
+	colnames(saCorRes) <- colnames(saCorRes_d) <- getOvertoneColnames(apLoc$stn$aqg_OT)
 	return(list(auc=saCorRes, aucd=saCorRes_d))
 } # EOF
 	
