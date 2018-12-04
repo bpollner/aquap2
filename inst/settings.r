@@ -215,7 +215,7 @@ stn <- list(
 	aqg_discrim = FALSE, 					## if, should subtraction spectra be plotted, it will be discriminated between "true" or "not true" positive peaks
 	aqg_defaultMod= "aucs.dce", 			## the default mode for the aquagram. See the help for XXX for possible values.
 	aqg_bootCI = FALSE, 					## if confidence intervalls for the selected wavelengths should be calculated within each group (using bootstrap)
-	aqg_bootUseParallel = FALSE, 			## if, should the CIs be calculated, this should be done in parallel
+	aqg_bootUseParallel = TRUE, 			## if, should the CIs be calculated, this should be done in parallel
 	aqg_bootR = "nrow@3",					## if aqg_bootCI = TRUE, how many bootstrap replicates should be performed? leave at "nrow@3" for e.g. 3 x nrow(samples) or provide a length one numeric
 	aqg_saveBootRes = FALSE, 				## if the bootstrap result should be saved under "bootResult" to the analysis-data folder
 	aqg_smoothCalib = 17,					## the smoothing (sav. golay) applied for the aucs ("area-under-the-curve-stabilization") calibration data
