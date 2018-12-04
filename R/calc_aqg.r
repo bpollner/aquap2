@@ -200,9 +200,9 @@ calc_aquagr_CORE <- function(dataset, smoothN, reference, msc, selIndsWL, colInd
 } # EOF
 ##############
 
-calc_aquagr_bootCI <- function(dataset, smoothN, reference, msc, selIndsWL, colInd, useMC, R, mod, minus, TCalib, Texp) {
-	fnAnD <- .ap2$stn$fn_analysisData
-	saveBootResult <- .ap2$stn$aqg_saveBootRes
+calc_aquagr_bootCI <- function(dataset, smoothN, reference, msc, selIndsWL, colInd, useMC, R, mod, minus, TCalib, Texp, parChar, stnLoc) {
+	fnAnD <- stnLoc2$stn$fn_analysisData
+	saveBootResult <- stnLoc$stn$aqg_saveBootRes
 	path <- paste(fnAnD, "bootResult", sep="/")
 	#
 	if (!dir.exists(fnAnD)) {
@@ -214,11 +214,11 @@ calc_aquagr_bootCI <- function(dataset, smoothN, reference, msc, selIndsWL, colI
 	innerWorkings <- function(x, ind) {
 		out <- as.matrix(calc_aquagr_CORE(x[ind,], smoothN, reference, msc, selIndsWL, colInd, mod, minus, TCalib, Texp))
 	} # EOIF
-	if (!.ap2$stn$allSilent) {cat(paste("      calc.", R, "bootstrap replicates... ")) }
+	if (!stnLoc$stn$allSilent) {cat(paste0("      calc.", R, "bootstrap replicates (", parChar, ") ... ")) }
 	thisR <- R
 	nCPUs <- getDesiredNrCPUs(allowNA=FALSE)
 	bootResult <- boot::boot(dataset, innerWorkings, R=thisR, strata=dataset$header[,colInd], parallel=useMC, ncpus=nCPUs)   	### here the bootstrap replicates happen
-	if (!.ap2$stn$allSilent) {cat("ok\n")}
+	if (!stnLoc$stn$allSilent) {cat("ok\n")}
 	if (saveBootResult) {
 		save(bootResult, file=path)
 	}
@@ -253,7 +253,7 @@ calc_aquagr_bootCI <- function(dataset, smoothN, reference, msc, selIndsWL, colI
 	mat2er <- foreach(i = 1: (nRows*nCols), .combine="cbind") %dopar% {
 			a <- boot::boot.ci(bootResult, index = i, type="bca")$bca[,4:5]    #### here the CIs are calculated 
 	} # end dopar i
-	if (!.ap2$stn$allSilent) {cat("ok\n")}
+	if (!stnLoc$stn$allSilent) {cat("ok\n")}
 	ciMat <- matrix(mat2er, ncol=nCols) 
 	####
 	origMat <- bootResult$t0
@@ -748,7 +748,7 @@ aq_calculateCItable <- function(bootRes, groupAvg) {
 	} # end !is.null(bootRes)	
 } # EOF
 
-calcAquagramSingle <- function(dataset, md, ap, classVar, minus, idString) {
+calcAquagramSingle <- function(dataset, md, ap, classVar, minus, idString, stnLoc) {
 	##
 	a <- ap$aquagr
 	nrCorr <- a$nrCorr
@@ -797,10 +797,12 @@ calcAquagramSingle <- function(dataset, md, ap, classVar, minus, idString) {
 			} else {
 				useMC <- "multicore"		
 			}
+			parChar <- "par."
 		} else {
 			useMC <- "no"
+			parChar <- "ser."
 		}
-		bootRes <- try(calc_aquagr_bootCI(dataset, smoothN, reference, msc, selIndsWL, colInd, useMC, R, mod, minus, TCalib, Texp))
+		bootRes <- try(calc_aquagr_bootCI(dataset, smoothN, reference, msc, selIndsWL, colInd, useMC, R, mod, minus, TCalib, Texp, parChar, stnLoc))
 		if (class(bootRes) == "try-error") {
 			bootRes <- NULL
 		}

@@ -77,9 +77,18 @@ calculateAquagram <- function(dataset, md, ap, idString, tempFile) {
 	if (is.null(ap$aquagr)) {
 		return(NULL)
 	}
+	stnLoc <- .ap2$stn
 #	aq_loadGlobalAquagramCalibData()
+	if (ap$aquagr$bootCI) {
+		registerParallelBackend()  ## will be used in the calculation of confidence intervals
+		bootTxtCorr <- "\n"
+		bootTxtClosingAdd <- "      Aquagrams ok.\n" 	
+	} else {
+		registerDoSEQ() # XXX new !
+		bootTxtCorr <- ""
+		bootTxtClosingAdd <- " " 	
+	}
 	if (is.character(ap$aquagr$spectra)) { message <- "      calc. Aquagrams & spectra... "	} else { message <- "      calc. Aquagrams... "	}
-	if (ap$aquagr$bootCI) {bootTxtCorr <- "\n"; bootTxtClosingAdd <- "      Aquagrams ok.\n" } else {bootTxtCorr <- ""; bootTxtClosingAdd <- "ok\n"}
 	message <- paste(message, bootTxtCorr)
 	if (!.ap2$stn$allSilent) {cat(message)}
 	ap <- aq_getTCalibRange(ap, tempFile) 	# checks with the calibration file if the temperature range is ok
@@ -91,13 +100,8 @@ calculateAquagram <- function(dataset, md, ap, idString, tempFile) {
 	minus <- ap$aquagr$minus
 	aquCalcRes  <- list()
 	length(aquCalcRes) <- lec <- length(vars)
-	if (ap$aquagr$bootCI) {
-		registerParallelBackend()  ## will be used in the calculation of confidence intervals
-	} else {
-		registerDoSEQ() # XXX new !
-	}
 	for (i in 1: length(vars)) {
-		aquCalcRes[[i]] <- calcAquagramSingle(dataset, md, ap, vars[i], minus[i], idString)
+		aquCalcRes[[i]] <- calcAquagramSingle(dataset, md, ap, vars[i], minus[i], idString, stnLoc)
 	} # end for i
 	
 	if (!.ap2$stn$allSilent) {cat(bootTxtClosingAdd)}
