@@ -409,7 +409,7 @@ calcUnivAucTable <- function(smoothN=17, ot=c(1300, 1600), tcdName) {
 calcAUCtable <- function(NIRdata, apLoc) { 
 	wls <- as.numeric(substr(colnames(NIRdata), 2, nchar(colnames(NIRdata)) ))
 #	Call <- t(readInSpecAreasFromSettings())
-	Call <- getOvertoneWls(apLoc$stn$aqg_OT)
+	Call <- getOvertoneWls(apLoc$stn$aqg_OT, apLoc)
 #	wlCrossPoint=1438
 #	indCrossPoint <- which(wlsOt == wlCrossPoint)
 	saCorRes <- NULL
@@ -443,7 +443,7 @@ calcAUCtable <- function(NIRdata, apLoc) {
 		saCorRes_d <- rbind(saCorRes_d, saCorOut_d)
 	} # end for i
 	rownames(saCorRes) <- rownames(saCorRes_d) <- rownames(NIRdata)
-	colnames(saCorRes) <- colnames(saCorRes_d) <- getOvertoneColnames(apLoc$stn$aqg_OT)
+	colnames(saCorRes) <- colnames(saCorRes_d) <- getOvertoneColnames(apLoc$stn$aqg_OT, apLoc)
 	return(list(auc=saCorRes, aucd=saCorRes_d))
 } # EOF
 	
@@ -587,13 +587,13 @@ getOvertoneCut <- function(otNumberChar) {
 	}
 } # EOF
 
-getOvertoneWls <- function(otNumberChar) {
+getOvertoneWls <- function(otNumberChar, apLoc=.ap2) {
 	if (otNumberChar == "1st") {
-		if (.ap2$stn$aqq_nCoord == 12) {
-			return(.ap2$aquagramPSettings$ot1$wls$wls12)
+		if (apLoc$stn$aqq_nCoord == 12) {
+			return(apLoc$aquagramPSettings$ot1$wls$wls12)
 		} else {
-			if (.ap2$stn$aqq_nCoord == 15) {
-				return(.ap2$aquagramPSettings$ot1$wls$wls15)
+			if (apLoc$stn$aqq_nCoord == 15) {
+				return(apLoc$aquagramPSettings$ot1$wls$wls15)
 			} else {
 				stop("Please provide either '12' or '15' as the numbers of coordinates for the first overtone in the settings. Thank you.", call.=FALSE)
 			}
@@ -601,13 +601,13 @@ getOvertoneWls <- function(otNumberChar) {
 	} # end 1st
 } # EOF
 
-getOvertoneColnames <- function(otNumberChar) {
+getOvertoneColnames <- function(otNumberChar, apLoc=.ap2) {
 	if (otNumberChar == "1st") {
-		if (.ap2$stn$aqq_nCoord == 12) {
-			return(.ap2$aquagramPSettings$ot1$cns$cns12)
+		if (apLoc$stn$aqq_nCoord == 12) {
+			return(apLoc$aquagramPSettings$ot1$cns$cns12)
 		} else {
-			if (.ap2$stn$aqq_nCoord == 15) {
-				return(.ap2$aquagramPSettings$ot1$cns$cns15)
+			if (apLoc$stn$aqq_nCoord == 15) {
+				return(apLoc$aquagramPSettings$ot1$cns$cns15)
 			} else {
 				stop("Please provide either '12' or '15' as the numbers of coordinates for the first overtone in the settings. Thank you.", call.=FALSE)
 			}
