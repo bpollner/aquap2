@@ -60,7 +60,7 @@ aquCoreCalc_AUCstabilized <- function(dataset, smoothN, colInd, apLoc) {
 	}
 	dataset$NIR <- calcAUCtable(dataset$NIR)$aucd 		## "NIR" being actually the area under the curve divided by its fullArea for every row in every coordinate
 	groupAverages <- do_ddply(dataset, colInd)	## the group averages of the area under the curve, still in raw area units
-	perc <- calcAUCPercent(groupAverages, aucCalibExtrema=apLoc$aucEx) ## .aucEx being the package-based calibration data for the min. and max. AUC for each coordinate.
+	perc <- calcAUCPercent(groupAverages, apLoc$aucEx) ## .aucEx being the package-based calibration data for the min. and max. AUC for each coordinate.
 } #EOF
 
 aquCoreCalc_AUCstabilized_diff <- function(dataset, smoothN, colInd, minus, apLoc) {
@@ -201,7 +201,7 @@ calc_aquagr_CORE <- function(dataset, smoothN, reference, msc, selIndsWL, colInd
 } # EOF
 ##############
 
-calc_aquagr_bootCI <- function(dataset, smoothN, reference, msc, selIndsWL, colInd, useMC, R, mod, minus, TCalib, Texp, ap, parChar) {
+calc_aquagr_bootCI <- function(dataset, smoothN, reference, msc, selIndsWL, colInd, useMC, R, mod, minus, TCalib, Texp, ap, parChar, apLoc) {
 	fnAnD <- .ap2$stn$fn_analysisData
 	saveBootResult <- .ap2$stn$aqg_saveBootRes
 	path <- paste(fnAnD, "bootResult", sep="/")
@@ -212,7 +212,6 @@ calc_aquagr_bootCI <- function(dataset, smoothN, reference, msc, selIndsWL, colI
 			saveBootResult <- FALSE
 		}
 	}
-	apLoc <- .ap2
 	innerWorkings <- function(x, ind) {
 		out <- as.matrix(calc_aquagr_CORE(x[ind,], smoothN, reference, msc, selIndsWL, colInd, mod, minus, TCalib, Texp, apLoc))
 	} # EOIF
@@ -792,7 +791,8 @@ calcAquagramSingle <- function(dataset, md, ap, classVar, minus, idString) {
 		possibleNrPartic <- possN <- checkRes$nrPart
 		selInds <- checkRes$selInds
 	dataset <- dataset[selInds,]  	### it might be reduced or not
-	groupAverage <- avg <- as.matrix(calc_aquagr_CORE(dataset, smoothN, reference, msc, selIndsWL, colInd, mod, minus, TCalib, Texp))
+	apLoc <- .ap2
+	groupAverage <- avg <- as.matrix(calc_aquagr_CORE(dataset, smoothN, reference, msc, selIndsWL, colInd, mod, minus, TCalib, Texp, apLoc))
 	avgSpec <- subtrSpec <- rawSpec <-  NULL
 	if (is.character(plotSpectra)) {
 		a <- calcSpectra(dataset, classVar, selInds, minus, plotSpectra)
@@ -812,7 +812,7 @@ calcAquagramSingle <- function(dataset, md, ap, classVar, minus, idString) {
 			useMC <- "no"
 			parChar <- "ser."
 		}
-		bootRes <- try(calc_aquagr_bootCI(dataset, smoothN, reference, msc, selIndsWL, colInd, useMC, R, mod, minus, TCalib, Texp, ap, parChar))
+		bootRes <- try(calc_aquagr_bootCI(dataset, smoothN, reference, msc, selIndsWL, colInd, useMC, R, mod, minus, TCalib, Texp, ap, parChar, apLoc))
 		if (class(bootRes) == "try-error") {
 			bootRes <- NULL
 		}
