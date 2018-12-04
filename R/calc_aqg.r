@@ -240,7 +240,7 @@ calc_aquagr_bootCI <- function(dataset, smoothN, reference, msc, selIndsWL, colI
 #	print(str(bootResult)); print(bootResult$t0); print(bootResult$t[1:5, 1:12]); wait()
 	nRows <- dim(bootResult$t0)[1]
 	nCols <- dim(bootResult$t0)[2]
-	if (!.ap2$stn$allSilent) {cat("      calc. confidence intervals... ")}
+	if (!stnLoc$allSilent) {cat("      calc. confidence intervals... ")}
 #	ciMat <- matrix(NA, nRows*2, nCols)
 #	kseq <- seq(1, nRows*2, by=2)
 #	for (i in 1: nCols) {
