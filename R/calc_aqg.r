@@ -791,7 +791,7 @@ calcAquagramSingle <- function(dataset, md, ap, classVar, minus, idString, stnLo
 		subtrSpec <- a$subtrSpec
 	} # end calc spectra
 	if (bootCI) {
-		if (.ap2$stn$aqg_bootUseParallel == TRUE) {
+		if (stnLoc$aqg_bootUseParallel == TRUE) {
 			if (Sys.info()["sysname"] == "Windows") {
 				useMC <- "snow"
 			} else {
