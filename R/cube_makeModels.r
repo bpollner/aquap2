@@ -91,11 +91,11 @@ calculateAquagram <- function(dataset, md, ap, idString, tempFile) {
 	minus <- ap$aquagr$minus
 	aquCalcRes  <- list()
 	length(aquCalcRes) <- lec <- length(vars)
-	if (ap$aquagr$bootCI) {
-		registerParallelBackend()  ## will be used in the calculation of confidence intervals
-	} else {
-		registerDoSEQ() # XXX new !
-	}
+#	if (ap$aquagr$bootCI) {
+#		registerParallelBackend()  ## will be used in the calculation of confidence intervals
+#	} else {
+#		registerDoSEQ() # XXX new !
+#	}
 	for (i in 1: length(vars)) {
 		aquCalcRes[[i]] <- calcAquagramSingle(dataset, md, ap, vars[i], minus[i], idString)
 	} # end for i

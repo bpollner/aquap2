@@ -200,7 +200,7 @@ calc_aquagr_CORE <- function(dataset, smoothN, reference, msc, selIndsWL, colInd
 } # EOF
 ##############
 
-calc_aquagr_bootCI <- function(dataset, smoothN, reference, msc, selIndsWL, colInd, useMC, R, mod, minus, TCalib, Texp) {
+calc_aquagr_bootCI <- function(dataset, smoothN, reference, msc, selIndsWL, colInd, useMC, R, mod, minus, TCalib, Texp, ap, parChar) {
 	fnAnD <- .ap2$stn$fn_analysisData
 	saveBootResult <- .ap2$stn$aqg_saveBootRes
 	path <- paste(fnAnD, "bootResult", sep="/")
@@ -214,7 +214,7 @@ calc_aquagr_bootCI <- function(dataset, smoothN, reference, msc, selIndsWL, colI
 	innerWorkings <- function(x, ind) {
 		out <- as.matrix(calc_aquagr_CORE(x[ind,], smoothN, reference, msc, selIndsWL, colInd, mod, minus, TCalib, Texp))
 	} # EOIF
-	if (!.ap2$stn$allSilent) {cat(paste("      calc.", R, "bootstrap replicates... ")) }
+	if (!.ap2$stn$allSilent) {cat(paste0("      calc.", R, " bootstrap replicates (", parChar, ")... ")) }
 	thisR <- R
 	nCPUs <- getDesiredNrCPUs(allowNA=FALSE)
 	bootResult <- boot::boot(dataset, innerWorkings, R=thisR, strata=dataset$header[,colInd], parallel=useMC, ncpus=nCPUs)   	### here the bootstrap replicates happen
@@ -250,9 +250,17 @@ calc_aquagr_bootCI <- function(dataset, smoothN, reference, msc, selIndsWL, colI
 #		} # end for k
 #	} # end for i
 #	####
+	if (ap$aquagr$bootCI) {
+		registerParallelBackend()  ## will be used in the calculation of confidence intervals
+	} else {
+		registerDoSEQ() # XXX new !
+	}
 	mat2er <- foreach(i = 1: (nRows*nCols), .combine="cbind") %dopar% {
 			a <- boot::boot.ci(bootResult, index = i, type="bca")$bca[,4:5]    #### here the CIs are calculated 
 	} # end dopar i
+	if (checkHaveParallel) {
+		registerDoSEQ() # switch off when we do not need it any more
+	}
 	if (!.ap2$stn$allSilent) {cat("ok\n")}
 	ciMat <- matrix(mat2er, ncol=nCols) 
 	####
@@ -797,10 +805,12 @@ calcAquagramSingle <- function(dataset, md, ap, classVar, minus, idString) {
 			} else {
 				useMC <- "multicore"		
 			}
+			parChar <- "par."
 		} else {
 			useMC <- "no"
+			parChar <- "ser."
 		}
-		bootRes <- try(calc_aquagr_bootCI(dataset, smoothN, reference, msc, selIndsWL, colInd, useMC, R, mod, minus, TCalib, Texp))
+		bootRes <- try(calc_aquagr_bootCI(dataset, smoothN, reference, msc, selIndsWL, colInd, useMC, R, mod, minus, TCalib, Texp, ap, parChar))
 		if (class(bootRes) == "try-error") {
 			bootRes <- NULL
 		}
