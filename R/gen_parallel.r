@@ -1,6 +1,6 @@
 checkHaveParallel <- function() {
-	if (is.null(getDoParName()) ) { return(FALSE) }
-	if (getDoParName() == "doSEQ") { return(FALSE) }
+	if (is.null(foreach::getDoParName()) ) { return(FALSE) }
+	if (foreach::getDoParName() == "doSEQ") { return(FALSE) }
 	return(TRUE)
 } # EOF
 
