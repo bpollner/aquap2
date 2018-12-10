@@ -836,7 +836,7 @@ countDecimals <- function(x, nrDec=25) {
 } # EOF
 
 readInSpecAreas <- function() {
-	out <- as.data.frame(t(getOvertoneWls(.ap2$stn$aqg_OT)))  # getOvertoneWls() is in the file "calc_aqg.r"
+	out <- as.data.frame(t(getOvertoneWls(.ap2$stn$aqg_OT, .ap2)))  # getOvertoneWls() is in the file "calc_aqg.r"
 return(out)
 } # EOF
 

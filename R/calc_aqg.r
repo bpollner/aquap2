@@ -241,7 +241,7 @@ calc_aquagr_bootCI <- function(dataset, smoothN, reference, msc, selIndsWL, colI
 #	print(str(bootResult)); print(bootResult$t0); print(bootResult$t[1:5, 1:12]); wait()
 	nRows <- dim(bootResult$t0)[1]
 	nCols <- dim(bootResult$t0)[2]
-	if (!.ap2$stn$allSilent) {cat("      calc. confidence intervals... ")}
+	if (!apLoc$stn$allSilent) {cat("      calc. confidence intervals... ")}
 #	ciMat <- matrix(NA, nRows*2, nCols)
 #	kseq <- seq(1, nRows*2, by=2)
 #	for (i in 1: nCols) {
@@ -262,7 +262,7 @@ calc_aquagr_bootCI <- function(dataset, smoothN, reference, msc, selIndsWL, colI
 	if (checkHaveParallel()) {
 		registerDoSEQ() # switch off when we do not need it any more
 	}
-	if (!.ap2$stn$allSilent) {cat("ok\n")}
+	if (!apLoc$stn$allSilent) {cat("ok\n")}
 	ciMat <- matrix(mat2er, ncol=nCols) 
 	####
 	origMat <- bootResult$t0
@@ -409,7 +409,7 @@ calcUnivAucTable <- function(smoothN=17, ot=c(1300, 1600), tcdName) {
 calcAUCtable <- function(NIRdata, apLoc) { 
 	wls <- as.numeric(substr(colnames(NIRdata), 2, nchar(colnames(NIRdata)) ))
 #	Call <- t(readInSpecAreasFromSettings())
-	Call <- getOvertoneWls(apLoc$stn$aqg_OT, apLoc=apLoc)
+	Call <- getOvertoneWls(otNumberChar=apLoc$stn$aqg_OT, apLoc=apLoc)
 #	wlCrossPoint=1438
 #	indCrossPoint <- which(wlsOt == wlCrossPoint)
 	saCorRes <- NULL
@@ -443,7 +443,7 @@ calcAUCtable <- function(NIRdata, apLoc) {
 		saCorRes_d <- rbind(saCorRes_d, saCorOut_d)
 	} # end for i
 	rownames(saCorRes) <- rownames(saCorRes_d) <- rownames(NIRdata)
-	colnames(saCorRes) <- colnames(saCorRes_d) <- getOvertoneColnames(apLoc$stn$aqg_OT, apLoc=apLoc)
+	colnames(saCorRes) <- colnames(saCorRes_d) <- getOvertoneColnames(otNumberChar=apLoc$stn$aqg_OT, apLoc=apLoc)
 	return(list(auc=saCorRes, aucd=saCorRes_d))
 } # EOF
 	
@@ -587,7 +587,7 @@ getOvertoneCut <- function(otNumberChar) {
 	}
 } # EOF
 
-getOvertoneWls <- function(otNumberChar, apLoc=.ap2) {
+getOvertoneWls <- function(otNumberChar, apLoc) {
 	if (otNumberChar == "1st") {
 		if (apLoc$stn$aqq_nCoord == 12) {
 			return(apLoc$aquagramPSettings$ot1$wls$wls12)
@@ -601,7 +601,7 @@ getOvertoneWls <- function(otNumberChar, apLoc=.ap2) {
 	} # end 1st
 } # EOF
 
-getOvertoneColnames <- function(otNumberChar, apLoc=.ap2) {
+getOvertoneColnames <- function(otNumberChar, apLoc) {
 	if (otNumberChar == "1st") {
 		if (apLoc$stn$aqq_nCoord == 12) {
 			return(apLoc$aquagramPSettings$ot1$cns$cns12)
