@@ -56,7 +56,7 @@ aquCoreCalc_Classic_diff <- function(dataset, smoothN, reference, msc, selIndsWL
 
 aquCoreCalc_AUCstabilized <- function(dataset, smoothN, colInd, apLoc) {
 	if (is.numeric(smoothN)){
-		dataset <- do_sgolay(dataset, p=2, n=smoothN, m=0)
+	#	dataset <- do_sgolay(dataset, p=2, n=smoothN, m=0) # we get an .ap2 error in autoUpS() when in parallel !
 	}
 	dataset$NIR <- calcAUCtable(dataset$NIR, apLoc)$aucd 		## "NIR" being actually the area under the curve divided by its fullArea for every row in every coordinate
 	groupAverages <- do_ddply(dataset, colInd)	## the group averages of the area under the curve, still in raw area units
@@ -192,7 +192,6 @@ calc_aquagr_CORE <- function(dataset, smoothN, reference, msc, selIndsWL, colInd
 	}
 	if (mod == "aucs.dce") {
 		return(aquCoreCalc_aucs_DCE(dataset, smoothN, colInd, TCalib, apLoc))
-		return(aquCoreCalc_aucs_DCE(dataset, smoothN, colInd, TCalib, apLoc))
 	}
 	if (mod == "aucs.dce-diff") {
 		return(aquCoreCalc_aucs_DCE_diff(dataset, smoothN, colInd, TCalib, minus, apLoc))
@@ -251,7 +250,7 @@ calc_aquagr_bootCI <- function(dataset, smoothN, reference, msc, selIndsWL, colI
 #		} # end for k
 #	} # end for i
 #	####
-	if (ap$aquagr$bootCI) {
+	if (apLoc$stn$aqg_bootUseParallel) { # was ap$aquagr$bootCI
 		registerParallelBackend()  ## will be used in the calculation of confidence intervals
 	} else {
 		registerDoSEQ() # XXX new !
@@ -407,7 +406,12 @@ calcUnivAucTable <- function(smoothN=17, ot=c(1300, 1600), tcdName) {
 ## !gives back a list!; 
 ## calculates the AUC-value in every coordinate for every single row (so we get back same number of rows, but only e.g. 15 columns)
 calcAUCtable <- function(NIRdata, apLoc) { 
-	wls <- as.numeric(substr(colnames(NIRdata), 2, nchar(colnames(NIRdata)) ))
+#	class(NIRdata) <- "matrix"
+#	cns <- dimnames(NIRdata)[[2]] 
+#	print(cns[1:4])
+#	kk <- .ap2
+#	wls <- as.numeric(substr(cns, 2, nchar(cns))) # leaving out the first charcter
+	wls <- as.numeric(substr(colnames(NIRdata), 2, nchar(colnames(NIRdata)) ))	
 #	Call <- t(readInSpecAreasFromSettings())
 	Call <- getOvertoneWls(otNumberChar=apLoc$stn$aqg_OT, apLoc=apLoc)
 #	wlCrossPoint=1438
@@ -807,10 +811,10 @@ calcAquagramSingle <- function(dataset, md, ap, classVar, minus, idString) {
 			} else {
 				useMC <- "multicore"		
 			}
-			parChar <- "par."
+			parChar <- "parallel"
 		} else {
 			useMC <- "no"
-			parChar <- "ser."
+			parChar <- "seriell"
 		}
 		bootRes <- try(calc_aquagr_bootCI(dataset, smoothN, reference, msc, selIndsWL, colInd, useMC, R, mod, minus, TCalib, Texp, ap, parChar, apLoc))
 		if (class(bootRes) == "try-error") {
