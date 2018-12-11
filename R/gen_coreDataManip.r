@@ -34,6 +34,17 @@ do_sgolay <- function(dataset, p=2, n=21, m=0, exportModel=FALSE) {
 	return(dataset)
 } # EOF
 
+# is used when we have no access to .ap2 like in parallel operations
+do_sgolay_sys <- function(dataset, p=2, n=21, m=0) {
+ 	cns <- colnames(dataset$NIR)
+	rns <- rownames(dataset$NIR)
+	NIR <- t(apply(dataset$NIR, 1, signal::sgolayfilt, p=p, n=n, m=m))
+	colnames(NIR) <- cns
+	rownames(NIR) <- rns
+	dataset$NIR <- I(NIR)
+	return(dataset)
+} # EOF
+
 ### for baseline removal
 #' @title Calculate Standard Normal Variation SNV
 #' @description Calculate the standard normal variation (SNV) by autoscaling the 

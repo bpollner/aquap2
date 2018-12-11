@@ -698,6 +698,27 @@ reFactor <- function(dataset) {
 	return(dataset)
 } # EOF
 
+manualDatasetSubscripting <- function(dataset, inds) { # is NOT returning a full dataset!!, is used in the windows-parallel bootstrap of the aquagram, because in "snow" the methods are available
+	x <- dataset
+	i <- inds
+	#
+	drop=FALSE
+	header <- x$header[i, , drop=drop]
+	colRep <- x$colRep[i, , drop=drop]
+	if (!is.null(x$NIR)) {
+		NIR <- x$NIR[i, , drop=drop]
+		rownames(NIR) <- rownames(x$NIR)[i]
+		colnames(NIR) <- colnames(x$NIR)
+		fd <- reFactor(data.frame(I(header), I(colRep), I(NIR)))
+	} else {
+		fd <- reFactor(data.frame(I(header), I(colRep)))				
+	}
+	return(fd)
+#	dataset@.Data <- fd # does not work on windows-parallel, as the class-definition is "invoked" when calling the "@.Data", and this class definition is not copied to the R-worker processes
+#	return(dataset)
+#	return(new("aquap_data", fd, ncpwl=x@ncpwl, metadata=x@metadata, anproc=x@anproc, version=x@version))
+} # EOF
+
 is.wholenumber <- function(x, tol = .Machine$double.eps^0.5) {
 	 return(abs(x - round(x)) < tol)
 } # EOF

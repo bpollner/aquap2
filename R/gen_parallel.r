@@ -4,7 +4,7 @@ checkHaveParallel <- function() {
 	return(TRUE)
 } # EOF
 
-checkNrOfWorkers <- function(allowNA=TRUE, logic=FALSE) {
+checkNrOfWorkers <- function(allowNA=TRUE, logic=.ap2$stn$gen_useVirtualCores) {
 	nr <- parallel::detectCores(all.tests=FALSE, logical=logic)
 	if (is.na(nr)) {
 		if (allowNA) {
