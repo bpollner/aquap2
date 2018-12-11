@@ -1,10 +1,10 @@
 checkHaveParallel <- function() {
-	if (is.null(getDoParName()) ) { return(FALSE) }
-	if (getDoParName() == "doSEQ") { return(FALSE) }
+	if (is.null(foreach::getDoParName()) ) { return(FALSE) }
+	if (foreach::getDoParName() == "doSEQ") { return(FALSE) }
 	return(TRUE)
 } # EOF
 
-checkNrOfWorkers <- function(allowNA=TRUE, logic=FALSE) {
+checkNrOfWorkers <- function(allowNA=TRUE, logic=.ap2$stn$gen_useVirtualCores) {
 	nr <- parallel::detectCores(all.tests=FALSE, logical=logic)
 	if (is.na(nr)) {
 		if (allowNA) {

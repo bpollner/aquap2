@@ -492,22 +492,22 @@ updateAquap2 <- function(force=FALSE) {
 } # EOF
 
 
-#' @title Load the aquap2 data and examples package.
-#' @description Download and install the latest version of package 'aquapData' 
-#'  from its github repository. 
-#' 	Package 'aquapData' contains the data and examples used in package 'aquap2'.
-#' @details Always downloads and installs the latest available version, also 
-#'  if the same up-to-date version is already installed.
-#' @param branch Character, the name of the branch to downlaod. Defaults to 
-#'  "master".
-#' @examples
-#'  \dontrun{
-#'  loadAquapDatapackage()
-#'  }
+# @title Load the aquap2 data and examples package.
+# @description Download and install the latest version of package 'aquapData' 
+#  from its github repository. 
+# 	Package 'aquapData' contains the data and examples used in package 'aquap2'.
+# @details Always downloads and installs the latest available version, also 
+#  if the same up-to-date version is already installed.
+# @param branch Character, the name of the branch to downlaod. Defaults to 
+#  "master".
+# @examples
+#  \dontrun{
+#  loadAquapDatapackage()
+#  }
 ################ @export
-loadAquapDatapackage <- function(branch="master") {
+#loadAquapDatapackage <- function(branch="master") {
 #	devtools::install_github(repo="bpollner/aquapData", ref=branch, auth_token=NULL)
-} # EOF
+#} # EOF
 
 getStdColnames <- function() {
 	yPref <- .ap2$stn$p_yVarPref
@@ -698,6 +698,27 @@ reFactor <- function(dataset) {
 	return(dataset)
 } # EOF
 
+manualDatasetSubscripting <- function(dataset, inds) { # is NOT returning a full dataset!!, is used in the windows-parallel bootstrap of the aquagram, because in "snow" the methods are available
+	x <- dataset
+	i <- inds
+	#
+	drop=FALSE
+	header <- x$header[i, , drop=drop]
+	colRep <- x$colRep[i, , drop=drop]
+	if (!is.null(x$NIR)) {
+		NIR <- x$NIR[i, , drop=drop]
+		rownames(NIR) <- rownames(x$NIR)[i]
+		colnames(NIR) <- colnames(x$NIR)
+		fd <- reFactor(data.frame(I(header), I(colRep), I(NIR)))
+	} else {
+		fd <- reFactor(data.frame(I(header), I(colRep)))				
+	}
+	return(fd)
+#	dataset@.Data <- fd # does not work on windows-parallel, as the class-definition is "invoked" when calling the "@.Data", and this class definition is not copied to the R-worker processes
+#	return(dataset)
+#	return(new("aquap_data", fd, ncpwl=x@ncpwl, metadata=x@metadata, anproc=x@anproc, version=x@version))
+} # EOF
+
 is.wholenumber <- function(x, tol = .Machine$double.eps^0.5) {
 	 return(abs(x - round(x)) < tol)
 } # EOF
@@ -836,7 +857,7 @@ countDecimals <- function(x, nrDec=25) {
 } # EOF
 
 readInSpecAreas <- function() {
-	out <- as.data.frame(t(getOvertoneWls(.ap2$stn$aqg_OT)))  # getOvertoneWls() is in the file "calc_aqg.r"
+	out <- as.data.frame(t(getOvertoneWls(.ap2$stn$aqg_OT, .ap2)))  # getOvertoneWls() is in the file "calc_aqg.r"
 return(out)
 } # EOF
 

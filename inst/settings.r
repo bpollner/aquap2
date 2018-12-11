@@ -55,6 +55,7 @@ stn <- list(
 	gen_showExtendedCube = TRUE, 			## if set to TRUE, the number of rows and the number of wavelengths in each element of a cube will be displayed as well.
 	gen_useParallel = FALSE, 				## if parallel computing should be used where applicable and implemented
 	gen_numberOfCPUs = NA, 					## the number of CPUs used for parallel computing; leave at 'NA' for automatically using the system defaults
+	gen_useVirtualCores = FALSE, 			## if, should parallel computing be performed, the maximum number of cores (physical plus virtual) should be used. If set to FALSE, only the number of physical cores will be used.
 	gen_showData_NIR = FALSE, 				## if the first rows of the NIR data should be printed as well wenn printing (showing) an object of class 'aquap_data' to the screen.
 	gen_versionCheckDataset = TRUE,			## if it should be checked if the dataset was created with an older version of package aquap2. Recommended value is TRUE.
 	gen_plot_anprocSource = "cube", 		## the default way to obtain the analysis procedure when *PLOTTING*. Possible values are "cube" to take the analysis procedure from within the cube, "defFile" to load instead the default filename of the analysis procedure file, or provide a custom analysis procedure filename. (Ending in ".r")

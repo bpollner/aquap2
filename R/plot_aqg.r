@@ -169,7 +169,7 @@ aq_checkLegendTextMod <- function(mod, minus, TCalib, Texp) {
 
 aq_checkSelWls <- function(mod, selWls) {
 	if ((mod == "aucs") | (mod == "aucs-diff") | (mod == "aucs.tn") | (mod == "aucs.tn.dce") | (mod == "aucs.tn-diff") | (mod == "aucs.tn.dce-diff") | (mod == "aucs.dce") | (mod == "aucs.dce-diff") ) {
-	out <- paste("C", getOvertoneColnames(.ap2$stn$aqg_OT), sep="")
+	out <- paste("C", getOvertoneColnames(.ap2$stn$aqg_OT, apLoc=.ap2), sep="")
 	} else {
 		out <- selWls
 	}

@@ -34,7 +34,7 @@ do_ddply <- function(dataset, colInd) {
 
 aquCoreCalc_Classic <- function(dataset, smoothN, reference, msc, selIndsWL, colInd, apLoc) {
 	if (is.numeric(smoothN)){
-		dataset <- do_sgolay(dataset, p=2, n=smoothN, m=0)
+		dataset <- do_sgolay_sys(dataset, p=2, n=smoothN, m=0)
 	}
 	if (msc==TRUE) {
 		dataset <- do_msc(dataset, reference)
@@ -56,15 +56,15 @@ aquCoreCalc_Classic_diff <- function(dataset, smoothN, reference, msc, selIndsWL
 
 aquCoreCalc_AUCstabilized <- function(dataset, smoothN, colInd, apLoc) {
 	if (is.numeric(smoothN)){
-		dataset <- do_sgolay(dataset, p=2, n=smoothN, m=0)
+		dataset <- do_sgolay_sys(dataset, p=2, n=smoothN, m=0) # we get an .ap2 error in autoUpS() when in parallel !
 	}
-	dataset$NIR <- calcAUCtable(dataset$NIR)$aucd 		## "NIR" being actually the area under the curve divided by its fullArea for every row in every coordinate
+	dataset$NIR <- calcAUCtable(dataset$NIR, apLoc)$aucd 		## "NIR" being actually the area under the curve divided by its fullArea for every row in every coordinate
 	groupAverages <- do_ddply(dataset, colInd)	## the group averages of the area under the curve, still in raw area units
 	perc <- calcAUCPercent(groupAverages, apLoc$aucEx) ## .aucEx being the package-based calibration data for the min. and max. AUC for each coordinate.
 } #EOF
 
 aquCoreCalc_AUCstabilized_diff <- function(dataset, smoothN, colInd, minus, apLoc) {
-	perc <- aquCoreCalc_AUCstabilized(dataset, smoothN, colInd, apLoc, apLoc)
+	perc <- aquCoreCalc_AUCstabilized(dataset, smoothN, colInd, apLoc)
 	ind <- which(rownames(perc) == minus)
 	if (length(ind) < 1) {
 		stop("\nI am sorry, please provide a valid value for 'minus' to perform subtractions within the aquagram. Thanks.", call.=FALSE)
@@ -77,7 +77,7 @@ aquCoreCalc_AUCstabilized_diff <- function(dataset, smoothN, colInd, minus, apLo
 
 aquCoreCalc_NormForeignCenter <- function(dataset, smoothN, reference, msc, selIndsWL, colInd, apLoc) {
 	if (is.numeric(smoothN)){
-		dataset <- do_sgolay(dataset, p=2, n=smoothN, m=0)
+		dataset <- do_sgolay_sys(dataset, p=2, n=smoothN, m=0)
 	}
 	if (msc==TRUE) {
 		dataset <- do_msc(dataset, reference)
@@ -200,7 +200,8 @@ calc_aquagr_CORE <- function(dataset, smoothN, reference, msc, selIndsWL, colInd
 } # EOF
 ##############
 
-calc_aquagr_bootCI <- function(dataset, smoothN, reference, msc, selIndsWL, colInd, useMC, R, mod, minus, TCalib, Texp, parChar, apLoc) {
+
+calc_aquagr_bootCI <- function(dataset, smoothN, reference, msc, selIndsWL, colInd, useMC, R, mod, minus, TCalib, Texp, ap, parChar, apLoc) {
 	fnAnD <- apLoc$stn$fn_analysisData
 	saveBootResult <- apLoc$stn$aqg_saveBootRes
 	path <- paste(fnAnD, "bootResult", sep="/")
@@ -211,20 +212,27 @@ calc_aquagr_bootCI <- function(dataset, smoothN, reference, msc, selIndsWL, colI
 			saveBootResult <- FALSE
 		}
 	}
-	innerWorkings <- function(x, ind) {
-		out <- as.matrix(calc_aquagr_CORE(x[ind,], smoothN, reference, msc, selIndsWL, colInd, mod, minus, TCalib, Texp, apLoc))
+	innerWorkings <- function(x, ind, smoN, ref, ms, selIndW, colI, mo, minu, TCali, Tex, apLo, parInfo) {
+		# 	x[ind,] gives back "wrong dimensions"  Ha! on a PC, subscripting does not work --> the class-method seems not to be copied to the R-worker processes in "snow"
+		if (parInfo == "multicore" | parInfo == "no") { # so we are either in seriell or on a non-windows system
+			datasetSubscripted <- x[ind,] # is using the "[" method
+		} else { # so we have "snow" and are on a windows machine
+			datasetSubscripted <- manualDatasetSubscripting(x, ind) # is subscripting in an extra function, does NOT give back an "aquap_data" object !!
+		}	
+		out <- as.matrix(calc_aquagr_CORE(dataset=datasetSubscripted, smoothN=smoN, reference=ref, msc=ms, selIndsWL=selIndW, colInd=colI, mod=mo, minus=minu, TCalib=TCali, Texp=Tex, apLoc=apLo))
 	} # EOIF
-	if (!apLoc$stn$allSilent) {cat(paste0("      calc.", R, " bootstrap replicates (", parChar, ") ... ")) }
+	if (!apLoc$stn$allSilent) {cat(paste0("      calc. ", R, " bootstrap replicates (", parChar, ")... ")) }
 	thisR <- R
-	nCPUs <- getDesiredNrCPUs(allowNA=FALSE)
-	bootResult <- boot::boot(dataset, innerWorkings, R=thisR, strata=dataset$header[,colInd], parallel=useMC, ncpus=nCPUs)   	### here the bootstrap replicates happen
+	nCPUs <- getDesiredNrCPUs(allowNA=FALSE) # ! here we have some .ap2 ! (but should be ok)
+	###
+	bootResult <- boot::boot(dataset, innerWorkings, R=thisR, strata=dataset$header[,colInd], parallel=useMC, ncpus=nCPUs, smoN=smoothN, ref=reference, ms=msc, selIndW=selIndsWL, colI=colInd, mo=mod, minu=minus, TCali=TCalib, Tex=Texp, apLo=apLoc, parInfo=useMC)   	### here the bootstrap replicates happen
+	###
 	if (!apLoc$stn$allSilent) {cat("ok\n")}
 	if (saveBootResult) {
 		save(bootResult, file=path)
 	}
-#	load(path)
-#	print(str(bootResult)); print(bootResult$t0); print(bootResult$t[1:5, 1:12]); wait()
-#	if (mod == "aucs-diff" | mod == "nfs-diff" | mod == "classic-diff" | mod == "aucs.tn-diff" |  mod == "aucs.tn.dce-diff" | mod == "aucs.dce-diff")
+#	load(path) # DEV only
+#	print(str(bootResult, max.level=2)); print(bootResult$t0); print(bootResult$t[1:5, 1:12]); wait()
 	origBRt0 <- bootResult$t0
 	if (grepl("diff", mod)) {
 	#	colSeq <- seq(1, ncol(bootResult$t0)*nrow(bootResult$t0), by=nrow(bootResult$t0))
@@ -237,10 +245,9 @@ calc_aquagr_bootCI <- function(dataset, smoothN, reference, msc, selIndsWL, colI
 		bootResult$weights <- bootResult$weights[-a]
 		bootResult$data <- bootResult$data[-a,]
 	}	
-#	print(str(bootResult)); print(bootResult$t0); print(bootResult$t[1:5, 1:12]); wait()
+#	print(str(bootResult, max.level=2)); print(bootResult$t0); print(bootResult$t[1:5, 1:12]); wait()
 	nRows <- dim(bootResult$t0)[1]
 	nCols <- dim(bootResult$t0)[2]
-	if (!apLoc$stn$allSilent) {cat("      calc. confidence intervals... ")}
 #	ciMat <- matrix(NA, nRows*2, nCols)
 #	kseq <- seq(1, nRows*2, by=2)
 #	for (i in 1: nCols) {
@@ -250,9 +257,28 @@ calc_aquagr_bootCI <- function(dataset, smoothN, reference, msc, selIndsWL, colI
 #		} # end for k
 #	} # end for i
 #	####
-	mat2er <- foreach(i = 1: (nRows*nCols), .combine="cbind") %dopar% {
-			a <- boot::boot.ci(bootResult, index = i, type="bca")$bca[,4:5]    #### here the CIs are calculated 
+	txtPar <- "" # DEV
+	if (apLoc$stn$aqg_bootUseParallel) { 
+		if (useMC == "multicore") { # so we are in a non-windows system
+			registerParallelBackend()  ## will be used in the calculation of confidence intervals
+			txtPar <- "parallel"		
+		} else { # so it must be "snow"
+			registerDoSEQ() # is forcing seriell execution on windows -- because I just can not terminate the bug in the windows parallel execution. Sorry. XXX
+			txtPar <- "forced seriell on windows"					
+		}
+	} else {
+		registerDoSEQ()
+		txtPar <- "seriell"
+	}
+	if (!apLoc$stn$allSilent) {cat(paste0("      calc. confidence intervals (", txtPar, ")... "))}
+	###
+	mat2er <- foreach(i = 1: (nRows*nCols), .combine="cbind", .verbose=FALSE) %dopar% {
+			a <- boot::boot.ci(bootResult, index = i, type="bca")$bca[,4:5]    #### here the CIs are calculated  ## can not find the problem in windows parallel ("arguments must have same length". works perfekt in windows seriell)
 	} # end dopar i
+	###
+	if (checkHaveParallel()) {
+		registerDoSEQ() # switch off when we do not need it any more
+	}
 	if (!apLoc$stn$allSilent) {cat("ok\n")}
 	ciMat <- matrix(mat2er, ncol=nCols) 
 	####
@@ -390,17 +416,24 @@ calcUnivAucTable <- function(smoothN=17, ot=c(1300, 1600), tcdName) {
 	dataset <- get(tcdName, pos=.ap2)
 	if (!.ap2$stn$allSilent) {cat(" * Calculating universal AUC table... ")}
 	avgTable <- tempCalibMakeAvgTable(dataset, smoothN, TRange=NULL, ot)
-	aucd <- calcAUCtable(avgTable)$aucd
+	aucd <- calcAUCtable(avgTable, .ap2)$aucd
 	if (!.ap2$stn$allSilent) {cat("ok\n")}
 	return(aucd)
 } #EOF
 
 ## !gives back a list!; 
 ## calculates the AUC-value in every coordinate for every single row (so we get back same number of rows, but only e.g. 15 columns)
-calcAUCtable <- function(NIRdata) { 
-	wls <- as.numeric(substr(colnames(NIRdata), 2, nchar(colnames(NIRdata)) ))
+calcAUCtable <- function(NIRdata, apLoc) { 
+#	class(NIRdata) <- "matrix"
+#	cns <- dimnames(NIRdata)[[2]] 
+#	print(cns[1:4])
+#	kk <- .ap2
+#	wls <- as.numeric(substr(cns, 2, nchar(cns))) # leaving out the first charcter
+	wls <- as.numeric(substr(colnames(NIRdata), 2, nchar(colnames(NIRdata)) ))	
+#	kk <- .ap2
+	
 #	Call <- t(readInSpecAreasFromSettings())
-	Call <- getOvertoneWls(.ap2$stn$aqg_OT)
+	Call <- getOvertoneWls(otNumberChar=apLoc$stn$aqg_OT, apLoc=apLoc)
 #	wlCrossPoint=1438
 #	indCrossPoint <- which(wlsOt == wlCrossPoint)
 	saCorRes <- NULL
@@ -434,7 +467,7 @@ calcAUCtable <- function(NIRdata) {
 		saCorRes_d <- rbind(saCorRes_d, saCorOut_d)
 	} # end for i
 	rownames(saCorRes) <- rownames(saCorRes_d) <- rownames(NIRdata)
-	colnames(saCorRes) <- colnames(saCorRes_d) <- getOvertoneColnames(.ap2$stn$aqg_OT)
+	colnames(saCorRes) <- colnames(saCorRes_d) <- getOvertoneColnames(otNumberChar=apLoc$stn$aqg_OT, apLoc=apLoc)
 	return(list(auc=saCorRes, aucd=saCorRes_d))
 } # EOF
 	
@@ -578,13 +611,13 @@ getOvertoneCut <- function(otNumberChar) {
 	}
 } # EOF
 
-getOvertoneWls <- function(otNumberChar) {
+getOvertoneWls <- function(otNumberChar, apLoc) {
 	if (otNumberChar == "1st") {
-		if (.ap2$stn$aqq_nCoord == 12) {
-			return(.ap2$aquagramPSettings$ot1$wls$wls12)
+		if (apLoc$stn$aqq_nCoord == 12) {
+			return(apLoc$aquagramPSettings$ot1$wls$wls12)
 		} else {
-			if (.ap2$stn$aqq_nCoord == 15) {
-				return(.ap2$aquagramPSettings$ot1$wls$wls15)
+			if (apLoc$stn$aqq_nCoord == 15) {
+				return(apLoc$aquagramPSettings$ot1$wls$wls15)
 			} else {
 				stop("Please provide either '12' or '15' as the numbers of coordinates for the first overtone in the settings. Thank you.", call.=FALSE)
 			}
@@ -592,13 +625,13 @@ getOvertoneWls <- function(otNumberChar) {
 	} # end 1st
 } # EOF
 
-getOvertoneColnames <- function(otNumberChar) {
+getOvertoneColnames <- function(otNumberChar, apLoc) {
 	if (otNumberChar == "1st") {
-		if (.ap2$stn$aqq_nCoord == 12) {
-			return(.ap2$aquagramPSettings$ot1$cns$cns12)
+		if (apLoc$stn$aqq_nCoord == 12) {
+			return(apLoc$aquagramPSettings$ot1$cns$cns12)
 		} else {
-			if (.ap2$stn$aqq_nCoord == 15) {
-				return(.ap2$aquagramPSettings$ot1$cns$cns15)
+			if (apLoc$stn$aqq_nCoord == 15) {
+				return(apLoc$aquagramPSettings$ot1$cns$cns15)
 			} else {
 				stop("Please provide either '12' or '15' as the numbers of coordinates for the first overtone in the settings. Thank you.", call.=FALSE)
 			}
@@ -782,7 +815,8 @@ calcAquagramSingle <- function(dataset, md, ap, classVar, minus, idString, apLoc
 		possibleNrPartic <- possN <- checkRes$nrPart
 		selInds <- checkRes$selInds
 	dataset <- dataset[selInds,]  	### it might be reduced or not
-	groupAverage <- avg <- as.matrix(calc_aquagr_CORE(dataset, smoothN, reference, msc, selIndsWL, colInd, mod, minus, TCalib, Texp))
+	apLoc <- .ap2
+	groupAverage <- avg <- as.matrix(calc_aquagr_CORE(dataset, smoothN, reference, msc, selIndsWL, colInd, mod, minus, TCalib, Texp, apLoc))
 	avgSpec <- subtrSpec <- rawSpec <-  NULL
 	if (is.character(plotSpectra)) {
 		a <- calcSpectra(dataset, classVar, selInds, minus, plotSpectra)
@@ -790,19 +824,19 @@ calcAquagramSingle <- function(dataset, md, ap, classVar, minus, idString, apLoc
 		avgSpec <- a$avgSpec
 		subtrSpec <- a$subtrSpec
 	} # end calc spectra
-	if (bootCI) {
-		if (apLoc$stn$aqg_bootUseParallel == TRUE) {
+	if (bootCI & !haveClassicAqg(ap)) { # should make it impossible to run a bootstrap on the classic aquagram
+		if (.ap2$stn$aqg_bootUseParallel == TRUE) {
 			if (Sys.info()["sysname"] == "Windows") {
 				useMC <- "snow"
 			} else {
 				useMC <- "multicore"		
 			}
-			parChar <- "par."
+			parChar <- "parallel"
 		} else {
 			useMC <- "no"
-			parChar <- "ser."
+			parChar <- "seriell"
 		}
-		bootRes <- try(calc_aquagr_bootCI(dataset, smoothN, reference, msc, selIndsWL, colInd, useMC, R, mod, minus, TCalib, Texp, parChar, apLoc))
+		bootRes <- try(calc_aquagr_bootCI(dataset, smoothN, reference, msc, selIndsWL, colInd, useMC, R, mod, minus, TCalib, Texp, ap, parChar, apLoc))
 		if (class(bootRes) == "try-error") {
 			bootRes <- NULL
 		}

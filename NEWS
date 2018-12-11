@@ -1,17 +1,24 @@
 #############################
+Version 0.3.1
+New:
+	option in the settings to use also virtual cores in parallel computing
+	
+Improved:
+	classic aquagram is now impossible to bootstrap (as that does not make any sense)
+	
+Bugfix:
+	fixed the parallel calculation of aquagrams on windows systems
+
+#############################
+
+
+
+
+#############################
 Version 0.2.0
 New:
 	Added classifiers.
 	Function to select and possibly average groups of wavelengths (function siWlg).
-
-
-Improved:
-	
-	
-	
-
-Bugfix:
-
 
 #############################
 
