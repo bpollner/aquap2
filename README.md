@@ -1,4 +1,4 @@
-# aquap2 - A Multivariate Data Analysis Tools for R including Aquaphotomics Methods
+# aquap2 - Multivariate Data Analysis Tools for R including Aquaphotomics Methods
 Authors: Bernhard Pollner & Zoltan Kovacs
 
 ## Getting Started
