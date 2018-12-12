@@ -213,7 +213,7 @@ calc_aquagr_bootCI <- function(dataset, smoothN, reference, msc, selIndsWL, colI
 		}
 	}
 	innerWorkings <- function(x, ind, smoN, ref, ms, selIndW, colI, mo, minu, TCali, Tex, apLo, parInfo) {
-		# 	x[ind,] gives back "wrong dimensions"  Ha! on a PC, subscripting does not work --> the class-method seems not to be copied to the R-worker processes in "snow"
+		# 	x[ind,] gives back "wrong dimensions"  Ha! on a PC, subscripting does not work --> the class-method seems not to be copied to the R-worker processes in "snow" -- !! but only in local dev mode !!!
 		if (parInfo == "multicore" | parInfo == "no") { # so we are either in seriell or on a non-windows system
 			datasetSubscripted <- x[ind,] # is using the "[" method
 		} else { # so we have "snow" and are on a windows machine
@@ -267,6 +267,8 @@ calc_aquagr_bootCI <- function(dataset, smoothN, reference, msc, selIndsWL, colI
 			registerDoSEQ() # is forcing seriell execution on windows -- because I just can not terminate the bug in the windows parallel execution. Sorry. XXX
 			txtPar <- "forced seriell on windows"					
 		}
+		registerParallelBackend()  ## do it anyway
+		txtPar <- "parallel"		
 	} else {
 		registerDoSEQ()
 		txtPar <- "seriell"
