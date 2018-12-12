@@ -217,7 +217,8 @@ calc_aquagr_bootCI <- function(dataset, smoothN, reference, msc, selIndsWL, colI
 		if (parInfo == "multicore" | parInfo == "no") { # so we are either in seriell or on a non-windows system
 			datasetSubscripted <- x[ind,] # is using the "[" method
 		} else { # so we have "snow" and are on a windows machine
-			datasetSubscripted <- manualDatasetSubscripting(x, ind) # is subscripting in an extra function, does NOT give back an "aquap_data" object !!
+#			datasetSubscripted <- manualDatasetSubscripting(x, ind) # is subscripting in an extra function, does NOT give back an "aquap_data" object !!
+			datasetSubscripted <- x[ind,]
 		}	
 		out <- as.matrix(calc_aquagr_CORE(dataset=datasetSubscripted, smoothN=smoN, reference=ref, msc=ms, selIndsWL=selIndW, colInd=colI, mod=mo, minus=minu, TCalib=TCali, Texp=Tex, apLoc=apLo))
 	} # EOIF
