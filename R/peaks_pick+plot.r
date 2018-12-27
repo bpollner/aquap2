@@ -39,8 +39,13 @@ pickPeaks_RW <- function(x, span) {
 ##### dataset with wavelengths in the rows !!, the value-to-pick-peaks in  the column, so Factors in the column for PCA / PLSR
 ## ! provide only the loadings data as data frame! wavelengths have to be in the row!
 pickPeaksInner <- function(vectorToBePickedFrom, bandwidth, discrim, wavelengths) { 
+	bwPerc <- .ap2$stn$pp_bandwidth_Percent / 100 
+	#
 	vectorToBePickedFrom <- t(vectorToBePickedFrom)
 	vecInput <- vectorToBePickedFrom
+	if (ncol(vectorToBePickedFrom) <= bandwidth) {
+		bandwidth <- round(ncol(vectorToBePickedFrom) * bwPerc, 0) # otherwise we crash when having very little wavelengths
+	}
 	seqHalfBandwidth <- seq(1, bandwidth/2)
 	positivePeakPosition <- matrix(NA , ncol=length(wavelengths), nrow=nrow(vectorToBePickedFrom))
 	positivePeakHeight <- negativePeakPosition <- negativePeakHeight <- positivePeakPosition

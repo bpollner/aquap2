@@ -104,6 +104,9 @@ makePLSRModel_inner <- function(dataset, Y_Class, niter=5, ncomp=NULL, valid, st
 			if (maxNcomp > univMaxNcomp) { # is limiting the number of components to a maximum value defined in the settings
 				maxNcomp <- univMaxNcomp
 			}
+			if (maxNcomp > ncol(dataset$NIR)) {
+				maxNcomp <- ncol(dataset$NIR)
+			}
 			if (limitMaxToLevels & maxNcomp > length(levs)) {
 				maxNcomp <- length(levs)
 				nrSwitch <- maxNcomp -1  # just so that we are sure to use this maxNcomp
