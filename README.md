@@ -12,14 +12,27 @@ If not already done, first install the package "devtools" via
 ```
 install.packages("devtools")
 ```
-
-Then use devtools to install aquap2 from this repository:
+First use devtools to install a package dependency not available on CRAN:
 ```
 library(devtools)
+install_github(repo="rwehrens/ChemometricsWithR", ref="master")
+```
+Then install aquap2 from this repository:
+```
 install_github(repo="bpollner/aquap2", ref="latestPublic")
 ```
 You can now launch aquap2 and perform (only required at first use) the required setup
 ```
+library(aquap2)
+updateSettings()
+```
+
+All required code in a single block:
+```
+install.packages("devtools")
+library(devtools)
+install_github(repo="rwehrens/ChemometricsWithR", ref="master")
+install_github(repo="bpollner/aquap2", ref="latestPublic")
 library(aquap2)
 updateSettings()
 ```
