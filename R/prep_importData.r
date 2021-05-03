@@ -602,6 +602,15 @@ checkForPresenceOfData <- function() {
 	}
 } # EOF
 
+turnStringsIntoFactors <- function(header) {
+	for (i in 1: ncol(header)) {
+		if (is.character(header[,i])) {
+			header[,i] <- as.factor(header[,i]) # 
+		} # end if
+	} # end for i
+	return(header)
+} # EOF
+
 # get full data ---------------------------------------------------------------
 #' @template mr_getFullData
 #' @export
@@ -638,8 +647,9 @@ getFullData <- function(md=getmd(), filetype="def", naString="NA", slType="def",
 	gfd_getExpNameNoSplit(metadata=md, nRows=nr)
 	NIR <- si$NIR
 	outliers <- flagOutliers_allScope(NIR, detectOutliers=dol) # the value of dol is checked / changeed inside this function
-	headerFusion <- cbind(expName, noSplit, header, si$sampleNr, si$conSNr, si$timePoints, si$ecrm, si$repl, si$group, si$C_cols, si$Y_cols, outliers, si$temp, si$relHum, si$timestamp)
-	headerFusion <- headerFusion[, -(which(colnames(headerFusion) == "DELETE"))] 
+	headerFusion <- cbind(expName, noSplit, header, si$sampleNr, si$conSNr, si$timePoints, si$ecrm, si$repl, si$group, si$C_cols, si$Y_cols, outliers, si$temp, si$relHum, si$timestamp, stringsAsFactors=TRUE) # stringsAsFactors problem with the changed defaults in R 4.x --> but does not help here !!
+	headerFusion <- headerFusion[, -(which(colnames(headerFusion) == "DELETE"))] 		
+	headerFusion <- turnStringsIntoFactors(headerFusion) # see 2 lines above
 	check_conScanColumn(headerFusion, headerFilePath, spectraFilePath, slType, filetype) 
 	# ? check for existence of sample number column as well ?
 	gfd_checkForDoubleColumns(headerFusion, spectraFilePath, headerFilePath, slType)

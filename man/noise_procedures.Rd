@@ -118,7 +118,8 @@ plot_pca(cu)
 \code{\link{gdmm}}, \code{\link{settings_file}}, 
 \code{\link{genFolderStr}}
 
-Other Noise procedures: \code{\link{do_addNoise}},
-  \code{\link{genNoiseRecExp}}
+Other Noise procedures: 
+\code{\link{do_addNoise}()},
+\code{\link{genNoiseRecExp}()}
 }
 \concept{Noise procedures}

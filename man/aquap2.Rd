@@ -3,7 +3,6 @@
 \docType{package}
 \name{aquap2}
 \alias{aquap2}
-\alias{aquap2-package}
 \title{Multivariate Data Analysis Tools for R including Aquaphotomics Methods}
 \description{
 Methods and tools for multivariate data analysis in R, with an 

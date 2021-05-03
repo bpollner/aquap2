@@ -31,12 +31,18 @@ lowest wavelength as \code{to} will be selected.
 \seealso{
 \code{\link{siWl}}, \code{\link{siWlg}}
 
-Other Data pre-treatment functions: \code{\link{[,aquap_data-method}},
-  \code{\link{do_addNoise}}, \code{\link{do_avg}},
-  \code{\link{do_blowup}}, \code{\link{do_detrend}},
-  \code{\link{do_emsc}}, \code{\link{do_gapDer}},
-  \code{\link{do_msc}}, \code{\link{do_resampleNIR}},
-  \code{\link{do_sgolay}}, \code{\link{dpt_modules}},
-  \code{\link{ssc}}
+Other Data pre-treatment functions: 
+\code{\link{[,aquap_data-method}},
+\code{\link{do_addNoise}()},
+\code{\link{do_avg}()},
+\code{\link{do_blowup}()},
+\code{\link{do_detrend}()},
+\code{\link{do_emsc}()},
+\code{\link{do_gapDer}()},
+\code{\link{do_msc}()},
+\code{\link{do_resampleNIR}()},
+\code{\link{do_sgolay}()},
+\code{\link{dpt_modules}},
+\code{\link{ssc}()}
 }
 \concept{Data pre-treatment functions}

@@ -32,14 +32,6 @@ refer to the help for ?tempCalib_procedures for more information.}
  of the dataset. The default 'def' reads in the default value from the 
 settings.r file. (Parameter \code{p_commonNoSplit}.)}
 
-\item{envControlLabel}{The label for the environmental control. Leave at 
-code{def} to take the default value from the settings 
-(parameter \code{p_envControlLabel}).}
-
-\item{realMeasurementLabel}{The label for the "real measurement", for all 
-the samples of an experiment. Leave at \code{def} to take the default value 
-from the settings (parameter \code{p_realMeasurementLabel}).}
-
 \item{xaxDenominator}{The unit that is displayed on the x-axis when 
 plotting e.g. raw spectra.}
 
@@ -99,7 +91,8 @@ files in \code{examples/metadata}.)
 \seealso{
 \code{\link{getmd}}
 
-Other fileDocs: \code{\link{anproc_file}},
-  \code{\link{settings_file}}
+Other fileDocs: 
+\code{\link{anproc_file}},
+\code{\link{settings_file}}
 }
 \concept{fileDocs}

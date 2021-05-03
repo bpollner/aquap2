@@ -57,9 +57,6 @@ at NULL for no additional data treatment. Possible values are
 single strings via the separator '@'. For examples and further information 
 see \code{\link{dpt_modules}}.}
 
-\item{do.pca}{Logical. If used in \code{getap}, if a PCA should be calculated 
-with a given dataset.}
-
 \item{do.pca}{Logical. If used in a plotting function, if PCA score / loading 
 plots should be plotted.}
 
@@ -91,9 +88,6 @@ plot.}
 \item{pca.lo}{Numeric vector of length >=2, indicating what PCs to plot in 
 the loadingplot.}
 
-\item{do.sim}{Logical. If used in \code{getap}, if SIMCA models of the dataset 
-should be calculated.}
-
 \item{sim.vars}{NULL or character vector. Which variables should be 
 used to group the data. Set to NULL for using all available class-variables, 
 or provide a character vector with the column names of class variables to group
@@ -105,9 +99,6 @@ optimal number of components. [It is a capital 'K' in the argument.]}
 
 \item{do.sim}{Logical. If used in a plotting function, if analysis of SIMCA 
 models should be plotted.}
-
-\item{do.pls}{Logical. If used in \code{getap}, if PLSR models should be 
-calculated with a given dataset.}
 
 \item{pls.regOn}{NULL or character vector. Which variables should be used 
 to regress on. Set to NULL for using all numerical variables to regress on, or 
@@ -173,9 +164,6 @@ variable that should be used for coloring.}
 
 \item{pls.rdp}{Logical (TRUE or FALSE). If errors in the error plots should be 
 given in RDP or not.}
-
-\item{do.aqg}{Logical. If used in \code{getap}, if Aquagrams should be 
-calculated with a given dataset.}
 
 \item{aqg.vars}{NULL or character vector. Which class variables 
 should be used for grouping the data for the Aquagram. Provide a character 
@@ -391,8 +379,6 @@ to use the maximum number of components (i.e. the number of observations minus
 1), or an integer vector specifying the components resp. their scores to be 
 used for DA.}
 
-\item{reserved}{-- No plotting parameter yet defined --}
-
 \item{do.rnf}{Logical. If used in \code{getap}, if classification via 
 \code{\link[randomForest]{randomForest}} should be performed in the given 
 dataset.}
@@ -449,8 +435,6 @@ to use the maximum number of components (i.e. the number of observations minus
 1), or an integer vector specifying the components resp. their scores to be 
 used for random forest classification.}
 
-\item{reserved}{-- No plotting parameter yet defined --}
-
 \item{do.svm}{Logical. If used in \code{getap}, if classification via 
 \code{\link[e1071]{svm}} should be performed in the given dataset.}
 
@@ -505,8 +489,6 @@ TRUE, the subsequent classifications are performed on the PCA scores, see
 to use the maximum number of components (i.e. the number of observations minus 
 1), or an integer vector specifying the components resp. their scores to be 
 used for SVM classification.}
-
-\item{reserved}{-- No plotting parameter yet defined --}
 
 \item{do.nnet}{Logical. If used in \code{getap}, if classification via 
 artificial neural networks (\code{\link[nnet]{nnet}}) should be performed 
@@ -649,7 +631,8 @@ can lead to unexpected and distorted results in the Aquagram.
 \seealso{
 \code{\link{getap}}, \code{\link{gdmm}}
 
-Other fileDocs: \code{\link{metadata_file}},
-  \code{\link{settings_file}}
+Other fileDocs: 
+\code{\link{metadata_file}},
+\code{\link{settings_file}}
 }
 \concept{fileDocs}

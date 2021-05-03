@@ -5,8 +5,7 @@
 \alias{ttapM}
 \title{Transform into aquap2 structure}
 \usage{
-ttap(obj, md = getmd(), dol = TRUE, ncpwl = 1, reduceTRH = FALSE,
-  stf = TRUE)
+ttap(obj, md = getmd(), dol = TRUE, ncpwl = 1, reduceTRH = FALSE, stf = TRUE)
 
 ttapM(obj)
 }

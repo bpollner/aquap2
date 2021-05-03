@@ -83,19 +83,25 @@ please see \code{\link{anproc_file}}.
 \code{\link{gdmm}}, \code{\link{siWlg}} for reducing the number of 
 wavelengths in a dataset
 
-Other Calc. arguments: \code{\link{calc_NNET_args}},
-  \code{\link{calc_SVM_args}}, \code{\link{calc_aqg_args}},
-  \code{\link{calc_discrimAnalysis_args}},
-  \code{\link{calc_pca_args}}, \code{\link{calc_pls_args}},
-  \code{\link{calc_sim_args}}, \code{\link{split_dataset}}
+Other Calc. arguments: 
+\code{\link{calc_NNET_args}},
+\code{\link{calc_SVM_args}},
+\code{\link{calc_aqg_args}},
+\code{\link{calc_discrimAnalysis_args}},
+\code{\link{calc_pca_args}},
+\code{\link{calc_pls_args}},
+\code{\link{calc_sim_args}},
+\code{\link{split_dataset}}
 
-Other Classification functions: \code{\link{calc_NNET_args}},
-  \code{\link{calc_SVM_args}},
-  \code{\link{calc_discrimAnalysis_args}},
-  \code{\link{plot_classifX_indepPred}}
+Other Classification functions: 
+\code{\link{calc_NNET_args}},
+\code{\link{calc_SVM_args}},
+\code{\link{calc_discrimAnalysis_args}},
+\code{\link{plot_classifX_indepPred}()}
 
-Other RNF documentation: \code{\link{plot_randomForest_args}},
-  \code{\link{plot_rnf,aquap_cube-method}}
+Other RNF documentation: 
+\code{\link{plot_randomForest_args}},
+\code{\link{plot_rnf,aquap_cube-method}}
 }
 \concept{Calc. arguments}
 \concept{Classification functions}

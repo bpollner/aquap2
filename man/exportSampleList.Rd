@@ -5,11 +5,21 @@
 \alias{esl}
 \title{Create and Export Sample Lists}
 \usage{
-exportSampleList(md = getmd(), form = "def", rnd = TRUE,
-  showFirstRows = TRUE, timeEstimate = FALSE)
+exportSampleList(
+  md = getmd(),
+  form = "def",
+  rnd = TRUE,
+  showFirstRows = TRUE,
+  timeEstimate = FALSE
+)
 
-esl(md = getmd(), form = "def", rnd = TRUE, showFirstRows = TRUE,
-  timeEstimate = FALSE)
+esl(
+  md = getmd(),
+  form = "def",
+  rnd = TRUE,
+  showFirstRows = TRUE,
+  timeEstimate = FALSE
+)
 }
 \arguments{
 \item{md}{List. An object with the metadata of the experiment. Defaults to 
@@ -61,10 +71,11 @@ sl <- esl(md=getmd("myMetadataFile.r"), form="txt", showFirstRows=FALSE)
 }
 }
 \seealso{
-Other Core functions: \code{\link{gdmm}},
-  \code{\link{getFullData}},
-  \code{\link{plot,aquap_cube,missing-method}},
-  \code{\link{plot,aquap_data,missing-method}}
+Other Core functions: 
+\code{\link{gdmm}()},
+\code{\link{getFullData}()},
+\code{\link{plot,aquap_cube,missing-method}},
+\code{\link{plot,aquap_data,missing-method}}
 }
 \concept{Core functions}
 \concept{Import-Export}

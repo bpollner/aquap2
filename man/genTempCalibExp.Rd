@@ -57,14 +57,21 @@ gfd <- gfd() # imports temperature raw-data and saves an R-data file in the
 \code{\link{tempCalib_procedures}}, \code{\link{genFolderStr}}, 
 \code{\link{genNoiseRecExp}}
 
-Other Temperature procedures: \code{\link{tempCalib_procedures}}
+Other Temperature procedures: 
+\code{\link{tempCalib_procedures}}
 
-Other Helper Functions: \code{\link{genFolderStr}},
-  \code{\link{genNoiseRecExp}}, \code{\link{getcd}},
-  \code{\link{getcm}}, \code{\link{instAquap2Examples}},
-  \code{\link{printStdColnames}}, \code{\link{reColor}},
-  \code{\link{saveAQdata}}, \code{\link{siWlg}},
-  \code{\link{updateAquap2}}, \code{\link{updateSettings}}
+Other Helper Functions: 
+\code{\link{genFolderStr}()},
+\code{\link{genNoiseRecExp}()},
+\code{\link{getcd}()},
+\code{\link{getcm}()},
+\code{\link{instAquap2Examples}()},
+\code{\link{printStdColnames}()},
+\code{\link{reColor}()},
+\code{\link{saveAQdata}()},
+\code{\link{siWlg}()},
+\code{\link{updateAquap2}()},
+\code{\link{updateSettings}()}
 }
 \concept{Helper Functions}
 \concept{Temperature calibration procedures}

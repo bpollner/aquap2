@@ -43,15 +43,20 @@ please see \code{\link{anproc_file}}.
 \code{\link{plot_rnf}}, \code{\link{siWlg}} for reducing the number of 
 wavelengths in a dataset
 
-Other Plot arguments: \code{\link{plot,aquap_data,missing-method}},
-  \code{\link{plot_NNET_args}},
-  \code{\link{plot_SVM_args}}, \code{\link{plot_aqg_args}},
-  \code{\link{plot_discrimAnalysis_args}},
-  \code{\link{plot_pca_args}}, \code{\link{plot_pg_args}},
-  \code{\link{plot_pls_args}}, \code{\link{plot_sim_args}}
+Other Plot arguments: 
+\code{\link{plot,aquap_data,missing-method}},
+\code{\link{plot_NNET_args}},
+\code{\link{plot_SVM_args}},
+\code{\link{plot_aqg_args}},
+\code{\link{plot_discrimAnalysis_args}},
+\code{\link{plot_pca_args}},
+\code{\link{plot_pg_args}},
+\code{\link{plot_pls_args}},
+\code{\link{plot_sim_args}}
 
-Other RNF documentation: \code{\link{calc_randomForest_args}},
-  \code{\link{plot_rnf,aquap_cube-method}}
+Other RNF documentation: 
+\code{\link{calc_randomForest_args}},
+\code{\link{plot_rnf,aquap_cube-method}}
 }
 \concept{Plot arguments}
 \concept{RNF documentation}

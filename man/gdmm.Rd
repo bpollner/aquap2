@@ -68,9 +68,10 @@ cube <- gdmm(dataset, getap(spl.do.noise=TRUE), noiseFile="FooBarNoise") # to
 \seealso{
 \code{\link{getap}}, \code{\link{getmd}}
 
-Other Core functions: \code{\link{exportSampleList}},
-  \code{\link{getFullData}},
-  \code{\link{plot,aquap_cube,missing-method}},
-  \code{\link{plot,aquap_data,missing-method}}
+Other Core functions: 
+\code{\link{exportSampleList}()},
+\code{\link{getFullData}()},
+\code{\link{plot,aquap_cube,missing-method}},
+\code{\link{plot,aquap_data,missing-method}}
 }
 \concept{Core functions}

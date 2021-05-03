@@ -55,18 +55,25 @@ str(fd_2_pls)
 \seealso{
 \code{\link{do_emsc}}, \code{\link{dpt_modules}}
 
-Other Helper Functions: \code{\link{genFolderStr}},
-  \code{\link{genNoiseRecExp}},
-  \code{\link{genTempCalibExp}}, \code{\link{getcd}},
-  \code{\link{instAquap2Examples}},
-  \code{\link{printStdColnames}}, \code{\link{reColor}},
-  \code{\link{saveAQdata}}, \code{\link{siWlg}},
-  \code{\link{updateAquap2}}, \code{\link{updateSettings}}
+Other Helper Functions: 
+\code{\link{genFolderStr}()},
+\code{\link{genNoiseRecExp}()},
+\code{\link{genTempCalibExp}()},
+\code{\link{getcd}()},
+\code{\link{instAquap2Examples}()},
+\code{\link{printStdColnames}()},
+\code{\link{reColor}()},
+\code{\link{saveAQdata}()},
+\code{\link{siWlg}()},
+\code{\link{updateAquap2}()},
+\code{\link{updateSettings}()}
 
-Other Extract Elements: \code{\link{getHeader}},
-  \code{\link{getWavelengths,aquap_data-method}},
-  \code{\link{getcd}}, \code{\link{siWlg}},
-  \code{\link{siWl}}
+Other Extract Elements: 
+\code{\link{getHeader}()},
+\code{\link{getWavelengths,aquap_data-method}},
+\code{\link{getcd}()},
+\code{\link{siWlg}()},
+\code{\link{siWl}()}
 }
 \concept{Extract Elements}
 \concept{Helper Functions}

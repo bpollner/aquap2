@@ -4,9 +4,19 @@
 \alias{plot_classifX_indepPred}
 \title{Plot Independent Predictions}
 \usage{
-plot_classifX_indepPred(indepDataset, cube, ccv = NULL, icv = NULL,
-  pl = TRUE, toxls = "def", info = "def", confirm = "def",
-  predList = NULL, apPlot = "def", ...)
+plot_classifX_indepPred(
+  indepDataset,
+  cube,
+  ccv = NULL,
+  icv = NULL,
+  pl = TRUE,
+  toxls = "def",
+  info = "def",
+  confirm = "def",
+  predList = NULL,
+  apPlot = "def",
+  ...
+)
 }
 \arguments{
 \item{indepDataset}{The dataset containing the independent data. An object 
@@ -106,22 +116,24 @@ predictions <-  plot_classifX_indepPred(fd2, cube, icv="C_blabla", pl=FALSE)
 }
 }
 \seealso{
-Other Classification functions: \code{\link{calc_NNET_args}},
-  \code{\link{calc_SVM_args}},
-  \code{\link{calc_discrimAnalysis_args}},
-  \code{\link{calc_randomForest_args}}
+Other Classification functions: 
+\code{\link{calc_NNET_args}},
+\code{\link{calc_SVM_args}},
+\code{\link{calc_discrimAnalysis_args}},
+\code{\link{calc_randomForest_args}}
 
-Other Plot functions: \code{\link{plot,aquap_cube,missing-method}},
-  \code{\link{plot,aquap_data,missing-method}},
-  \code{\link{plot_aqg}},
-  \code{\link{plot_da,aquap_cube-method}},
-  \code{\link{plot_nnet,aquap_cube-method}},
-  \code{\link{plot_pca,aquap_cube-method}},
-  \code{\link{plot_pls,aquap_cube-method}},
-  \code{\link{plot_pls_indepPred}},
-  \code{\link{plot_rnf,aquap_cube-method}},
-  \code{\link{plot_simca,aquap_cube-method}},
-  \code{\link{plot_svm,aquap_cube-method}}
+Other Plot functions: 
+\code{\link{plot,aquap_cube,missing-method}},
+\code{\link{plot,aquap_data,missing-method}},
+\code{\link{plot_aqg}()},
+\code{\link{plot_da,aquap_cube-method}},
+\code{\link{plot_nnet,aquap_cube-method}},
+\code{\link{plot_pca,aquap_cube-method}},
+\code{\link{plot_pls,aquap_cube-method}},
+\code{\link{plot_pls_indepPred}()},
+\code{\link{plot_rnf,aquap_cube-method}},
+\code{\link{plot_simca,aquap_cube-method}},
+\code{\link{plot_svm,aquap_cube-method}}
 }
 \concept{Classification functions}
 \concept{Plot functions}
