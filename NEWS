@@ -1,4 +1,17 @@
 #############################
+Version 0.3.2
+New:
+	
+Improved:
+	
+Bugfix:
+	Fixed "stringsAsFactors" problem in creating the header data-frame (due to the update to R 4.x)
+	
+#############################
+
+
+
+#############################
 Version 0.3.1
 New:
 	option in the settings to use also virtual cores in parallel computing
@@ -10,7 +23,6 @@ Bugfix:
 	fixed the parallel calculation of aquagrams on windows systems
 
 #############################
-
 
 
 
