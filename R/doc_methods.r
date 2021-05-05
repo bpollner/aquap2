@@ -73,6 +73,9 @@ NULL
 #' @param i subsricpting indices for rows 
 #' @param e1 Object of class 'aquap_data'
 #' @param e2 Object of class 'aquap_data'
+#' @param j Numeric length one
+#' @param value An R object
+#' @param name A valid column name
 #' @examples 
 #' \dontrun{
 #'  dataset <- gfd()
@@ -86,6 +89,7 @@ NULL
 #'  plot(dataset / siWl(dataset, 1450))
 #' }
 #' @family Data pre-treatment functions
+#' @family dataset modification functions
 #' @aliases aquap_data-methods
 #' @name aquap_data-methods
 NULL

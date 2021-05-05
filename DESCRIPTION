@@ -72,6 +72,7 @@ Collate:
     'gen_parallel.r'
     'gen_possibleValues.r'
     'gen_roxygenHelpers.r'
+    'mod_modifyDatasets.r'
     'peaks_pick+plot.r'
     'plot_all.r'
     'plot_aqg.r'

@@ -2,12 +2,18 @@
 % Please edit documentation in R/cl_classDefs.r, R/doc_methods.r
 \name{[,aquap_data-method}
 \alias{[,aquap_data-method}
+\alias{[<-,aquap_mergeLabels-method}
+\alias{$<-,aquap_mergeLabels-method}
 \alias{-,aquap_data,aquap_data-method}
 \alias{/,aquap_data,aquap_data-method}
 \alias{aquap_data-methods}
 \title{aquap_data methods}
 \usage{
 \S4method{[}{aquap_data}(x, i)
+
+\S4method{[}{aquap_mergeLabels}(x, i, j) <- value
+
+\S4method{$}{aquap_mergeLabels}(x, name) <- value
 
 \S4method{-}{aquap_data,aquap_data}(e1, e2)
 
@@ -17,6 +23,12 @@
 \item{x}{An object of class 'aquap_data'}
 
 \item{i}{subsricpting indices for rows}
+
+\item{j}{Numeric length one}
+
+\item{value}{An R object}
+
+\item{name}{A valid column name}
 
 \item{e1}{Object of class 'aquap_data'}
 
@@ -80,5 +92,10 @@ Other Data pre-treatment functions:
 \code{\link{dpt_modules}},
 \code{\link{selectWls}()},
 \code{\link{ssc}()}
+
+Other dataset modification functions: 
+\code{\link{generateMergeLabels}()},
+\code{\link{mergeDatasets,aquap_data,aquap_data,missing-method}}
 }
 \concept{Data pre-treatment functions}
+\concept{dataset modification functions}

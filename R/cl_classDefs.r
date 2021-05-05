@@ -21,9 +21,15 @@ setClass("aquap_ipl", slots=c(metadata="aquap_md", anproc="aquap_ap", cubeID="ch
 # setClass("aquap_xda", slots=c(daType="character", classOn="character"), contains="list")
 # setClass("aquap_noiseDist", slots=c(timestamp="POSIXct", version="character"), contains="matrix")
 
+setClass("aquap_mergeLabels", slots=c(numVec="integer", varNames="character", varTypes="character", values="list", dsNames="character"), contains="data.frame")
+
+
+
+
 # methods ----------------------------------------
 setMethod("show", signature(object = "aquap_data"), definition = show_aquap_data )
 setMethod("show", signature(object = "aquap_cube"), definition = showCube )
+setMethod("show", signature(object = "aquap_mergeLabels"), definition = showMergeLabels )
 
 
 #' @rdname aquap_data-methods
@@ -45,10 +51,88 @@ setMethod("[", signature(x = "aquap_data"), definition = function(x, i) {
 
 #' @rdname aquap_data-methods
 #' @export
+setMethod("[<-", signature(x="aquap_mergeLabels"), definition=function(x, i, j, value) {
+			if (missing(i) & missing(j)) { # just to be sure
+				return(x)
+			}
+			Data <- as.data.frame(x@.Data) # because it comes out as list. God knows why. Should be a data frame.
+			lastCol <- Data[ncol(Data)] # get out as data frame
+			Data <- Data[,-(ncol(Data))] # for filling in the values
+			if (missing(i)) { # so we have j --> all rows, selected one column
+				Data[,j] <- value	
+			}
+			if (missing(j)) { # wo we have i --> all columns, selected row (would be weird to do in this case)
+			#	Data[i,] <- value
+			#	if (!.ap2$stn$allSilent) {message("Values for an entire row (across several variables) have been set.\nPlease use '[,j]' to set values for an entire column.")}
+				stop("Please use, in this case, '[,j]' to set values for an entire column", call.=FALSE)
+			}
+			if (!missing(i) & !missing(j)) { # so we got both
+				Data[i,j] <- value
+			}
+			check_sub_input(Data, x)   			# now go check if the input was ok
+			valueList <- list(NULL); length(valueList) <- length(x@varNames); names(valueList) <- x@varNames
+			for (i in 1: length(valueList)) {
+				valueList[[i]] <- Data[,i]   	# move the (now checked) input to the @values slot
+			} # end for i
+			allData <- cbind(Data, lastCol)
+			colnames(allData) <- x@names
+			rownames(allData) <- x@row.names
+			return(new("aquap_mergeLabels", allData, numVec=x@numVec, varNames=x@varNames, varTypes=x@varTypes, values=valueList, dsNames=x@dsNames))
+		} ) # end set method 
+
+#' @rdname aquap_data-methods
+#' @export
+setMethod("$<-", signature(x="aquap_mergeLabels"), definition=function(x, name, value) {
+			if (name == "nr_obs") {
+				return(x)
+			}
+			Data <- as.data.frame(x@.Data) # because it comes out as list. God knows why. Should be a data frame.
+			colnames(Data) <- x@names
+			rownames(Data) <- x@row.names
+			ind <- which(colnames(Data) == name)
+    		Data[,ind] <- value
+			check_sub_input(Data, x)
+			valueList <- list(NULL); length(valueList) <- length(x@varNames); names(valueList) <- x@varNames
+			for (i in 1: length(valueList)) {
+				valueList[[i]] <- Data[,i]   	# move the (now checked) input to the @values slot
+			} # end for i
+			return(new("aquap_mergeLabels", Data, numVec=x@numVec, varNames=x@varNames, varTypes=x@varTypes, values=valueList, dsNames=x@dsNames))
+		} )  # end set method
+		
+# 	setGeneric("@<-", function(object, name, value) standardGeneric("@<-")) # no. should not be necessary
+#	setGeneric("@<-", function(object, name, value){})		# no no no   should not be necessary
+#	setMethod("@<-", signature(object="aquap_mergeLabels"), definition=function(object, name, value) {	# does not work. no idea why. it should....
+#			print("hoho -- in the @")
+#			return(object)	
+#		} ) # end set method					
+		
+
+#' @rdname aquap_data-methods
+#' @export
 setMethod("-", signature(e1="aquap_data", e2="aquap_data"), definition = subtract_two_aquap_data_M)
 #' @rdname aquap_data-methods
 #' @export
 setMethod("/", signature(e1="aquap_data", e2="aquap_data"), definition = divide_two_aquap_data_M)
+
+
+
+
+
+# merge datasets --------
+setGeneric("mergeDatasets", function(ds1, ds2, mergeLabels, ...) standardGeneric("mergeDatasets"))
+#' @rdname mergeDatasets
+#' @export
+setMethod("mergeDatasets", signature(ds1="aquap_data", ds2="aquap_data", mergeLabels="missing"), definition=mergeDatasets_two_noLabels_M)
+#' @rdname mergeDatasets
+#' @export
+setMethod("mergeDatasets", signature(ds1="aquap_data", ds2="aquap_data", mergeLabels="aquap_mergeLabels"), definition=mergeDatasets_two_mergeLabels_M)
+#' @rdname mergeDatasets
+#' @export
+setMethod("mergeDatasets", signature(ds1="list", ds2="missing", mergeLabels="missing"), definition=mergeDatasets_list_noLabels_M)
+#' @rdname mergeDatasets
+#' @export
+setMethod("mergeDatasets", signature(ds1="list", ds2="missing", mergeLabels="aquap_mergeLabels"), definition=mergeDatasets_list_mergeLabels_M)
+
 
 
 

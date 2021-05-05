@@ -214,6 +214,7 @@ plot_simca_cube_M <- function(object, ...) {
 	plot_simca_cube(cube=object, ...)
 } # EOF
 
+
 # classification -----------
 plot_da_cube_M <- function(object, ...) {
 	plot_da_cube(cube=object, ...)
@@ -229,4 +230,39 @@ plot_svm_cube_M <- function(object, ...) {
 
 plot_nnet_cube_M <- function(object, ...) {
 	plot_nnet_cube(cube=object, ...)
+} # EOF
+
+
+# merge datasets ------------
+mergeDatasets_two_noLabels_M <- function(ds1, ds2, mergeLabels=NULL, dol=TRUE) {
+	mergeDatasets_two(ds1, ds2, mergeLabels, dol)
+} # EOF
+
+mergeDatasets_two_mergeLabels_M <- function(ds1, ds2, mergeLabels, dol=TRUE) {
+	mergeDatasets_two(ds1, ds2, mergeLabels, dol)
+} # EOF
+
+mergeDatasets_list_noLabels_M <- function(ds1, ds2=NULL, mergeLabels=NULL, dol=TRUE) {
+	mergeDatasets_list(dsList=ds1, mergeLabels, dol)
+} # EOF
+
+mergeDatasets_list_mergeLabels_M <- function(ds1, ds2=NULL, mergeLabels, dol=TRUE) {
+	mergeDatasets_list(dsList=ds1, mergeLabels, dol)
+} # EOF
+
+showMergeLabels <- function(object) {
+	cat(paste0("An object of class 'aquap_mergeLabels', containing ", length(object@varNames), " new Labels for ", length(object@numVec), " datasets to be merged.\n\n"))
+	print(object)
+	return(invisible(NULL))
+} # EOF
+
+check_sub_input <- function(Data, x) {
+# now go check if the input was ok
+	for (i in 1: length(x@varTypes)) {
+		if (x@varTypes[i] == "c") {
+		#	if (!all(is.character(Data[,i]) )) {stop(paste0("Please provide only characters for the variable named '", x@varNames[i], "')"), call.=FALSE)}  	# no, do not check this here. It could be that someone wants strings consisting of numbers ("8484"). That should stay possible.
+		} else { # so varType[i] must be "n"
+			if ( !any(is.na(Data[,i])) & !all(is.numeric(Data[,i])) ) {stop(paste0("Please provide only numerics for the variable named '", x@varNames[i], "')"), call.=FALSE)}
+		} # end else
+	} # end for i	
 } # EOF
