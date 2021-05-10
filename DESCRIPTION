@@ -1,8 +1,8 @@
 Package: aquap2
 Type: Package
 Title: Multivariate Data Analysis Tools for R including Aquaphotomics Methods
-Version: 0.3.1
-Date: 2018-12-02
+Version: 0.4.0
+Date: 2021-05-03
 Author: Bernhard Pollner, Zoltan Kovacs
 Maintainer: Bernhard Pollner <bernhard.pollner@mac.com>
 Description: Methods and tools for multivariate data analysis in R, with an 
@@ -72,6 +72,7 @@ Collate:
     'gen_parallel.r'
     'gen_possibleValues.r'
     'gen_roxygenHelpers.r'
+    'mod_modifyDatasets.r'
     'peaks_pick+plot.r'
     'plot_all.r'
     'plot_aqg.r'
@@ -89,4 +90,4 @@ Collate:
     'prep_transformToAp2.r'
     'prep_writeMfiles.r'
     'zzz.r'
-RoxygenNote: 6.1.0
+RoxygenNote: 7.1.1

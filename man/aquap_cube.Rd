@@ -33,7 +33,8 @@ other version of the data in 'cp' for internal use.}
 \seealso{
 \code{\link{gdmm}}
 
-Other Class documentations: \code{\link{aquap_cpt}},
-  \code{\link{aquap_set}}
+Other Class documentations: 
+\code{\link{aquap_cpt}},
+\code{\link{aquap_set}}
 }
 \concept{Class documentations}

@@ -1,24 +1,50 @@
 # aquap2 - Multivariate Data Analysis Tools for R including Aquaphotomics Methods
 Authors: Bernhard Pollner & Zoltan Kovacs
 
+<<<<<<< HEAD
 [![DOI](https://zenodo.org/badge/30932899.svg)](https://zenodo.org/badge/latestdoi/30932899)
 
-## Getting Started
-To install the R-package "aquap2", do a simple github-install via devtools, in that way all dependencies should get installed as well.
+=======
 
-If not already done, first install the package "devtools" via
+[![DOI](https://zenodo.org/badge/30932899.svg)](https://zenodo.org/badge/latestdoi/30932899)
+
+
+>>>>>>> master
+## Getting Started
+To install the R-package "aquap2", do a github-install via devtools, in that way all dependencies should get installed as well.
+
+If you work on a Windows-machine, first download and install [R-tools](https://cran.r-project.org/bin/windows/Rtools/). (Re-start the R-session.)
+
+In the further steps, pay attention to the output of the console.
+
+If not already done, install the package "devtools" via
 ```
 install.packages("devtools")
 ```
-
-Then use devtools to install aquap2 from this repository:
+Use devtools to install a package dependency not available on CRAN:
 ```
 library(devtools)
+install_github(repo="rwehrens/ChemometricsWithR", ref="master")
+```
+Install aquap2 from this repository:
+```
 install_github(repo="bpollner/aquap2", ref="latestPublic")
 ```
 You can now launch aquap2 and perform (only required at first use) the required setup
 ```
 library(aquap2)
+updateSettings()
+updateSettings()
+```
+
+All required code in a single block:
+```
+install.packages("devtools")
+library(devtools)
+install_github(repo="rwehrens/ChemometricsWithR", ref="master")
+install_github(repo="bpollner/aquap2", ref="latestPublic")
+library(aquap2)
+updateSettings()
 updateSettings()
 ```
 

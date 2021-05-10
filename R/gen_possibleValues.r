@@ -78,3 +78,18 @@ pv_suffixForTemplates <- "_TEMPLATE"
 #########################################################
 ## Globals
 pv_noiseDistPrefix <- "nd_"
+
+
+
+
+##################
+# merging datasets
+pv_noMatchChar <- c("ask", "delete", "fillIn", "stop") # the options for the noMatch argument in function mergeDatasets()
+
+
+
+
+
+
+
+

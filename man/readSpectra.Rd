@@ -49,9 +49,10 @@ written rawdata import functions. (see \code{\link{custom_import}})
 \seealso{
 \code{\link{getFullData}}
 
-Other Development Functions: \code{\link{custom_TRH}},
-  \code{\link{custom_import}},
-  \code{\link{imp_searchAskColumns}},
-  \code{\link{readHeader}}
+Other Development Functions: 
+\code{\link{custom_TRH}},
+\code{\link{custom_import}},
+\code{\link{imp_searchAskColumns}()},
+\code{\link{readHeader}()}
 }
 \concept{Development Functions}

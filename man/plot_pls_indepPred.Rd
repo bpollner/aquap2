@@ -4,8 +4,17 @@
 \alias{plot_pls_indepPred}
 \title{Independent plsr prediction}
 \usage{
-plot_pls_indepPred(indepDataset, cube, cnv = NULL, inv = NULL,
-  psd = "def", aps = "def", pl = TRUE, toxls = "def", ...)
+plot_pls_indepPred(
+  indepDataset,
+  cube,
+  cnv = NULL,
+  inv = NULL,
+  psd = "def",
+  aps = "def",
+  pl = TRUE,
+  toxls = "def",
+  ...
+)
 }
 \arguments{
 \item{indepDataset}{The dataset containing the independent data. An object 
@@ -108,21 +117,23 @@ predList <- plot_pls_indepPred(fdIndep, cu, toxls=FALSE) # no exporting to xls
 }
 }
 \seealso{
-Other PLSR documentation: \code{\link{calc_pls_args}},
-  \code{\link{plot_pls,aquap_cube-method}},
-  \code{\link{plot_pls_args}}
+Other PLSR documentation: 
+\code{\link{calc_pls_args}},
+\code{\link{plot_pls,aquap_cube-method}},
+\code{\link{plot_pls_args}}
 
-Other Plot functions: \code{\link{plot,aquap_cube,missing-method}},
-  \code{\link{plot,aquap_data,missing-method}},
-  \code{\link{plot_aqg}},
-  \code{\link{plot_classifX_indepPred}},
-  \code{\link{plot_da,aquap_cube-method}},
-  \code{\link{plot_nnet,aquap_cube-method}},
-  \code{\link{plot_pca,aquap_cube-method}},
-  \code{\link{plot_pls,aquap_cube-method}},
-  \code{\link{plot_rnf,aquap_cube-method}},
-  \code{\link{plot_simca,aquap_cube-method}},
-  \code{\link{plot_svm,aquap_cube-method}}
+Other Plot functions: 
+\code{\link{plot,aquap_cube,missing-method}},
+\code{\link{plot,aquap_data,missing-method}},
+\code{\link{plot_aqg}()},
+\code{\link{plot_classifX_indepPred}()},
+\code{\link{plot_da,aquap_cube-method}},
+\code{\link{plot_nnet,aquap_cube-method}},
+\code{\link{plot_pca,aquap_cube-method}},
+\code{\link{plot_pls,aquap_cube-method}},
+\code{\link{plot_rnf,aquap_cube-method}},
+\code{\link{plot_simca,aquap_cube-method}},
+\code{\link{plot_svm,aquap_cube-method}}
 }
 \concept{PLSR documentation}
 \concept{Plot functions}

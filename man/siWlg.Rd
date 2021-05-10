@@ -41,20 +41,28 @@ fdc <- siWlg(fd, TRUE) # averaging within the 12 ranges, resulting in only 12
 \seealso{
 \code{\link{selectWls}}, \code{\link{siWl}}
 
-Other Classification Helpers: \code{\link{classification_helpers}}
+Other Classification Helpers: 
+\code{\link{classification_helpers}}
 
-Other Extract Elements: \code{\link{getHeader}},
-  \code{\link{getWavelengths,aquap_data-method}},
-  \code{\link{getcd}}, \code{\link{getcm}},
-  \code{\link{siWl}}
+Other Extract Elements: 
+\code{\link{getHeader}()},
+\code{\link{getWavelengths,aquap_data-method}},
+\code{\link{getcd}()},
+\code{\link{getcm}()},
+\code{\link{siWl}()}
 
-Other Helper Functions: \code{\link{genFolderStr}},
-  \code{\link{genNoiseRecExp}},
-  \code{\link{genTempCalibExp}}, \code{\link{getcd}},
-  \code{\link{getcm}}, \code{\link{instAquap2Examples}},
-  \code{\link{printStdColnames}}, \code{\link{reColor}},
-  \code{\link{saveAQdata}}, \code{\link{updateAquap2}},
-  \code{\link{updateSettings}}
+Other Helper Functions: 
+\code{\link{genFolderStr}()},
+\code{\link{genNoiseRecExp}()},
+\code{\link{genTempCalibExp}()},
+\code{\link{getcd}()},
+\code{\link{getcm}()},
+\code{\link{instAquap2Examples}()},
+\code{\link{printStdColnames}()},
+\code{\link{reColor}()},
+\code{\link{saveAQdata}()},
+\code{\link{updateAquap2}()},
+\code{\link{updateSettings}()}
 }
 \concept{Classification Helpers}
 \concept{Extract Elements}

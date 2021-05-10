@@ -47,12 +47,17 @@ ls(.ap2)
 \seealso{
 \code{\link{settings_file}}
 
-Other Helper Functions: \code{\link{genFolderStr}},
-  \code{\link{genNoiseRecExp}},
-  \code{\link{genTempCalibExp}}, \code{\link{getcd}},
-  \code{\link{getcm}}, \code{\link{instAquap2Examples}},
-  \code{\link{printStdColnames}}, \code{\link{reColor}},
-  \code{\link{saveAQdata}}, \code{\link{siWlg}},
-  \code{\link{updateAquap2}}
+Other Helper Functions: 
+\code{\link{genFolderStr}()},
+\code{\link{genNoiseRecExp}()},
+\code{\link{genTempCalibExp}()},
+\code{\link{getcd}()},
+\code{\link{getcm}()},
+\code{\link{instAquap2Examples}()},
+\code{\link{printStdColnames}()},
+\code{\link{reColor}()},
+\code{\link{saveAQdata}()},
+\code{\link{siWlg}()},
+\code{\link{updateAquap2}()}
 }
 \concept{Helper Functions}

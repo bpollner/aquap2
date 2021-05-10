@@ -188,7 +188,7 @@ do_avg <- function(dataset, clv=NULL, inParallel=TRUE) {
 	##
 	fdfMean <- plyr::ddply(fdf, .variables=clv, .fun=plyr::colwise(mean), .parallel=inParallel) ##### CORE #####
 	NIR <- as.matrix(fdfMean[,-(1:length(clv))])
-	smh <- fdfMean[, 1:length(clv)]
+	smh <- fdfMean[, 1:length(clv)] # XXX problem with collapsing !! XXX
 	##
 	header <- as.data.frame(matrix(rep(NA, ncol(dataset$header)), nrow=1))
 	colnames(header) <- colnames(dataset$header)

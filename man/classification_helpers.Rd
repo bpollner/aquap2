@@ -33,6 +33,7 @@ process is indicated via a "`".
 }
 }
 \seealso{
-Other Classification Helpers: \code{\link{siWlg}}
+Other Classification Helpers: 
+\code{\link{siWlg}()}
 }
 \concept{Classification Helpers}

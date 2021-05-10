@@ -5,13 +5,29 @@
 \alias{gfd}
 \title{*** Get / Import Spectral Data ***}
 \usage{
-getFullData(md = getmd(), filetype = "def", naString = "NA",
-  slType = "def", trhLog = "def", multiplyRows = "def", ttl = TRUE,
-  stf = TRUE, dol = "def")
+getFullData(
+  md = getmd(),
+  filetype = "def",
+  naString = "NA",
+  slType = "def",
+  trhLog = "def",
+  multiplyRows = "def",
+  ttl = TRUE,
+  stf = TRUE,
+  dol = "def"
+)
 
-gfd(md = getmd(), filetype = "def", naString = "NA",
-  slType = "def", trhLog = "def", multiplyRows = "def", ttl = TRUE,
-  stf = TRUE, dol = "def")
+gfd(
+  md = getmd(),
+  filetype = "def",
+  naString = "NA",
+  slType = "def",
+  trhLog = "def",
+  multiplyRows = "def",
+  ttl = TRUE,
+  stf = TRUE,
+  dol = "def"
+)
 }
 \arguments{
 \item{md}{List. The object with the metadat of the experiment. 
@@ -172,9 +188,10 @@ strict and conscious handling of the files.
 \code{\link{readSpectra}}, \code{\link{readHeader}}, 
 \code{\link{aquap_data-methods}}
 
-Other Core functions: \code{\link{exportSampleList}},
-  \code{\link{gdmm}},
-  \code{\link{plot,aquap_cube,missing-method}},
-  \code{\link{plot,aquap_data,missing-method}}
+Other Core functions: 
+\code{\link{exportSampleList}()},
+\code{\link{gdmm}()},
+\code{\link{plot,aquap_cube,missing-method}},
+\code{\link{plot,aquap_data,missing-method}}
 }
 \concept{Core functions}

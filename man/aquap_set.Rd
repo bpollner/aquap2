@@ -31,7 +31,8 @@ dataset.}
 \seealso{
 \code{\link{gdmm}}
 
-Other Class documentations: \code{\link{aquap_cpt}},
-  \code{\link{aquap_cube}}
+Other Class documentations: 
+\code{\link{aquap_cpt}},
+\code{\link{aquap_cube}}
 }
 \concept{Class documentations}
