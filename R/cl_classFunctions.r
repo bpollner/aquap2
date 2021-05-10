@@ -235,25 +235,44 @@ plot_nnet_cube_M <- function(object, ...) {
 
 # merge datasets ------------
 mergeDatasets_two_noLabels_M <- function(ds1, ds2, mergeLabels=NULL, noMatch="ask", dol=TRUE) {
-	mergeDatasets_two(ds1, ds2, mergeLabels, noMatch, dol)
+#	print("mergeDatasets_two_noLabels_M"); wait()
+	mergeDatasets_two(ds1, ds2, mergeLabels=NULL, noMatch, dol)
 } # EOF
 
 mergeDatasets_two_mergeLabels_M <- function(ds1, ds2, mergeLabels, noMatch="ask", dol=TRUE) {
+#	print("mergeDatasets_two_mergeLabels_M"); wait()
 	mergeDatasets_two(ds1, ds2, mergeLabels, noMatch, dol)
 } # EOF
 
 mergeDatasets_list_noLabels_M <- function(ds1, ds2=NULL, mergeLabels=NULL, noMatch="ask",  dol=TRUE) {
-	mergeDatasets_list(dsList=ds1, mergeLabels, noMatch, dol)
+#	print("mergeDatasets_list_noLabels_M"); wait()
+	mergeDatasets_list(dsList=ds1, mergeLabels=NULL, noMatch, dol)
 } # EOF
 
 mergeDatasets_list_mergeLabels_M <- function(ds1, ds2=NULL, mergeLabels, noMatch="ask", dol=TRUE) {
+#	print("mergeDatasets_list_mergeLabels_M"); wait()
 	mergeDatasets_list(dsList=ds1, mergeLabels, noMatch, dol)
 } # EOF
+
 mergeDatasets_list_mergeLabels_2_M <- function(ds1, ds2, mergeLabels=NULL, noMatch="ask", dol=TRUE) {
+#	print("mergeDatasets_list_mergeLabels_2_M"); wait()
 	mergeDatasets_list(dsList=ds1, mergeLabels=ds2, noMatch, dol)
 } # EOF
 
+generateMergeLabels_twoDatasets_M <- function(ds1, ds2, varNames, varTypes, values=NULL) {
+#	print("generateMergeLabels_twoDatasets_M"); wait()
+	generateMergeLabels_sys(ds1=ds1, ds2=ds2, varNames, varTypes, values)
+} # EOF
 
+generateMergeLabels_list_M <- function(ds1, ds2, varNames, varTypes, values=NULL) {
+#	print("generateMergeLabels_list_M"); wait()
+	generateMergeLabels_sys(ds1=ds1, ds2=NULL, varNames, varTypes, values)
+} # EOF
+
+generateMergeLabels_list_2_M <- function(ds1, ds2=NULL, varNames, varTypes, values=NULL) {
+#	print("generateMergeLabels_list_2_M"); wait()
+	generateMergeLabels_sys(ds1=ds1, ds2=NULL, varNames=ds2, varTypes=varNames, values=varTypes)
+} # EOF
 
 showMergeLabels <- function(object) {
 	cat(paste0("An object of class 'aquap_mergeLabels', containing ", length(object@varNames), " new Labels for ", length(object@numVec), " datasets to be merged.\n\n"))

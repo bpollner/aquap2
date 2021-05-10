@@ -99,13 +99,7 @@ setMethod("$<-", signature(x="aquap_mergeLabels"), definition=function(x, name, 
 			return(new("aquap_mergeLabels", Data, numVec=x@numVec, varNames=x@varNames, varTypes=x@varTypes, values=valueList, dsNames=x@dsNames))
 		} )  # end set method
 		
-# 	setGeneric("@<-", function(object, name, value) standardGeneric("@<-")) # no. should not be necessary
-#	setGeneric("@<-", function(object, name, value){})		# no no no   should not be necessary
-#	setMethod("@<-", signature(object="aquap_mergeLabels"), definition=function(object, name, value) {	# does not work. no idea why. it should....
-#			print("hoho -- in the @")
-#			return(object)	
-#		} ) # end set method					
-		
+			
 
 #' @rdname aquap_data-methods
 #' @export
@@ -136,8 +130,18 @@ setMethod("mergeDatasets", signature(ds1="list", ds2="missing", mergeLabels="aqu
 #' @export
 setMethod("mergeDatasets", signature(ds1="list", ds2="aquap_mergeLabels", mergeLabels="missing"), definition=mergeDatasets_list_mergeLabels_2_M)
 
+setGeneric("generateMergeLabels", function(ds1, ds2, ...) standardGeneric("generateMergeLabels"))
+#' @rdname generateMergeLabels
+#' @export
+setMethod("generateMergeLabels", signature(ds1="aquap_data", ds2="aquap_data"), definition=generateMergeLabels_twoDatasets_M)
+#' @rdname generateMergeLabels
+#' @export
+setMethod("generateMergeLabels", signature(ds1="list", ds2="missing"), definition=generateMergeLabels_list_M)
+#' @rdname generateMergeLabels
+#' @export
+setMethod("generateMergeLabels", signature(ds1="list", ds2="character"), definition=generateMergeLabels_list_2_M)
 
-
+# generateMergeLabels_sys <- function(ds1, ds2=NULL, varNames, varTypes, values=NULL)
 
 # plotting old ones ----------
 setGeneric("plot", function(x, y, ...) standardGeneric("plot"))

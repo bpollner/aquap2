@@ -1257,5 +1257,6 @@ exportAdditionalModelToAp2Env <- function(doExport, thisMod, thisType) {
 reColor <- function(dataset) {
 	colRep <- extractClassesForColRep(dataset$header)
 	dataset$colRep <- I(colRep)
+	rownames(dataset$colRep) <- rownames(dataset$header)
 	return(dataset)
 } # EOF
