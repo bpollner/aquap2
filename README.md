@@ -8,16 +8,19 @@ Authors: Bernhard Pollner & Zoltan Kovacs
 ## Getting Started
 To install the R-package "aquap2", do a simple github-install via devtools, in that way all dependencies should get installed as well.
 
-If not already done, first install the package "devtools" via
+If you work on a Windows-machine, first download and install R-tools.
+[R-tools](https://cran.r-project.org/bin/windows/Rtools/)
+
+If not already done, install the package "devtools" via
 ```
 install.packages("devtools")
 ```
-First use devtools to install a package dependency not available on CRAN:
+Use devtools to install a package dependency not available on CRAN:
 ```
 library(devtools)
 install_github(repo="rwehrens/ChemometricsWithR", ref="master")
 ```
-Then install aquap2 from this repository:
+Install aquap2 from this repository:
 ```
 install_github(repo="bpollner/aquap2", ref="latestPublic")
 ```
