@@ -29,6 +29,7 @@ You can now launch aquap2 and perform (only required at first use) the required 
 ```
 library(aquap2)
 updateSettings()
+updateSettings()
 ```
 
 All required code in a single block:
@@ -38,6 +39,7 @@ library(devtools)
 install_github(repo="rwehrens/ChemometricsWithR", ref="master")
 install_github(repo="bpollner/aquap2", ref="latestPublic")
 library(aquap2)
+updateSettings()
 updateSettings()
 ```
 

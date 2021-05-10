@@ -1,10 +1,12 @@
 #############################
 Version 0.4.0
 New:
+	Added merging of datasets.
 	
 Improved:
 	
 Bugfix:
+	Fixed a bug that caused the path for the settings home folder in the .Renviron file to be wrong on Windwos machines.
 	
 #############################
 
