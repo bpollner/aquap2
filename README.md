@@ -6,10 +6,9 @@ Authors: Bernhard Pollner & Zoltan Kovacs
 
 
 ## Getting Started
-To install the R-package "aquap2", do a simple github-install via devtools, in that way all dependencies should get installed as well.
+To install the R-package "aquap2", do a github-install via devtools, in that way all dependencies should get installed as well.
 
-If you work on a Windows-machine, first download and install R-tools.
-[R-tools](https://cran.r-project.org/bin/windows/Rtools/)
+If you work on a Windows-machine, first download and install [R-tools](https://cran.r-project.org/bin/windows/Rtools/).
 
 If not already done, install the package "devtools" via
 ```
