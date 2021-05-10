@@ -33,14 +33,14 @@ non-matching header structures, i.e. the column names of the headers of the
 datasets to me merged can not be overlapped. The default value is defined in 
 the settings.r file (\code{gen_merge_noMatch}). Possible values are: 
 \describe{
-\item{<%=pv_noMatchChar[1]%>}{The non-matching header-columns in each dataset are 
+\item{ask}{The non-matching header-columns in each dataset are 
 displayed, and the user is asked interactively what to do, with the three options 
 below as possible options.}
 \item{delete}{Non-matching header columns are automatically deleted.}
-\item{<%=pv_noMatchChar[3]%>}{Each column name not existing in all of the datasets 
+\item{fillIn}{Each column name not existing in all of the datasets 
 to be merged is added to those datasets where it does not exist. The data is filled 
 in with 'NAs'.}
-\item{<%=pv_noMatchChar[4]%>}{In case of non-overlapping header structures, the merging 
+\item{stop}{In case of non-overlapping header structures, the merging 
 process is stopped, with possibly a message being displayed.}
 }}
 
@@ -65,6 +65,6 @@ the column names 'AA, CC, BB'.
 \seealso{
 Other dataset modification functions: 
 \code{\link{[,aquap_data-method}},
-\code{\link{generateMergeLabels,aquap_data,aquap_data-method}}
+\code{\link{generateMergeLabels,aquap_data,aquap_data,character,character-method}}
 }
 \concept{dataset modification functions}

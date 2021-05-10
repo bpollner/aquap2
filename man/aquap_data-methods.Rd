@@ -59,11 +59,11 @@ only the number of wavelengths as 'dictated' by the smaller dataset.}
 \item{Division via '/'}{Use the division via '/' to divide a first, complete 
 dataset by a dataset containing only a single wavelength in the NIR data. 
 Please see \code{\link{siWl}} for generating such a dataset. }
-\item{Subscripting of objects of class 'aquap_mergeLabels' via \code{'[,j]'}}{Can 
+\item{Subscripting of objects of class 'aquap_mergeLabels' via '[,j]'}{Can be used 
+to modify the values to be filled in the new variables when merging 
+datasets. Only values for columns are accepted. }
+\item{Subscripting of objects of class 'aquap_mergeLabels' via 'object$name'}{Can 
 be used do modify the values to be filled in the new variables when merging 
-datasets. Only values for columns are accepted.}
-\item{Subscripting of objects of class 'aquap_mergeLabels' via \code{'object$name'}}
-{Can be used do modify the values to be filled in the new variables when merging 
 datasets.}
 }
 }
@@ -100,7 +100,7 @@ Other Data pre-treatment functions:
 \code{\link{ssc}()}
 
 Other dataset modification functions: 
-\code{\link{generateMergeLabels,aquap_data,aquap_data-method}},
+\code{\link{generateMergeLabels,aquap_data,aquap_data,character,character-method}},
 \code{\link{mergeDatasets,aquap_data,aquap_data,missing-method}}
 }
 \concept{Data pre-treatment functions}

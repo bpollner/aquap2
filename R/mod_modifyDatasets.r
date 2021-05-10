@@ -453,7 +453,8 @@ mergeDatasets_list <- function(dsList, mergeLabels, noMatch=get(".ap2$stn$gen_me
 #' 'varTypes' are decisive. The last column in the data frame shows the number of 
 #' observations in each dataset, and it can not be changed manually. It is advised 
 #' to change the valus exclusively via subsetting the object ("\code{'[,j]<-'} or 
-#' \code{'object$name <-'}). 
+#' \code{'object$name <-'}). It is advised to name the arguments. 
+#' @note Naming the input-arguments is advised. 
 #' @param ds1 An object of class 'aquap_data' or a (possibly named) list containing 
 #' any number of objects of class 'aquap_data'
 #' @param ds2 An object of class 'aquap_data'. Is ignored when a list is provided 
@@ -487,6 +488,7 @@ mergeDatasets_list <- function(dsList, mergeLabels, noMatch=get(".ap2$stn$gen_me
 #' @name generateMergeLabels
 NULL
 
+#pv_noMatchChar <- c("ask", "delete", "fillIn", "stop")
 #' @title Merge Datasets
 #' @description Merge together two or more datasets, and possibly add class- or 
 #' numerical variables to each dataset via the 'mergeLabels' object.
@@ -504,14 +506,14 @@ NULL
 #' datasets to me merged can not be overlapped. The default value is defined in 
 #' the settings.r file (\code{gen_merge_noMatch}). Possible values are: 
 #' \describe{
-#' \item{<%=pv_noMatchChar[1]%>}{The non-matching header-columns in each dataset are 
+#' \item{ask}{The non-matching header-columns in each dataset are 
 #' displayed, and the user is asked interactively what to do, with the three options 
 #' below as possible options.}
 #' \item{delete}{Non-matching header columns are automatically deleted.}
-#' \item{<%=pv_noMatchChar[3]%>}{Each column name not existing in all of the datasets 
+#' \item{fillIn}{Each column name not existing in all of the datasets 
 #' to be merged is added to those datasets where it does not exist. The data is filled 
 #' in with 'NAs'.}
-#' \item{<%=pv_noMatchChar[4]%>}{In case of non-overlapping header structures, the merging 
+#' \item{stop}{In case of non-overlapping header structures, the merging 
 #' process is stopped, with possibly a message being displayed.}
 #' }
 #' @param dol Logical length one. If outliers should be detected based on the scope 

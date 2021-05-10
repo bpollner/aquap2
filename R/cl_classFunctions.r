@@ -270,8 +270,13 @@ generateMergeLabels_list_M <- function(ds1, ds2, varNames, varTypes, values=NULL
 } # EOF
 
 generateMergeLabels_list_2_M <- function(ds1, ds2=NULL, varNames, varTypes, values=NULL) {
-#	print("generateMergeLabels_list_2_M"); wait()
+#	print("generateMergeLabels_list_2_M"); wait()  # list, character, character, list
 	generateMergeLabels_sys(ds1=ds1, ds2=NULL, varNames=ds2, varTypes=varNames, values=varTypes)
+} # EOF
+
+generateMergeLabels_list_3_M <- function(ds1, ds2=NULL, varNames, varTypes, values=NULL) {
+#	print("generateMergeLabels_list_2_M"); wait() # list, character, character, missing
+	generateMergeLabels_sys(ds1=ds1, ds2=NULL, varNames=ds2, varTypes=varNames, values=NULL)
 } # EOF
 
 showMergeLabels <- function(object) {

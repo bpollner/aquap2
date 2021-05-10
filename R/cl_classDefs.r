@@ -130,18 +130,21 @@ setMethod("mergeDatasets", signature(ds1="list", ds2="missing", mergeLabels="aqu
 #' @export
 setMethod("mergeDatasets", signature(ds1="list", ds2="aquap_mergeLabels", mergeLabels="missing"), definition=mergeDatasets_list_mergeLabels_2_M)
 
-setGeneric("generateMergeLabels", function(ds1, ds2, ...) standardGeneric("generateMergeLabels"))
+setGeneric("generateMergeLabels", function(ds1, ds2, varNames, varTypes, ...) standardGeneric("generateMergeLabels"))
 #' @rdname generateMergeLabels
 #' @export
-setMethod("generateMergeLabels", signature(ds1="aquap_data", ds2="aquap_data"), definition=generateMergeLabels_twoDatasets_M)
+setMethod("generateMergeLabels", signature(ds1="aquap_data", ds2="aquap_data", varNames="character", varTypes="character"), definition=generateMergeLabels_twoDatasets_M)  
 #' @rdname generateMergeLabels
 #' @export
-setMethod("generateMergeLabels", signature(ds1="list", ds2="missing"), definition=generateMergeLabels_list_M)
+setMethod("generateMergeLabels", signature(ds1="list", ds2="missing", varNames="character", varTypes="character"), definition=generateMergeLabels_list_M)
 #' @rdname generateMergeLabels
 #' @export
-setMethod("generateMergeLabels", signature(ds1="list", ds2="character"), definition=generateMergeLabels_list_2_M)
+setMethod("generateMergeLabels", signature(ds1="list", ds2="character", varNames="character", varTypes="list"), definition=generateMergeLabels_list_2_M)
+#' @rdname generateMergeLabels
+#' @export
+setMethod("generateMergeLabels", signature(ds1="list", ds2="character", varNames="character", varTypes="missing"), definition=generateMergeLabels_list_3_M)
 
-# generateMergeLabels_sys <- function(ds1, ds2=NULL, varNames, varTypes, values=NULL)
+
 
 # plotting old ones ----------
 setGeneric("plot", function(x, y, ...) standardGeneric("plot"))
