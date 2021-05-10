@@ -22,9 +22,9 @@
 \arguments{
 \item{x}{An object of class 'aquap_data'}
 
-\item{i}{subsricpting indices for rows}
+\item{i}{Subsricpting indices for rows}
 
-\item{j}{Numeric length one}
+\item{j}{Subsricpting indices for columns}
 
 \item{value}{An R object}
 
@@ -59,6 +59,12 @@ only the number of wavelengths as 'dictated' by the smaller dataset.}
 \item{Division via '/'}{Use the division via '/' to divide a first, complete 
 dataset by a dataset containing only a single wavelength in the NIR data. 
 Please see \code{\link{siWl}} for generating such a dataset. }
+\item{Subscripting of objects of class 'aquap_mergeLabels' via \code{'[,j]'}}{Can 
+be used do modify the values to be filled in the new variables when merging 
+datasets. Only values for columns are accepted.}
+\item{Subscripting of objects of class 'aquap_mergeLabels' via \code{'object$name'}}
+{Can be used do modify the values to be filled in the new variables when merging 
+datasets.}
 }
 }
 \note{

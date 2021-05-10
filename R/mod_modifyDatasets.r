@@ -56,7 +56,7 @@ genMergeLabels_checkType <- function(valueList, varTypes, varNames) { # checks i
 #' automatically) the definitions given in argument 'varTypes' are decisive. The last 
 #' column in the data frame shows the number of observations in each dataset, and it 
 #' can not be changed manually. It is advised to change the valus exclusively via 
-#' subsetting the object ("[<-" or "$<-").
+#' subsetting the object ("\code{'[,j]<-'} or \code{'object$name <-'}).
 #' @param ds1 An object of class 'aquap_data' or a (possibly named) list containing 
 #' any number of objects of class 'aquap_data'
 #' @param ds2 An object of class 'aquap_data'. Is ignored when a list is provided 
@@ -156,26 +156,72 @@ merge_makeNewLabelBlock <- function(mergeLabels) {   # here creating the repeats
 	return(outdf)	
 } # EOF
 
-mergeDatasets_two <- function(ds1, ds2, mergeLabels, dol) { # newLabels can come in as NULL
+mergeDatasets_two <- function(ds1, ds2, mergeLabels, noMatch=get(".ap2$stn$gen_merge_noMatch"), dol=get(".ap2$stn$gen_merge_detectOutliers")) { # newLabels can come in as NULL
 	dsList <- list(ds1, ds2)
 	names(dsList) <- c(deparse(substitute(ds1)), deparse(substitute(ds2))) # get the names of the provided objects
-	return(mergeDatasets_list(dsList, mergeLabels, dol))
+	return(mergeDatasets_list(dsList, mergeLabels, noMatch, dol))
 } # EOF
 
-mergeLabelObj_toList <- function(mergeLabels) {
+mergeLabelObj_toList <- function(mergeLabels) {  ## used in the end of mergeDatasets_list() to put the mergeLabel object into the @metadata slot
 	ml <- mergeLabels
 #	char <- "These are not the metadata, but the info generated from the mergeLabels"
 	char <- "from mergeLabels"
 	out <- list(note=char, numVec=ml@numVec, varNames=ml@varNames, varTypes=ml@varTypes, values=ml@values, dsNames=ml@dsNames)
 	return(out)	
+} # EOF  ## used in the end of mergeDatasets_list()
+
+merge_checkNoMatchChar <- function(noMatch) {
+	#	pv_noMatchChar <- c("ask", "delete", "rename", "stop")
+	if (! all(is.character(noMatch)) | length(noMatch) > 1) {
+		stop("Please provide a character length one to the argument 'noMatch'", call.=FALSE)
+	}
+	if (! noMatch %in% pv_noMatchChar) {
+		stop(paste0("Please provide one of '", paste(pv_noMatchChar, collapse="', '"), "' to the argumet 'noMatch'"), call.=FALSE) 
+	}
+	return(noMatch)
 } # EOF
 
-### CORE ###
-mergeDatasets_list <- function(dsList, mergeLabels, dol) { # newLabels can come in as NULL   ####CORE####
+merge_readInChoice <- function() {
+	maxTries <- 3
+	ask <- TRUE
+	aa <- 1
+	txt <- "Please type in either 1, 2, or 3."
+	#
+	checkChoice <- function(choice) {
+		if (length(choice) == 0) {
+			message(txt)
+			return(TRUE)			
+		}
+		if (! choice %in% c(1,2,3)) {
+			message(txt)
+			return(TRUE)
+		}
+		return(FALSE)
+	} # EOiF
+	##
+	while (ask) {
+#		print(paste0("we are in try #", aa))
+		options(warn=-1)
+		choice <- as.numeric(scan(file = "", n = 1, quiet = TRUE, what="integer"))
+		ask <- checkChoice(choice)
+		options(warn=0)
+		aa <- aa+1
+		if (aa > maxTries & ask == TRUE) {
+			ask <- FALSE
+			stop(paste0("Please try again"), call.=FALSE)
+		}
+	} # end while ask
+	return(choice)	
+} # EOF
+
+###### CORE #########
+mergeDatasets_list <- function(dsList, mergeLabels, noMatch=get(".ap2$stn$gen_merge_noMatch"), dol=get(".ap2$stn$gen_merge_detectOutliers")) { # newLabels can come in as NULL   ####CORE####
 	stn <- get("stn", envir=.ap2)
 	clpref <- stn$p_ClassVarPref
 	olc <- stn$p_outlierCol
+	thisSilent <- stn$allSilent
 	#
+	# intern functions 
 	checkForSameness <- function(xList, char=NULL) {
 		cns1 <- colnames(xList[[1]])
 		for (i in 2: length(xList)) {
@@ -187,6 +233,11 @@ mergeDatasets_list <- function(dsList, mergeLabels, dol) { # newLabels can come 
 		} # end for i
 	} # EOIF
 	#
+	#
+	#### entry-checking ######
+	noMatch <- merge_checkNoMatchChar(noMatch) # check if input is valid
+	
+	#########  make the newLabel columns ################
 	newLabelBlock <- NULL
 	numVec <- sapply(dsList, nrow)
 	dsNames <- names(dsList)
@@ -195,15 +246,146 @@ mergeDatasets_list <- function(dsList, mergeLabels, dol) { # newLabels can come 
 		numVec <- mergeLabels@numVec # not really necessary
 		dsNames <- mergeLabels@dsNames
 	} # end if 
+	
+	##### collect header, colRep and NIR together #########
 	headerList <- lapply(dsList, getHeader)
 	nirList <- lapply(dsList, getNIR)
-	colRepList <- lapply(dsList, getColRep)
+#	colRepList <- lapply(dsList, getColRep)
 	wlsList <- lapply(dsList, getWavelengths)
 	##
-	checkForSameness(headerList, "header")   #### here checking for sameness !! #####
-	checkForSameness(nirList, "wavelength")
+	
+	######### check for duplicates within a singel dataset ########
+	for (i in 1: length(headerList)) {  # check for duplicate colnames within each single dataset
+		cns <- c(colnames(headerList[[i]]), colnames(newLabelBlock)) # within a single dataset + the new names
+		ind <- which(duplicated(cns))
+		if (length(ind) != 0) { # so we have a duplicate
+			stop(paste0("There are duplicate column names ('", paste0(cns[ind], collapse=", "), "') in dataset #", i, " ('", mergeLabels@dsNames[i], "').\n(Possibly coming in via the 'mergeLabel' object.)"), call.=FALSE)
+		} # end if
+	} # end for i
 	##
-	# now, for the moment, all structure is the same
+	
+	###### via a table, collect and align the same column names, and fill in missing colnames #######
+	aa <- as.vector(unlist(sapply(headerList, colnames)))   	# first collect all column names into a single vector
+	cnsTab <- table(aa) # gives a named numeric
+	namesComplete <- names(which(cnsTab == length(headerList))) # gives the names of those columns that are present in all datasets
+	tabMissing <- sort(cnsTab[which(cnsTab < length(headerList))], decreasing = TRUE) # gives back a named numeric
+	namesMissing <- NULL
+	if (length(tabMissing) != 0) { # so we have non-matching colnames
+		namesMissing <- names(tabMissing)  #  gives the names of those columns that are NOT in all datasets
+		for (i in 1: length(headerList)) {
+			cns <- colnames(headerList[[i]])
+			for (k in 1: length(namesMissing)) {
+				haveIt <- namesMissing[k] %in% colnames(headerList[[i]]) # comes back as single logical
+				if (!haveIt) { # so we do not have a column with the name "namesMissing[k]" in the dataset
+					rnrs <- nrow(headerList[[i]])
+					newFrame <- as.data.frame(matrix(NA, nrow=rnrs, ncol=1))
+					colnames(newFrame) <- namesMissing[k]
+					headerList[[i]] <- cbind(headerList[[i]], newFrame) # cbind the new frame to the old header in the headerList
+				} # end if not haveIt
+			} # end for k (going through the missing colnames)
+			newOrder <- c(namesComplete, namesMissing)
+			headerList[[i]] <- headerList[[i]][,newOrder] # re-order the header by "colname-indexing"
+		} # end for i (going through the header list)		
+	} else { # so we do NOT have non-matching colnames
+		for (i in 1: length(headerList)) {
+			headerList[[i]] <- headerList[[i]][,namesComplete] # re-order the header
+		} # end for i
+	} # end else
+	# end of filling in missing colnames
+	
+	############## check for non-matches, handle them ################
+	allCns <- sapply(headerList, colnames) # check for non-overlapping colnames, gives back a matrix
+	aa <- apply(allCns, 1, function(x) length(unique(x))) # gives a vector with 1 and 2, 2 when not unique i.e. not overlapping
+	ind <- which(aa != 1)
+	if (length(ind) != 0) { # so we have a non-match
+		nonMatchingHeader <- as.data.frame(allCns[ind,]) # make a nice data frame for display with the non-matching columns
+		colnames(nonMatchingHeader) <- mergeLabels@dsNames
+		rownames(nonMatchingHeader) <- paste0("header_column_#", ind)
+		txtGen <- paste0("\nThere were ", length(ind), " non-matching header columns detected.\n")
+		#		
+		if (noMatch == pv_noMatchChar[1]) { # "ask"   # yes, I know.  I tried a "switch". Could not make it work. Shame.
+			message(txtGen)
+			print(nonMatchingHeader)
+			cat(paste0("\nShould the non-matching header columns be:\n1 - be deleted,\n2 - renamed, or\n3 - should the merging of datasets be stopped?\n"))
+			choice <- merge_readInChoice()
+			if (choice == 1) {
+				noMatch <- pv_noMatchChar[2] ## so we go into the delete below
+				thisSilent <- TRUE
+			} # end if
+			if (choice == 2) {
+				noMatch <- pv_noMatchChar[3] ## so we go into the rename below
+				thisSilent <- TRUE
+			} # end if
+			if (choice == 3) {
+				noMatch <- pv_noMatchChar[4] ## so we go into the delete below
+				thisSilent <- TRUE
+			} # end if
+		} # end "ask"
+		##
+		if (noMatch == pv_noMatchChar[2]) { # "delete"
+			if (!thisSilent) {
+				message(txtGen)
+				cat(paste0("From all datasets to be merged (in columns below), the following header-columns will be deleted (in the rows below):\n"))
+				print(nonMatchingHeader); cat("\n")
+			} # end if not silent
+			for (i in 1: length(headerList)) {
+				for (k in 1: length(ind)) {
+					print() # deleting does not work yet
+					headerList[[i]] <- headerList[[i]][,-ind[k]] # kick out the column in the header
+					colName <- nonMatchingHeader[k,i]
+					indColRep <- which(colnames(colRepList[[i]]) == colName)
+					if (length(indColRep) > 1) {
+						colRepList[[i]] <- colRepList[[i]][,-indColRep] # kick out the column in the colRep
+					}
+				} # end for k
+			} # end for i
+		} # end "delete"
+		##
+		if (noMatch == pv_noMatchChar[3]) { # "rename"
+			if (!thisSilent) {
+				message(txtGen)
+				renameAfter <- colnames(nonMatchingHeader)[1]
+				cat(paste0("From all datasets to be merged (in columns below), the following header-columns (in the rows below) will be renamed after the column-names as given in dataset '", renameAfter, "':\n"))
+				print(nonMatchingHeader); cat("\n")		
+			} # end if this silent
+			# now rename them
+			masterColNames <- colnames(headerList[[1]])[ind] ## copy from the first dataset
+			aa <- colnames(colRepList[[1]])  # copy from first dataset
+			crInd <- which(aa == masterColNames)
+			for (i in 1: length(headerList)) {
+				for (k in 1: length(ind)) {
+					colnames(headerList[[i]])[ind[k]] <- masterColNames[k]  ##### CORE renaming #####
+					if (length(crInd) > 1) {
+						colnames(colRepList[[i]][crInd]) <-  aa[crInd]   ##### CORE renaming #####
+					} # end if we have some colRep to rename
+				} # end for k
+			} # end for i
+		} # end "rename"
+		##
+		if (noMatch == pv_noMatchChar[4]) { # "stop"
+			if (!thisSilent) {
+				message(txtGen)
+				print(nonMatchingHeader); cat("\n")
+			} # end if not silent
+			stop(paste0("Merging of datasets is stopped. See ?mergeDatasets for options."), call.=FALSE)
+		} # end "stop"			
+		##
+	} ######### end if (we have a non-match #########
+	##	
+	
+	
+	allCns <- sapply(headerList, colnames) # check for non-overlapping colnames, gives back a matrix
+	aa <- apply(allCns, 1, function(x) length(unique(x))) # gives a vector with 1 and 2, 2 when not unique i.e. not overlapping
+	ind <- which(aa != 1)
+	print(allCns); print(aa); print(ind)
+	wait()
+	
+	checkForSameness(headerList, "header")   ## after the corrections above, this never should give a no-match. Leave it here just to check.
+	checkForSameness(nirList, "wavelength")  #### here checking for sameness !! #####
+	# now, for the moment, all NIR has to be the same
+	##
+
+	######## prepare for and fuse the datasets together #########
 	header <- as.data.frame(matrix(NA, nrow=sum(numVec) , ncol=ncol(dsList[[1]]$header) ))
 	NIR <- as.data.frame(matrix(NA, nrow=sum(numVec) , ncol=ncol(dsList[[1]]$NIR) ))
 	colRep <- as.data.frame(matrix(NA, nrow=sum(numVec) , ncol=ncol(dsList[[1]]$colRep) ))
@@ -212,6 +394,9 @@ mergeDatasets_list <- function(dsList, mergeLabels, dol) { # newLabels can come 
 		cat(paste0("Merging ", length(dsList), " datasets... "))
 	}
 	for (k in 1: (length(riVec)-1)) {
+		addChar <- ", "
+		if (k == length(headerList)) {addChar <- ". "}
+		cat(paste0(k, addChar))
 		ris <- riVec[k]
 		rie <- riVec[k+1]-1
 		for (i in 1: ncol(header)) {
@@ -220,7 +405,7 @@ mergeDatasets_list <- function(dsList, mergeLabels, dol) { # newLabels can come 
 				aa <- as.character(aa)	# otherwise we destroy the numeric-information
 			}
 			header[ris:rie,i] <- aa  # colwise			### CORE ###
-			colRep[ris:rie,] <- colRepList[[k]]			### CORE ###
+	#		colRep[ris:rie,] <- colRepList[[k]]			### CORE ###
 			NIR[ris:rie,] <- nirList[[k]]				### CORE ###
 		} # end for i
 	} # end for k
@@ -228,18 +413,23 @@ mergeDatasets_list <- function(dsList, mergeLabels, dol) { # newLabels can come 
 	colnames(header) <- c(colnames(headerList[[1]]), colnames(newLabelBlock))	# just take the first one -- for the moment, all are the same
 	ind <- which(colnames(header) == paste0(clpref, olc, "_all"))
 	colnames(header)[ind] <- paste0(clpref, olc, "_single_all")
-	colnames(colRep) <- colnames(colRepList[[1]])
+#	colnames(colRep) <- colnames(colRepList[[1]])
 	colnames(NIR) <- colnames(nirList[[1]])
 	rownames(header) <- paste0("r", 1:nrow(header))
-	rownames(colRep) <- paste0("r", 1:nrow(colRep))
+#	rownames(colRep) <- paste0("r", 1:nrow(colRep))
 	rownames(NIR) <- paste0("r", 1:nrow(NIR))
 	NIR <- as.matrix(NIR)
 	#
+	
+	###### possibly detect outliers ###########
 	if (dol) {
-		outliers <- flagOutliers_allScope(NIR, detectOutliers=TRUE)
+		cat("ok.\n") # denoting the end of merging the dataset
+		outliers <- flagOutliers_allScope(NIR, detectOutliers=TRUE) # comes back as a very nice 1-column data frame
 		header <- cbind(header, outliers)
 	} # end if
 	#
+	
+	####### put all together, make nice #########
 	fd <- data.frame(I(header), I(colRep), I(NIR))
 	names(fd) <- names(dsList[[1]])
 	fd <- new("aquap_data", fd)
@@ -263,6 +453,8 @@ mergeDatasets_list <- function(dsList, mergeLabels, dol) { # newLabels can come 
 
 # general idea: first generate the complete block with new labels, then merge the x datasets, then merge new big dataset with the block of new labels, then reFactor and reColor the final dataset
 
+#  c("ask", "delete", "rename", "stop")
+
 #' @title Merge Datasets
 #' @description Merge together two or more datasets, and possibly add class- or 
 #' numerical variables to each dataset.
@@ -273,8 +465,23 @@ mergeDatasets_list <- function(dsList, mergeLabels, dol) { # newLabels can come 
 #' @param ds2 An object of class 'aquap_data'.
 #' @param mergeLabels An object of class 'aquap_mergeLabels' as generated by 
 #' \code{\link{generateMergeLabels}}.
+#' @param noMatch Character length one. Defines what should happen in the case of 
+#' non-matching header structures, i.e. the column names of the headers of the 
+#' datasets to me merged do not match exactly. The default value is defined in 
+#' the settings.r file (\code{gen_merge_noMatch}). Possible values are: 
+#' \describe{
+#' \item{<%=pv_noMatchChar[1]%>}{The non-matching header-columns in each dataset are 
+#' displayed, and the user is asked interactively what to do, with the three options 
+#' below as possible options.}
+#' \item{delete}{Non-matching header columns are automatically deleted.} # XXX
+#' \item{<%=pv_noMatchChar[3]%>}{Non-matching header columns are automatically renamed 
+#' after the column name in the first fo the datasets to be merged.}
+#' \item{<%=pv_noMatchChar[4]%>}{In case of non-matching header structures, the merging 
+#' process is stopped, with possibly a message being displayed.}
+#' }
 #' @param dol Logical length one. If outliers should be detected based on the scope 
-#' of the new, merged dataset. Defaults to 'FALSE'.
+#' of the new, merged dataset. The default value is defined in the settings file at
+#' \code{gen_merge_detectOutliers}.
 #' @return An object of class 'aquap_data', with all the single datasets merged
 #' together.
 #' @family dataset modification functions

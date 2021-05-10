@@ -66,14 +66,20 @@ NULL
 #' \item{Division via '/'}{Use the division via '/' to divide a first, complete 
 #' dataset by a dataset containing only a single wavelength in the NIR data. 
 #' Please see \code{\link{siWl}} for generating such a dataset. }
+#' \item{Subscripting of objects of class 'aquap_mergeLabels' via \code{'[,j]'}}{Can 
+#' be used do modify the values to be filled in the new variables when merging 
+#' datasets. Only values for columns are accepted.}
+#' \item{Subscripting of objects of class 'aquap_mergeLabels' via \code{'object$name'}}
+#' {Can be used do modify the values to be filled in the new variables when merging 
+#' datasets.}
 #' }
 #' @note \code{drop} is always set to \code{FALSE} for subsrictping via 
 #' \code{'[]'}.
 #' @param x An object of class 'aquap_data'
-#' @param i subsricpting indices for rows 
+#' @param i Subsricpting indices for rows 
 #' @param e1 Object of class 'aquap_data'
 #' @param e2 Object of class 'aquap_data'
-#' @param j Numeric length one
+#' @param j Subsricpting indices for columns
 #' @param value An R object
 #' @param name A valid column name
 #' @examples 

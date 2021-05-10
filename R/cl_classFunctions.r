@@ -234,21 +234,26 @@ plot_nnet_cube_M <- function(object, ...) {
 
 
 # merge datasets ------------
-mergeDatasets_two_noLabels_M <- function(ds1, ds2, mergeLabels=NULL, dol=TRUE) {
-	mergeDatasets_two(ds1, ds2, mergeLabels, dol)
+mergeDatasets_two_noLabels_M <- function(ds1, ds2, mergeLabels=NULL, noMatch="ask", dol=TRUE) {
+	mergeDatasets_two(ds1, ds2, mergeLabels, noMatch, dol)
 } # EOF
 
-mergeDatasets_two_mergeLabels_M <- function(ds1, ds2, mergeLabels, dol=TRUE) {
-	mergeDatasets_two(ds1, ds2, mergeLabels, dol)
+mergeDatasets_two_mergeLabels_M <- function(ds1, ds2, mergeLabels, noMatch="ask", dol=TRUE) {
+	mergeDatasets_two(ds1, ds2, mergeLabels, noMatch, dol)
 } # EOF
 
-mergeDatasets_list_noLabels_M <- function(ds1, ds2=NULL, mergeLabels=NULL, dol=TRUE) {
-	mergeDatasets_list(dsList=ds1, mergeLabels, dol)
+mergeDatasets_list_noLabels_M <- function(ds1, ds2=NULL, mergeLabels=NULL, noMatch="ask",  dol=TRUE) {
+	mergeDatasets_list(dsList=ds1, mergeLabels, noMatch, dol)
 } # EOF
 
-mergeDatasets_list_mergeLabels_M <- function(ds1, ds2=NULL, mergeLabels, dol=TRUE) {
-	mergeDatasets_list(dsList=ds1, mergeLabels, dol)
+mergeDatasets_list_mergeLabels_M <- function(ds1, ds2=NULL, mergeLabels, noMatch="ask", dol=TRUE) {
+	mergeDatasets_list(dsList=ds1, mergeLabels, noMatch, dol)
 } # EOF
+mergeDatasets_list_mergeLabels_2_M <- function(ds1, ds2, mergeLabels=NULL, noMatch="ask", dol=TRUE) {
+	mergeDatasets_list(dsList=ds1, mergeLabels=ds2, noMatch, dol)
+} # EOF
+
+
 
 showMergeLabels <- function(object) {
 	cat(paste0("An object of class 'aquap_mergeLabels', containing ", length(object@varNames), " new Labels for ", length(object@numVec), " datasets to be merged.\n\n"))

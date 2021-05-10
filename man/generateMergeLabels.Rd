@@ -52,7 +52,7 @@ by column via standard dataframe subselection. At any checking process (done
 automatically) the definitions given in argument 'varTypes' are decisive. The last 
 column in the data frame shows the number of observations in each dataset, and it 
 can not be changed manually. It is advised to change the valus exclusively via 
-subsetting the object ("[<-" or "$<-").
+subsetting the object ("\code{'[,j]<-'} or \code{'object$name <-'}).
 }
 \examples{
 \dontrun{

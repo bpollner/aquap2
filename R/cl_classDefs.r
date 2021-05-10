@@ -132,6 +132,9 @@ setMethod("mergeDatasets", signature(ds1="list", ds2="missing", mergeLabels="mis
 #' @rdname mergeDatasets
 #' @export
 setMethod("mergeDatasets", signature(ds1="list", ds2="missing", mergeLabels="aquap_mergeLabels"), definition=mergeDatasets_list_mergeLabels_M)
+#' @rdname mergeDatasets
+#' @export
+setMethod("mergeDatasets", signature(ds1="list", ds2="aquap_mergeLabels", mergeLabels="missing"), definition=mergeDatasets_list_mergeLabels_2_M)
 
 
 
