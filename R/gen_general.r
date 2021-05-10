@@ -248,9 +248,11 @@ checkCreateSHfolder <- function(systemHome, fn_aquap2SH) {
 
 checkSettings <- function() {
 	systemHome <- Sys.getenv("HOME")
-	fullRenvPath <- paste0(systemHome, "/.Renviron")
+	systemHome_R <- gsub("\\\\", "/", systemHome)
+#	fullRenvPath <- paste0(systemHome, "/.Renviron") # was this
+	fullRenvPath <- paste0(systemHome_R, "/.Renviron")
 	fn_aquap2SH <- "aquap2SH"
-	AQUAP2SH_creationMsg <- paste0("The initial path of `AQUAP2SH` in the .Renviron file (`", fullRenvPath, "`) has been set to `", systemHome, "/", fn_aquap2SH, "`. \nIf you want, you can open the .Renviron file (e.g. using R-Studio) and modify the variable `AQUAP2SH` (holding the path to the  `settings-home` directory) so that it points to a folder of your liking.")
+	AQUAP2SH_creationMsg <- paste0("The initial path of `AQUAP2SH` in the .Renviron file (`", fullRenvPath, "`) has been set to `", systemHome_R, "/", fn_aquap2SH, "`. \nIf you want, you can open the .Renviron file (e.g. using R-Studio) and modify the variable `AQUAP2SH` (holding the path to the  `settings-home` directory) so that it points to a folder of your liking.")
 	addInfo <- "Restart R for the changes to become effective. \nSee the help for '?updateSettings' for additional information."
 	restartMsg <- "Please restart R for the changes in the .Renviron file to become effective."
 	#
@@ -269,7 +271,7 @@ checkSettings <- function() {
 					return(FALSE)
 				}
 			# now we have to fill the newly created .Renviron file and point AQUAP2SH to the newly created folder
-			defaultFillForRenviron <- paste0("\n\nAQUAP2SH = ", systemHome, "/", fn_aquap2SH)
+			defaultFillForRenviron <- paste0("\n\nAQUAP2SH = ", systemHome_R, "/", fn_aquap2SH) # here problem in windows !!
 			fcon <- file(fullRenvPath, open="w")
 			writeLines(defaultFillForRenviron, fcon)
 			close(fcon)
