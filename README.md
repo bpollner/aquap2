@@ -2,7 +2,7 @@
 Authors: Bernhard Pollner & Zoltan Kovacs
 
 
-[![DOI](https://zenodo.org/badge/30932899.svg)](https://zenodo.org/badge/latestdoi/30932899)
+[![DOI](https://zenodo.org/badge/bpollner.svg)](https://zenodo.org/badge/latestdoi/bpollner)
 
 
 ## Getting Started
