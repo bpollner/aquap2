@@ -123,11 +123,14 @@ If \code{dol} evaluates to TRUE, an additional column flagging the outliers
 as detected in the scope of the complete dataset will be added to the dataset.}
 }
 \value{
-An object of class 'aquap_data' containing a data frame and four slots:
+An object of class 'aquap_data' containing a data frame and five slots:
 \itemize{
 \item dataframe Consists of 'header', 'colRep' and 'NIR'.
 \item metadata A list with the metadata of the experiment
 \item anproc Possibly a list with an analysis procedure
+\item mergeInfo Possibly an object of class 'aquap_mergeLabels' 
+(\code{\link{generateMergeLabels}}), if the dataset is the result of merging 
+other datsets.
  \item ncpwl Numeric length one, the number of characters before the wavelength 
  in the column names of the NIR spectra.
 \item version A length one character noting the version of the dataset.
@@ -159,7 +162,9 @@ as defined in the settings.r file. (see \code{\link{printStdColnames}})
 If you use a custom function and provide all the class- and numerical variables 
 together with the spectral data, set argument 'slType' to NULL.
 If you import from a .pir file and have all the class- and numerical variables 
-inside the .pir file, set argument 'slType'to NULL
+inside the .pir file, set argument 'slType'to NULL.
+If the dataset is the result of the fusion of other datasets 
+\code{\link{mergeDatasets}}, the slot 'mergeInfo' will contain further information.
 }
 \section{Note}{
  The strict regime with the filenames (see Details) seems maybe 

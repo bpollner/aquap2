@@ -10,7 +10,9 @@ setClassUnion(name="numChar", members =c("numeric", "character"))
 setClass("aquap_md", contains="list")
 setClass("aquap_ap", contains="list")
 setClassUnion(name="apNull", members =c("aquap_ap", "NULL"))
-setClass("aquap_data", slots=c(metadata="list", anproc="apNull", ncpwl="numeric", version="character"), contains="data.frame")
+setClass("aquap_mergeLabels", slots=c(numVec="integer", varNames="character", varTypes="character", values="listNull", dsNames="character"), contains="data.frame")
+setClassUnion(name="melaNull", members =c("aquap_mergeLabels", "NULL"))
+setClass("aquap_data", slots=c(metadata="list", anproc="apNull", mergeInfo= "melaNull", ncpwl="numeric", version="character"), contains="data.frame")
 setClass("aquap_cpt", slots=c(splitVars="list", wlSplit="list", csAvg="logical", noise="logical", exOut="logical", len="numeric"))
 setClass("aqg_calc", slots = c(ID="character", classVar="character", itemIndex="numeric", avg="matrix", colRep="numChar", possN="numeric", selInds="numeric", bootRes="matNull", ciTable="dfNull", rawSpec="dfNull", avgSpec="dfNull", subtrSpec="dfNull"))
 #setClass("aqg_cr", slots = c(res="list", ran="listNull"))
@@ -21,7 +23,6 @@ setClass("aquap_ipl", slots=c(metadata="aquap_md", anproc="aquap_ap", cubeID="ch
 # setClass("aquap_xda", slots=c(daType="character", classOn="character"), contains="list")
 # setClass("aquap_noiseDist", slots=c(timestamp="POSIXct", version="character"), contains="matrix")
 
-setClass("aquap_mergeLabels", slots=c(numVec="integer", varNames="character", varTypes="character", values="list", dsNames="character"), contains="data.frame")
 
 
 

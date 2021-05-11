@@ -52,7 +52,8 @@ generateMergeLabels_sys <- function(ds1, ds2=NULL, varNames, varTypes, values=NU
 	} else { # so we get in two datasets via ds1 and ds2
 		numVec <- c(nrow(ds1), nrow(ds2))
 		dsList <- list(ds1, ds2)
-		dsNameVec <- c(deparse(substitute(ds1)), deparse(substitute(ds2))) # get the names of the provided objects
+#		dsNameVec <- c(deparse(substitute(ds1)), deparse(substitute(ds2))) # get the names of the provided objects ##  does NOT work.
+		dsNameVec <- paste0("dataset_", c(1,2))
 	} # end else
 	#
 	varTypes <- genMergeLabels_checkInput(ds1, ds2, varNames, varTypes, values, numVec) # general checking, and here varTypes gets possible recycled i.e. length-adapted
@@ -105,13 +106,14 @@ merge_makeNewLabelBlock <- function(mergeLabels) {   # here creating the repeats
 	} # end for i
 	return(outdf)	
 } # EOF
-
+######
 mergeDatasets_two <- function(ds1, ds2, mergeLabels, noMatch=get(".ap2$stn$gen_merge_noMatch"), dol=get(".ap2$stn$gen_merge_detectOutliers")) { # newLabels can come in as NULL
 	dsList <- list(ds1, ds2)
-	names(dsList) <- c(deparse(substitute(ds1)), deparse(substitute(ds2))) # get the names of the provided objects
+#	names(dsList) <- c(deparse(substitute(ds1)), deparse(substitute(ds2))) # get the names of the provided objects ### does NOT work
+	names(dsList) <- paste0("dataset_", c(1,2))
 	return(mergeDatasets_list(dsList, mergeLabels, noMatch, dol))
 } # EOF
-
+#####
 mergeLabelObj_toList <- function(mergeLabels) {  ## used in the end of mergeDatasets_list() to put the mergeLabel object into the @metadata slot
 	char <- "from mergeLabels"
 	if (is.null(mergeLabels)) {
@@ -195,22 +197,38 @@ merge_checkListInput <- function(dsList) {
 	} # end if
 } # EOF
 
-merge_checkLabelObjectToList <- function(dsList, mergeLabels) { 
+merge_checkLabelObject <- function(dsList, mergeLabels) {
 	if (!is.null(mergeLabels)) {
 		aa <- length(dsList)
 		bb <- length(mergeLabels@dsNames)
 		if (aa != bb) {
 			stop(paste0("The number of datasets to be merged (", aa, " datasets) does not match the parameters provided in the 'mergeLabel' object (", bb, " datasets) ."), call.=FALSE)
 		} # end if length
-	} # end if !is.null mergeLabels
+	} # end if !is.null mergeLabels	
 } # EOF
+
+merge_labelObjectToSlot <- function(dsList, mergeLabels) { 
+	if (is.null(mergeLabels)) {
+		numVec <- unlist(lapply(dsList, nrow))
+		dsNames <- names(dsList)
+		vn <- ""
+		vt <- ""
+		return(new("aquap_mergeLabels", numVec=numVec, varNames=vn, varTypes=vt, values=NULL, dsNames=dsNames))
+	} else {
+		return(mergeLabels)
+	}
+} # EOF
+# setClass("aquap_mergeLabels", slots=c(numVec="integer", varNames="character", varTypes="character", values="list", dsNames="character"), contains="data.frame")
 
 ###### CORE #########
 mergeDatasets_list <- function(dsList, mergeLabels, noMatch=get(".ap2$stn$gen_merge_noMatch"), dol=get(".ap2$stn$gen_merge_detectOutliers")) { # newLabels can come in as NULL   ####CORE####
 	stn <- get("stn", envir=.ap2)
 	clpref <- stn$p_ClassVarPref
+	ypref <- stn$p_yVarPref
 	olc <- stn$p_outlierCol
 	thisSilent <- stn$allSilent
+	snrColName_y <- paste0(ypref, stn$p_sampleNrCol)
+	snrColName_c <- paste0(clpref, stn$p_sampleNrCol)
 	#
 	# intern functions 
 	checkForSameness <- function(xList, char=NULL) {
@@ -227,12 +245,15 @@ mergeDatasets_list <- function(dsList, mergeLabels, noMatch=get(".ap2$stn$gen_me
 			} # end if
 		} # end for i
 	} # EOIF
+	getRLEs_num <- function(x, cn=snrColName_y) {
+		return(rle(as.numeric(x$header[,cn])))
+	} # EOIF
 	#
 	#
 	#### entry-checking ######
 	merge_checkListInput(dsList)
 	noMatch <- merge_checkNoMatchChar(noMatch) # check if input is valid
-	merge_checkLabelObjectToList(dsList, mergeLabels)
+	merge_checkLabelObject(dsList, mergeLabels)
 	#
 	#########  make the newLabel columns ################
 	newLabelBlock <- NULL
@@ -251,6 +272,7 @@ mergeDatasets_list <- function(dsList, mergeLabels, noMatch=get(".ap2$stn$gen_me
 	headerList <- lapply(dsList, getHeader)
 	nirList <- lapply(dsList, getNIR)
 	wlsList <- lapply(dsList, getWavelengths)
+	rleList_sn <- lapply(dsList, getRLEs_num) # the default is to get the rle for the sample numbers
 	##
 	
 	######### check for duplicates within a singel dataset ########
@@ -365,7 +387,18 @@ mergeDatasets_list <- function(dsList, mergeLabels, noMatch=get(".ap2$stn$gen_me
 	checkForSameness(nirList, "wavelength")  #### here checking for sameness !! #####  # now, for the moment, all NIR has to be the same
 	##
 	##
-	######## prepare for and fuse the datasets together #########
+	
+	########## prepare special columns (Y_SampleNr) ##########
+	# prepare for the modified Y_SampleNr
+	totalNrsNeeded <- sum(unlist(lapply(rleList_sn, function(x) length(x$lengths)))) # the sum of how many numbers in each dataset occuring
+	runningHowMany <- unlist(lapply(rleList_sn, function(x) x$lengths)) # a vector, the running number saying how many of the same values (ranging from 1:totalNrsNeeded)  are needed
+	newSNrVec <- numeric(0)
+	for (i in 1: totalNrsNeeded) { # length(runningHowMany) would be the same
+		newSNrVec <- c(newSNrVec, rep(i, runningHowMany[i])) # will be pasted into the ready-made fused header below
+	} # end for i
+	##
+	
+	######## prepare for and fuse the datasets together, also take care of special columns (Y_SampleNr) #########
 	header <- as.data.frame(matrix(NA, nrow=sum(numVec) , ncol=ncol(headerList[[1]]) )) # just take the first one, by now all columns should be the same
 	NIR <- as.data.frame(matrix(NA, nrow=sum(numVec) , ncol=ncol(nirList[[1]]) )) # at the moment, all NIR MUST be the same wavelength
 	colRep <- as.data.frame(matrix(NA, nrow=sum(numVec) , ncol=2 )) # will be re-colored anyway
@@ -387,13 +420,17 @@ mergeDatasets_list <- function(dsList, mergeLabels, noMatch=get(".ap2$stn$gen_me
 			header[ris:rie,i] <- aa  # colwise			### CORE ###
 			NIR[ris:rie,] <- nirList[[k]]				### CORE ###
 		} # end for i
-	} # end for k
+	} # end for k #### CORE fuse together ######
 	newHeaderColnames <- colnames(headerList[[1]])
 	if (!is.null(newLabelBlock)) {
 		header <- cbind(header, newLabelBlock)	
 		newHeaderColnames <- c(colnames(headerList[[1]]), colnames(newLabelBlock)) # take from #1 as now all header names should be the same
 	} # end if
 	colnames(header) <- newHeaderColnames
+	# replace some values 
+	header[,which(colnames(header) == snrColName_y)] <- newSNrVec	  	# paste in the new values for the sample number
+	header[,which(colnames(header) == snrColName_c)] <- as.character(newSNrVec)	  	# paste in the new values for the sample number as character
+	#
 	ind <- which(colnames(header) == paste0(clpref, olc, "_all"))
 	if (length(ind) != 0) {
 		colnames(header)[ind] <- paste0(clpref, olc, "_single_all")	
@@ -424,7 +461,7 @@ mergeDatasets_list <- function(dsList, mergeLabels, noMatch=get(".ap2$stn$gen_me
     } # end for i
     fd <- reColor(fd)
     fd@ncpwl <- getNcpwl(dsList[[1]]) # just take the first one
-    fd@metadata <- mergeLabelObj_toList(mergeLabels)
+    fd@mergeInfo <- merge_labelObjectToSlot(dsList, mergeLabels)
     fd@version <- pv_versionDataset
     if (!stn$allSilent & !dol) {
 		cat(paste0("ok. \n"))
