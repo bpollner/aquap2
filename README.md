@@ -4,7 +4,6 @@ Authors: Bernhard Pollner & Zoltan Kovacs
 
 [![DOI](https://zenodo.org/badge/30932899.svg)](https://zenodo.org/badge/latestdoi/30932899)
 
-
 ## Getting Started
 To install the R-package "aquap2", do a github-install via devtools, in that way all dependencies should get installed as well.
 
