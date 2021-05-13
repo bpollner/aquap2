@@ -281,7 +281,7 @@ generateMergeLabels_list_3_M <- function(ds1, ds2=NULL, varNames, varTypes, valu
 
 showMergeLabels <- function(object) {
 	aa <- object@varNames
-	if (aa == "") {le <- 0} else {le <- length(object@varNames)}
+	if (all(aa == "")) {le <- 0} else {le <- length(object@varNames)}
 	cat(paste0("An object of class 'aquap_mergeLabels', containing ", le, " new Labels for ", length(object@numVec), " datasets to be merged.\n\n"))
 	print(object)
 	return(invisible(NULL))
