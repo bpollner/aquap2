@@ -170,20 +170,23 @@ merge_readInChoice <- function() {
 } # EOF
 
 merge_makeMissVisual <- function(headerList, dsNames) {
+	charMiss <- "no" # the characters used in the missVisual
+	charPresent <- "yes"
+	#
 	missVisual <- NULL
 	aa <- as.vector(unlist(sapply(headerList, colnames)))   	# first collect all column names into a single vector
 	cnsTab <- table(aa) # gives a named numeric
 	tabMissing <- sort(cnsTab[which(cnsTab < length(headerList))], decreasing = TRUE) # gives back a named numeric
 	if (length(tabMissing) != 0) { # so we do have non-matching column names
 		namesMissing <- sort(names(tabMissing))  #  gives the names of those columns that are NOT in all datasets
-		missVisual <- as.data.frame(matrix("ok", nrow=length(headerList), ncol=length(tabMissing)))
+		missVisual <- as.data.frame(matrix(charPresent, nrow=length(headerList), ncol=length(tabMissing)))
 		rownames(missVisual) <- dsNames
 		colnames(missVisual) <- namesMissing
 		for (i in 1: length(headerList)) { # the rows in missVisual
 			for (k in 1: length(namesMissing)) { # the columns in missVisual
 				haveIt <- namesMissing[k] %in% colnames(headerList[[i]])
 				if (!haveIt) {
-					missVisual[i,k] <- "miss"
+					missVisual[i,k] <- charMiss
 				} # end if
 			} # end for k (going through the missing names)
 		} # end for i (going through the datasets)
