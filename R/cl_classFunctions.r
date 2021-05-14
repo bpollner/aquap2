@@ -1,20 +1,27 @@
 show_aquap_data <- function(object) {
 	autoUpS(cfs=FALSE)
+	#
+	stn <- get("stn", envir=.ap2)
+	maxShow <- stn$gen_showData_nrRows
+	#
 	cns <- colnames(object$NIR)
 	nr <- nrow(object$header)
 	nNIRcols <- nnc <- ncol(object$NIR)
 	cat("Formal class 'aquap_data' \n")
-	cat(paste(nr, " observations in ", nNIRcols, " wavelengths, from ", cns[1], " to ", cns[length(cns)], ".\n(Showing only max. 10 rows.)\n", sep=""))
-	if (nr < 10) {
+	cat(paste0(nr, " observations in ", nNIRcols, " wavelengths, from ", cns[1], " to ", cns[length(cns)], ".\n"))
+	if (nr < maxShow) {
 		rs <- 1:nr
+		showChar <- ""
 	} else {
-		rs <- 1:10
+		rs <- 1:maxShow
+		showChar <- paste0("(Showing only max. ", maxShow, " rows.)\n")
 	}
 	if (nnc < 8) {
 		cs <- 1:nnc
 	} else {
 		cs <- 1:8
-	}	
+	} 
+	cat(showChar)
 	print(object$header[rs,])
 	if (.ap2$stn$gen_showData_NIR) {
 		print(object$NIR[rs,cs])

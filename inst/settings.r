@@ -52,6 +52,7 @@ stn <- list(
 	allSilent = FALSE,						## if false, "status" messages will be displayed
 	autoUpdateSettings = TRUE, 				## if the settings should be automatically updated when calling a function from package 'aquap2'. Recommended value is TRUE.
 	defCfs = TRUE,							## if, when calling any resp. most functions, it should be checked if we are within the required default folder structure of an aquap2 experiment.
+	gen_showData_nrRows = 24, 				## the number of rows that should be displayed when showing an object of class 'aquap_data', i.e. when typing only the name of the object in the console.
 	gen_merge_noMatch = "ask", 				## when merging datasets, what should be done if non-matching header structures (column names) are detected. For possible values see ?mergeDatsets.
 	gen_merge_detectOutliers = TRUE, 		## if, when merging datasets, outliers should be detected based on the new scope of the merged dataset
 	gen_showExtendedCube = TRUE, 			## if set to TRUE, the number of rows and the number of wavelengths in each element of a cube will be displayed as well.

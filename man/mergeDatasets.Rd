@@ -63,8 +63,12 @@ e.g. a header with the column names 'AA, BB, CC' does overlap with a header with
 the column names 'AA, CC, BB'.
 }
 \seealso{
+generateMergeLabels
+
 Other dataset modification functions: 
 \code{\link{[,aquap_data-method}},
+\code{\link{calculateVariable}()},
+\code{\link{combineVariable}()},
 \code{\link{generateMergeLabels,aquap_data,aquap_data,character,character-method}}
 }
 \concept{dataset modification functions}
