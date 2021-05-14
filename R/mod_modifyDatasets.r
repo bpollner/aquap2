@@ -1,3 +1,4 @@
+#########################  Merge Datasets #######################
 # functions to merge datasets together, i.e. kind of "rbind" them. --------
 
 # setClass("aquap_mergeLabels", slots=c(numVec="integer", varNames="character", varTypes="character", values="list", dsNames="character"), contains="data.frame")
@@ -170,20 +171,23 @@ merge_readInChoice <- function() {
 } # EOF
 
 merge_makeMissVisual <- function(headerList, dsNames) {
+	charMiss <- "no" # the characters used in the missVisual
+	charPresent <- "yes"
+	#
 	missVisual <- NULL
 	aa <- as.vector(unlist(sapply(headerList, colnames)))   	# first collect all column names into a single vector
 	cnsTab <- table(aa) # gives a named numeric
 	tabMissing <- sort(cnsTab[which(cnsTab < length(headerList))], decreasing = TRUE) # gives back a named numeric
 	if (length(tabMissing) != 0) { # so we do have non-matching column names
 		namesMissing <- sort(names(tabMissing))  #  gives the names of those columns that are NOT in all datasets
-		missVisual <- as.data.frame(matrix("ok", nrow=length(headerList), ncol=length(tabMissing)))
+		missVisual <- as.data.frame(matrix(charPresent, nrow=length(headerList), ncol=length(tabMissing)))
 		rownames(missVisual) <- dsNames
 		colnames(missVisual) <- namesMissing
 		for (i in 1: length(headerList)) { # the rows in missVisual
 			for (k in 1: length(namesMissing)) { # the columns in missVisual
 				haveIt <- namesMissing[k] %in% colnames(headerList[[i]])
 				if (!haveIt) {
-					missVisual[i,k] <- "miss"
+					missVisual[i,k] <- charMiss
 				} # end if
 			} # end for k (going through the missing names)
 		} # end for i (going through the datasets)
@@ -222,6 +226,7 @@ merge_labelObjectToSlot <- function(dsList, mergeLabels) {
 
 ###### CORE #########
 mergeDatasets_list <- function(dsList, mergeLabels, noMatch=get(".ap2$stn$gen_merge_noMatch"), dol=get(".ap2$stn$gen_merge_detectOutliers")) { # newLabels can come in as NULL   ####CORE####
+	autoUpS()
 	stn <- get("stn", envir=.ap2)
 	clpref <- stn$p_ClassVarPref
 	ypref <- stn$p_yVarPref
@@ -460,6 +465,7 @@ mergeDatasets_list <- function(dsList, mergeLabels, noMatch=get(".ap2$stn$gen_me
        } # end if
     } # end for i
     fd <- reColor(fd)
+    fd@metadata <- getmd()
     fd@ncpwl <- getNcpwl(dsList[[1]]) # just take the first one
     fd@mergeInfo <- merge_labelObjectToSlot(dsList, mergeLabels)
     fd@version <- pv_versionDataset
@@ -468,6 +474,229 @@ mergeDatasets_list <- function(dsList, mergeLabels, noMatch=get(".ap2$stn$gen_me
 	}
 	return(fd)
 } # EOF
+#########################  End Merge Datasets #######################
+
+
+
+########################
+combine_checkEntry <- function(dataset, sourceVars, name, sep) {
+	checkForCharacter <- function(char, argName, len=1) {
+		if (!all(is.character(char)) | length(char) != len) {
+			stop(paste0("Please provide a character length ", len, " in the argument '", argName, "'"), call.=FALSE)
+		} 
+	} # EOIF
+	##
+	if (class(dataset) != "aquap_data") {
+		stop("Please provide an object of class 'aquap_data' in the argument 'dataset'", call.=FALSE)
+	} # end if
+	if (is.null(sourceVars)) {
+		stop("You must provide two or more valid variable / column names in the argument 'sourceVars'", call.=FALSE)
+	} # end if
+	if (is.null(name)) {
+		stop("You must provide a name for the new variable in the argument 'name'", call.=FALSE)
+	} # end if
+	checkForCharacter(name, "name", len=1)
+	checkForCharacter(sep, "sep", len=1)
+	# check the source vars
+	if (!all(is.character(sourceVars))) {
+		stop("Please provide only characters in the argument 'sourceVars'", call.=FALSE)
+	} # end if
+	cns <- colnames(getHeader(dataset))
+	ind <- which(!sourceVars %in% cns) # check for existence of source vars
+	if (length(ind) != 0) { # so we have source vars that are NOT present in the header
+		charMiss <- sourceVars[ind]
+		if (length(ind)>1) {add <- "s"; w <- "are"} else {add <- ""; w <- "is"}
+		stop(paste0("The source-variable", add, " '", paste(charMiss, collapse=", "), "' ", w, " not present in the provided dataset"), call.=FALSE)
+	} # end if
+	
+
+} # EOF
+
+#' @title Combine Variable
+#' @description Combine values from several variables into a single value in 
+#' a mew variable.
+#' @details The resulting new variable can only be a class-variable. 
+#' @param dataset The standard dataset as produced by \code{\link{gfd}}.
+#' @param sourceVars Character length two or more. The name of the variables where 
+#' values should be copied from.
+#' @param name Character length one. The name of the new variable.
+#' @param sep Character length one. A character to separate the individual 
+#' values in the new variable. Set to '""' (empty string) to have no separation 
+#' between values.
+#' @return An object of class 'aquap_data' with a new variable in the header.
+#' @examples
+#' \dontrun{
+#' fd <- gfd() # load a dataset
+#' fdNew <- combineVariable(fd, c("C_Foo", "C_Bar"), "FooBar")
+#' fdNew <- combineVariable(fd, c("C_Foo", "C_Bar"), "FooBar", sep="*")
+#' 	# is combining the values of the two variables 'C_Foo' and 'C_Bar' into a new 
+#'  # variable called 'C_FooBar'.
+#' }
+#' @seealso calculateVariable
+#' @family dataset modification functions
+#' @export
+combineVariable <- function(dataset, sourceVars=NULL, name=NULL, sep="_") {
+	autoUpS()
+	stn <- get("stn", envir=.ap2)
+	clpref <- stn$p_ClassVarPref
+	#
+	combine_checkEntry(dataset, sourceVars, name, sep) # checks all input, makes sure that all provided source variables are present in the dataset
+	#
+	header <- getHeader(dataset)
+	sourceHeader <- header[,sourceVars]
+	newDF <- data.frame(factor(apply(sourceHeader, 1, function(x) paste(x, collapse=sep))))
+	colnames(newDF) <- paste0(clpref, name)
+	header <- cbind(header, newDF)
+	dataset$header <- I(header)
+	dataset <- reColor(dataset)
+	return(dataset)
+} # EOF
+
+calculate_checkEntry <- function(dataset, cexpr, name, type) {
+	checkForCharacter <- function(char, argName, len=1) {
+		if (!all(is.character(char)) | length(char) != len) {
+			stop(paste0("Please provide a character length ", len, " in the argument '", argName, "'"), call.=FALSE)
+		} 
+	} # EOIF
+	##
+	if (class(dataset) != "aquap_data") {
+		stop("Please provide an object of class 'aquap_data' in the argument 'dataset'", call.=FALSE)
+	} # end if
+	if (is.null(name)) {
+		stop("You must provide a name for the new variable in the argument 'name'", call.=FALSE)
+	} # end if
+	if (!is.expression(cexpr)) {
+		stop("You must provide an expression describing how the values for the new variable should be calculated in the argument 'cexpr'", call.=FALSE)
+	} # end if	
+	if (deparse(cexpr) == "expression(\"\")") {
+		stop("Please provide an expression describing how the values for the new variable should be calculated in the argument 'cexpr'", call.=FALSE)
+	} # end if
+	checkForCharacter(name, "name", len=1)
+	checkForCharacter(type, "type", len=1)
+	if (!type %in% c("c", "n")) {
+		stop("Please provide either 'c' or 'n' in the argument 'type'", call.=FALSE)
+	} # end if
+	
+} # EOF
+
+calculate_postChecking <- function(header, newDF, name, type) {
+	stn <- get("stn", envir=.ap2)
+	allSilent <- stn$allSilent
+	#
+	if (type == "n") {
+		if (!all(is.numeric(newDF[,1]))) {
+			stop(paste0("You want the the new variable '", name, "' to be numeric, but not all calculated values are numeric"), call.=FALSE)
+		} # end if
+	} # end if type == "n"
+	if (type =="c") {
+		# do nothign
+	} # end if
+	if (any(is.na(newDF[,1]))) {
+		ind <- which(is.na(newDF[,1]))
+		char <- "\nSome values calculated to 'NA'\n\n"
+		if (!allSilent) {
+			message(char)
+			print(header[ind,])
+		} # end if	
+	} # end if
+	
+} # EOF
+
+#' @title Calculate Variable
+#' @description Calculate values for a new variable.
+#' @param dataset The standard dataset as produced by \code{\link{gfd}}.
+#' @param cexpr An arbitrary R expression describing how to calculate the 
+#' values for the new variable. The expression will be evaluated using 'with', 
+#' with the local environment being a single row of the provided dataset.
+#' @param name Character length one. The name of the new variable.
+#' @param type Character length one. The type of the new variable. Possible values 
+#' are 'c' for class-variables and 'n' for numeric variables. Defaults to '"c"'.
+#' @details Similarly as \code{\link{combineVariable}} is simply combining , i.e. 
+#' pasting together all the values of the selected variables from a single 
+#' observation (within one row), \code{calculateVariable} is using variables of 
+#' one observation (within one row) to calculate a new value according to the 
+#' expression provided in the argument 'cexpr'. The expression can contain logical 
+#' clauses etc, and it pertains exclusively to the values within a single row. 
+#' Typically, the expression could contain an if clause followed by two values,
+#' See examples.
+#' New variables of type 'numeric' can obviously only be calculated from numerical 
+#' variables, but the numeric result of such a calculation can be used as class 
+#' variable by setting the type of the new variable to 'class' voa providing 'c' 
+#' to the argument 'type'.
+#' The name of the new variable and the expression used to calculate it is stored 
+#' in a list in the slot named 'calcVarInfo'. (\code{object@@calcVarInfo})
+#' @return An object of class 'aquap_data' with a new variable in the header.
+#' @examples
+#' \dontrun{
+#' fd <- gfd() # load a dataset
+#' cexpr <- expression(Y_Foo + Y_Bar)
+#' newFd <- calculateVariable(fd, cexpr, name="Addition")
+#' # more examples of how to formulate the expression:
+#' cexpr <- expression((Y_Foo * Y_Bar)/Y_Fuba)
+#' cexpr <- expression(if (Y_Foo < 5 & C_Bar == "blabla") "Outcome1" else "Outcome2")
+#' cexpr <- expression(if (C_Bar == "blabla" | C_Foo == "blibli") "Outcome1" else "Outcome2")
+#' cexpr <- expression(as.numeric(paste0(Y_Foo, C_Bar))/Y_Foobar) # of course crazy, but
+#' # it demonstrates that everything is possible in the expression. 
+#' #
+#' # use a numerical outcome as class variable:
+#' newFd <- calculateVariable(fd, expression(Y_Foo - Y_Bar), name="Subtraction", type="c") 
+#' newFd <- calculateVariable(fd, expression(Y_Foo - Y_Bar), name="Subtraction", type="n") 
+#' # in that way you can color by the result of the calculation, and you 
+#' # can also add the same variable as numerical variable
+#' }
+#' @family dataset modification functions
+#' @seealso combineVariable
+#' @export
+calculateVariable <- function(dataset, cexpr=expression(""), name=NULL, type="c") {
+	autoUpS()
+	stn <- get("stn", envir=.ap2)
+	clpref <- stn$p_ClassVarPref
+	ypref <- stn$p_yVarPref
+	#
+	calculate_checkEntry(dataset, cexpr, name, type) # checks the input
+	#
+	if (type == "c") {
+		newColname <- paste0(clpref, name)
+	} else {
+		newColname <- paste0(ypref, name)
+	}
+	header <- getHeader(dataset)
+	if (newColname %in% colnames(header)) { # check for double column names
+		stop(paste0("The column name '", newColname, "' already exists in the provided dataset '", deparse(substitute(dataset)), "'."), call.=FALSE)
+	} # end if
+	#
+	newDF <- as.data.frame(matrix(NA, nrow=nrow(header), ncol=1))
+	colnames(newDF) <- newColname
+	for (i in 1: nrow(header)) {   # I know. Something with "apply" or so would be way more elegant. Could not quickly find how to do that. Sorry. :-) 
+		aa <- 	try(with(header[i,], eval(cexpr)), silent=TRUE)   ###### CORE ######
+		if (class(aa) != "try-error") { # so all went well
+			newDF[i,1] <- aa
+			# check for warnigns. No. Maybe an other time. It is late now.
+		} else { # so we have an error
+			msgChar <- paste0("Sorry, there was an error while applying the expression \n'", paste0(enquote(cexpr), collapse="("), ")'.\n")
+			message(msgChar)
+			errMsg <- trimws(strsplit(aa[[1]], ":")[[1]][2])
+			cat(paste0("Error text: \n"))
+			message(paste0(errMsg, "\n\n"))
+			cat(paste0("The error occurred at row #", i, " in the provided dataset '", deparse(substitute(dataset)), "'.\n\n"))
+			print(header[i,])
+			stop(call.=FALSE)
+		} # end else
+	} # end for i
+	if (type == "c") {
+		newDF[,1] <- factor(newDF[,1]) # turn characters into factors
+	} # end if
+	header <- cbind(header, newDF)
+	calculate_postChecking(header, newDF, newColname, type)
+	dataset$header <- I(header)
+	dataset <- reColor(dataset)
+	dataset@calcVarInfo <- c(dataset@calcVarInfo, list(list(name=newColname, cexpr=cexpr)))  # make new CalcInfo List
+	return(dataset)	
+} # EOF
+
+
+
+###############################################################################
 
 #' @title Generate Merge Labels
 #' @description Generate an object of class 'aquap_mergeLabels' that can be used 
@@ -522,6 +751,7 @@ mergeDatasets_list <- function(dsList, mergeLabels, noMatch=get(".ap2$stn$gen_me
 #' }
 #' @family dataset modification functions
 #' @return An object of class 'aquap_mergeLabels'.
+#' @seealso mergeDatasets
 #' @name generateMergeLabels
 NULL
 
@@ -559,5 +789,6 @@ NULL
 #' @return An object of class 'aquap_data', with all the single datasets merged
 #' together.
 #' @family dataset modification functions
+#' @seealso generateMergeLabels
 #' @name mergeDatasets
 NULL

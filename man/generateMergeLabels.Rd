@@ -83,8 +83,12 @@ labels <- generateMergeLabels(fd1, fd2, c("foo", "bar", "foobar"), c("c", "n", "
 }
 }
 \seealso{
+mergeDatasets
+
 Other dataset modification functions: 
 \code{\link{[,aquap_data-method}},
+\code{\link{calculateVariable}()},
+\code{\link{combineVariable}()},
 \code{\link{mergeDatasets,aquap_data,aquap_data,missing-method}}
 }
 \concept{dataset modification functions}

@@ -100,6 +100,8 @@ Other Data pre-treatment functions:
 \code{\link{ssc}()}
 
 Other dataset modification functions: 
+\code{\link{calculateVariable}()},
+\code{\link{combineVariable}()},
 \code{\link{generateMergeLabels,aquap_data,aquap_data,character,character-method}},
 \code{\link{mergeDatasets,aquap_data,aquap_data,missing-method}}
 }

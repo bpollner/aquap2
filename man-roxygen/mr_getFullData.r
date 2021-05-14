@@ -113,12 +113,13 @@
 #' as detected in the scope of the complete dataset will be added to the dataset.
 #' @seealso \code{\link{readSpectra}}, \code{\link{readHeader}}, 
 #' \code{\link{aquap_data-methods}}
-#' @return An object of class 'aquap_data' containing a data frame and five slots:
+#' @return An object of class 'aquap_data' containing a data frame and six slots:
 #' \itemize{
 #' \item dataframe Consists of 'header', 'colRep' and 'NIR'.
 #' \item metadata A list with the metadata of the experiment
 #' \item anproc Possibly a list with an analysis procedure
 #' \item mergeInfo Possibly an object of class 'aquap_mergeLabels' 
+#' \item calcVarInfo Possibly a list containing information on calculated variables.
 #' (\code{\link{generateMergeLabels}}), if the dataset is the result of merging 
 #' other datsets.
 #'  \item ncpwl Numeric length one, the number of characters before the wavelength 
