@@ -241,29 +241,29 @@ plot_nnet_cube_M <- function(object, ...) {
 
 
 # merge datasets ------------
-mergeDatasets_two_noLabels_M <- function(ds1, ds2, mergeLabels=NULL, noMatch="ask", dol=TRUE) {
+mergeDatasets_two_noLabels_M <- function(ds1, ds2, mergeLabels=NULL, noMatchH="ask", noMatchW="ask", dol=TRUE) {
 #	print("mergeDatasets_two_noLabels_M"); wait()
-	mergeDatasets_two(ds1, ds2, mergeLabels=NULL, noMatch, dol)
+	mergeDatasets_two(ds1, ds2, mergeLabels=NULL, noMatchH, noMatchW, dol)
 } # EOF
 
-mergeDatasets_two_mergeLabels_M <- function(ds1, ds2, mergeLabels, noMatch="ask", dol=TRUE) {
+mergeDatasets_two_mergeLabels_M <- function(ds1, ds2, mergeLabels, noMatchH="ask", noMatchW="ask", dol=TRUE) {
 #	print("mergeDatasets_two_mergeLabels_M"); wait()
-	mergeDatasets_two(ds1, ds2, mergeLabels, noMatch, dol)
+	mergeDatasets_two(ds1, ds2, mergeLabels, noMatchH, noMatchW, dol)
 } # EOF
 
-mergeDatasets_list_noLabels_M <- function(ds1, ds2=NULL, mergeLabels=NULL, noMatch="ask",  dol=TRUE) {
+mergeDatasets_list_noLabels_M <- function(ds1, ds2=NULL, mergeLabels=NULL, noMatchH="ask", noMatchW="ask", dol=TRUE) {
 #	print("mergeDatasets_list_noLabels_M"); wait()
-	mergeDatasets_list(dsList=ds1, mergeLabels=NULL, noMatch, dol)
+	mergeDatasets_list(dsList=ds1, mergeLabels=NULL, noMatchH, noMatchW, dol)
 } # EOF
 
-mergeDatasets_list_mergeLabels_M <- function(ds1, ds2=NULL, mergeLabels, noMatch="ask", dol=TRUE) {
+mergeDatasets_list_mergeLabels_M <- function(ds1, ds2=NULL, mergeLabels, noMatchH="ask", noMatchW="ask", dol=TRUE) {
 #	print("mergeDatasets_list_mergeLabels_M"); wait()
-	mergeDatasets_list(dsList=ds1, mergeLabels, noMatch, dol)
+	mergeDatasets_list(dsList=ds1, mergeLabels, noMatchH, noMatchW, dol)
 } # EOF
 
-mergeDatasets_list_mergeLabels_2_M <- function(ds1, ds2, mergeLabels=NULL, noMatch="ask", dol=TRUE) {
+mergeDatasets_list_mergeLabels_2_M <- function(ds1, ds2, mergeLabels=NULL, noMatchH="ask", noMatchW="ask", dol=TRUE) {
 #	print("mergeDatasets_list_mergeLabels_2_M"); wait()
-	mergeDatasets_list(dsList=ds1, mergeLabels=ds2, noMatch, dol)
+	mergeDatasets_list(dsList=ds1, mergeLabels=ds2, noMatchH, noMatchW, dol)
 } # EOF
 
 generateMergeLabels_twoDatasets_M <- function(ds1, ds2, varNames, varTypes, values=NULL) {

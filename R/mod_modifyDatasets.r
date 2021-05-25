@@ -108,11 +108,11 @@ merge_makeNewLabelBlock <- function(mergeLabels) {   # here creating the repeats
 	return(outdf)	
 } # EOF
 ######
-mergeDatasets_two <- function(ds1, ds2, mergeLabels, noMatch=get(".ap2$stn$gen_merge_noMatch"), dol=get(".ap2$stn$gen_merge_detectOutliers")) { # newLabels can come in as NULL
+mergeDatasets_two <- function(ds1, ds2, mergeLabels, noMatchH=get(".ap2$stn$gen_merge_noMatchH"), noMatchW=get(".ap2$stn$gen_merge_noMatchW"), dol=get(".ap2$stn$gen_merge_detectOutliers")) { # newLabels can come in as NULL
 	dsList <- list(ds1, ds2)
 #	names(dsList) <- c(deparse(substitute(ds1)), deparse(substitute(ds2))) # get the names of the provided objects ### does NOT work
 	names(dsList) <- paste0("dataset_", c(1,2))
-	return(mergeDatasets_list(dsList, mergeLabels, noMatch, dol))
+	return(mergeDatasets_list(dsList, mergeLabels, noMatchH, noMatchW, dol))
 } # EOF
 #####
 mergeLabelObj_toList <- function(mergeLabels) {  ## used in the end of mergeDatasets_list() to put the mergeLabel object into the @metadata slot
@@ -126,29 +126,35 @@ mergeLabelObj_toList <- function(mergeLabels) {  ## used in the end of mergeData
 	return(out)	
 } # EOF  ## used in the end of mergeDatasets_list()
 
-merge_checkNoMatchChar <- function(noMatch) {
-	#	pv_noMatchChar <- c("ask", "delete", "rename", "stop")
-	if (! all(is.character(noMatch)) | length(noMatch) > 1) {
-		stop("Please provide a character length one to the argument 'noMatch'", call.=FALSE)
+merge_checknoMatchChar <- function(noMatchX, pvals, what) {
+	#	pv_noMatchHChar <- c("ask", "delete", "rename", "stop")
+	if (! all(is.character(noMatchX)) | length(noMatchX) > 1) {
+		stop(paste0("Please provide a character length one to the argument 'noMatch", what, "'"), call.=FALSE)
 	}
-	if (! noMatch %in% pv_noMatchChar) {
-		stop(paste0("Please provide one of '", paste(pv_noMatchChar, collapse="', '"), "' to the argumet 'noMatch'"), call.=FALSE) 
+	if (! noMatchX %in% pvals) {
+		stop(paste0("Please provide one of '", paste(pvals, collapse="', '"), "' to the argumet 'noMatch", what, "'"), call.=FALSE) 
 	}
-	return(noMatch)
+	return(noMatchX)
 } # EOF
 
-merge_readInChoice <- function() {
+merge_readInChoice <- function(xx) {
 	maxTries <- 3
 	ask <- TRUE
 	aa <- 1
-	txt <- "Please type in either 1, 2, or 3."
+	if (xx == 3) {
+		txt <- "Please type in either 1, 2, or 3."
+	}
+	if (xx == 5) {
+		txt <- "Please type in either 1, 2, 3, 4 or 5."
+	}
+	vec <- 1:xx
 	#
 	checkChoice <- function(choice) {
 		if (length(choice) == 0) {
 			message(txt)
 			return(TRUE)			
 		}
-		if (! choice %in% c(1,2,3)) {
+		if (! choice %in% vec) {
 			message(txt)
 			return(TRUE)
 		}
@@ -195,6 +201,56 @@ merge_makeMissVisual <- function(headerList, dsNames) {
 	return(missVisual)
 } # EOF
 
+merge_makeMissVisualNIR <- function(wlsList, dsNames) {
+	charMiss <- 	"    -- no --    " # the characters used in the missVisual
+	charPresent <-	"      yes       "
+	rndDelta <- 20
+	mdC <- "*" # the character to add when we have more then one deltas in one dataset
+	#
+	combLists <- function(la, lb) {
+		ol <- list(NULL); length(ol) <- length(la)
+		for (i in 1: length(la)) {
+			ol[[i]] <- c(la[[i]], lb[[i]])
+		}
+		return(ol)
+	} # EOIF
+	#
+	missVisual <- NULL
+	ranges <- lapply(wlsList, range) # gives back a list
+	ransUn <- unique(ranges) # gives back a list
+	deltas <- lapply(wlsList, function(x) unique(round(diff(x), rndDelta))) # rounding seems to be necessary... somehow the delta can come up with long decimals...
+	ranDeltaComb <- combLists(ranges, deltas)
+	ranDeltaUni <- unique(ranDeltaComb) # now has the ranges combined with the deltas. The length of that is the numbers of different datasets that we have
+	#
+	singleDeltaChar <- rep("", length(deltas))
+	singleDeltaNum <- numeric(length(deltas))
+	for (i in 1: length(deltas)) { # prepare a character vector telling us whether we have more than one delta wls
+		if (length(deltas[[i]]) == 1) {
+			singleDeltaNum[i] <- deltas[[i]]
+		} else {
+			singleDeltaNum[i] <- as.numeric(names(sort(table(deltas[[i]]), TRUE))[1]) # gives back the delta that comes up most often
+			singleDeltaChar[i] <- mdC
+		} # end else
+	} # end for i	
+	print(singleDeltaChar); print(singleDeltaNum)
+	#
+	missVisual <- as.data.frame(matrix(charMiss, nrow=length(wlsList), ncol=length(ranDeltaUni)))
+	for (i in 1: length(ranDeltaUni)) { # go through each present range & delta (the columns)
+		for (k in 1: length(wlsList)) { # go through each dataset (the rows)
+			if (identical(ranDeltaUni[[i]], ranDeltaComb[[k]])) {
+				missVisual[k,i] <- charPresent
+			} # end if
+		} # end for k (the datasets)
+	} # end for i (the ranges)
+	rownames(missVisual) <- dsNames
+	cns <- sapply(ranDeltaUni, function(x) paste0(x[1], " - ", x[2], ", ∆=", x[3]))
+	cns <- paste0("   ", cns,"   ")
+	colnames(missVisual) <- cns
+	newO <- order(sapply(apply(missVisual,2, function(x) which(grepl("yes",x))), length), decreasing = TRUE) # re-order the miss-visual, most participants on the left
+	missVisual <- missVisual[,newO]
+	return(missVisual)
+} # EOF
+
 merge_checkListInput <- function(dsList) {
 	if (class(dsList) == "aquap_data") {
 		stop(paste0("Wrong or missing input. Please refer to the manual (?mergeDatasets) for possible options."), call.=FALSE)
@@ -224,8 +280,83 @@ merge_labelObjectToSlot <- function(dsList, mergeLabels) {
 } # EOF
 # setClass("aquap_mergeLabels", slots=c(numVec="integer", varNames="character", varTypes="character", values="list", dsNames="character"), contains="data.frame")
 
+merge_checkWlsActual <- function(wlsList, newMasterWls, dsNames, what) {
+	for (i in 1: length(wlsList)) {
+		if (what == "fill") {
+			if (!all(wlsList[[i]] %in% newMasterWls)) {
+					stop(paste0("Sorry, without resampling the wavelengths from dataset '", dsNames[i], "' can not be merged."), call.=FALSE)
+			} # end if		
+		} # end if fill
+		#
+		if (what == "cut") {
+			if (!all(newMasterWls %in% wlsList[[i]])) {
+					stop(paste0("Sorry, without resampling the wavelengths from dataset '", dsNames[i], "' can not be merged."), call.=FALSE)
+			} # end if		
+		} # end if fill		
+	} # end for i
+	return(invisible(NULL))
+} # EOF
+
+merge_checkWlsDeltas <- function(wlsList) {
+	deltas <- lapply(wlsList, function(x) unique(diff(x)))
+	deltaUn <- unique(unlist(deltas))
+	if (length(deltaUn) != 1) {
+		stop(paste0("Not all datasets have the same delta wavelength. Please consider resampling the datasets by providing '", pv_noMatchWChar[4], "' or '", pv_noMatchWChar[5], "' to the argument 'noMatchW'"), call.=FALSE)
+	} # end if 
+	return(deltaUn)
+} # EOF
+
+merge_cutNirOutsiders <- function(dsList, wlsList, dsNames) {
+	# check for equal delta
+	deltaWls <- merge_checkWlsDeltas(wlsList)
+	#
+	rans <- lapply(wlsList, range)
+	newLower <- max(sapply(rans, function(x) x[1])) # get the new lower limit for all wavelengths
+	newUpper <- min(sapply(rans, function(x) x[2])) # get the new upper limit for all wavelengths
+	#
+	newMasterWls <- seq(newLower, newUpper, by=deltaWls) # just for checking
+	merge_checkWlsActual(wlsList, newMasterWls, dsNames, "cut")
+	#
+	new_dsList <- lapply(dsList, function(x, lower, upper) selectWls(x, lower, upper), lower=newLower, upper=newUpper) # haha
+	# now collect back
+	nirList <- lapply(new_dsList, getNIR)
+	wlsList <- lapply(new_dsList, getWavelengths)
+	return(list(nirList=nirList, wlsList=wlsList, newRange=c(newLower, newUpper)))
+} # EOF
+
+merge_fillInNirOutsiders <- function(nirList, wlsList, dsNames) {
+	# check for equal delta
+	deltaWls <- merge_checkWlsDeltas(wlsList)
+	#
+	rans <- lapply(wlsList, range)
+	newLower <- min(sapply(rans, function(x) x[1])) # get the new lower limit for all wavelengths
+	newUpper <- max(sapply(rans, function(x) x[2])) # get the new upper limit for all wavelengths
+	newRange <- c(newLower, newUpper)
+	# find out the ncpwl of the first dataset (yes, we could bring it. But we can check as well.)
+	wlW <- unlist(strsplit(	colnames(nirList[[1]])[1], "")) # the wavelength with the character
+	wlWo <- unlist(strsplit(as.character(wlsList[[1]][1]), ""))
+	cpwl <- setdiff(wlW, wlWo) # the character(s) before the wavelength
+	# now we have to operate on the wlsList, as the ncpwl in the other wavelengths could be different (would be stupid - but it is possible)
+	newMaWls <- seq(newLower, newUpper, by=deltaWls) # the new master wavelength
+	#
+	merge_checkWlsActual(wlsList, newMaWls, dsNames, "fill")
+	#
+	for (i in 1: length(nirList)) { # going through the nirList
+		if (!identical(range(wlsList[[i]]), newRange)) {
+			thisNewNir <- as.data.frame(matrix(NA, nrow=nrow(nirList[[i]]), ncol=length(newMaWls)))
+			colnames(thisNewNir) <- paste0(cpwl, newMaWls)
+			rownames(thisNewNir) <- rownames(nirList[[i]])
+			inds <- which(newMaWls %in% wlsList[[i]])
+			thisNewNir[,inds] <- nirList[[i]][,]
+			nirList[[i]] <- thisNewNir 
+			wlsList[[i]] <- newMaWls
+		} # end if not identical
+	} # end for i (nirList)
+	return(list(nirList=nirList, wlsList=wlsList, newRange=newRange, cpwl=cpwl))
+} # EOF
+
 ###### CORE #########
-mergeDatasets_list <- function(dsList, mergeLabels, noMatch=get(".ap2$stn$gen_merge_noMatch"), dol=get(".ap2$stn$gen_merge_detectOutliers")) { # newLabels can come in as NULL   ####CORE####
+mergeDatasets_list <- function(dsList, mergeLabels, noMatchH=get(".ap2$stn$gen_merge_noMatchH"), noMatchW=get(".ap2$stn$gen_merge_noMatchW"), dol=get(".ap2$stn$gen_merge_detectOutliers")) { # newLabels can come in as NULL   ####CORE####
 	autoUpS()
 	stn <- get("stn", envir=.ap2)
 	clpref <- stn$p_ClassVarPref
@@ -243,9 +374,12 @@ mergeDatasets_list <- function(dsList, mergeLabels, noMatch=get(".ap2$stn$gen_me
 			cnsi <- colnames(xList[[i]])
 			if (!identical(cns1, cnsi)) { # compares the first one with all the others
 				if (char == "header") {
-					add <- "\nWe are terribly sorry, but apparently there was an error while deleting / filling in header columns\n"
+					apoChar <- "\nWe are terribly sorry, but apparently there was an error while deleting / filling in header columns.\n"
 				} # end if
-				stop(paste0("Sorry, at the moment only identical ", char, "-structures can be merged", add), call.=FALSE)
+				if (char == "wavelength") {
+					apoChar <- "\nWe are terribly sorry, but apparently there was an error while resampling / cutting / filling in wavelengths.\n"
+				} # end if
+				stop(paste0(apoChar), call.=FALSE)
 				return(FALSE)
 			} # end if
 		} # end for i
@@ -253,11 +387,21 @@ mergeDatasets_list <- function(dsList, mergeLabels, noMatch=get(".ap2$stn$gen_me
 	getRLEs_num <- function(x, cn=snrColName_y) {
 		return(rle(as.numeric(x$header[,cn])))
 	} # EOIF
+	printTxtMissVisual <- function(thisSilent, weComeFromAsking, txtGen, missVisualNIR, txt) {
+		if (!thisSilent) {
+			if (!weComeFromAsking) {
+				message(txtGen)
+				print(missVisualNIR); cat("\n")			
+			} # end if !weComeFromAsking
+			cat(txt)
+		} # end if not silent
+	} # EOIF
 	#
 	#
 	#### entry-checking ######
 	merge_checkListInput(dsList)
-	noMatch <- merge_checkNoMatchChar(noMatch) # check if input is valid
+	noMatchH <- merge_checknoMatchChar(noMatchH, pv_noMatchHChar, "H") # check if input is valid
+	noMatchW <- merge_checknoMatchChar(noMatchW, pv_noMatchWChar, "W") # check if input is valid
 	merge_checkLabelObject(dsList, mergeLabels)
 	#
 	#########  make the newLabel columns ################
@@ -290,7 +434,7 @@ mergeDatasets_list <- function(dsList, mergeLabels, noMatch=get(".ap2$stn$gen_me
 	} # end for i
 	##
 			
-	############## check for non-matches, handle them ################
+	############## check for non-matches in header columns, handle them ################
 	aa <- as.vector(unlist(sapply(headerList, colnames)))   	# first collect all column names into a single vector
 	cnsTab <- table(aa) # gives a named numeric
 	namesComplete <- names(which(cnsTab == length(headerList))) # gives the names of those columns that are present in all datasets
@@ -300,32 +444,32 @@ mergeDatasets_list <- function(dsList, mergeLabels, noMatch=get(".ap2$stn$gen_me
 		missVisual <- merge_makeMissVisual(headerList, dsNames) 
 		txtGen <- paste0("\nThere were ", length(namesMissing), " non-matching header columns detected.\n")
 		#		
-		if (noMatch == pv_noMatchChar[1]) { # "ask"   # yes, I know.  I tried a "switch". Could not make it work. Shame.
+		if (noMatchH == pv_noMatchHChar[1]) { # "ask"   # yes, I know.  I tried a "switch". Could not make it work. Shame.
 			message(txtGen)
 			print(missVisual)
 			cat(paste0("\nShould the non-matching header columns be:\n1 - deleted,\n2 - filled in, or\n3 - should the merging of datasets be stopped?\n"))
-			choice <- merge_readInChoice()
+			choice <- merge_readInChoice(xx=3)
 			if (choice == 1) {
 				if (!thisSilent) {
 					cat(paste0("Deleting header-columns... \n"))
 				} # end if
-				noMatch <- pv_noMatchChar[2] ## so we go into the delete below
+				noMatchH <- pv_noMatchHChar[2] ## so we go into the delete below
 				thisSilent <- TRUE
 			} # end if
 			if (choice == 2) {
 				if (!thisSilent) {
 					cat(paste0("Filling in header-columns... \n"))
 				} # end if
-				noMatch <- pv_noMatchChar[3] ## so we go into the filling in below
+				noMatchH <- pv_noMatchHChar[3] ## so we go into the filling in below
 				thisSilent <- TRUE
 			} # end if
 			if (choice == 3) {
-				noMatch <- pv_noMatchChar[4] ## so we go into the stop below
+				noMatchH <- pv_noMatchHChar[4] ## so we go into the stop below
 				thisSilent <- TRUE
 			} # end if
 		} # end "ask"
 		##
-		if (noMatch == pv_noMatchChar[2]) { # "delete"
+		if (noMatchH == pv_noMatchHChar[2]) { # "delete"
 			if (!thisSilent) {
 				message(txtGen)
 				cat(paste0("From all datasets to be merged (in the rows below), the following header-columns will be deleted in (in the columns below):\n\n"))
@@ -348,7 +492,7 @@ mergeDatasets_list <- function(dsList, mergeLabels, noMatch=get(".ap2$stn$gen_me
 			} # end for i
 		} # end "delete"
 		##
-		if (noMatch == pv_noMatchChar[3]) { # "fill in"
+		if (noMatchH == pv_noMatchHChar[3]) { # "fill in"
 			if (!thisSilent) {
 				message(txtGen)
 				cat(paste0("For all datasets to be merged (in the rows below), the following header-columns will be filled in (in the columns below):\n\n"))
@@ -371,7 +515,7 @@ mergeDatasets_list <- function(dsList, mergeLabels, noMatch=get(".ap2$stn$gen_me
 			} # end for i (going through the header list)		
 		} # end "filling in"
 		##
-		if (noMatch == pv_noMatchChar[4]) { # "stop"
+		if (noMatchH == pv_noMatchHChar[4]) { # "stop"
 			if (!thisSilent) {
 				message(txtGen)
 				print(missVisual); cat("\n")
@@ -384,12 +528,91 @@ mergeDatasets_list <- function(dsList, mergeLabels, noMatch=get(".ap2$stn$gen_me
 			headerList[[i]] <- headerList[[i]][,namesComplete] # re-order the header ######## important !! --> as before, we only checked for the "presence" of the column name, the order was irrelevant. Now everything has to have same order.
 		} # end for i	
 	} ######### end if (we have a non-match #########
-	##	
-	##
 	##		
-#	print(merge_makeMissVisual(headerList, dsNames)); wait()
 	checkForSameness(headerList, "header")   ## after the corrections above, this never should give a no-match. Leave it here just to check.
-	checkForSameness(nirList, "wavelength")  #### here checking for sameness !! #####  # now, for the moment, all NIR has to be the same
+	##
+	##
+	########## check for not-same wavelengths, deal with them #############  
+	cpwl <- NULL # might be modified later
+	nirSame <- sapply(wlsList, function(x, aa) identical(x, aa), aa=wlsList[[1]])
+	allNirSame <- all(nirSame)
+	if (!allNirSame) {
+		ransUn <- unique(lapply(wlsList, range)) # gives back a list
+		nrs <- length(ransUn)
+		txtGen <- paste0("There were ", nrs, " sets of wavelengths detected in the datasets to be merged.\n")
+		cutText <- "The wavelengths in all datasets to be merged (in the rows) were cut to the following common range:"
+		fillText <- "The wavelengths in all datasets to be merged (in the rows) were filled in to the following maximum range:"
+		cutResaAdd <- "wavelengths resampled  yes no ??"
+		fillResaAdd <- "wavelengths resampled  yes no ??"
+		missVisualNIR <- merge_makeMissVisualNIR(wlsList, dsNames)
+		weComeFromAsking <- FALSE
+		if (noMatchW == pv_noMatchWChar[1]) { # so we want to ask
+			message(txtGen)
+			print(missVisualNIR)
+			cat(paste0("\nShould the non-matching wavelengths be:\n1 - cut: outsides will be cut off,\n2 - filled in: outsides will be filled in with NAs, \n3 - cut off (outsides) and (possibly) resampled, \n4 - filled in (outsides) and (possibly) resampled, or \n5 - should the merging of datasets be stopped?\n"))
+			choice <- merge_readInChoice(xx=5)
+			if (choice == 1) { # cut away wavelengthsf
+				noMatchW <- pv_noMatchWChar[2] ## so we go into the cutting outsiders below
+				weComeFromAsking <- TRUE
+			} # end if
+			if (choice == 2) { # fill in
+				noMatchW <- pv_noMatchWChar[3] ## so we go into the filling in below
+				weComeFromAsking <- TRUE
+			} # end if
+			if (choice == 3) {			
+				noMatchW <- pv_noMatchWChar[4] ## so we go into cutting and resampling below
+				weComeFromAsking <- TRUE
+			} # end if
+			if (choice == 4) {			
+				noMatchW <- pv_noMatchWChar[5] ## so we go into filling in and resampling below
+				weComeFromAsking <- TRUE
+			} # end if
+			if (choice == 5) {
+				noMatchW <- pv_noMatchWChar[6] ## so we go into the stop below
+				weComeFromAsking <- TRUE
+			} # end if						
+		} # end if "ask"
+		##
+		# pv_noMatchWChar <- c("ask", "cut", "fill", "cutresa", "fillresa", "stop")		
+		if (noMatchW == pv_noMatchWChar[2]) { # "cut"
+			aaa <- merge_cutNirOutsiders(dsList, wlsList, dsNames)
+				nirList <- aaa$nirList
+				wlsList <- aaa$wlsList
+				newRange <- aaa$newRange
+			printTxtMissVisual(thisSilent, weComeFromAsking, txtGen, missVisualNIR, txt=paste0(cutText, "\n", paste0(newRange, collapse=" - "), "\n\n"))		
+		} # end "cut"	
+		##	
+		if (noMatchW == pv_noMatchWChar[3]) { # "fill"
+			aaa <- merge_fillInNirOutsiders(nirList, wlsList, dsNames)
+				nirList <- aaa$nirList
+				wlsList <- aaa$wlsList
+				newRange <- aaa$newRange
+				cpwl <- aaa$cpwl
+				#
+			printTxtMissVisual(thisSilent, weComeFromAsking, txtGen, missVisualNIR, txt=paste0(fillText, "\n", paste0(newRange, collapse=" - "), "\n\n"))		
+		} # end "fill"	
+		##	
+		if (noMatchW == pv_noMatchWChar[4]) { # "cutresa"
+			# do it
+			
+			printTxtMissVisual(thisSilent, weComeFromAsking, txtGen, missVisualNIR, txt=paste0(cutText, "\n", paste0(newRange, collapse=" - "), "\n", cutResaAdd, "\n\n"))
+		} # end "cutresa"	
+		##
+		if (noMatchW == pv_noMatchWChar[5]) { # "fillresa"
+			# do it
+				
+			printTxtMissVisual(thisSilent, weComeFromAsking, txtGen, missVisualNIR, txt=paste0(cutText, "\n", paste0(newRange, collapse=" - "), "\n", fillResaAdd, "\n\n"))
+		} # end "fillresa"	
+		##						
+		if (noMatchW == pv_noMatchWChar[6]) { # "stop"
+			printTxtMissVisual(thisSilent, weComeFromAsking, txtGen, missVisualNIR, txt=NULL)
+			stop(paste0("Merging of datasets is stopped. See ?mergeDatasets for options."), call.=FALSE)
+		} # end "stop"	
+		##		
+	} # end if !allNirSame
+	#
+	checkForSameness(nirList, "wavelength")  #### after the corrections above, this never should give a no-match. Leave it here just to check.
+	##
 	##
 	##
 	
@@ -755,7 +978,7 @@ calculateVariable <- function(dataset, cexpr=expression(""), name=NULL, type="c"
 #' @name generateMergeLabels
 NULL
 
-#pv_noMatchChar <- c("ask", "delete", "fillIn", "stop")
+#pv_noMatchHChar <- c("ask", "delete", "fillIn", "stop")
 #' @title Merge Datasets
 #' @description Merge together two or more datasets, and possibly add class- or 
 #' numerical variables to each dataset via the 'mergeLabels' object.
@@ -768,10 +991,10 @@ NULL
 #' @param ds2 An object of class 'aquap_data', can be missing.
 #' @param mergeLabels An object of class 'aquap_mergeLabels' as generated by 
 #' \code{\link{generateMergeLabels}}, can be missing.
-#' @param noMatch Character length one. Defines what should happen in the case of 
+#' @param noMatchH Character length one. Defines what should happen in the case of 
 #' non-matching header structures, i.e. the column names of the headers of the 
 #' datasets to me merged can not be overlapped. The default value is defined in 
-#' the settings.r file (\code{gen_merge_noMatch}). Possible values are: 
+#' the settings.r file (\code{gen_merge_noMatchH}). Possible values are: 
 #' \describe{
 #' \item{ask}{The non-matching header-columns in each dataset are 
 #' displayed, and the user is asked interactively what to do, with the three options 
@@ -782,6 +1005,25 @@ NULL
 #' in with 'NAs'.}
 #' \item{stop}{In case of non-overlapping header structures, the merging 
 #' process is stopped, with possibly a message being displayed.}
+#' }
+#' @param noMatchW Character length one. Defines what should happen in the case of 
+#' non-matching wavelengths, i.e. the wavelengths in the datasets to be merged are 
+#' not identical. The default value is defined in the settings.r file 
+#' (\code{gen_merge_noMatchH}). Possible values are:
+#' \describe{
+#' \item {ask}{The non-matching wavelenghts in each dataset are displayed, and the 
+#' user is asked interactively what to do, with the five options below as possible 
+#' options.}
+#' \item{cut}{All wavelengths outside a range common to all datasets will be deleted. 
+#' In other words, for some datasets the 'outsiders', i.e. the wavelengths outside 
+#' of that common range, will be deleted.}
+#' \item{fill}{Missing wavelengths will be filled in with 'NAs'. In other words, the 
+#' wavelengths of all datasets will be expanded to encompass the overal mimimum and 
+#' the overal maximum of the wavelengths of the datasets.}
+#' \item{cutresa}{XXX}
+#' \item{fillresa}{XXX}
+#' \item{stop}{In case of non-matching wavelengths, the merging process is stopped, 
+#' with possibly a message being displayed.}
 #' }
 #' @param dol Logical length one. If outliers should be detected based on the scope 
 #' of the new, merged dataset. The default value is defined in the settings file at
