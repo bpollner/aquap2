@@ -13,55 +13,55 @@
   ds1,
   ds2,
   mergeLabels = NULL,
-  noMatchH = "ask",
-  noMatchW = "ask",
+  noMatchH = get("stn", envir = .ap2)$gen_merge_noMatchH,
+  noMatchW = get("stn", envir = .ap2)$gen_merge_noMatchW,
   resaTo = "best",
-  resaMethod = "linear",
-  dol = TRUE
+  resaMethod = get("stn", envir = .ap2)$gen_resample_method,
+  dol = get("stn", envir = .ap2)$gen_merge_detectOutliers
 )
 
 \S4method{mergeDatasets}{aquap_data,aquap_data,aquap_mergeLabels}(
   ds1,
   ds2,
   mergeLabels,
-  noMatchH = "ask",
-  noMatchW = "ask",
+  noMatchH = get("stn", envir = .ap2)$gen_merge_noMatchH,
+  noMatchW = get("stn", envir = .ap2)$gen_merge_noMatchW,
   resaTo = "best",
-  resaMethod = "linear",
-  dol = TRUE
+  resaMethod = get("stn", envir = .ap2)$gen_resample_method,
+  dol = get("stn", envir = .ap2)$gen_merge_detectOutliers
 )
 
 \S4method{mergeDatasets}{list,missing,missing}(
   ds1,
   ds2 = NULL,
   mergeLabels = NULL,
-  noMatchH = "ask",
-  noMatchW = "ask",
+  noMatchH = get("stn", envir = .ap2)$gen_merge_noMatchH,
+  noMatchW = get("stn", envir = .ap2)$gen_merge_noMatchW,
   resaTo = "best",
-  resaMethod = "linear",
-  dol = TRUE
+  resaMethod = get("stn", envir = .ap2)$gen_resample_method,
+  dol = get("stn", envir = .ap2)$gen_merge_detectOutliers
 )
 
 \S4method{mergeDatasets}{list,missing,aquap_mergeLabels}(
   ds1,
   ds2 = NULL,
   mergeLabels,
-  noMatchH = "ask",
-  noMatchW = "ask",
+  noMatchH = get("stn", envir = .ap2)$gen_merge_noMatchH,
+  noMatchW = get("stn", envir = .ap2)$gen_merge_noMatchW,
   resaTo = "best",
-  resaMethod = "linear",
-  dol = TRUE
+  resaMethod = get("stn", envir = .ap2)$gen_resample_method,
+  dol = get("stn", envir = .ap2)$gen_merge_detectOutliers
 )
 
 \S4method{mergeDatasets}{list,aquap_mergeLabels,missing}(
   ds1,
   ds2,
   mergeLabels = NULL,
-  noMatchH = "ask",
-  noMatchW = "ask",
+  noMatchH = get("stn", envir = .ap2)$gen_merge_noMatchH,
+  noMatchW = get("stn", envir = .ap2)$gen_merge_noMatchW,
   resaTo = "best",
-  resaMethod = "linear",
-  dol = TRUE
+  resaMethod = get("stn", envir = .ap2)$gen_resample_method,
+  dol = get("stn", envir = .ap2)$gen_merge_detectOutliers
 )
 }
 \arguments{
@@ -129,8 +129,10 @@ it is in range of the provided datasets etc. For 'filling in' (option 'fill' or
 }}
 
 \item{resaMethod}{Character length one. Which of the resampling methods should be 
-used. Defaults to 'linear'. See \code{\link{do_resampleNIR}} and 
-\code{\link[pracma]{interp1}}.}
+used. Factory-fresh defaults to 'cubic'; the default can be changed in the settings.r file 
+parameter \code{gen_resample_method}. See \code{\link{do_resampleNIR}} and 
+\code{\link[pracma]{interp1}}. 'linear' is much faster than e.g. 'spline' or 
+'cubic', but the quality of the resampling is not as good.}
 
 \item{dol}{Logical length one. If outliers should be detected based on the scope 
 of the new, merged dataset. The default value is defined in the settings file at

@@ -56,6 +56,7 @@ stn <- list(
 	gen_merge_noMatchH = "ask", 			## when merging datasets, what should be done if non-matching header structures (column names) are detected. For possible values see ?mergeDatsets.
 	gen_merge_noMatchW = "ask", 			## when merging datasets, what should be done if non-matching wavelengths (column names in the NIR data) are detected. For possible values see ?mergeDatsets.
 	gen_merge_detectOutliers = TRUE, 		## if, when merging datasets, outliers should be detected based on the new scope of the merged dataset
+	gen_resample_method = "cubic", 			## the default method for resampling in function do_resampleNIR
 	gen_showExtendedCube = TRUE, 			## if set to TRUE, the number of rows and the number of wavelengths in each element of a cube will be displayed as well.
 	gen_useParallel = FALSE, 				## if parallel computing should be used where applicable and implemented
 	gen_numberOfCPUs = NA, 					## the number of CPUs used for parallel computing; leave at 'NA' for automatically using the system defaults

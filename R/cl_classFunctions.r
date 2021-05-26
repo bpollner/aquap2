@@ -240,28 +240,30 @@ plot_nnet_cube_M <- function(object, ...) {
 } # EOF
 
 
+
+
 # merge datasets ------------
-mergeDatasets_two_noLabels_M <- function(ds1, ds2, mergeLabels=NULL, noMatchH="ask", noMatchW="ask", resaTo="best", resaMethod="linear", dol=TRUE) {
+mergeDatasets_two_noLabels_M <- function(ds1, ds2, mergeLabels=NULL, noMatchH=get("stn", envir=.ap2)$gen_merge_noMatchH, noMatchW=get("stn", envir=.ap2)$gen_merge_noMatchW, resaTo="best", resaMethod=get("stn", envir=.ap2)$gen_resample_method, dol=get("stn", envir=.ap2)$gen_merge_detectOutliers) {
 #	print("mergeDatasets_two_noLabels_M"); wait()
 	mergeDatasets_two(ds1, ds2, mergeLabels=NULL, noMatchH, noMatchW, resaTo, resaMethod, dol)
 } # EOF
 
-mergeDatasets_two_mergeLabels_M <- function(ds1, ds2, mergeLabels, noMatchH="ask", noMatchW="ask", resaTo="best", resaMethod="linear", dol=TRUE) {
+mergeDatasets_two_mergeLabels_M <- function(ds1, ds2, mergeLabels, noMatchH=get("stn", envir=.ap2)$gen_merge_noMatchH, noMatchW=get("stn", envir=.ap2)$gen_merge_noMatchW, resaTo="best", resaMethod=get("stn", envir=.ap2)$gen_resample_method, dol=get("stn", envir=.ap2)$gen_merge_detectOutliers) {
 #	print("mergeDatasets_two_mergeLabels_M"); wait()
 	mergeDatasets_two(ds1, ds2, mergeLabels, noMatchH, noMatchW, resaTo, resaMethod, dol)
 } # EOF
 
-mergeDatasets_list_noLabels_M <- function(ds1, ds2=NULL, mergeLabels=NULL, noMatchH="ask", noMatchW="ask", resaTo="best", resaMethod="linear", dol=TRUE) {
+mergeDatasets_list_noLabels_M <- function(ds1, ds2=NULL, mergeLabels=NULL, noMatchH=get("stn", envir=.ap2)$gen_merge_noMatchH, noMatchW=get("stn", envir=.ap2)$gen_merge_noMatchW, resaTo="best", resaMethod=get("stn", envir=.ap2)$gen_resample_method, dol=get("stn", envir=.ap2)$gen_merge_detectOutliers) {
 #	print("mergeDatasets_list_noLabels_M"); wait()
 	mergeDatasets_list(dsList=ds1, mergeLabels=NULL, noMatchH, noMatchW, resaTo, resaMethod, dol)
 } # EOF
 
-mergeDatasets_list_mergeLabels_M <- function(ds1, ds2=NULL, mergeLabels, noMatchH="ask", noMatchW="ask", resaTo="best", resaMethod="linear", dol=TRUE) {
+mergeDatasets_list_mergeLabels_M <- function(ds1, ds2=NULL, mergeLabels, noMatchH=get("stn", envir=.ap2)$gen_merge_noMatchH, noMatchW=get("stn", envir=.ap2)$gen_merge_noMatchW, resaTo="best", resaMethod=get("stn", envir=.ap2)$gen_resample_method, dol=get("stn", envir=.ap2)$gen_merge_detectOutliers) {
 #	print("mergeDatasets_list_mergeLabels_M"); wait()
 	mergeDatasets_list(dsList=ds1, mergeLabels, noMatchH, noMatchW, resaTo, resaMethod, dol)
 } # EOF
 
-mergeDatasets_list_mergeLabels_2_M <- function(ds1, ds2, mergeLabels=NULL, noMatchH="ask", noMatchW="ask", resaTo="best", resaMethod="linear", dol=TRUE) {
+mergeDatasets_list_mergeLabels_2_M <- function(ds1, ds2, mergeLabels=NULL, noMatchH=get("stn", envir=.ap2)$gen_merge_noMatchH, noMatchW=get("stn", envir=.ap2)$gen_merge_noMatchW, resaTo="best", resaMethod=get("stn", envir=.ap2)$gen_resample_method, dol=get("stn", envir=.ap2)$gen_merge_detectOutliers) {
 #	print("mergeDatasets_list_mergeLabels_2_M"); wait()
 	mergeDatasets_list(dsList=ds1, mergeLabels=ds2, noMatchH, noMatchW, resaTo, resaMethod, dol)
 } # EOF

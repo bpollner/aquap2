@@ -108,12 +108,12 @@ merge_makeNewLabelBlock <- function(mergeLabels) {   # here creating the repeats
 	return(outdf)	
 } # EOF
 ######
-mergeDatasets_two <- function(ds1, ds2, mergeLabels, noMatchH=get(".ap2$stn$gen_merge_noMatchH"), noMatchW=get(".ap2$stn$gen_merge_noMatchW"), resaTo="best", resaMethod="linear", dol=get(".ap2$stn$gen_merge_detectOutliers")) { # newLabels can come in as NULL
+mergeDatasets_two <- function(ds1, ds2, mergeLabels, noMatchH=get("stn", envir=.ap2)$gen_merge_noMatchH, noMatchW=get("stn", envir=.ap2)$gen_merge_noMatchW, resaTo="best", resaMethod=get("stn", envir=.ap2)$gen_resample_method, dol=get("stn", envir=.ap2)$gen_merge_detectOutliers) { # newLabels can come in as NULL
 	dsList <- list(ds1, ds2)
 #	names(dsList) <- c(deparse(substitute(ds1)), deparse(substitute(ds2))) # get the names of the provided objects ### does NOT work
 	names(dsList) <- paste0("dataset_", c(1,2))
 	return(mergeDatasets_list(dsList, mergeLabels, noMatchH, noMatchW, resaTo, resaMethod, dol))
-} # EOF
+} # EOF  gen_merge_detectOutliers
 #####
 mergeLabelObj_toList <- function(mergeLabels) {  ## used in the end of mergeDatasets_list() to put the mergeLabel object into the @metadata slot
 	char <- "from mergeLabels"
@@ -399,7 +399,9 @@ merge_cutNirOutsiders <- function(dsList, targetWls=NULL, resaMethod=NULL) {
 	return(list(nirList=nirList, wlsList=wlsList, newRange=outRange))
 } # EOF
 
-merge_fillInNirOutsiders <- function(dsList, targetWls=NULL, resaMethod=NULL) {
+merge_fillInNirOutsiders <- function(dsList, targetWls=NULL, resaTo=NULL, resaMethod=NULL) {
+	rndDiff <- 3 # the rounding for the diff
+	##
 	get_cpwl <- function(nirList, wlsList) {
 		# find out the ncpwl of the first dataset (yes, we could bring it. But we can check as well.)
 		wlW <- unlist(strsplit(	colnames(nirList[[1]])[1], "")) # the wavelength with the character
@@ -423,18 +425,22 @@ merge_fillInNirOutsiders <- function(dsList, targetWls=NULL, resaMethod=NULL) {
 		newMaWls <- seq(newLower, newUpper, by=deltaWls) # the new master wavelength
 		merge_checkWlsActual(wlsList, newMaWls, dsNames, "fill")
 	} else { # we bring in a target wavelength. We want to resample. 
-		deltaWls <- unique(diff(targetWls)) # XXX does not make sense - we have to KNOW the delta already before !! I think. 
-		newMaWls <- seq(newLower, newUpper, by=deltaWls) # the new master wavelength
+		deltaWls <- unique(round(diff(targetWls), rndDiff)) #  BUT: if we bring in a custom targetWls, that one should stay the same 
+		if (resaTo$what == "target") { # so we got a specific target wavelength
+			newMaWls <- targetWls # has been checked before in function merge_getTargetWls
+			newRange <- range(newMaWls)
+		} else { # so we are NOT providing a custom target vecctor
+			newMaWls <- seq(newLower, newUpper, by=deltaWls) # the new master wavelength
+		} # end else 
 	} # end else
 	##
 	if (!is.null(targetWls)) { # we have to adapt the wlsList --> via resampling in the dsList
 		# first cut the master wavelength to the range in east dataset in the dsList, then resample that dataset to this part of the master wavelength
 		rans <- lapply(wlsList, range) # we have a list with the range of each dataset in each element
 		for (i in 1: length(dsList)) {
-			thiRa <- rans[[i]] # this range
-			thisTwl <- targetWls[targetWls >= rans[[i]][1] ] # the lower range # adapt the target wavelength to each individual dataset # ! we have to preserve the original targetWls for each dataset
+			thisTwl <- newMaWls[newMaWls >= rans[[i]][1] ] # ## was targetWls ( targetWls[targetWls >= ) before ###  the lower range # adapt the target wavelength to each individual dataset # ! we have to preserve the original targetWls for each dataset
 			thisTwl <- thisTwl[thisTwl <= rans[[i]][2] ] # the higher range
-#	message(paste0("\n\nThe ", i, "# iteration: ")); print(str(thisTwl)); print(range(thisTwl)); print(unique(diff(thisTwl)))
+			#	message(paste0("\n\nThe ", i, "# iteration: ")); print(str(thisTwl)); print(range(thisTwl)); print(unique(round(diff(thisTwl), rndDiff)))
 			dsList[[i]] <- do_resampleNIR(dsList[[i]], thisTwl, NULL, method=resaMethod) # # resample each individual dataset with the custom-cut target wavelength ###### CORE resampling ######		
 		} # end for i going through the dsList
 		nirList <- lapply(dsList, getNIR) 			# we have to make a new nirList, as now the wavelengths possibly did change
@@ -571,7 +577,7 @@ merge_findBestResaToWls <- function(dsList, cutFill) {
 } # EOF
 
 ###### CORE #########
-mergeDatasets_list <- function(dsList, mergeLabels, noMatchH=get(".ap2$stn$gen_merge_noMatchH"), noMatchW=get(".ap2$stn$gen_merge_noMatchW"), resaTo="best", resaMethod="linear", dol=get(".ap2$stn$gen_merge_detectOutliers")) { # newLabels can come in as NULL   ####CORE####
+mergeDatasets_list <- function(dsList, mergeLabels, noMatchH=get("stn", envir=.ap2)$gen_merge_noMatchH, noMatchW=get("stn", envir=.ap2)$gen_merge_noMatchW, resaTo="best", resaMethod=get("stn", envir=.ap2)$gen_resample_method, dol=get("stn", envir=.ap2)$gen_merge_detectOutliers) { # newLabels can come in as NULL   ####CORE####
 	autoUpS()
 	stn <- get("stn", envir=.ap2)
 	clpref <- stn$p_ClassVarPref
@@ -621,6 +627,7 @@ mergeDatasets_list <- function(dsList, mergeLabels, noMatchH=get(".ap2$stn$gen_m
 	merge_checkLabelObject(dsList, mergeLabels)
 	merge_checkResaMethodInput(resaMethod)
 	#
+	
 	#########  make the newLabel columns ################
 	newLabelBlock <- NULL
 	numVec <- sapply(dsList, nrow)
@@ -760,8 +767,10 @@ mergeDatasets_list <- function(dsList, mergeLabels, noMatchH=get(".ap2$stn$gen_m
 		ransUn <- unique(lapply(wlsList, range)) # gives back a list
 		nrs <- length(ransUn)
 		txtGen <- paste0("There were ", nrs, " sets of wavelengths detected in the datasets to be merged.\n")
-		cutText <- "The wavelengths in all datasets to be merged (in the rows) were cut to the following common range:"
-		fillText <- "The wavelengths in all datasets to be merged (in the rows) were filled in to the following maximum range:"
+		cutText <- "The wavelengths in all datasets to be merged (in the rows) were cut to the following"
+		cutText2 <- " common range:"
+		fillText <- "The wavelengths in all datasets to be merged (in the rows) were filled in to the following"
+		fillText2 <- " maxium range:"
 		cutResaAdd <- fillResaAdd <-  "No resampling of datasets was necessary." # the default message when no resampling has to be done. In case of resampling, gets modified.
 		missVisualNIR <- merge_makeMissVisualNIR(wlsList, dsNames)
 		weComeFromAsking <- FALSE
@@ -800,23 +809,26 @@ mergeDatasets_list <- function(dsList, mergeLabels, noMatchH=get(".ap2$stn$gen_m
 		##
 		# pv_noMatchWChar <- c("ask", "cut", "fill", "resacut", "resafill", "stop")		
 		if (noMatchW == pv_noMatchWChar[2]) { # "cut"
+			if (!thisSilent) {cat("Checking and cutting outsides... \n")}
 			aaa <- merge_cutNirOutsiders(dsList)
 				nirList <- aaa$nirList
 				wlsList <- aaa$wlsList
 				newRange <- aaa$newRange
-			printTxtMissVisual(thisSilent, weComeFromAsking, txtGen, missVisualNIR, txt=paste0(cutText, "\n", paste0(newRange, collapse=" - "), "\n\n"))		
+			printTxtMissVisual(thisSilent, weComeFromAsking, txtGen, missVisualNIR, txt=paste0(cutText, cutText2, "\n", paste0(newRange, collapse=" - "), "\n\n"))		
 		} # end "cut"	
 		##	
 		if (noMatchW == pv_noMatchWChar[3]) { # "fill"
+			if (!thisSilent) {cat("Checking and filling in outsides... \n")}
 			aaa <- merge_fillInNirOutsiders(dsList)
 				nirList <- aaa$nirList
 				wlsList <- aaa$wlsList
 				newRange <- aaa$newRange
 				cpwl <- aaa$cpwl
-			printTxtMissVisual(thisSilent, weComeFromAsking, txtGen, missVisualNIR, txt=paste0(fillText, "\n", paste0(newRange, collapse=" - "), "\n\n"))		
+			printTxtMissVisual(thisSilent, weComeFromAsking, txtGen, missVisualNIR, txt=paste0(fillText, fillText2, "\n", paste0(newRange, collapse=" - "), "\n\n"))		
 		} # end "fill"	
 		##	
 		if (noMatchW == pv_noMatchWChar[4]) { # "resacut"
+			if (!thisSilent) {cat("Checking for resampling and cutting outsides... \n")}
 			deltaUn <- unique(unlist(lapply(wlsList, function(x) unique(diff(x)))))
 			if (length(deltaUn) == 1) { # so all datasets have the same delta wavelength, no resampling necessary.
 				aaa <- merge_cutNirOutsiders(dsList)
@@ -829,14 +841,21 @@ mergeDatasets_list <- function(dsList, mergeLabels, noMatchH=get(".ap2$stn$gen_m
 					nirList <- aaa$nirList
 					wlsList <- aaa$wlsList
 					newRange <- aaa$newRange
-				if (resaTo$what == "best") {cutResaAdd <- paste0("Datasets were optimally resampled (delta=", unique(round(diff(targetWls), rndDiff)), ").") } # end if
-				if (resaTo$what == "target") {cutResaAdd <- "Datasets were resampled to a provided target wavelength."} # end if
-				if (resaTo$what == "index") {cutResaAdd <- paste0("Datasets were resampled to '", dsNames[resaTo$val], "' (delta=", unique(round(diff(targetWls), rndDiff)), ").") } # end if
+				#
+				td <- unique(round(diff(targetWls), rndDiff))	
+				reme <- resaMethod
+				if (resaTo$what == "best") {cutResaAdd <- paste0("Datasets were optimally resampled (using method '", reme, "').") } # end if
+				if (resaTo$what == "target") {
+					cutText2 <- " range dictated by the provided target wavelengths:"
+					cutResaAdd <- paste0("Datasets were resampled to provided target wavelengths (using method '", reme, "').")
+				} # end if
+				if (resaTo$what == "index") {cutResaAdd <- paste0("Datasets were resampled to '", dsNames[resaTo$val], "' (using method '", reme, "').") } # end if
 			} # end else
-			printTxtMissVisual(thisSilent, weComeFromAsking, txtGen, missVisualNIR, txt=paste0(cutText, "\n", paste0(newRange, collapse=" - "), "\n", cutResaAdd, "\n\n"))
+			printTxtMissVisual(thisSilent, weComeFromAsking, txtGen, missVisualNIR, txt=paste0(cutText, cutText2, "\n", paste0(newRange, collapse=" - "), " (delta=", td, ") \n", cutResaAdd, "\n\n"))
 		} # end "resacut"	
 		##
 		if (noMatchW == pv_noMatchWChar[5]) { # "resafill"
+			if (!thisSilent) {cat("Checking for resampling and filling in outsides... \n")}
 			deltaUn <- unique(unlist(lapply(wlsList, function(x) unique(diff(x)))))
 			if (length(deltaUn) == 1) { # so all datasets have the same delta wavelength, no resampling necessary.
 				aaa <- merge_fillInNirOutsiders(dsList)
@@ -846,17 +865,23 @@ mergeDatasets_list <- function(dsList, mergeLabels, noMatchH=get(".ap2$stn$gen_m
 					cpwl <- aaa$cpwl
 			} else { # so we do need to resample
 				targetWls <- merge_getTargetWls(dsList, resaTo, cutFill="fill") 
-#	print(str(targetWls)); print(range(targetWls)); print(unique(diff(targetWls)))
-				aaa <- merge_fillInNirOutsiders(dsList, targetWls, resaMethod)
+				#	print(str(targetWls)); print(range(targetWls)); print(unique(diff(targetWls)))
+				aaa <- merge_fillInNirOutsiders(dsList, targetWls, resaTo, resaMethod)
 					nirList <- aaa$nirList
 					wlsList <- aaa$wlsList
 					newRange <- aaa$newRange
 					cpwl <- aaa$cpwl
-				if (resaTo$what == "best") {fillResaAdd <- paste0("Datasets were optimally resampled (delta=", unique(round(diff(targetWls), rndDiff)), ").") } # end if
-				if (resaTo$what == "target") {fillResaAdd <- "Datasets were resampled to a provided target wavelength."} # end if
-				if (resaTo$what == "index") {fillResaAdd <- paste0("Datasets were resampled to '", dsNames[resaTo$val], "' (delta=", unique(round(diff(targetWls), rndDiff)), ").") } # end if
+				td <- unique(round(diff(targetWls), rndDiff))
+				reme <- resaMethod
+				#	
+				if (resaTo$what == "best") {fillResaAdd <- paste0("Datasets were optimally resampled (using method '", reme, "').") } # end if
+				if (resaTo$what == "target") {
+					fillText2 <- " range dictated by the provided target wavelengths:"
+					fillResaAdd <- paste0("Datasets were resampled to provided target wavelengths (using method '", reme, "').")
+				} # end if
+				if (resaTo$what == "index") {fillResaAdd <- paste0("Datasets were resampled to '", dsNames[resaTo$val], "' (using method '", reme, "').") } # end if
 			} # end else	
-			printTxtMissVisual(thisSilent, weComeFromAsking, txtGen, missVisualNIR, txt=paste0(fillText, "\n", paste0(newRange, collapse=" - "), "\n", fillResaAdd, "\n\n"))
+			printTxtMissVisual(thisSilent, weComeFromAsking, txtGen, missVisualNIR, txt=paste0(fillText, fillText2, "\n", paste0(newRange, collapse=" - "), " (delta=", td, ") \n", fillResaAdd, "\n\n"))
 		} # end "resafill"	
 		##						
 		if (noMatchW == pv_noMatchWChar[6]) { # "stop"
@@ -1296,8 +1321,10 @@ NULL
 #' \code{length(unique(diff(x))) == 1} are accepted.}
 #' }
 #' @param resaMethod Character length one. Which of the resampling methods should be 
-#' used. Defaults to 'linear'. See \code{\link{do_resampleNIR}} and 
-#' \code{\link[pracma]{interp1}}.
+#' used. Factory-fresh defaults to 'cubic'; the default can be changed in the settings.r file 
+#' parameter \code{gen_resample_method}. See \code{\link{do_resampleNIR}} and 
+#' \code{\link[pracma]{interp1}}. 'linear' is much faster than e.g. 'spline' or 
+#' 'cubic', but the quality of the resampling is not as good.
 #' @param dol Logical length one. If outliers should be detected based on the scope 
 #' of the new, merged dataset. The default value is defined in the settings file at
 #' \code{gen_merge_detectOutliers}.

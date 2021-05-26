@@ -549,7 +549,8 @@ do_dptSeq <- function(dataset, dptSeq, extraModelList=NULL, silent=TRUE) {
 #' generated target wavelength. Only applies if \code{targetWls} is left at 
 #' \code{NULL}.
 #' @param method The resampling method. For details see 
-#' \code{\link[pracma]{interp1}}.
+#' \code{\link[pracma]{interp1}}. Defaults to 'cubic'; the default can be 
+#' changed in the settings.r file (parameter \code{gen_resample_method}).
 #' @return The resampled dataset.
 #' @examples
 #' \dontrun{
@@ -558,7 +559,7 @@ do_dptSeq <- function(dataset, dptSeq, extraModelList=NULL, silent=TRUE) {
 #' }
 #' @family Data pre-treatment functions 
 #' @export
-do_resampleNIR <- function(dataset, targetWls=NULL, tby=0.5, method="linear") {
+do_resampleNIR <- function(dataset, targetWls=NULL, tby=0.5, method=get("stn", envir=.ap2)$gen_resample_method) {
 	ncpwl <- dataset@ncpwl
 	charPrevWls <- substr(colnames(dataset$NIR)[1], 1, (ncpwl))
 	#
