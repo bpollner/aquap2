@@ -123,7 +123,9 @@ containing the target wavelength.}
 containing the target wavelength.}
 \item{Numeric Vector}{Provide a numeric vector as target wavelengths to which all 
 datasets will be resampled. The vector will be checked for plausibility, i.e. if 
-it is in range of the provided datasets etc.}
+it is in range of the provided datasets etc. For 'filling in' (option 'fill' or 
+'resafill' in argument 'noMatchW') only numeric vectors x with 
+\code{length(unique(diff(x))) == 1} are accepted.}
 }}
 
 \item{resaMethod}{Character length one. Which of the resampling methods should be 

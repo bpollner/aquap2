@@ -567,12 +567,10 @@ do_resampleNIR <- function(dataset, targetWls=NULL, tby=0.5, method="linear") {
     	xNew <- seq(ceiling(x[1]/2) * 2, floor(x[length(x)]/2) * 2, tby)
 	} else {
 		xNew <- targetWls
-		if (identical(x, xNew)) {
-#			message("identical")
-			return(dataset) # To save possibly time. In the merging, it could be that we provide the same target than the present wls.
-		} # end if
+	#	if (identical(x, xNew)) {
+	#		return(dataset) # To save possibly time. In the merging, it could be that we provide the same target than the present wls.
+	#	} # end if
 	} # end else	
-#	print(str(x)); print(range(x)); print(unique(diff(x)));  print("------------"); wait()
 	NIR <- t(apply(dataset$NIR, 1, pracma::interp1, x = x, xi = xNew, method = method))
     colnames(NIR) <- paste0(charPrevWls, xNew)
     dataset$NIR <- NIR
