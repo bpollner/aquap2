@@ -35,7 +35,7 @@ genMergeLabels_checkType <- function(valueList, varTypes, varNames) { # checks i
 		} else { # so varType[i] must be "n"
 			if (!all(is.numeric(valueList[[i]]))) {stop(paste0("Please provide only numerics in the values list-element #", i, " (values for the variable named '", varNames[i], "')"), call.=FALSE)}
 		}
-	} # end for i	
+	} # end for i 
 } # EOF
 
 ###### method (documentation below) #######
@@ -245,7 +245,7 @@ merge_makeMissVisualNIR <- function(wlsList, dsNames) {
 	rownames(missVisual) <- paste0("#", 1: nrow(missVisual), " ", dsNames)
 	rdc <- combLists(combLists(ranges, singleDeltaNum), singleDeltaChar) # here are the x[1] to x[4] from the sapply below.  ###   Clumsy, I know. But: I do not care! :-)  
 	rdcUni <- unique(rdc)
-	cns <- sapply(rdcUni, function(x) paste0(x[1], " - ", x[2], ", ∆=", x[3], x[4]))
+	cns <- sapply(rdcUni, function(x) paste0(x[1], " - ", x[2], ", d=", x[3], x[4]))
 	cns <- paste0("   ", cns,"   ")
 	colnames(missVisual) <- cns
 	newO <- order(sapply(apply(missVisual,2, function(x) which(grepl("yes",x))), length), decreasing = TRUE) # re-order the miss-visual, most participants on the left
@@ -754,9 +754,9 @@ mergeDatasets_list <- function(dsList, mergeLabels, noMatchH=get(".ap2$stn$gen_m
 					nirList <- aaa$nirList
 					wlsList <- aaa$wlsList
 					newRange <- aaa$newRange
-					if (resaTo$what == "best") {cutResaAdd <- paste0("Datasets were optimally resampled (∆=", unique(round(diff(targetWls), rndDiff)), ").") } # end if
+					if (resaTo$what == "best") {cutResaAdd <- paste0("Datasets were optimally resampled (delta=", unique(round(diff(targetWls), rndDiff)), ").") } # end if
 					if (resaTo$what == "target") {cutResaAdd <- "Datasets were resampled to a provided target wavelength."} # end if
-					if (resaTo$what == "index") {cutResaAdd <- paste0("Datasets were resampled to '", dsNames[resaTo$val], "' (∆=", unique(round(diff(targetWls), rndDiff)), ").") } # end if
+					if (resaTo$what == "index") {cutResaAdd <- paste0("Datasets were resampled to '", dsNames[resaTo$val], "' (delta=", unique(round(diff(targetWls), rndDiff)), ").") } # end if
 			} # end else
 			printTxtMissVisual(thisSilent, weComeFromAsking, txtGen, missVisualNIR, txt=paste0(cutText, "\n", paste0(newRange, collapse=" - "), "\n", cutResaAdd, "\n\n"))
 		} # end "resacut"	
@@ -1180,7 +1180,7 @@ NULL
 #' not identical. The default value is defined in the settings.r file 
 #' (\code{gen_merge_noMatchH}). Possible values are:
 #' \describe{
-#' \item {ask}{The non-matching wavelenghts in each dataset are displayed, and the 
+#' \item{ask}{The non-matching wavelenghts in each dataset are displayed, and the 
 #' user is asked interactively what to do, with the five options below as possible 
 #' options.}
 #' \item{cut}{All wavelengths outside a range common to all datasets will be deleted. 

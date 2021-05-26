@@ -94,7 +94,7 @@ non-matching wavelengths, i.e. the wavelengths in the datasets to be merged are
 not identical. The default value is defined in the settings.r file 
 (\code{gen_merge_noMatchH}). Possible values are:
 \describe{
-\item {ask}{The non-matching wavelenghts in each dataset are displayed, and the 
+\item{ask}{The non-matching wavelenghts in each dataset are displayed, and the 
 user is asked interactively what to do, with the five options below as possible 
 options.}
 \item{cut}{All wavelengths outside a range common to all datasets will be deleted. 
