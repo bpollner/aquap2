@@ -15,6 +15,8 @@
   mergeLabels = NULL,
   noMatchH = "ask",
   noMatchW = "ask",
+  resaTo = "best",
+  resaMethod = "linear",
   dol = TRUE
 )
 
@@ -24,6 +26,8 @@
   mergeLabels,
   noMatchH = "ask",
   noMatchW = "ask",
+  resaTo = "best",
+  resaMethod = "linear",
   dol = TRUE
 )
 
@@ -33,6 +37,8 @@
   mergeLabels = NULL,
   noMatchH = "ask",
   noMatchW = "ask",
+  resaTo = "best",
+  resaMethod = "linear",
   dol = TRUE
 )
 
@@ -42,6 +48,8 @@
   mergeLabels,
   noMatchH = "ask",
   noMatchW = "ask",
+  resaTo = "best",
+  resaMethod = "linear",
   dol = TRUE
 )
 
@@ -51,6 +59,8 @@
   mergeLabels = NULL,
   noMatchH = "ask",
   noMatchW = "ask",
+  resaTo = "best",
+  resaMethod = "linear",
   dol = TRUE
 )
 }
@@ -72,7 +82,7 @@ the settings.r file (\code{gen_merge_noMatchH}). Possible values are:
 displayed, and the user is asked interactively what to do, with the three options 
 below as possible options.}
 \item{delete}{Non-matching header columns are automatically deleted.}
-\item{fillIn}{Each column name not existing in all of the datasets 
+\item{fill}{Each column name not existing in all of the datasets 
 to be merged is added to those datasets where it does not exist. The data is filled 
 in with 'NAs'.}
 \item{stop}{In case of non-overlapping header structures, the merging 
@@ -87,13 +97,38 @@ not identical. The default value is defined in the settings.r file
 \item {ask}{The non-matching wavelenghts in each dataset are displayed, and the 
 user is asked interactively what to do, with the five options below as possible 
 options.}
-\item{cut}{XXX}
-\item{fill}{XXX}
-\item{cutresa}{XXX}
-\item{fillresa}{XXX}
+\item{cut}{All wavelengths outside a range common to all datasets will be deleted. 
+In other words, for some datasets the 'outsiders', i.e. the wavelengths outside 
+of that common range, will be deleted.}
+\item{fill}{Missing wavelengths will be filled in with 'NAs'. In other words, the 
+wavelengths of all datasets will be expanded to encompass the overal mimimum and 
+the overal maximum of the wavelengths of the datasets.}
+\item{resacut}{Same as 'cut', but datasets are resampled to have all the same delta
+wavelength.}
+\item{resafill}{Same as 'fill', but datasets are resampled to have all the same delta
+wavelength.}
 \item{stop}{In case of non-matching wavelengths, the merging process is stopped, 
 with possibly a message being displayed.}
 }}
+
+\item{resaTo}{Target wavelength for a (possible) resampling process (which uses the 
+function \code{\link{do_resampleNIR}}. Can be one of the following:
+\describe{
+\item{"best"}{If left at the default 'best' the best target wavelength will be 
+automatically determined. The best target wavelength is a solution where as few 
+as possible datasets get resampled.}
+\item{Character length one}{The name of the dataset (if a named list is provided) 
+containing the target wavelength.}
+\item{Integer length one}{The number of the dataset (e.g. in the provided list) 
+containing the target wavelength.}
+\item{Numeric Vector}{Provide a numeric vector as target wavelengths to which all 
+datasets will be resampled. The vector will be checked for plausibility, i.e. if 
+it is in range of the provided datasets etc.}
+}}
+
+\item{resaMethod}{Character length one. Which of the resampling methods should be 
+used. Defaults to 'linear'. See \code{\link{do_resampleNIR}} and 
+\code{\link[pracma]{interp1}}.}
 
 \item{dol}{Logical length one. If outliers should be detected based on the scope 
 of the new, merged dataset. The default value is defined in the settings file at

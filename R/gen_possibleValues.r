@@ -84,8 +84,8 @@ pv_noiseDistPrefix <- "nd_"
 
 ##################
 # merging datasets
-pv_noMatchHChar <- c("ask", "delete", "fillIn", "stop") # the options for the noMatchH argument in function mergeDatasets()
-pv_noMatchWChar <- c("ask", "cut", "fill", "cutresa", "fillresa", "stop")
+pv_noMatchHChar <- c("ask", "delete", "fill", "stop") # the options for the noMatchH argument in function mergeDatasets()
+pv_noMatchWChar <- c("ask", "cut", "fill", "resacut", "resafill", "stop")
 
 
 

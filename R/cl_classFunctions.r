@@ -161,7 +161,7 @@ subtract_two_aquap_data_M <- function(e1, e2) { # e1 and e2 being each an object
 			} # end else allow for subtraction of different number of wavelengths
 		} # end check the same nr of columns in the NIR
 		if (!identical(colnames(e1$NIR), colnames(e2$NIR))) {
-			stop("The provided datasets do not have the same wavelengths.\nFor successful subtraction via '-', in both datasets there have to be the same wavelengths present.", call.=FALSE)
+			stop("The provided datasets do not have the same wavelengths.\nFor successful subtraction via '-', there have to be the same wavelengths present in both datasets.", call.=FALSE)
 		}
 		if (!.ap2$stn$gen_calc_allowSubtrDiffHead) {	 # if the subtraction of datasets having a different header structure should be allowed.
 			if (!identical(e1$header, e2$header)) {
@@ -241,29 +241,29 @@ plot_nnet_cube_M <- function(object, ...) {
 
 
 # merge datasets ------------
-mergeDatasets_two_noLabels_M <- function(ds1, ds2, mergeLabels=NULL, noMatchH="ask", noMatchW="ask", dol=TRUE) {
+mergeDatasets_two_noLabels_M <- function(ds1, ds2, mergeLabels=NULL, noMatchH="ask", noMatchW="ask", resaTo="best", resaMethod="linear", dol=TRUE) {
 #	print("mergeDatasets_two_noLabels_M"); wait()
-	mergeDatasets_two(ds1, ds2, mergeLabels=NULL, noMatchH, noMatchW, dol)
+	mergeDatasets_two(ds1, ds2, mergeLabels=NULL, noMatchH, noMatchW, resaTo, resaMethod, dol)
 } # EOF
 
-mergeDatasets_two_mergeLabels_M <- function(ds1, ds2, mergeLabels, noMatchH="ask", noMatchW="ask", dol=TRUE) {
+mergeDatasets_two_mergeLabels_M <- function(ds1, ds2, mergeLabels, noMatchH="ask", noMatchW="ask", resaTo="best", resaMethod="linear", dol=TRUE) {
 #	print("mergeDatasets_two_mergeLabels_M"); wait()
-	mergeDatasets_two(ds1, ds2, mergeLabels, noMatchH, noMatchW, dol)
+	mergeDatasets_two(ds1, ds2, mergeLabels, noMatchH, noMatchW, resaTo, resaMethod, dol)
 } # EOF
 
-mergeDatasets_list_noLabels_M <- function(ds1, ds2=NULL, mergeLabels=NULL, noMatchH="ask", noMatchW="ask", dol=TRUE) {
+mergeDatasets_list_noLabels_M <- function(ds1, ds2=NULL, mergeLabels=NULL, noMatchH="ask", noMatchW="ask", resaTo="best", resaMethod="linear", dol=TRUE) {
 #	print("mergeDatasets_list_noLabels_M"); wait()
-	mergeDatasets_list(dsList=ds1, mergeLabels=NULL, noMatchH, noMatchW, dol)
+	mergeDatasets_list(dsList=ds1, mergeLabels=NULL, noMatchH, noMatchW, resaTo, resaMethod, dol)
 } # EOF
 
-mergeDatasets_list_mergeLabels_M <- function(ds1, ds2=NULL, mergeLabels, noMatchH="ask", noMatchW="ask", dol=TRUE) {
+mergeDatasets_list_mergeLabels_M <- function(ds1, ds2=NULL, mergeLabels, noMatchH="ask", noMatchW="ask", resaTo="best", resaMethod="linear", dol=TRUE) {
 #	print("mergeDatasets_list_mergeLabels_M"); wait()
-	mergeDatasets_list(dsList=ds1, mergeLabels, noMatchH, noMatchW, dol)
+	mergeDatasets_list(dsList=ds1, mergeLabels, noMatchH, noMatchW, resaTo, resaMethod, dol)
 } # EOF
 
-mergeDatasets_list_mergeLabels_2_M <- function(ds1, ds2, mergeLabels=NULL, noMatchH="ask", noMatchW="ask", dol=TRUE) {
+mergeDatasets_list_mergeLabels_2_M <- function(ds1, ds2, mergeLabels=NULL, noMatchH="ask", noMatchW="ask", resaTo="best", resaMethod="linear", dol=TRUE) {
 #	print("mergeDatasets_list_mergeLabels_2_M"); wait()
-	mergeDatasets_list(dsList=ds1, mergeLabels=ds2, noMatchH, noMatchW, dol)
+	mergeDatasets_list(dsList=ds1, mergeLabels=ds2, noMatchH, noMatchW, resaTo, resaMethod, dol)
 } # EOF
 
 generateMergeLabels_twoDatasets_M <- function(ds1, ds2, varNames, varTypes, values=NULL) {
