@@ -25,7 +25,7 @@ The transformed dataset.
 \description{
 Reduces the number of wavelengths in a provided dataset, either 
 by simply keeping only the wavelengths of the 12 or 15 water matrix coordinates 
-in the first overtone (1300nm - 1400nm), or by providing a user-defined list 
+in the first overtone (1300nm - 1600nm), or by providing a user-defined list 
 containing the wavelengths to be kept.
 }
 \examples{

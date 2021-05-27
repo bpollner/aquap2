@@ -4,6 +4,7 @@ New:
 	Create new variables via combining pre-existent values or by calculating a new value using an arbitrary expression.
 	
 Improved:
+	When merging datasets, it is now possible to also resample the wavelengths if necessary.
 	
 Bugfix:
 	Various small bugfixes (e.g. the show-method for aquap_data)	

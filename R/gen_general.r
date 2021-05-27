@@ -1119,7 +1119,7 @@ siWl <- function(dataset, wl, getMax=FALSE) {
 #' @title Reduce Number of Wavelengths
 #' @description Reduces the number of wavelengths in a provided dataset, either 
 #' by simply keeping only the wavelengths of the 12 or 15 water matrix coordinates 
-#' in the first overtone (1300nm - 1400nm), or by providing a user-defined list 
+#' in the first overtone (1300nm - 1600nm), or by providing a user-defined list 
 #' containing the wavelengths to be kept.
 #' @param dataset The standard dataset as produced by \code{\link{gfd}}.
 #' @param wlg List or character. Provide an integer matrix with two columns and n 

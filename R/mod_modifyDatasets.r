@@ -35,7 +35,7 @@ genMergeLabels_checkType <- function(valueList, varTypes, varNames) { # checks i
 		} else { # so varType[i] must be "n"
 			if (!all(is.numeric(valueList[[i]]))) {stop(paste0("Please provide only numerics in the values list-element #", i, " (values for the variable named '", varNames[i], "')"), call.=FALSE)}
 		}
-	} # end for i	
+	} # end for i 
 } # EOF
 
 ###### method (documentation below) #######
@@ -108,12 +108,12 @@ merge_makeNewLabelBlock <- function(mergeLabels) {   # here creating the repeats
 	return(outdf)	
 } # EOF
 ######
-mergeDatasets_two <- function(ds1, ds2, mergeLabels, noMatch=get(".ap2$stn$gen_merge_noMatch"), dol=get(".ap2$stn$gen_merge_detectOutliers")) { # newLabels can come in as NULL
+mergeDatasets_two <- function(ds1, ds2, mergeLabels, noMatchH=get("stn", envir=.ap2)$gen_merge_noMatchH, noMatchW=get("stn", envir=.ap2)$gen_merge_noMatchW, resaTo="best", resaMethod=get("stn", envir=.ap2)$gen_resample_method, dol=get("stn", envir=.ap2)$gen_merge_detectOutliers) { # newLabels can come in as NULL
 	dsList <- list(ds1, ds2)
 #	names(dsList) <- c(deparse(substitute(ds1)), deparse(substitute(ds2))) # get the names of the provided objects ### does NOT work
 	names(dsList) <- paste0("dataset_", c(1,2))
-	return(mergeDatasets_list(dsList, mergeLabels, noMatch, dol))
-} # EOF
+	return(mergeDatasets_list(dsList, mergeLabels, noMatchH, noMatchW, resaTo, resaMethod, dol))
+} # EOF  gen_merge_detectOutliers
 #####
 mergeLabelObj_toList <- function(mergeLabels) {  ## used in the end of mergeDatasets_list() to put the mergeLabel object into the @metadata slot
 	char <- "from mergeLabels"
@@ -126,29 +126,34 @@ mergeLabelObj_toList <- function(mergeLabels) {  ## used in the end of mergeData
 	return(out)	
 } # EOF  ## used in the end of mergeDatasets_list()
 
-merge_checkNoMatchChar <- function(noMatch) {
-	#	pv_noMatchChar <- c("ask", "delete", "rename", "stop")
-	if (! all(is.character(noMatch)) | length(noMatch) > 1) {
-		stop("Please provide a character length one to the argument 'noMatch'", call.=FALSE)
+merge_checknoMatchChar <- function(noMatchX, pvals, what) {
+	if (! all(is.character(noMatchX)) | length(noMatchX) > 1) {
+		stop(paste0("Please provide a character length one to the argument 'noMatch", what, "'"), call.=FALSE)
 	}
-	if (! noMatch %in% pv_noMatchChar) {
-		stop(paste0("Please provide one of '", paste(pv_noMatchChar, collapse="', '"), "' to the argumet 'noMatch'"), call.=FALSE) 
+	if (! noMatchX %in% pvals) {
+		stop(paste0("Please provide one of '", paste(pvals, collapse="', '"), "' to the argumet 'noMatch", what, "'"), call.=FALSE) 
 	}
-	return(noMatch)
+	return(noMatchX)
 } # EOF
 
-merge_readInChoice <- function() {
+merge_readInChoice <- function(xx) {
 	maxTries <- 3
 	ask <- TRUE
 	aa <- 1
-	txt <- "Please type in either 1, 2, or 3."
+	if (xx == 3) {
+		txt <- "Please type in either 1, 2, or 3."
+	}
+	if (xx == 5) {
+		txt <- "Please type in either 1, 2, 3, 4 or 5."
+	}
+	vec <- 1:xx
 	#
 	checkChoice <- function(choice) {
 		if (length(choice) == 0) {
 			message(txt)
 			return(TRUE)			
 		}
-		if (! choice %in% c(1,2,3)) {
+		if (! choice %in% vec) {
 			message(txt)
 			return(TRUE)
 		}
@@ -195,6 +200,59 @@ merge_makeMissVisual <- function(headerList, dsNames) {
 	return(missVisual)
 } # EOF
 
+merge_makeMissVisualNIR <- function(wlsList, dsNames) {
+	charMiss <- 	"    -- no --    " # the characters used in the missVisual
+	charPresent <-	"      yes       "
+	rndDelta <- 20
+	rndSig <- 3
+	mdC <- "*" # the character to add when we have more then one deltas in one dataset
+	#
+	combLists <- function(la, lb) {
+		ol <- list(NULL); length(ol) <- length(la)
+		for (i in 1: length(la)) {
+			ol[[i]] <- c(la[[i]], lb[[i]])
+		}
+		return(ol)
+	} # EOIF
+	#
+	missVisual <- NULL
+	ranges <- lapply(wlsList, range) # gives back a list
+	ransUn <- unique(ranges) # gives back a list
+#	deltas <- lapply(wlsList, function(x) unique(round(diff(x), rndDelta))) # rounding seems to be necessary... somehow the delta can come up with long decimals...
+	deltas <- lapply(wlsList, function(x) unique(diff(x))) 
+	ranDeltaComb <- combLists(ranges, deltas)
+	ranDeltaUni <- unique(ranDeltaComb) # now has the ranges combined with the deltas. The length of that is the numbers of different datasets that we have
+	#
+	singleDeltaChar <- rep("", length(deltas))
+	singleDeltaNum <- numeric(length(deltas))
+	for (i in 1: length(deltas)) { # prepare a character vector telling us whether we have more than one delta wls
+		if (length(deltas[[i]]) == 1) {
+			singleDeltaNum[i] <- deltas[[i]]
+		} else {
+			singleDeltaNum[i] <- signif(as.numeric(names(sort(table(deltas[[i]]), TRUE))[1]), rndSig) # gives back the delta that comes up most often
+			singleDeltaChar[i] <- mdC
+		} # end else
+	} # end for i	
+	#
+	missVisual <- as.data.frame(matrix(charMiss, nrow=length(wlsList), ncol=length(ranDeltaUni)))
+	for (i in 1: length(ranDeltaUni)) { # go through each present range & delta (the columns)
+		for (k in 1: length(wlsList)) { # go through each dataset (the rows)
+			if (identical(ranDeltaUni[[i]], ranDeltaComb[[k]])) {
+				missVisual[k,i] <- charPresent
+			} # end if
+		} # end for k (the datasets)
+	} # end for i (the ranges)
+	rownames(missVisual) <- paste0("#", 1: nrow(missVisual), " ", dsNames)
+	rdc <- combLists(combLists(ranges, singleDeltaNum), singleDeltaChar) # here are the x[1] to x[4] from the sapply below.  ###   Clumsy, I know. But: I do not care! :-)  
+	rdcUni <- unique(rdc)
+	cns <- sapply(rdcUni, function(x) paste0(x[1], " - ", x[2], ", d=", x[3], x[4]))
+	cns <- paste0("   ", cns,"   ")
+	colnames(missVisual) <- cns
+	newO <- order(sapply(apply(missVisual,2, function(x) which(grepl("yes",x))), length), decreasing = TRUE) # re-order the miss-visual, most participants on the left
+	missVisual <- missVisual[,newO]
+	return(missVisual)
+} # EOF
+
 merge_checkListInput <- function(dsList) {
 	if (class(dsList) == "aquap_data") {
 		stop(paste0("Wrong or missing input. Please refer to the manual (?mergeDatasets) for possible options."), call.=FALSE)
@@ -222,10 +280,308 @@ merge_labelObjectToSlot <- function(dsList, mergeLabels) {
 		return(mergeLabels)
 	}
 } # EOF
-# setClass("aquap_mergeLabels", slots=c(numVec="integer", varNames="character", varTypes="character", values="list", dsNames="character"), contains="data.frame")
+
+merge_checkWlsActual <- function(wlsList, newMasterWls, dsNames, what) {
+	for (i in 1: length(wlsList)) {
+		if (what == "fill") {
+			if ((!all(wlsList[[i]] %in% newMasterWls)) ) {
+					stop(paste0("Sorry, without resampling the wavelengths from dataset '", dsNames[i], "' can not be merged."), call.=FALSE)
+			} # end if		
+		} # end if fill
+		#
+		if (what == "cut") {
+			if (!all(newMasterWls %in% wlsList[[i]])) {
+					stop(paste0("Sorry, without resampling the wavelengths from dataset '", dsNames[i], "' can not be merged."), call.=FALSE)
+			} # end if		
+		} # end if fill		
+	} # end for i
+	return(invisible(NULL))
+} # EOF
+
+merge_checkWlsDeltas <- function(wlsList) {
+	deltas <- lapply(wlsList, function(x) unique(diff(x)))
+	deltaUn <- unique(unlist(deltas))
+	if (length(deltaUn) != 1) {
+		stop(paste0("Not all datasets have the same delta wavelength. Please consider resampling the datasets by providing '", pv_noMatchWChar[4], "' or '", pv_noMatchWChar[5], "' to the argument 'noMatchW'"), call.=FALSE)
+	} # end if 
+	return(deltaUn)
+} # EOF
+
+merge_checkResaToInput <- function(resaTo, dsNames, wlsList, noMatchW) {
+	stn <- get("stn", envir=.ap2)
+	thisSilent <- stn$allSilent
+	#
+	if (all(resaTo == "best")) {
+		val <- "best"
+		what <- "best"
+		return(list(val=val, what=what))
+	} # end if
+	if ( all(is.numeric(resaTo)) ) {
+		if (length(resaTo) == 1 ) { # so we will want the index of the dataset
+			if (resaTo > length(dsNames)) {
+				stop(paste0("Please provide an integer within the range 1..", length(dsNames), " to the argument 'resaTo'"), call.=FALSE)
+			} # end if
+			val <- resaTo
+			what <- "index"
+			return(list(val=val, what=what))
+		} else { # so we are providing a wavelength vector
+			rans <- lapply(wlsList, range) # the code for the filling -- getting the supermax and supermin
+			newLower <- min(sapply(rans, function(x) x[1])) # get the new lower limit for all wavelengths # good for filling, having them all
+			newUpper <- max(sapply(rans, function(x) x[2])) # get the new upper limit for all wavelengths
+			if (noMatchW == pv_noMatchWChar[4]) { # 'resacut'
+				newLower <- max(sapply(rans, function(x) x[1])) # get the new lower limit for all wavelengths
+				newUpper <- min(sapply(rans, function(x) x[2])) # get the new upper limit for all wavelengths
+			} # end if
+			newR <- c(newLower, newUpper) # what we actually have
+			resR <- range(resaTo) # the range that we want to resample to
+			if (resR[1] < newR[1] | resR[2] > newR[2] | resR[2] < newR[1] | resR[1] > newR[2] ) {
+				stop(paste0("The provided target wavelength ranging from ", resR[1], " to ", resR[2], " is not possible (out of bounds)."), call.=FALSE)
+			} # end if
+			val <- resaTo
+			what <- "target"
+			return(list(val=val, what=what))
+		} # end else
+	} # end if all is numeric resaTo
+	if (all(is.character(resaTo))) {
+		if (length(resaTo) != 1) {
+			stop("Please provide a character length one to the argument 'resaTo'", call.=FALSE)
+		} # end if
+		if (!resaTo %in% dsNames) {
+			stop(paste0("Please provide on of '", paste(dsNames, collapse="', '"), "' to the argument 'resaTo'"), call.=FALSE)
+		} # end if
+		val <- which(dsNames == resaTo)
+		what <- "index"
+		return(list(val=val, what=what))
+	} # end if all is character resaTo
+	if (!thisSilent) {
+		message("Due to input errors, 'resaTo' was set to 'best'")
+	} # end if
+	val <- "best"
+	what <- "best"
+	return(list(val=val, what=what))
+} # EOF
+
+merge_checkResaMethodInput <- function(resaMethod) {
+	pvals <- c("constant", "linear", "nearest", "spline", "cubic")
+	msg <- paste0("Please provide one of '", paste(pvals, collapse="', '"), "' to the argument 'resaMethod'")
+	if (!all(is.character(resaMethod)) | length(resaMethod) != 1) {
+		stop(msg, call.=FALSE)
+	} # end if
+	if (!resaMethod %in% pvals) {
+		stop(msg, call.=FALSE)
+	} # end if
+} # EOF
+
+merge_cutNirOutsiders <- function(dsList, targetWls=NULL, resaMethod=NULL) {
+	aaa <- merge_getCutRange(dsList)
+		newLower <- aaa$lower
+		newUpper <- aaa$upper
+	outRange <- c(newLower, newUpper)
+	wlsList <- lapply(dsList, getWavelengths)
+	dsNames <- names(dsList)
+	##
+	if (is.null(targetWls)) {
+		deltaWls <- merge_checkWlsDeltas(wlsList) # check for equal delta # stops if not ALL the deltas in all wavelengths are exactly the same
+		newMasterWls <- seq(newLower, newUpper, by=deltaWls) # just for checking
+		merge_checkWlsActual(wlsList, newMasterWls, dsNames, what="cut")
+	} # end is.null(targetWls)
+	##
+	new_dsList <- lapply(dsList, function(x, lower, upper) selectWls(x, lower, upper), lower=newLower, upper=newUpper) # haha    'selectWls' is a function from aquap2  ##### CORE cutting ######
+	if (!is.null(targetWls)) {
+		rangs_corr <- lapply(lapply(new_dsList, getWavelengths), range) # because if we do not exactly hit the from / to points (lower, upper; above), the actual ranges can be different. So we have to change the target wavelengths.
+		lowerMax <- max(sapply(rangs_corr, function(x) x[1]))
+		higherMin <- min(sapply(rangs_corr, function(x) x[2]))
+		targetWls <- targetWls[targetWls >= lowerMax] # the lower range
+		targetWls <- targetWls[targetWls <= higherMin] # the higher range	# we have to cut down the target wavelength to accomodate for possible inaccuracies in the 'selectWls' function above	
+#		print("Target Wls is:"); print(str(targetWls)); print(range(targetWls)); print(unique(diff(targetWls)))
+		new_dsList <- lapply(new_dsList, do_resampleNIR, targetWls, 1, resaMethod) ## haha. Here the resampling  in case of cutting outsides. ##### CORE resampling #####		### make that parallel ###
+		outRange <- range(targetWls)
+	} # end if !is.null(targetWls)
+	##
+	nirList <- lapply(new_dsList, getNIR) # now collect back
+	wlsList <- lapply(new_dsList, getWavelengths)
+	return(list(nirList=nirList, wlsList=wlsList, newRange=outRange))
+} # EOF
+
+merge_fillInNirOutsiders <- function(dsList, targetWls=NULL, resaTo=NULL, resaMethod=NULL) {
+	rndDiff <- 3 # the rounding for the diff
+	##
+	get_cpwl <- function(nirList, wlsList) {
+		# find out the ncpwl of the first dataset (yes, we could bring it. But we can check as well.)
+		wlW <- unlist(strsplit(	colnames(nirList[[1]])[1], "")) # the wavelength with the character
+		wlWo <- unlist(strsplit(as.character(wlsList[[1]][1]), ""))
+		cpwl <- setdiff(wlW, wlWo) # the character(s) before the wavelength
+		return(cpwl)
+	} # EOIF
+	##
+	nirList <- lapply(dsList, getNIR)
+	wlsList <- lapply(dsList, getWavelengths)
+	dsNames <- names(dsList)
+	#
+	aaa <- merge_getFillRange(dsList)
+		newLower <- aaa$lower
+		newUpper <- aaa$upper
+	outRange <- newRange <- c(newLower, newUpper)
+	cpwl <- get_cpwl(nirList, wlsList) # # the character(s) before the wavelength # is an inner function above
+	##
+	if (is.null(targetWls)) { # we do NOT bring in a target wavelength. So we only want to fill in. ('fill')
+		deltaWls <- merge_checkWlsDeltas(wlsList) # check for equal delta # stops if not all deltas the same
+		newMaWls <- seq(newLower, newUpper, by=deltaWls) # the new master wavelength
+		merge_checkWlsActual(wlsList, newMaWls, dsNames, "fill")
+	} else { # we bring in a target wavelength. We want to resample. 
+		deltaWls <- unique(round(diff(targetWls), rndDiff)) #  BUT: if we bring in a custom targetWls, that one should stay the same 
+		if (resaTo$what == "target") { # so we got a specific target wavelength
+			newMaWls <- targetWls # has been checked before in function merge_getTargetWls
+			newRange <- range(newMaWls)
+		} else { # so we are NOT providing a custom target vecctor
+			newMaWls <- seq(newLower, newUpper, by=deltaWls) # the new master wavelength
+		} # end else 
+	} # end else
+	##
+	if (!is.null(targetWls)) { # we have to adapt the wlsList --> via resampling in the dsList
+		# first cut the master wavelength to the range in east dataset in the dsList, then resample that dataset to this part of the master wavelength
+		rans <- lapply(wlsList, range) # we have a list with the range of each dataset in each element
+		for (i in 1: length(dsList)) {
+			thisTwl <- newMaWls[newMaWls >= rans[[i]][1] ] # ## was targetWls ( targetWls[targetWls >= ) before ###  the lower range # adapt the target wavelength to each individual dataset # ! we have to preserve the original targetWls for each dataset
+			thisTwl <- thisTwl[thisTwl <= rans[[i]][2] ] # the higher range
+			#	message(paste0("\n\nThe ", i, "# iteration: ")); print(str(thisTwl)); print(range(thisTwl)); print(unique(round(diff(thisTwl), rndDiff)))
+			dsList[[i]] <- do_resampleNIR(dsList[[i]], thisTwl, NULL, method=resaMethod) # # resample each individual dataset with the custom-cut target wavelength ###### CORE resampling ######		## make that parallel ##
+		} # end for i going through the dsList
+		nirList <- lapply(dsList, getNIR) 			# we have to make a new nirList, as now the wavelengths possibly did change
+		wlsList <- lapply(dsList, getWavelengths) 
+	} # end if !is.null(targetWls)       			# now, in case we have target wavelengths, all datasets in the dsList are resampled to this target wavelength
+	##
+	## now we have to operate on the wlsList, as the ncpwl in the other wavelengths could be different (would be stupid - but it is possible)
+	for (i in 1: length(nirList)) { # going through the nirList
+		if (!identical(range(wlsList[[i]]), newRange)) {
+			thisNewNir <- as.data.frame(matrix(NA, nrow=nrow(nirList[[i]]), ncol=length(newMaWls)))
+			colnames(thisNewNir) <- paste0(cpwl, newMaWls)
+			rownames(thisNewNir) <- rownames(nirList[[i]])
+			inds <- which(newMaWls %in% wlsList[[i]]) # after possibly resampling, should be all here ##### CORE filling in #######
+			thisNewNir[,inds] <- nirList[[i]][,]
+			nirList[[i]] <- thisNewNir 
+			wlsList[[i]] <- newMaWls
+		} # end if not identical
+	} # end for i (nirList)
+	return(list(nirList=nirList, wlsList=wlsList, newRange=newRange, cpwl=cpwl))
+} # EOF
+
+merge_getCutRange <- function(dsList) {
+	wlsList <- lapply(dsList, getWavelengths)
+	rans <- lapply(wlsList, range) # the cutting code
+	newLower <- max(sapply(rans, function(x) x[1])) # get the new lower limit for all wavelengths
+	newUpper <- min(sapply(rans, function(x) x[2])) # get the new upper limit for all wavelengths
+	return(list(lower=newLower, upper=newUpper))
+} # EOF
+
+merge_getFillRange <- function(dsList) {
+	wlsList <- lapply(dsList, getWavelengths)
+	rans <- lapply(wlsList, range) # the filling code
+	newLower <- min(sapply(rans, function(x) x[1])) # get the new lower limit for all wavelengths
+	newUpper <- max(sapply(rans, function(x) x[2])) # get the new upper limit for all wavelengths
+	return(list(lower=newLower, upper=newUpper))
+} # EOF
+
+merge_getTargetWls <- function(dsList, resaTo, cutFill="cut") {
+	rndDiff <- 3
+	##
+	val <- resaTo$val # gives back the values that the user provided
+	what <- resaTo$what # tells the category of what the user wants
+	##
+	if (what == "best") {
+		twls <- merge_findBestResaToWls(dsList, cutFill) 
+		return(twls)
+	} # end if
+	##
+	if (cutFill == "cut") {
+		aaa <- merge_getCutRange(dsList)
+				newLower <- aaa$lower
+				newUpper <- aaa$upper
+		if (what == "target") {
+			val <- val[val >= newLower] # cut away possible too low
+			val <- val[val <= newUpper] # cut away possible too high
+			return(val) # return the provided target wavelength, but cut away those values below or above the new cutting-range
+		} # end if what == "target"
+		if (what == "index") {
+			wls <- getWavelengths(dsList[[val]]) # 'val' has the index to the desired dataset
+			wls <- wls[wls >= newLower] # cut away possible too low
+			wls <- wls[wls <= newUpper] # cut away possible too high
+			return(wls) # return the provided target wavelength, but cut away those values below or above the new cutting-range
+		} # end if what == "index"
+	} # end if cutFill=="cut"	
+	##
+	if (cutFill == "fill") {
+		aaa <- merge_getFillRange(dsList)
+			newLower <- aaa$lower
+			newUpper <- aaa$upper
+		if (what == "target") { # if a target is provided, check for uneven distribution !!
+			val <- val[val >= newLower] # cut away possible too low
+			val <- val[val <= newUpper] # cut away possible too high
+			targDelta <- unique(round(diff(val), rndDiff))
+			if (length(targDelta) != 1) { # so we have uneven distribution
+				stop(paste0("Sorry, the delta (wavelength) in the provided numerical target vector is not unique. \n(unique(diff(x)) != 1; uneven distribution of wavelength-deltas). "), call.=FALSE)
+			} # end if
+			return(val) # return the provided target wavelength
+		} # end if what == "target"
+		if (what == "index") {
+			wls <- getWavelengths(dsList[[val]]) # 'val' has the index to the desired dataset
+			wls <- wls[wls >= newLower] # cut away possible too low
+			wls <- wls[wls <= newUpper] # cut away possible too high
+			delta <- unique(round(diff(wls), rndDiff))
+			if (length(delta) != 1) { # so we have uneven distribution
+				na <- names(dsList)[val]
+				stop(paste0("Sorry, the delta wavelength in selected dataset #", val, " ('", na, "') is not unique. \n(unique(diff(x)) != 1; uneven distribution of wavelength-deltas). "), call.=FALSE)
+			} # end if		
+			tarWls <- seq(newLower, newUpper, by=delta)
+			return(tarWls) # return the total target wavelength based on the delta-wavelength as present in the selected dataset
+		} # end if what == "index"
+	} # end if cutFill=="cut"	
+	stop() # just so, we should never reach it. If yes -- gives a nice debugging thing.
+} # EOF
+
+merge_getOptimalDSindex <- function(wlsList, dsNames) {
+	mv <- merge_makeMissVisualNIR(wlsList, dsNames) # gives back a data frame
+	indYes <- grep("yes", mv[,1]) # in the first column are the most "yes". if possible.
+	if (length(indYes) == 1) {
+		stop(paste0("Sorry, but it is not obvious which is the best target wavelength to resample all datasets to.\nPlease specify a single dataset or provide a target wavelength vector in the argument 'resaTo'"), call.=FALSE)
+	} # end if
+	return(indYes[1]) # # just get the first of the "yes" datasets in the first column 
+} # EOF
+
+merge_findBestResaToWls <- function(dsList, cutFill) {
+	targetWls <- NULL
+	rndDiff <- 3 # the rounding for getting the unique(diff(x))
+	##
+	if (cutFill == "cut") {
+		aaa <- merge_getCutRange(dsList)
+			newLower <- aaa$lower
+			newUpper <- aaa$upper
+		new_dsList <- lapply(dsList, function(x, lower, upper) selectWls(x, lower, upper), lower=newLower, upper=newUpper) # just cut all down to the new range
+		indOpt <- merge_getOptimalDSindex(lapply(new_dsList, getWavelengths), names(dsList)) # does a checking too, if no optimal solution can be found it is stopped.
+		twls <- getWavelengths(new_dsList[[indOpt]]) # just get the first of the "yes" datasets in the first column -- they all have to have exactly the same wavelenghts; but from the NEW dsList -- where all is cut down already
+		twls <- twls[twls >= newLower] # cut away possible too low. Should be not necessary here. 
+		twls <- twls[twls <= newUpper] # cut away possible too high. Should be not necessary here. 
+		return(twls)
+	} # end cutFill == "cut"
+	##
+	if (cutFill == "fill") {
+		aaa <- merge_getFillRange(dsList)
+			newLower <- aaa$lower
+			newUpper <- aaa$upper
+		indOpt <- merge_getOptimalDSindex(lapply(dsList, getWavelengths), names(dsList)) # does a checking too, if no optimal solution can be found it is stopped.
+		optTwls <- getWavelengths(dsList[[indOpt]]) # get the optimum delta and create the targetWls using the new range and this delta.
+		optDelta <- unique(round(diff(optTwls), rndDiff))
+		if (length(optDelta) != 1) { # so we have uneven distribution
+			na <- names(dsList)[indOpt]
+			stop(paste0("Sorry, the optimal delta wavelength in dataset #", indOpt, " ('", na, "') is not unique. \n(unique(diff(x)) != 1; uneven distribution of wavelength-deltas). "), call.=FALSE)
+		} # end if
+		twls <- seq(newLower, newUpper, by=optDelta)
+		return(twls)
+	} # end cutFill = "fill"
+} # EOF
 
 ###### CORE #########
-mergeDatasets_list <- function(dsList, mergeLabels, noMatch=get(".ap2$stn$gen_merge_noMatch"), dol=get(".ap2$stn$gen_merge_detectOutliers")) { # newLabels can come in as NULL   ####CORE####
+mergeDatasets_list <- function(dsList, mergeLabels, noMatchH=get("stn", envir=.ap2)$gen_merge_noMatchH, noMatchW=get("stn", envir=.ap2)$gen_merge_noMatchW, resaTo="best", resaMethod=get("stn", envir=.ap2)$gen_resample_method, dol=get("stn", envir=.ap2)$gen_merge_detectOutliers) { # newLabels can come in as NULL   ####CORE####
 	autoUpS()
 	stn <- get("stn", envir=.ap2)
 	clpref <- stn$p_ClassVarPref
@@ -234,6 +590,7 @@ mergeDatasets_list <- function(dsList, mergeLabels, noMatch=get(".ap2$stn$gen_me
 	thisSilent <- stn$allSilent
 	snrColName_y <- paste0(ypref, stn$p_sampleNrCol)
 	snrColName_c <- paste0(clpref, stn$p_sampleNrCol)
+	rndDiff <- 3
 	#
 	# intern functions 
 	checkForSameness <- function(xList, char=NULL) {
@@ -243,9 +600,12 @@ mergeDatasets_list <- function(dsList, mergeLabels, noMatch=get(".ap2$stn$gen_me
 			cnsi <- colnames(xList[[i]])
 			if (!identical(cns1, cnsi)) { # compares the first one with all the others
 				if (char == "header") {
-					add <- "\nWe are terribly sorry, but apparently there was an error while deleting / filling in header columns\n"
+					apoChar <- "\nWe are terribly sorry, but apparently there was an error while deleting / filling in header columns.\n"
 				} # end if
-				stop(paste0("Sorry, at the moment only identical ", char, "-structures can be merged", add), call.=FALSE)
+				if (char == "wavelength") {
+					apoChar <- "\nWe are terribly sorry, but apparently there was an error while resampling / cutting / filling in wavelengths.\n"
+				} # end if
+				stop(paste0(apoChar), call.=FALSE)
 				return(FALSE)
 			} # end if
 		} # end for i
@@ -253,13 +613,25 @@ mergeDatasets_list <- function(dsList, mergeLabels, noMatch=get(".ap2$stn$gen_me
 	getRLEs_num <- function(x, cn=snrColName_y) {
 		return(rle(as.numeric(x$header[,cn])))
 	} # EOIF
+	printTxtMissVisual <- function(thisSilent, weComeFromAsking, txtGen, missVisualNIR, txt) {
+		if (!thisSilent) {
+			if (!weComeFromAsking) {
+				message(txtGen)
+				print(missVisualNIR); cat("\n")			
+			} # end if !weComeFromAsking
+			cat(txt)
+		} # end if not silent
+	} # EOIF
 	#
 	#
 	#### entry-checking ######
 	merge_checkListInput(dsList)
-	noMatch <- merge_checkNoMatchChar(noMatch) # check if input is valid
+	noMatchH <- merge_checknoMatchChar(noMatchH, pv_noMatchHChar, "H") # check if input is valid
+	noMatchW <- merge_checknoMatchChar(noMatchW, pv_noMatchWChar, "W") # check if input is valid
 	merge_checkLabelObject(dsList, mergeLabels)
+	merge_checkResaMethodInput(resaMethod)
 	#
+	
 	#########  make the newLabel columns ################
 	newLabelBlock <- NULL
 	numVec <- sapply(dsList, nrow)
@@ -279,7 +651,9 @@ mergeDatasets_list <- function(dsList, mergeLabels, noMatch=get(".ap2$stn$gen_me
 	wlsList <- lapply(dsList, getWavelengths)
 	rleList_sn <- lapply(dsList, getRLEs_num) # the default is to get the rle for the sample numbers
 	##
-	
+	## some more checking
+	resaTo <- merge_checkResaToInput(resaTo, dsNames, wlsList, noMatchW) # gives back either "best", a number indicating the index of the dataset for the target wavelength, or a target wavelength vector
+	##
 	######### check for duplicates within a singel dataset ########
 	for (i in 1: length(headerList)) {  # check for duplicate colnames within each single dataset
 		cns <- c(colnames(headerList[[i]]), colnames(newLabelBlock)) # within a single dataset + the new names
@@ -290,7 +664,7 @@ mergeDatasets_list <- function(dsList, mergeLabels, noMatch=get(".ap2$stn$gen_me
 	} # end for i
 	##
 			
-	############## check for non-matches, handle them ################
+	############## check for non-matches in header columns, handle them ################
 	aa <- as.vector(unlist(sapply(headerList, colnames)))   	# first collect all column names into a single vector
 	cnsTab <- table(aa) # gives a named numeric
 	namesComplete <- names(which(cnsTab == length(headerList))) # gives the names of those columns that are present in all datasets
@@ -300,32 +674,32 @@ mergeDatasets_list <- function(dsList, mergeLabels, noMatch=get(".ap2$stn$gen_me
 		missVisual <- merge_makeMissVisual(headerList, dsNames) 
 		txtGen <- paste0("\nThere were ", length(namesMissing), " non-matching header columns detected.\n")
 		#		
-		if (noMatch == pv_noMatchChar[1]) { # "ask"   # yes, I know.  I tried a "switch". Could not make it work. Shame.
+		if (noMatchH == pv_noMatchHChar[1]) { # "ask"   # yes, I know.  I tried a "switch". Could not make it work. Shame.
 			message(txtGen)
 			print(missVisual)
 			cat(paste0("\nShould the non-matching header columns be:\n1 - deleted,\n2 - filled in, or\n3 - should the merging of datasets be stopped?\n"))
-			choice <- merge_readInChoice()
+			choice <- merge_readInChoice(xx=3)
 			if (choice == 1) {
 				if (!thisSilent) {
 					cat(paste0("Deleting header-columns... \n"))
 				} # end if
-				noMatch <- pv_noMatchChar[2] ## so we go into the delete below
+				noMatchH <- pv_noMatchHChar[2] ## so we go into the delete below
 				thisSilent <- TRUE
 			} # end if
 			if (choice == 2) {
 				if (!thisSilent) {
 					cat(paste0("Filling in header-columns... \n"))
 				} # end if
-				noMatch <- pv_noMatchChar[3] ## so we go into the filling in below
+				noMatchH <- pv_noMatchHChar[3] ## so we go into the filling in below
 				thisSilent <- TRUE
 			} # end if
 			if (choice == 3) {
-				noMatch <- pv_noMatchChar[4] ## so we go into the stop below
+				noMatchH <- pv_noMatchHChar[4] ## so we go into the stop below
 				thisSilent <- TRUE
 			} # end if
 		} # end "ask"
 		##
-		if (noMatch == pv_noMatchChar[2]) { # "delete"
+		if (noMatchH == pv_noMatchHChar[2]) { # "delete"
 			if (!thisSilent) {
 				message(txtGen)
 				cat(paste0("From all datasets to be merged (in the rows below), the following header-columns will be deleted in (in the columns below):\n\n"))
@@ -348,7 +722,7 @@ mergeDatasets_list <- function(dsList, mergeLabels, noMatch=get(".ap2$stn$gen_me
 			} # end for i
 		} # end "delete"
 		##
-		if (noMatch == pv_noMatchChar[3]) { # "fill in"
+		if (noMatchH == pv_noMatchHChar[3]) { # "fill in"
 			if (!thisSilent) {
 				message(txtGen)
 				cat(paste0("For all datasets to be merged (in the rows below), the following header-columns will be filled in (in the columns below):\n\n"))
@@ -371,7 +745,7 @@ mergeDatasets_list <- function(dsList, mergeLabels, noMatch=get(".ap2$stn$gen_me
 			} # end for i (going through the header list)		
 		} # end "filling in"
 		##
-		if (noMatch == pv_noMatchChar[4]) { # "stop"
+		if (noMatchH == pv_noMatchHChar[4]) { # "stop"
 			if (!thisSilent) {
 				message(txtGen)
 				print(missVisual); cat("\n")
@@ -384,15 +758,147 @@ mergeDatasets_list <- function(dsList, mergeLabels, noMatch=get(".ap2$stn$gen_me
 			headerList[[i]] <- headerList[[i]][,namesComplete] # re-order the header ######## important !! --> as before, we only checked for the "presence" of the column name, the order was irrelevant. Now everything has to have same order.
 		} # end for i	
 	} ######### end if (we have a non-match #########
-	##	
-	##
+	thisSilent <- stn$allSilent # because we modified it in there
 	##		
-#	print(merge_makeMissVisual(headerList, dsNames)); wait()
 	checkForSameness(headerList, "header")   ## after the corrections above, this never should give a no-match. Leave it here just to check.
-	checkForSameness(nirList, "wavelength")  #### here checking for sameness !! #####  # now, for the moment, all NIR has to be the same
 	##
 	##
-	
+	########## check for not-same wavelengths, deal with them #############  
+	cpwl <- NULL # might be modified later
+	nirSame <- sapply(wlsList, function(x, aa) identical(x, aa), aa=wlsList[[1]])
+	allNirSame <- all(nirSame)
+	if (!allNirSame) {
+		ransUn <- unique(lapply(wlsList, range)) # gives back a list
+		nrs <- length(ransUn)
+		txtGen <- paste0("There were ", nrs, " sets of wavelengths detected in the datasets to be merged.\n")
+		cutText <- "The wavelengths in all datasets to be merged (in the rows) were cut to the following"
+		cutText2 <- " common range:"
+		fillText <- "The wavelengths in all datasets to be merged (in the rows) were filled in to the following"
+		fillText2 <- " maxium range:"
+		deltaText <- ""
+		cutResaAdd <- fillResaAdd <-  "No resampling of datasets was necessary." # the default message when no resampling has to be done. In case of resampling, gets modified.
+		missVisualNIR <- merge_makeMissVisualNIR(wlsList, dsNames)
+		weComeFromAsking <- FALSE
+		if (noMatchW == pv_noMatchWChar[1]) { # so we want to ask
+			message(txtGen)
+			print(missVisualNIR)
+			aa <- "\nShould non-matching wavelengths be:\n"
+			bb <- "1 - cut: outsides (wavelengths outside of a common minimal range) will be cut off,\n"
+			cc <- "2 - filled in: outsides will be filled in with NAs, \n"
+			dd <- "3 - resampled and cut: possibly resample datasets to a common delta wavelength, then cut off outsides, \n"
+			ee <- "4 - resampled and filled in: possibly resample datasets to a common delta wavelength, then fill in outsides, or \n"
+			ff <- "5 - should the merging of datasets be stopped?\n"
+			cat(paste0(aa, bb, cc, dd, ee, ff))
+			choice <- merge_readInChoice(xx=5)
+			if (choice == 1) { # cut away wavelengthsf
+				noMatchW <- pv_noMatchWChar[2] ## so we go into the cutting outsiders below
+				weComeFromAsking <- TRUE
+			} # end if
+			if (choice == 2) { # fill in
+				noMatchW <- pv_noMatchWChar[3] ## so we go into the filling in below
+				weComeFromAsking <- TRUE
+			} # end if
+			if (choice == 3) {			
+				noMatchW <- pv_noMatchWChar[4] ## so we go into cutting and resampling below
+				weComeFromAsking <- TRUE
+			} # end if
+			if (choice == 4) {			
+				noMatchW <- pv_noMatchWChar[5] ## so we go into filling in and resampling below
+				weComeFromAsking <- TRUE
+			} # end if
+			if (choice == 5) {
+				noMatchW <- pv_noMatchWChar[6] ## so we go into the stop below
+				weComeFromAsking <- TRUE
+			} # end if						
+		} # end if "ask"
+		##
+		# pv_noMatchWChar <- c("ask", "cut", "fill", "resacut", "resafill", "stop")		
+		if (noMatchW == pv_noMatchWChar[2]) { # "cut"
+			if (!thisSilent) {cat("Checking and cutting outsides... \n")}
+			aaa <- merge_cutNirOutsiders(dsList)
+				nirList <- aaa$nirList
+				wlsList <- aaa$wlsList
+				newRange <- aaa$newRange
+			printTxtMissVisual(thisSilent, weComeFromAsking, txtGen, missVisualNIR, txt=paste0(cutText, cutText2, "\n", paste0(newRange, collapse=" - "), "\n\n"))		
+		} # end "cut"	
+		##	
+		if (noMatchW == pv_noMatchWChar[3]) { # "fill"
+			if (!thisSilent) {cat("Checking and filling in outsides... \n")}
+			aaa <- merge_fillInNirOutsiders(dsList)
+				nirList <- aaa$nirList
+				wlsList <- aaa$wlsList
+				newRange <- aaa$newRange
+				cpwl <- aaa$cpwl
+			printTxtMissVisual(thisSilent, weComeFromAsking, txtGen, missVisualNIR, txt=paste0(fillText, fillText2, "\n", paste0(newRange, collapse=" - "), "\n\n"))		
+		} # end "fill"	
+		##	
+		if (noMatchW == pv_noMatchWChar[4]) { # "resacut"
+			if (!thisSilent) {cat(paste0("Checking for resampling ('", resaMethod, "') and cutting outsides... \n"))}
+			deltaUn <- unique(unlist(lapply(wlsList, function(x) unique(diff(x))))) # xxx no rounding?
+			if (length(deltaUn) == 1) { # so all datasets have the same delta wavelength, no resampling necessary.
+				aaa <- merge_cutNirOutsiders(dsList)
+					nirList <- aaa$nirList
+					wlsList <- aaa$wlsList
+					newRange <- aaa$newRange
+			} else { # so we do need to resample
+				targetWls <- merge_getTargetWls(dsList, resaTo, cutFill="cut") 
+				aaa <- merge_cutNirOutsiders(dsList, targetWls, resaMethod)
+					nirList <- aaa$nirList
+					wlsList <- aaa$wlsList
+					newRange <- aaa$newRange
+				#
+				reme <- resaMethod
+				deltaText <- paste0(" (delta=", unique(round(diff(targetWls), rndDiff))	, ")")
+				if (resaTo$what == "best") {cutResaAdd <- paste0("Datasets were optimally resampled (using method '", reme, "').") } # end if
+				if (resaTo$what == "target") {
+					cutText2 <- " range dictated by the provided target wavelengths:"
+					cutResaAdd <- paste0("Datasets were resampled to provided target wavelengths (using method '", reme, "').")
+				} # end if
+				if (resaTo$what == "index") {cutResaAdd <- paste0("Datasets were resampled to '", dsNames[resaTo$val], "' (using method '", reme, "').") } # end if
+			} # end else
+			printTxtMissVisual(thisSilent, weComeFromAsking, txtGen, missVisualNIR, txt=paste0(cutText, cutText2, "\n", paste0(newRange, collapse=" - "), deltaText, "\n", cutResaAdd, "\n\n"))
+		} # end "resacut"	
+		##
+		if (noMatchW == pv_noMatchWChar[5]) { # "resafill"
+			if (!thisSilent) {cat(paste0("Checking for resampling ('", resaMethod, "') and filling in outsides... \n"))}
+			deltaUn <- unique(unlist(lapply(wlsList, function(x) unique(diff(x)))))
+			if (length(deltaUn) == 1) { # so all datasets have the same delta wavelength, no resampling necessary.
+				aaa <- merge_fillInNirOutsiders(dsList)
+					nirList <- aaa$nirList
+					wlsList <- aaa$wlsList
+					newRange <- aaa$newRange
+					cpwl <- aaa$cpwl
+			} else { # so we do need to resample
+				targetWls <- merge_getTargetWls(dsList, resaTo, cutFill="fill") 
+				#	print(str(targetWls)); print(range(targetWls)); print(unique(diff(targetWls)))
+				aaa <- merge_fillInNirOutsiders(dsList, targetWls, resaTo, resaMethod)
+					nirList <- aaa$nirList
+					wlsList <- aaa$wlsList
+					newRange <- aaa$newRange
+					cpwl <- aaa$cpwl
+				deltaText <- paste0(" (delta=", unique(round(diff(targetWls), rndDiff))	, ")")
+				reme <- resaMethod
+				#	
+				if (resaTo$what == "best") {fillResaAdd <- paste0("Datasets were optimally resampled (using method '", reme, "').") } # end if
+				if (resaTo$what == "target") {
+					fillText2 <- " range dictated by the provided target wavelengths:"
+					fillResaAdd <- paste0("Datasets were resampled to provided target wavelengths (using method '", reme, "').")
+				} # end if
+				if (resaTo$what == "index") {fillResaAdd <- paste0("Datasets were resampled to '", dsNames[resaTo$val], "' (using method '", reme, "').") } # end if
+			} # end else	
+			printTxtMissVisual(thisSilent, weComeFromAsking, txtGen, missVisualNIR, txt=paste0(fillText, fillText2, "\n", paste0(newRange, collapse=" - "), deltaText, "\n", fillResaAdd, "\n\n"))
+		} # end "resafill"	
+		##						
+		if (noMatchW == pv_noMatchWChar[6]) { # "stop"
+			printTxtMissVisual(thisSilent, weComeFromAsking, txtGen, missVisualNIR, txt=NULL)
+			stop(paste0("Merging of datasets is stopped. See ?mergeDatasets for options."), call.=FALSE)
+		} # end "stop"	
+		##		
+	} # end if !allNirSame
+	##
+	checkForSameness(nirList, "wavelength")  #### after the corrections above, this never should give a no-match. Leave it here just to check.
+	##
+	##
 	########## prepare special columns (Y_SampleNr) ##########
 	# prepare for the modified Y_SampleNr
 	totalNrsNeeded <- sum(unlist(lapply(rleList_sn, function(x) length(x$lengths)))) # the sum of how many numbers in each dataset occuring
@@ -755,7 +1261,6 @@ calculateVariable <- function(dataset, cexpr=expression(""), name=NULL, type="c"
 #' @name generateMergeLabels
 NULL
 
-#pv_noMatchChar <- c("ask", "delete", "fillIn", "stop")
 #' @title Merge Datasets
 #' @description Merge together two or more datasets, and possibly add class- or 
 #' numerical variables to each dataset via the 'mergeLabels' object.
@@ -768,21 +1273,63 @@ NULL
 #' @param ds2 An object of class 'aquap_data', can be missing.
 #' @param mergeLabels An object of class 'aquap_mergeLabels' as generated by 
 #' \code{\link{generateMergeLabels}}, can be missing.
-#' @param noMatch Character length one. Defines what should happen in the case of 
+#' @param noMatchH Character length one. Defines what should happen in the case of 
 #' non-matching header structures, i.e. the column names of the headers of the 
 #' datasets to me merged can not be overlapped. The default value is defined in 
-#' the settings.r file (\code{gen_merge_noMatch}). Possible values are: 
+#' the settings.r file (\code{gen_merge_noMatchH}). Possible values are: 
 #' \describe{
 #' \item{ask}{The non-matching header-columns in each dataset are 
 #' displayed, and the user is asked interactively what to do, with the three options 
 #' below as possible options.}
 #' \item{delete}{Non-matching header columns are automatically deleted.}
-#' \item{fillIn}{Each column name not existing in all of the datasets 
+#' \item{fill}{Each column name not existing in all of the datasets 
 #' to be merged is added to those datasets where it does not exist. The data is filled 
 #' in with 'NAs'.}
 #' \item{stop}{In case of non-overlapping header structures, the merging 
 #' process is stopped, with possibly a message being displayed.}
 #' }
+#' @param noMatchW Character length one. Defines what should happen in the case of 
+#' non-matching wavelengths, i.e. the wavelengths in the datasets to be merged are 
+#' not identical. The default value is defined in the settings.r file 
+#' (\code{gen_merge_noMatchH}). Possible values are:
+#' \describe{
+#' \item{ask}{The non-matching wavelenghts in each dataset are displayed, and the 
+#' user is asked interactively what to do, with the five options below as possible 
+#' options.}
+#' \item{cut}{All wavelengths outside a range common to all datasets will be deleted. 
+#' In other words, for some datasets the 'outsiders', i.e. the wavelengths outside 
+#' of that common range, will be deleted.}
+#' \item{fill}{Missing wavelengths will be filled in with 'NAs'. In other words, the 
+#' wavelengths of all datasets will be expanded to encompass the overal mimimum and 
+#' the overal maximum of the wavelengths of the datasets.}
+#' \item{resacut}{Same as 'cut', but datasets are resampled to have all the same delta
+#' wavelength.}
+#' \item{resafill}{Same as 'fill', but datasets are resampled to have all the same delta
+#' wavelength.}
+#' \item{stop}{In case of non-matching wavelengths, the merging process is stopped, 
+#' with possibly a message being displayed.}
+#' }
+#' @param resaTo Target wavelength for a (possible) resampling process (which uses the 
+#' function \code{\link{do_resampleNIR}}. Can be one of the following:
+#' \describe{
+#' \item{"best"}{If left at the default 'best' the best target wavelength will be 
+#' automatically determined. The best target wavelength is a solution where as few 
+#' as possible datasets get resampled.}
+#' \item{Character length one}{The name of the dataset (if a named list is provided) 
+#' containing the target wavelength.}
+#' \item{Integer length one}{The number of the dataset (e.g. in the provided list) 
+#' containing the target wavelength.}
+#' \item{Numeric Vector}{Provide a numeric vector as target wavelengths to which all 
+#' datasets will be resampled. The vector will be checked for plausibility, i.e. if 
+#' it is in range of the provided datasets etc. For 'filling in' (option 'fill' or 
+#' 'resafill' in argument 'noMatchW') only numeric vectors x with 
+#' \code{length(unique(diff(x))) == 1} are accepted.}
+#' }
+#' @param resaMethod Character length one. Which of the resampling methods should be 
+#' used. Factory-fresh defaults to 'cubic'; the default can be changed in the settings.r file 
+#' parameter \code{gen_resample_method}. See \code{\link{do_resampleNIR}} and 
+#' \code{\link[pracma]{interp1}}. 'linear' is much faster than e.g. 'spline' or 
+#' 'cubic', but the quality of the resampling is not as good.
 #' @param dol Logical length one. If outliers should be detected based on the scope 
 #' of the new, merged dataset. The default value is defined in the settings file at
 #' \code{gen_merge_detectOutliers}.

@@ -549,7 +549,8 @@ do_dptSeq <- function(dataset, dptSeq, extraModelList=NULL, silent=TRUE) {
 #' generated target wavelength. Only applies if \code{targetWls} is left at 
 #' \code{NULL}.
 #' @param method The resampling method. For details see 
-#' \code{\link[pracma]{interp1}}.
+#' \code{\link[pracma]{interp1}}. Defaults to 'cubic'; the default can be 
+#' changed in the settings.r file (parameter \code{gen_resample_method}).
 #' @return The resampled dataset.
 #' @examples
 #' \dontrun{
@@ -558,7 +559,7 @@ do_dptSeq <- function(dataset, dptSeq, extraModelList=NULL, silent=TRUE) {
 #' }
 #' @family Data pre-treatment functions 
 #' @export
-do_resampleNIR <- function(dataset, targetWls=NULL, tby=0.5, method="linear") {
+do_resampleNIR <- function(dataset, targetWls=NULL, tby=0.5, method=get("stn", envir=.ap2)$gen_resample_method) {
 	ncpwl <- dataset@ncpwl
 	charPrevWls <- substr(colnames(dataset$NIR)[1], 1, (ncpwl))
 	#
@@ -567,7 +568,10 @@ do_resampleNIR <- function(dataset, targetWls=NULL, tby=0.5, method="linear") {
     	xNew <- seq(ceiling(x[1]/2) * 2, floor(x[length(x)]/2) * 2, tby)
 	} else {
 		xNew <- targetWls
-	}	
+	#	if (identical(x, xNew)) {
+	#		return(dataset) # To save possibly time. In the merging, it could be that we provide the same target than the present wls.
+	#	} # end if
+	} # end else	
 	NIR <- t(apply(dataset$NIR, 1, pracma::interp1, x = x, xi = xNew, method = method))
     colnames(NIR) <- paste0(charPrevWls, xNew)
     dataset$NIR <- NIR

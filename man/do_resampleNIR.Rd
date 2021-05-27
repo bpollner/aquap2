@@ -4,7 +4,12 @@
 \alias{do_resampleNIR}
 \title{Resample data to new Wavelengths}
 \usage{
-do_resampleNIR(dataset, targetWls = NULL, tby = 0.5, method = "linear")
+do_resampleNIR(
+  dataset,
+  targetWls = NULL,
+  tby = 0.5,
+  method = get("stn", envir = .ap2)$gen_resample_method
+)
 }
 \arguments{
 \item{dataset}{An object of class 'aquap_data' as produced e.g. by 
@@ -20,7 +25,8 @@ generated target wavelength. Only applies if \code{targetWls} is left at
 \code{NULL}.}
 
 \item{method}{The resampling method. For details see 
-\code{\link[pracma]{interp1}}.}
+\code{\link[pracma]{interp1}}. Defaults to 'cubic'; the default can be 
+changed in the settings.r file (parameter \code{gen_resample_method}).}
 }
 \value{
 The resampled dataset.
