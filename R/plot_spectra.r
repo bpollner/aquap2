@@ -1,4 +1,4 @@
-plotSpectra_outer <- function(dataset, colorBy, onMain, onSub, idString="", md) {
+plotSpectra_outer <- function(dataset, colorBy, onMain, onSub, idString="", md, ...) {
 	if (!is.null(colorBy)) {
 		if (any(colorBy == "all")) {	
 			cPref <- .ap2$stn$p_ClassVarPref
@@ -15,15 +15,16 @@ plotSpectra_outer <- function(dataset, colorBy, onMain, onSub, idString="", md) 
 		stop(paste("Sorry, the class-variable '", paste(colorBy[a], collapse=", "), "' does not exist. Please check your input.", sep=""), call.=FALSE)
 	}	
 	if (is.null(colorBy)) {
-		plotSpectra_inner(dataset, singleColorBy=NULL, onMain, onSub, idString, md)
+		plotSpectra_inner(dataset, singleColorBy=NULL, onMain, onSub, idString, md, ...)
 	} else {
 		for (i in 1: length(colorBy)) {
-			plotSpectra_inner(dataset, colorBy[i], onMain, onSub, idString, md)
+			plotSpectra_inner(dataset, colorBy[i], onMain, onSub, idString, md, ...)
 		} # end for i	
 	} 
 } # EOF
 
-plotSpectra_inner <- function(dataset, singleColorBy, onMain, onSub, idString="", md) {
+# the ablv and after that values used for making vertical lines when plotting the HNA/LNA cutoff (flowdex / Xiaoxia Paper)
+plotSpectra_inner <- function(dataset, singleColorBy, onMain, onSub, idString="", md, ablv=NULL, ablvCol="gray", ablvLty=3, bp=NULL, slwd=NULL, ...) {
 	xlab <- md$meta$xaxDenom
 	ylab <- md$meta$yaxDenom
 	#
@@ -57,8 +58,19 @@ plotSpectra_inner <- function(dataset, singleColorBy, onMain, onSub, idString=""
 #	plotPeaks(pires, onMain="", onSub="", adLines=TRUE, pcaVariances=NULL, customColor=NULL, ylim=NULL, wls, clty=NULL)
 	#
 	onSub <- paste(onSub, msg, partNMsg, sep=" ")
-	matplot(wls, t(dataset$NIR), type="l", xlab=xlab, ylab=ylab, main=onMain, sub=onSub, col=colorData, lty=1)
+	if (is.null(slwd)) {
+		lwdUse <- 1
+	} else {
+		lwdUse <- slwd
+	} # end else
+	matplot(wls, t(dataset$NIR), type="l", xlab=xlab, ylab=ylab, main=onMain, sub=onSub, col=colorData, lty=1, lwd=lwdUse)
 	abline(h=0, col="gray")
+	if (!is.null(ablv)) {
+		abline(v=ablv, col=ablvCol, lty=ablvLty)
+	} # end if
+	if (!is.null(bp)) {
+		abline(v=c(bp$bp[1], bp$bp[2]), col=bp$bpCol, lty=bp$bpLty, lwd=bp$bpLwd)
+	} # end if
 	if (makeLegend) {
 		legBgCol <- rgb(255,255,255, alpha=.ap2$stn$col_alphaForLegends, maxColorValue=255) # is a white with alpha to be determined in the settings
 #		legPosition <- getCheckLegendPosition(as.numeric(matrix(rep(wls, ncol(t(dataset$NIR))), nrow=1)), as.numeric(matrix(t(dataset$NIR), nrow=1, byrow=TRUE)))
@@ -90,7 +102,7 @@ plot_spectra_Data <- function(x, colorBy=NULL, ...) {
 	onMain <- paste(expName, onMain, sep=" ")
 	if (where == "pdf") { pdf(file=filename, width, height, onefile=TRUE, family='Helvetica', pointsize=12) }
 	if (where != "pdf" & (Sys.getenv("RSTUDIO") != 1) & (!names(dev.cur()) == "quartz") ) {dev.new(height=height, width=width)}	
-	plotSpectra_outer(dataset, colorBy, onMain, onSub, md=md)
+	plotSpectra_outer(dataset, colorBy, onMain, onSub, md=md, ...)
 	if (where == "pdf") {dev.off()}
 	if (!.ap2$stn$allSilent & (where == "pdf" )) {cat("ok\n") }
 } # EOF
@@ -136,7 +148,7 @@ plot_spectra_Cube <- function(x, colorBy=NULL, ...) {
 		dataset <- getDataset(x[[i]]) # the sets are in the list within the cube
 		idString <- getIdString(x[[i]])
 		if (!.ap2$stn$allSilent & (where == "pdf" )) {cat(paste("   working on #", i, " of ", length(x), "\n", sep=""))}
-		plotSpectra_outer(dataset, colorBy, onMain, onSub, idString, md)
+		plotSpectra_outer(dataset, colorBy, onMain, onSub, idString, md, ...)
 	} # end for i
 	if (where == "pdf") {dev.off()}
 	if (!.ap2$stn$allSilent & (where == "pdf" )) {cat("ok\n") }
