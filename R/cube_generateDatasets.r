@@ -203,6 +203,27 @@ ap_cleanOutZeroValues <- function(ap, dataset) {
 	return(ap)
 } # EOF
 
+ap_reCheckAqgBootR <- function(ap, dataset) {
+	###
+#	R <- ap$aquagr$R
+	R <- ap$aquagr$ROrig # because we have to re-evaluate, as, due to subsplitting in groups, the nrow very probably did change!!! 
+	if (all(R=="def")) {
+		R <- .ap2$stn$aqg_bootR
+	}
+	if (!grepl("nrow@", R)) {
+		if (!is.numeric(R) | (length(R)!=1)) {
+			stop("Please provide either 'def', 'nrow@x' (with x being a number),  or a length 1 numeric for the argument 'aqg.R'.", call.=FALSE)			
+		}
+	}
+	if (!is.numeric(R)) {
+		num <- as.numeric(unlist(strsplit(R, "@"))[2])
+		R <- round(nrow(dataset) * num, 0)
+	}
+	ap$aquagr$R <- R # possibly new value
+	###
+	return(ap)
+} # EOF
+
 ap_checkAquagramDefaults <- function(ap, header) {
 	if (!is.null(ap$aquagr)) {
 		a <- ap$aquagr
@@ -315,7 +336,7 @@ ap_checkAquagramDefaults <- function(ap, header) {
 			}	
 		}
 		###
-		R <- a$R
+		R <- ROrig <- a$R
 		if (all(R=="def")) {
 			R <- .ap2$stn$aqg_bootR
 		}
@@ -328,6 +349,7 @@ ap_checkAquagramDefaults <- function(ap, header) {
 			num <- as.numeric(unlist(strsplit(R, "@"))[2])
 			R <- round(nrow(header) * num, 0)
 		}
+		ap$aquagr$ROrig <- ROrig
 		ap$aquagr$R <- R
 		###
 		if (!is.numeric(a$smoothN) | length(a$smoothN)!=1) {
@@ -1211,7 +1233,8 @@ processSingleRow_CPT <- function(dataset, siClass, siValue, siWlSplit, siCsAvg, 
 	keepEC <- .ap2$stn$gd_keepECs
 	newDataset <- ssc_s(dataset, siClass, siValue, keepEC) 
 	if (is.null(newDataset)) { # character "nixnox" is returned if a variable combination yields no data. That is because returning NULL introduced a bug if it was on the end of the list... probably...
-		return("nixnox")
+#		return("nixnox")
+		return(NULL)
 	}
 	initializeExtraModelsList() ### upper end
 	newDataset <- selectWls(newDataset, siWlSplit[1], siWlSplit[2])
@@ -1587,7 +1610,8 @@ gdmm <- function(dataset, ap=getap(), noiseFile="def", tempFile="def") {
 	###
 	### clean out the NULL-datasets
 #	nullInd <- which(unlist(lapply(cubeList, is.null))) # which one of the split by variable resulted in zero rows (has been returned as NULL in ssc_s)
-	nullInd <- which(cubeList == "nixnox")
+#	nullInd <- which(cubeList == "nixnox")
+	nullInd <- which(lapply(cubeList, is.null) == TRUE)
 	if (length(nullInd) > 0) {
 		cubeList <- cubeList[-nullInd]
 		cp <- cp[-nullInd,]

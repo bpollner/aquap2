@@ -88,7 +88,7 @@ calculateAquagram <- function(dataset, md, ap, idString, tempFile) {
 		bootTxtCorr <- ""
 		bootTxtClosingAdd <- " " 	
 	}
-	if (is.character(ap$aquagr$spectra)) { message <- "      calc. Aquagrams & spectra... "	} else { message <- "      calc. Aquagrams... "	}
+ 	if (is.character(ap$aquagr$spectra)) { message <- "      calc. Aquagrams & spectra... "	} else { message <- "      calc. Aquagrams... "	}
 	message <- paste(message, bootTxtCorr)
 	if (!.ap2$stn$allSilent) {cat(message)}
 	ap <- aq_getTCalibRange(ap, tempFile) 	# checks with the calibration file if the temperature range is ok

@@ -607,6 +607,9 @@ readInAquagramPSettings <- function() {
 		a <- path.package("aquap2")
 		File <- "/pData/aqugrStngs"
 		filepath <- paste(a, File, sep="")
+		if (!file.exists(filepath)) {
+			filepath <- paste(a, File, sep="/inst")		# required for the case of devtools::load_all
+		} # end if
 	}
 #	load(filepath)
 	return(eval(parse(text=load(filepath))))
@@ -792,15 +795,16 @@ aq_calculateCItable <- function(bootRes, groupAvg) {
 
 calcAquagramSingle <- function(dataset, md, ap, classVar, minus, idString, apLoc) {
 	##
+	ap <- ap_reCheckAqgBootR(ap, dataset) # we have to re-asses the bootstrap R, as after splitting, avg. of cons scans etc, the number of observation is, of course, different than when the datasets for the cube were made.
 	a <- ap$aquagr
 	nrCorr <- a$nrCorr
 	plotSpectra <- a$spectra
+	R <- a$R
 #	minus <- a$minus
 	mod <- a$mod
 	TCalib <- a$TCalib
 	Texp <- a$Texp
 	bootCI <- a$bootCI
-	R <- a$R
 	smoothN <- a$smoothN
 	selWls <- a$selWls
 	msc <- a$msc
@@ -846,7 +850,7 @@ calcAquagramSingle <- function(dataset, md, ap, classVar, minus, idString, apLoc
 			parChar <- "seriell"
 		}
 		bootRes <- try(calc_aquagr_bootCI(dataset, smoothN, reference, msc, selIndsWL, colInd, useMC, R, mod, minus, TCalib, Texp, ap, parChar, apLoc))
-		if (class(bootRes) == "try-error") {
+		if (any(class(bootRes) == "try-error")) {
 			bootRes <- NULL
 		}
 	} else {
@@ -865,6 +869,7 @@ calcAquagramSingle <- function(dataset, md, ap, classVar, minus, idString, apLoc
 	aqRes@possN <- possibleNrPartic
 	aqRes@selInds <- selInds
 	aqRes@bootRes <- bootRes
+	aqRes@realR <- R
 	aqRes@ciTable <- ciTable
 	aqRes@rawSpec <- rawSpec
 	aqRes@avgSpec <- avgSpec

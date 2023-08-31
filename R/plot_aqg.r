@@ -177,6 +177,7 @@ aq_checkSelWls <- function(mod, selWls) {
 } # EOF
 
 aq_checkPlotType <- function(mod) {
+
 	plotType <- .ap2$stn$aqg_plottingType
 	if (grepl(pv_AquagramModes[1], mod)) {
 		plotType <- "circular"
@@ -534,11 +535,13 @@ aq_getMinusText <- function(minus, mod) {
 } # EOF
 
 plotAquagram_single <- function(aquCalc, classVarRanges, where, onSub, onMain, customColor, plotSpectra, adPeakPlot, adLines, discrim, clt, mod, TCalib, Texp, selWls, nrCorr, bootCI, minus, fsa, fss, R, ncpwl, setIdString, ap) {
+# 	!! the incoming R is not used any more !!
 #	classVarRanges: a list with one element for each kind of range throughout the whole set (within a singel classVar)
 #	idString <- getIdString(aquCalc)
 	idString <- adaptIdStringForDpt(ap, setIdString)
 	classVar <- getClassVar(aquCalc)
 	itemIndex <- getItemIndex(aquCalc)
+	realR <- aquCalc@realR
 	onMain <- paste(onMain, ", ", idString, sep="")
 	textForSub <- paste(onSub, " grouping by ", classVar, sep="")
 	ranAvg <- list(classVarRanges$ranAvg)
@@ -572,7 +575,7 @@ plotAquagram_single <- function(aquCalc, classVarRanges, where, onSub, onMain, c
 	}
 	##
 	for (i in 1: cntAqu) {
-		plot_aquagram_inner(aquCalc, selWls, onSub=textForSub, onMain, where, customColor, nrCorr, bootCI, mod, TCalib, minus, Texp, masterScaleAQ=ranAvg[[i]], masterScaleBoot=ranBootRes[[i]], clt, R)
+		plot_aquagram_inner(aquCalc, selWls, onSub=textForSub, onMain, where, customColor, nrCorr, bootCI, mod, TCalib, minus, Texp, masterScaleAQ=ranAvg[[i]], masterScaleBoot=ranBootRes[[i]], clt, R=realR)
 	} # end for i
 	##
 	if( any(c("raw", "all") %in% plotSpectra) ) {

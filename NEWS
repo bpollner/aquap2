@@ -1,4 +1,17 @@
 #############################
+Version 0.4.4
+New:
+	In Aquagrams, bootR is now adjusted to the actual dataset
+	
+Improved:
+	Aquagram	
+Bugfix:
+	Various small bugfixes
+#############################
+
+
+
+#############################
 Version 0.4.2
 New:
 	Create new variables via combining pre-existent values or by calculating a new value using an arbitrary expression.
