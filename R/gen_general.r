@@ -153,7 +153,7 @@ checkFileVersionPossiblyModify <- function(pathToPack, pathToLocal, folderLocal,
 	sys.source(loc, envir=lenv)
 	txt <- paste0("sort(names(lenv", pm, "))")
 	locNames <- eval(parse(text=txt))
-	penv <- new.env()
+	penv <- new.env()	
 	sys.source(pac, envir=penv)
 	txt <- paste0("sort(names(penv", pm, "))")
 	pacNames <- eval(parse(text=txt))
@@ -328,6 +328,9 @@ checkSettings <- function() {
 				sFile <- "settings.r"
 				pathSH <- Sys.getenv("AQUAP2SH")
 				pspath <- paste(path.package("aquap2"), sFile, sep="/")
+				if (!file.exists(pspath)) {
+					pspath <- paste(path.package("aquap2"), sFile, sep="/inst/")	# required in the case of devtools::load_all			
+				} # end if
 				pathToSettings <- paste(pathSH, sFile, sep="/")
 				if (!file.exists(pathToSettings)) {
 					# please simply copy the settings
@@ -621,11 +624,14 @@ ssc <- function(dataset, criteria, include=TRUE, keepEC=FALSE) {
 	ecLabel <- getMetadata(dataset)$postProc$ECRMLabel[1]
 	string <- deparse(substitute(criteria))
 	cns <- colnames(dataset$header)
-	cnsPres <- cns[which(lapply(cns, function(x) grep(x, string)) > 0)] # gives back only those column names that appear in the string
+#	aa <- lapply(cns, function(x) grep(x, string, fixed=TRUE))  	# core of the problem	
+#	print(string); str(aa);
+	cnsPres <- cns[which(lapply(cns, function(x) grep(pattern=x, x=string, fixed=TRUE)) > 0)] # gives back only those column names that appear in the string # XXX Problem !!
+	# XXX problem here, when kind of ambiguous column names, e.g. one contained completely in the other	
 	stri <- string
 	for (i in 1: length(cnsPres)) {
-		stri <- gsub(cnsPres[i], paste("dataset$header$", cnsPres[i], sep=""), stri)
-	}
+		stri <- gsub(cnsPres[i], paste("dataset$header$", cnsPres[i], sep=""), stri, fixed=TRUE)
+	} # end for i
 	if (include) {
 		if (keepEC) {
 			stri <- paste("(", stri, ") |  dataset$header$", cPref, ecrmCol, " == \"", ecLabel, "\"", sep="")

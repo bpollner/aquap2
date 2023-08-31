@@ -55,7 +55,7 @@ pv_modifyClassifiers <- c("do.da", "da.type", "da.classOn", "do.rnf", "rnf.class
 pv_modifyClassif2 <- c("da.testCV", "da.percTest", "da.cvBootCutoff", "da.cvBootFactor", "da.valid", "rnf.testCV", " rnf.percTest", "rnf.cvBootCutoff", "rnf.cvBootFactor", "rnf.valid", "svm.testCV", "svm.percTest", "svm.cvBootCutoff", " vm.cvBootFactor", "svm.valid", "nnet.testCV", "nnet.percTest", "nnet.cvBootCutoff", "nnet.cvBootFactor", "nnet.valid")
 pv_modifyClassif3 <- c("da.pcaRed", "da.pcaNComp", "svm.pcaRed", "svm.pcaNComp", "rnf.pcaRed", "rnf.pcaNComp", "nnet.pcaRed", "nnet.pcaNComp")
 pv_modifyGenPlot <- c("pg.where", "pg.main", "pg.sub", "pg.fns")	
-additionalElements <- c("aps")
+additionalElements <- c("aps", "ablv", "ablvCol", "ablvLty", "bp.bp", "bp.bpCol", "bp.bpLty", "bp.bpLwd", "slwd") 
 pv_tripleDotsMod <- c(pv_modifyUCL, pv_modifyDPT, pv_modifyPCA, pv_modifySIMCA, pv_modifyPLSR, pv_modifyAquagram_calc, pv_modifyAquagram_plot, pv_modifyClassifiers, pv_modifyClassif2, pv_modifyClassif3, pv_modifyGenPlot, additionalElements)
 ##############
 

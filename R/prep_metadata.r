@@ -99,6 +99,9 @@ copyMetadataFile <- function(fromPath, toPath) {
 
 check_mdVersion_I <- function(folderLocal, nameLocal) {
 	aa <- paste(path.package("aquap2"), "/templates/metadata.r", sep="")
+	if (!file.exists(aa)) {
+		aa <- paste(path.package("aquap2"), "/templates/metadata.r", sep="/inst")	# required in the case of devtools::load_all			
+	} # end if	
 	pathToLocal <- paste(folderLocal, nameLocal, sep="/")
 	out <- checkFileVersionPossiblyModify(pathToPack=aa, pathToLocal, folderLocal, nameLocal)
 	if (out == FALSE) {
@@ -229,6 +232,9 @@ copyAnProcFile <- function(fromPath, toPath) {
 
 check_apVersion_I <- function(folderLocal, nameLocal) {
 	aa <- paste(path.package("aquap2"), "/templates/anproc.r", sep="")
+	if (!file.exists(aa)) {
+		aa <- paste(path.package("aquap2"), "/templates/anproc.r", sep="/inst")	# required in the case of devtools::load_all			
+	} # end if	
 	pathToLocal <- paste(folderLocal, nameLocal, sep="/")
 	out <- checkFileVersionPossiblyModify(pathToPack=aa, pathToLocal, folderLocal, nameLocal)
 	if (out == FALSE) {

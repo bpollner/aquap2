@@ -14,7 +14,7 @@ setClass("aquap_mergeLabels", slots=c(numVec="integer", varNames="character", va
 setClassUnion(name="melaNull", members =c("aquap_mergeLabels", "NULL"))
 setClass("aquap_data", slots=c(metadata="list", anproc="apNull", mergeInfo= "melaNull", calcVarInfo="listNull", ncpwl="numeric", version="character"), contains="data.frame")
 setClass("aquap_cpt", slots=c(splitVars="list", wlSplit="list", csAvg="logical", noise="logical", exOut="logical", len="numeric"))
-setClass("aqg_calc", slots = c(ID="character", classVar="character", itemIndex="numeric", avg="matrix", colRep="numChar", possN="numeric", selInds="numeric", bootRes="matNull", ciTable="dfNull", rawSpec="dfNull", avgSpec="dfNull", subtrSpec="dfNull"))
+setClass("aqg_calc", slots = c(ID="character", classVar="character", itemIndex="numeric", avg="matrix", colRep="numChar", possN="numeric", selInds="numeric", bootRes="matNull", realR="numeric", ciTable="dfNull", rawSpec="dfNull", avgSpec="dfNull", subtrSpec="dfNull"))
 #setClass("aqg_cr", slots = c(res="list", ran="listNull"))
 #setClass("aquap_extMod", slots=c(type="character", mod="listNull"))
 setClass("aquap_set", slots=c(dataset="aquap_data", idString="character", pca="listNull", plsr="listNull", simca="listNull", aquagr="listNull", extraModels="listNull", xda="listNull", rnf="listNull", svm="listNull", ann="listNull")) 
