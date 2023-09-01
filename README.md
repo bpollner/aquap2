@@ -48,7 +48,7 @@ The repository [aquap2_courseMaterial](https://github.com/bpollner/aquap2_course
 This is the same demo-dataset as handed out at [The 3rd Aquaphotomics Symposium](http://conference.aquaphotomics.com/) in Japan in December 2018.
 
 ### Rome 2023
-The course material for the Summer School on Aquaphotomics (September 2023, Rome) can be found [here](https://github.com/bpollner/aquap2_demo_Rome2023).
+The course material for the Summer School on Aquaphotomics (September 2023, Rome) can be found [here](https://github.com/bpollner/aquap2_course_Rome2023).
 
 ## Note
 Please note that the package in its current state is in several parts still considered to be beta:
