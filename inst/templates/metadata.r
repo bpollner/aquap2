@@ -18,6 +18,7 @@ TimePoints <- FALSE						## how many points in time does the experiment cover? P
 nrConScans <- 3							## how many consecutive scans for every sample?
 spacing <- 5							## the space between environmental control samples (set to FALSE for not inserting environmental controls)
 ###
+sl_classes <- "def"						## the name of the xlsx file in the metadata folder holding the class structure. Leave at 'def' to get the default from the settings (parameter 'fn_class_structure').
 columnNamesL1 <- c("C_DELETE")			## please note that there is a special prefix for class- and numerical variables: the default is "C_" for class-variables and "Y_" for numerical variables
 columnNamesL2 <- c("C_DELETE")			## "DELETE" is the default character for those columns that, after the generation of the sample list, should be omitted
 L1  <- list(list("")) 					## Please look at the vignette 'Examples for Experiment-Design' for more information on the use of the arguments L1 and L2.

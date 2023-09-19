@@ -90,6 +90,19 @@ check_mdDefaultValues <- function(localEnv) {
 		stop(msg, call.=FALSE)		
 	}
 	#
+	slClasses <- le$sl_classes
+	if (all(slClasses == "def")) {
+		slClasses <- .ap2$stn$fn_class_structure
+	}
+	if (length(slClasses) != 1 | !all(is.character(slClasses))) {
+		stop("Please provide a character length one to the variable 'sl_classes' in the metadata file.", call.=FALSE)
+	}
+	foldLoc <- .ap2$stn$fn_metadata
+	if (!file.exists(paste0(foldLoc, "/", slClasses, ".xlsx"))) {
+ 		stop(paste("The class-structure file \"", slClasses, ".xlsx\" does not seem to exist in the folder \"", foldLoc, "\". \nPlease check your input.", sep=""), call.=FALSE)
+	}
+	assign("slClasses", slClasses, pos=parent.frame(n=1))
+	#
 } # EOF
 
 copyMetadataFile <- function(fromPath, toPath) {
@@ -114,6 +127,73 @@ check_mdVersion <- function(folderLocal, nameLocal) {
 	if (is.null(.ap2$.devMode)) {
 		check_mdVersion_I(folderLocal, nameLocal)
 	}
+} # EOF
+
+getClassStructureFromXlsx <- function(slClasses) {
+	# is checked, everything coming in here should be a real existing xlsx file
+	foldLoc <-  .ap2$stn$fn_metadata
+	delCol <- .ap2$stn$p_deleteCol
+	slClassFilePath <- paste0(foldLoc, "/", slClasses, ".xlsx") # make it the complete path
+	#	
+	xTxt <- openxlsx::read.xlsx(xlsxFile = slClassFilePath, skipEmptyRows = FALSE, colNames = FALSE)	
+	#
+	clPref <- .ap2$stn$p_ClassVarPref
+	yPref <- .ap2$stn$p_yVarPref
+	
+	indNA <- sort(c(grep(clPref, xTxt[,1]), grep(yPref, xTxt[,1])))[-1]-1 # one row above each of the column names there MUST be an empty row, i.e. NA
+	if (!all(is.na(xTxt[,1])[indNA])) {
+		stop(paste0("There must be at least one empty row above each column name in the file \"", slClasses, ".xlsx\""), call.=FALSE)
+	} # end if
+
+	# get the column names
+	indL1 <- sort(c(grep(clPref, xTxt[,1]), grep(yPref, xTxt[,1])))
+	colNamesL1 <- xTxt[,1][indL1]
+	colNamesL2 <- xTxt[,2][indL1]
+	colNamesL2[which(is.na(colNamesL2))] <- paste0(clPref, delCol) # is inserting "C_DELETE" into empty Level2 column names
+
+	cleanOutNAs <- function(vals) {
+		vnas <- which(is.na(vals)) # the indices of vals that are NAs
+		if (length(vnas) > 0) {
+			if (length(vnas) == length(vals)) { #  so we have only NAs, we need to keep only one
+				return("x")
+			} # end if
+			vals <- vals[-vnas]
+		} # end if
+		return(vals)
+	} # EOIF
+
+	#### now break up into elements and extract values on L1 and L2
+	aa <- c(indL1, nrow(xTxt)+1)
+	## L1
+	valL1 <- list(NULL)
+	length(valL1) <- length(indL1)
+	for (i in seq_along(indL1)) {
+		fr <- aa[i]+1
+		to <- aa[i+1]-1
+		vals <- xTxt[fr:to, 1]
+		vals <- cleanOutNAs(vals)
+		valL1[[i]] <- vals
+	} # end for i
+	
+	## L2
+	valL2 <- list(NULL)
+	length(valL2) <- length(indL1)
+	cols <- 2: ncol(xTxt) # the colnumns, ranging from 2 to ncol
+	for (i in seq_along(indL1)) {
+		rnFr <- aa[i]+1
+		nrRows <- length(valL1[[i]])
+		L2inner <- list(NULL)
+		length(L2inner) <- nrRows
+		for (k in 0 : (nrRows-1)) {
+			vals <- as.character(xTxt[rnFr+k, cols])
+			vals <- cleanOutNAs(vals)
+			L2inner[[k+1]] <- vals
+		} # end for k
+		valL2[[i]] <- L2inner
+	} # end for i
+	#	
+	outList <- list(cnsL1=colNamesL1, cnsL2=colNamesL2, valL1=valL1, valL2=valL2)
+	return(outList)
 } # EOF
 
 getmd_core <- function(fn="def") {
@@ -141,7 +221,7 @@ getmd_core <- function(fn="def") {
 	check_mdVersion(folderLocal=foldLoc, nameLocal=fn) 	### Version check here !!
 	e <- new.env()
 	sys.source(paste(foldLoc, fn, sep="/"), envir=e)
-	noSplitLabel <- ECLabel <- RMLabel <- filetype <- noiseFileName <- tempCalibFileName <- NULL # gets assigned below
+	noSplitLabel <- ECLabel <- RMLabel <- filetype <- noiseFileName <- tempCalibFileName <- slClasses <- NULL # gets assigned below
 	check_mdDefaultValues(localEnv=e) ### checking and assigning
 	##
 	Repls <- (paste(defReplPref, seq(1, e$Repls), sep=""))
@@ -151,17 +231,18 @@ getmd_core <- function(fn="def") {
 	} else {
 		TimePoints <- e$TimePoints
 	}
-	if (length(e$columnNamesL1) != length(e$columnNamesL2)) {
-		stop("Please provide two equally long inputs for the column names in L1 and L2", call.=FALSE)
-	}
+	##
+	# now get the class structure from the xlsx file
+	classStructure <- getClassStructureFromXlsx(slClasses=slClasses) # "slClasses" got assigned above in check_mdDefaultValues
+	##
 	userCols <- NULL
-	for (i in 1: length(e$columnNamesL1)) {
-		userCols <- c(userCols, e$columnNamesL1[i], e$columnNamesL2[i])
-	}
+	for (i in 1: length(classStructure$cnsL1)) {
+		userCols <- c(userCols, classStructure$cnsL1[i], classStructure$cnsL2[i])
+	} # end for i
 	coluNames <- c(timeCol, ecrmCol, userCols, replCol, groupCol, tempCol, rhCol)
 	###
 	## put together
- 	expClasses <- list(L1=e$L1, L2=e$L2, Repls=Repls, Group=Group, timeLabels=TimePoints)
+ 	expClasses <- list(L1=classStructure$valL1, L2=classStructure$valL2, Repls=Repls, Group=Group, timeLabels=TimePoints)
  	postProc <- list(spacing=e$spacing, ECRMLabel=c(ECLabel, RMLabel), noSplitLabel=noSplitLabel, nrConScans=e$nrConScans)
  	meta <- list(expName=e$expName, coluNames=coluNames, filetype=filetype, noiseFile=noiseFileName, tempFile=tempCalibFileName, xaxDenom=e$xaxDenominator, yaxDenom=e$yaxDenominator)
 	expMetaData <- list(expClasses = expClasses, postProc = postProc, meta = meta)

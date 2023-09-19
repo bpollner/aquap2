@@ -19,7 +19,8 @@ stn <- list(
 	fn_mDataDefFile = "metadata.r", 		## the default filename for the metadata file
 	fn_anProcDefFile = "anproc.r", 			## the default filename for the analysis procedure file
 	fn_noiseExpName = "NoiseData",			## the default experiment name (and with that the default name for the resulting R-data file) for the noise data
-
+	fn_class_structure = "sl_classes",		## the default file name for the xlsx file in the metadata folder holding the class-structure used for generating the sample list.
+	
 	
 	## Data preparation, standard column names & prefixes
 	p_yVarPref = "Y_", 						## the prefix for numerical variables	
