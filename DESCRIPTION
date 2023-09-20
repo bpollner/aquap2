@@ -3,11 +3,16 @@ Type: Package
 Title: Multivariate Data Analysis Tools for R including Aquaphotomics Methods
 Version: 0.4.5
 Date: 2023-08-31
-Author: Bernhard Pollner, Zoltan Kovacs
+Authors@R: c(
+    person("Bernhard", "Pollner", email = "bernhard.pollner@mac.com", role = c("cre","aut")),
+    person("Zoltan", "Kovacs", email = "kovacs@correltech.hu", role = "aut"))
 Maintainer: Bernhard Pollner <bernhard.pollner@mac.com>
 Description: Methods and tools for multivariate data analysis in R, with an 
 	additional focus on specialized Aquaphotomics procedures and methods.
-License: GPL (>=2)
+URL: https://bpollner.github.io/aquap2/, https://github.com/bpollner/aquap2
+BugReports: https://github.com/bpollner/aquap2/issues
+Language: en-US
+License: GPL (>=3)
 LazyLoad: yes
 Depends:
     R (>= 3.3.0)

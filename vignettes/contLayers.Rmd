@@ -1,0 +1,21 @@
+---
+title: "3 Layers of Control"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{3 Layers of Control}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## 3 Layers of Control
+
+show graphic
+
+***

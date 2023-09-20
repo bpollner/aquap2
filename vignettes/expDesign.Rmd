@@ -1,0 +1,19 @@
+---
+title: "Experiment Design"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Experiment Design}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+`aquap2` can provide help in the stage of designing the experiment.
+
+Sample list, randomized.
+

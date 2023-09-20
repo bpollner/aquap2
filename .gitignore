@@ -4,3 +4,4 @@ vignettes/*.html
 .Rapp.history
 .DS_Store
 aquap2_R.Rproj
+docs

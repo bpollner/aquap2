@@ -1,0 +1,16 @@
+---
+title: "aquap2 & Aquaphotomics eBook"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{aquap2 & Aquaphotomics eBook}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+Here please to the wonderful eBook

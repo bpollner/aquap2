@@ -1,0 +1,34 @@
+url: https://bpollner.github.io/aquap2/
+template:
+  bootstrap: 5
+
+navbar:
+ components:
+   articles:
+    text: Articles
+    menu:
+    - text: "Background & Concept"
+    - text: "3 Layers of Control"
+      href: articles/contLayers.html
+    - text: "Environmental Conditions"
+      href: articles/environCond.html
+    - text: "Data Objects"
+      href: articles/dataObjects.html
+    - text: -------
+    - text: "Experiment Design & Data Acquisition"
+    - text: "Experiment Design"
+      href: articles/expDesign.html
+    - text: "Recording Spectra"
+      href: articles/recordSpectra.html
+    - text: "Data Import"
+      href: articles/dataImport.html
+    - text: -------
+    - text: "Data Analysis"
+    - text: "Basic Workflow"
+      href: articles/basicWorkflow.html
+    - text: -------
+    - text: "Resources"
+    - text: "Courses"
+      href: articles/courses.html
+    - text: "eBook"
+      href: articles/eBook.html

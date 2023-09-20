@@ -1,0 +1,27 @@
+---
+title: "aquap2"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{aquap2}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+Package `aquap2` provides methods and tools for multivariate data analysis in R, with an additional focus on specialized Aquaphotomics procedures and methods.
+
+## Description
+
+
+## Installation
+
+***
+
+## Set up example
+
