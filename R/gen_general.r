@@ -1,12 +1,3 @@
-## not in use any more
-showPathToAquap2 <- function() {
-	path <- path.package("aquap2")
-	cat("The path to this package is: \n")
-	print(path)
-	cat("(This is where you will find the settings.r file.\n")
-	invisible(path)
-} # EOF
-
 getParamName <- function(rowString) {
 	sep <- "="
 	if (!grepl(sep, rowString)) {
@@ -175,7 +166,7 @@ checkFileVersionPossiblyModify <- function(pathToPack, pathToLocal, folderLocal,
 		close(fconLocal)
 		## add the missing parameters
 		newTxt <- try(expandFillInLocalTxt(ftPack, ftLocal, missNames=miss), silent=TRUE) # returns the unchanged local text if there is nothing to add
-		if(class(newTxt) == "try-error") { 
+		if (is(newTxt, "try-error")) {
 			newTxt <- NULL
 		}
 		## now delete the obsolete parameters
@@ -246,7 +237,7 @@ checkCreateSHfolder <- function(systemHome, fn_aquap2SH) {
 	return(TRUE) 
 } # EOF
 
-checkSettings <- function() {
+checkSettings_old <- function() {
 	systemHome <- Sys.getenv("HOME")
 	systemHome_R <- gsub("\\\\", "/", systemHome)
 #	fullRenvPath <- paste0(systemHome, "/.Renviron") # was this
@@ -350,61 +341,15 @@ checkSettings <- function() {
 	} # end else if !renvExists	
 } # EOF
 
-#' @title Update aquap2 settings.
-#' @description Manually read in the settings-file in the aquap2-settings 
-#' home directory as specified in the .Renviron file.
-#' @details If you leave 'autoUpdateSettings' in settings.r to 'TRUE', the 
-#' settings will be checked resp. updated automatically every time you call any 
-#' function from package 'aquap2'.
-#' @section Note: If not present, the required `.Renviron` file will be 
-#' automatically created. If the variable `AQUAP2SH` is not defined in the 
-#' .Renviron file, it will be automatically added, and its default path is 
-#' pointing to the (possibly also created) folder `aquap2SH` in the users home 
-#' directory, where the `settings.r` file is automatically copied to if not 
-#' already present. It is possible to manually provide a different path in the 
-#' variable `AQUAP2SH` in the .Renviron file, pointing to any folder where then 
-#' the settings.r file and all other relevant general files will reside.
-#' @param packageName Character, the name of the package where settings 
-#' should be updated. Defaults to "aquap2".
-#' @param silent Logical. If a confirmation should be printed. Defaults 
-#' to 'FALSE'
-#' @return An (invisible) list with the settings resp. a list called 'stn' in 
-#' the environment '.ap2'.
-#' @family Helper Functions
-#' @seealso \code{\link{settings_file}} 
-#' @examples
-#' \dontrun{
-#' updateSettings()
-#' str(.ap2$stn)
-#' ls(.ap2)
-#'}
-#' @export
-updateSettings <- function(packageName="aquap2", silent=FALSE) { 
-	ok <- checkSettings() # makes sure that we have the latest version of the settings.r file in the settings-home directory defined in .Renviron
-	if (ok) {
-		pathSettings <- paste0(Sys.getenv("AQUAP2SH"), "/settings.r")
-		sys.source(pathSettings, envir=.GlobalEnv$.ap2)
-	#	if (any(grepl(".ap2", search(), fixed=TRUE))) {
-	#		detach(.ap2)
-	#	}
-	#	attach(.ap2)
-		if (!silent) {
-			cat(paste(packageName, "settings updated\n"))
-		}
-		return(invisible(.ap2$stn))
-	} else { # so if the settings check was not ok
-		return(invisible(NULL))
-	}
-} # EOF
-
 checkForExperimentFolderStructure <- function() {
-	aa <- .ap2$stn$fn_exports
-	aaa  <- .ap2$stn$fn_rcode
-	bb <- .ap2$stn$fn_rawdata
-	bbb  <- .ap2$stn$fn_rdata
-	cc <- .ap2$stn$fn_metadata
-	ccc <- .ap2$stn$fn_results
-	dd  <- .ap2$stn$fn_sampleList
+	stn <- getstn()
+	aa <- stn$fn_exports
+	aaa  <- stn$fn_rcode
+	bb <- stn$fn_rawdata
+	bbb  <- stn$fn_rdata
+	cc <- stn$fn_metadata
+	ccc <- stn$fn_results
+	dd  <- stn$fn_sampleList
 	folderNames <- c(aa, aaa, bb, bbb, cc, ccc, dd)
 	#
 	if(!all(folderNames %in% list.files()) ) {
@@ -412,25 +357,9 @@ checkForExperimentFolderStructure <- function() {
 	}
 } # EOF
 
-autoUpS <- function(cfs=.ap2$stn$defCfs) { # stops if somethings goes wrong
-	res <- 1
-	if (exists(".ap2$stn")) {
-		autoUpS <- .ap2$stn$autoUpdateSettings
-	} else {
-		autoUpS <- TRUE
-	}
-	if (autoUpS) {
-		if (is.null(.ap2$.devMode)) { 			## to be able to run it locally without loading the package
-			res <- updateSettings(packageName="aquap2", silent=TRUE)
-		}
-	}
-	if (cfs) {	
-		checkForExperimentFolderStructure()
-	}
-	if (is.null(res)) {
-		stop(call.=FALSE)
-	}
-} # EOF
+################################################################
+################################################################
+
 
 #' @title Generate Folder Structure
 #' @description Generate the required folder structure for a new experiment in 
@@ -445,20 +374,20 @@ autoUpS <- function(cfs=.ap2$stn$defCfs) { # stops if somethings goes wrong
 #' \code{\link{genNoiseRecExp}} 
 #' @export
 genFolderStr <- function() {
-	autoUpS(cfs=FALSE) # no checking of folder structure here!
+	stn <- autoUpS(cfs=FALSE) # no checking of folder structure here!
 	fn_analysisData <- .ap2$fn_analysisData 
-	fn_exports <- .ap2$stn$fn_exports
-	fn_rcode <- .ap2$stn$fn_rcode 
-	fn_rawdata <- .ap2$stn$fn_rawdata
-	fn_rdata <- .ap2$stn$fn_rdata 
-	fn_metadata <- .ap2$stn$fn_metadata
-	fn_results <- .ap2$stn$fn_results 
-	fn_sampleLists <- .ap2$stn$fn_sampleLists
-	fn_sampleListOut <- .ap2$stn$fn_sampleListOut
-	fn_sampleListIn <- .ap2$stn$fn_sampleListIn
+	fn_exports <- stn$fn_exports
+	fn_rcode <- stn$fn_rcode 
+	fn_rawdata <- stn$fn_rawdata
+	fn_rdata <- stn$fn_rdata 
+	fn_metadata <- stn$fn_metadata
+	fn_results <- stn$fn_results 
+	fn_sampleLists <- stn$fn_sampleLists
+	fn_sampleListOut <- stn$fn_sampleListOut
+	fn_sampleListIn <- stn$fn_sampleListIn
 	
-	fn_mDataDefFile <- .ap2$stn$fn_mDataDefFile
-	fn_anProcDefFile <- .ap2$stn$fn_anProcDefFile
+	fn_mDataDefFile <- stn$fn_mDataDefFile
+	fn_anProcDefFile <- stn$fn_anProcDefFile
 	pp <- c(fn_analysisData, fn_exports, fn_rcode, fn_rawdata, fn_rdata, fn_metadata, fn_results, fn_sampleLists)
 	dirOk <- NULL
 	for (p in pp) {
@@ -475,56 +404,23 @@ genFolderStr <- function() {
 	file.rename(paste(fn_metadata, "metadata.r", sep="/"), paste(fn_metadata, fn_mDataDefFile, sep="/"))
 	file.rename(paste(fn_metadata, "anproc.r", sep="/"), paste(fn_metadata, fn_anProcDefFile, sep="/"))
 	if (any(dirOk)) {
-		if (!.ap2$stn$allSilent) {	cat("Folder structure created.\n")}
+		if (!stn$allSilent) {	cat("Folder structure created.\n")}
 	} 
 } # EOF
 
-#' @title Update the aquap2-package.
-#' @description Download and install the latest version of package 'aquap2' 
-#' from its github repository
-#' @param force Logical, if the package should be downloaded even if no newer 
-#' version is available. Defaults to \code{FALSE}.
-#' @family Helper Functions
-#' @examples
-#' \dontrun{
-#' updateAquap2()
-#' }
-#' @export
-updateAquap2 <- function(force=FALSE) {
-	buildVig <- FALSE
-	# 
-	devtools::install_github(repo="bpollner/aquap2", ref="latestPublic", build_vignettes=buildVig, force=force)
-} # EOF
-
-
-# @title Load the aquap2 data and examples package.
-# @description Download and install the latest version of package 'aquapData' 
-#  from its github repository. 
-# 	Package 'aquapData' contains the data and examples used in package 'aquap2'.
-# @details Always downloads and installs the latest available version, also 
-#  if the same up-to-date version is already installed.
-# @param branch Character, the name of the branch to downlaod. Defaults to 
-#  "master".
-# @examples
-#  \dontrun{
-#  loadAquapDatapackage()
-#  }
-################ @export
-#loadAquapDatapackage <- function(branch="master") {
-#	devtools::install_github(repo="bpollner/aquapData", ref=branch, auth_token=NULL)
-#} # EOF
 
 getStdColnames <- function() {
-	yPref <- .ap2$stn$p_yVarPref
-	cPref <- .ap2$stn$p_ClassVarPref
-	sampleNrColn <- .ap2$stn$p_sampleNrCol
-	conSNrColn <- .ap2$stn$p_conSNrCol
-	timePointsColn <- .ap2$stn$p_timeCol
-	ecrmColn <- .ap2$stn$p_ECRMCol
-	replColn <- .ap2$stn$p_replicateCol
-	groupColn <- .ap2$stn$p_groupCol
-	tempColn <- .ap2$stn$p_tempCol
-	relHumColn <- .ap2$stn$p_RHCol
+	stn <- getstn()
+	yPref <- stn$p_yVarPref
+	cPref <- stn$p_ClassVarPref
+	sampleNrColn <- stn$p_sampleNrCol
+	conSNrColn <- stn$p_conSNrCol
+	timePointsColn <- stn$p_timeCol
+	ecrmColn <- stn$p_ECRMCol
+	replColn <- stn$p_replicateCol
+	groupColn <- stn$p_groupCol
+	tempColn <- stn$p_tempCol
+	relHumColn <- stn$p_RHCol
 	stdColsY <- c(paste(yPref, sampleNrColn, sep=""), paste(yPref, conSNrColn, sep=""), paste(yPref, tempColn, sep=""), paste(yPref, relHumColn, sep=""))
 	stdColsC <- c( paste(cPref, timePointsColn, sep=""), paste(cPref, ecrmColn, sep=""), paste(cPref, replColn, sep=""), paste(cPref, groupColn, sep=""))
 	return(list(stdColsY=stdColsY, stdColsC=stdColsC))
@@ -545,28 +441,6 @@ printStdColnames <- function() {
 	cat(paste(stdColsC, collapse=", ")); cat("\n\n")
 	cat("Numeric variables:\n")
 	cat(paste(stdColsY, collapse=", ")); cat("\n")
-} # EOF
-
-
-#' @title Install Examples
-#' @description Install a single experiment-home folder containing various 
-#' examples.
-#' @details The example folder will be installed in the directory as specified 
-#' in the .Renviron file. (see \code{\link{updateSettings}})
-#' @family Helper Functions
-#' @export
-instAquap2Examples <- function() {
-	eh <- "home_examples"
-	pathSH <- Sys.getenv("AQUAP2SH")
-	pathFolder <- paste(pathSH, "/", eh, sep="")
-	a <- system.file(package="aquap2")
-	pathFrom <- paste(a, "/", eh, sep="")
-	ok <- FALSE
-	if (!file.exists(pathFolder)) {
-		ok <- file.copy(pathFrom, pathSH, recursive=TRUE)
-		
-	}
-	if (ok) {cat("Example folder copied\n")}
 } # EOF
 
 
@@ -618,9 +492,9 @@ instAquap2Examples <- function() {
 #' @family Data pre-treatment functions
 #' @export
 ssc <- function(dataset, criteria, include=TRUE, keepEC=FALSE) {
-	autoUpS()
-	cPref <- .ap2$stn$p_ClassVarPref
-	ecrmCol <- .ap2$stn$p_ECRMCol
+	stn <- autoUpS()
+	cPref <- stn$p_ClassVarPref
+	ecrmCol <- stn$p_ECRMCol
 	ecLabel <- getMetadata(dataset)$postProc$ECRMLabel[1]
 	string <- deparse(substitute(criteria))
 	cns <- colnames(dataset$header)
@@ -649,11 +523,12 @@ ssc <- function(dataset, criteria, include=TRUE, keepEC=FALSE) {
 
 # to be called from the system
 ssc_s <- function(dataset, variable, value, keepEC=TRUE) {
+	stn <- getstn()
 	# variable and value are always data frames with one row and 1 or *more* columns
-	cPref <- .ap2$stn$p_ClassVarPref
-	ecrmCol <- .ap2$stn$p_ECRMCol
+	cPref <- stn$p_ClassVarPref
+	ecrmCol <- stn$p_ECRMCol
 	ecLabel <- getMetadata(dataset)$postProc$ECRMLabel[1]
-	noSplitCol <- paste(cPref, .ap2$stn$p_commonNoSplitCol, sep="")
+	noSplitCol <- paste(cPref, stn$p_commonNoSplitCol, sep="")
 	indEC <- which(colnames(dataset$header) == paste(cPref, ecrmCol, sep=""))
 	selIndOut <-  NULL
 	#
@@ -666,7 +541,7 @@ ssc_s <- function(dataset, variable, value, keepEC=TRUE) {
 #		}
 #	} # EOIF
 	###
-	if (class(variable) == "data.frame") {
+	if (is(variable, "data.frame")) {
 		for (i in 1: ncol(variable)) { # both variable and value have the same number of columns
 			ind <- which(colnames(dataset$header) == variable[1,i])
 			val <- as.character(value[1,i])
@@ -768,11 +643,12 @@ getUniqLevelColor <- function(nrc) {
 
 # color_data, color_unique, color_legend, txt, txtE, sumPart, dataGrouping, pch_data, pch_legend
 extractColorLegendValues <- function(dataset, groupBy, minPart=NULL, minDistinctVals=NULL, ltyIn=NULL) { # returns a list
-	legColLim <- .ap2$stn$plt_lengthLegend_limToCols	# the number when we switch to columns
-	maxLengLeg <- .ap2$stn$plt_lengthLegend_truncate	# the maximum legend length
-	legNrCols_more <- .ap2$stn$plt_legendMoreCols			# the number of columns in the legend if more than 1
-	legCex <- .ap2$stn$plt_legend_standardCex			# the standard cex for the legend
-	legCexDim <- .ap2$stn$plt_legend_smallerCex			# the legend cex if smaller
+	stn <- getstn()
+	legColLim <- stn$plt_lengthLegend_limToCols	# the number when we switch to columns
+	maxLengLeg <- stn$plt_lengthLegend_truncate	# the maximum legend length
+	legNrCols_more <- stn$plt_legendMoreCols			# the number of columns in the legend if more than 1
+	legCex <- stn$plt_legend_standardCex			# the standard cex for the legend
+	legCexDim <- stn$plt_legend_smallerCex			# the legend cex if smaller
 	#
 	legNrCols <- 1
 	lty <- outIndsLeg <- NULL
@@ -791,7 +667,8 @@ extractColorLegendValues <- function(dataset, groupBy, minPart=NULL, minDistinct
 		lto <- order(nrs) # so if the legend text is coming from all numbers *and* they are higher than 9 we get the real order to sort later
 	}		
 	partN <- sapply(levels(grouping), function(x, grAll) length(which(grAll==x)), grAll=grouping)
-	if (class(partN) == "list" & length(partN) == 0) {
+	
+	if (is(partN, "list") & length(partN) == 0) {
 		stop(paste0("Sorry, a problem occurred when trying to count the levels in the class-variable '", groupBy, "'. \nProbably there are no data in this class-variable. A solution could be to remove '", groupBy, "' from your analysis / your input."), call.=FALSE)
 	}
 	sumPart <- sum(partN)
@@ -865,7 +742,7 @@ countDecimals <- function(x, nrDec=25) {
 } # EOF
 
 readInSpecAreas <- function() {
-	out <- as.data.frame(t(getOvertoneWls(.ap2$stn$aqg_OT, .ap2)))  # getOvertoneWls() is in the file "calc_aqg.r"
+	out <- as.data.frame(t(getOvertoneWls(getstn()$aqg_OT, .ap2)))  # getOvertoneWls() is in the file "calc_aqg.r"
 return(out)
 } # EOF
 
@@ -998,7 +875,8 @@ getCubeNrs <- function(cube) {
 } # EOF
 
 adaptIdStringForDpt <- function(dptSource, prevIdString="") { # returns the new idString; dptSource is an analysis procedure
-	limit <- .ap2$stn$gen_plot_maxNrDptInfoOnMain
+	stn <- getstn()
+	limit <- stn$gen_plot_maxNrDptInfoOnMain
 	##
 	origAp <- dptSource #  we should get in the ap containing all the dpt information
 	combChar <- msg <- char <- ""
@@ -1027,7 +905,8 @@ adaptIdStringForDpt <- function(dptSource, prevIdString="") { # returns the new 
 } # EOF
 
 getCheckLegendPosition <- function(xData, yData) {
-	defPos <- .ap2$stn$gen_plot_legendPosition
+	stn <- getstn()
+	defPos <- stn$gen_plot_legendPosition
 	pvPos <- pv_legendPosition # ("auto", "topleft", "topright", "bottomright", "bottomleft")
 	if (!all(is.character(defPos)) | length(defPos) !=1) {
 		stop(paste("Please provide a character length one for the default legend position.\n Possible values are ", paste(pvPos, collapse=", "), ".", sep=""), call.=FALSE)
@@ -1058,9 +937,10 @@ getCheckLegendPosition <- function(xData, yData) {
 } # EOF
 
 checkApsChar <- function(aps) {
-	path <- .ap2$stn$fn_metadata
+	stn <- getstn()
+	path <- stn$fn_metadata
 	if (all(aps == "def")) {
-		aps <- .ap2$stn$gen_plot_anprocSource
+		aps <- stn$gen_plot_anprocSource
 	}
 	if (!all(is.character(aps)) | length(aps) != 1) {
 		stop("Please provide a length one character to the argument 'aps' resp. the corresponding variable (gen_plot_anprocSource) in 'settings.r', thank you.", call.=FALSE)
@@ -1069,7 +949,7 @@ checkApsChar <- function(aps) {
 		return(aps)
 	}
 	if (aps == "defFile") {
-		fn <- .ap2$stn$fn_anProcDefFile
+		fn <- stn$fn_anProcDefFile
 		ok <- file.exists(paste(path, fn, sep="/"))
 		if (!ok) {
 			stop(paste("The analysis procedure file \"", fn, "\" does not seem to exist. Please check your input.", sep=""), call.=FALSE)

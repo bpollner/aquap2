@@ -13,55 +13,55 @@
   ds1,
   ds2,
   mergeLabels = NULL,
-  noMatchH = get("stn", envir = .ap2)$gen_merge_noMatchH,
-  noMatchW = get("stn", envir = .ap2)$gen_merge_noMatchW,
+  noMatchH = getstn()$gen_merge_noMatchH,
+  noMatchW = getstn()$gen_merge_noMatchW,
   resaTo = "best",
-  resaMethod = get("stn", envir = .ap2)$gen_resample_method,
-  dol = get("stn", envir = .ap2)$gen_merge_detectOutliers
+  resaMethod = getstn()$gen_resample_method,
+  dol = getstn()$gen_merge_detectOutliers
 )
 
 \S4method{mergeDatasets}{aquap_data,aquap_data,aquap_mergeLabels}(
   ds1,
   ds2,
   mergeLabels,
-  noMatchH = get("stn", envir = .ap2)$gen_merge_noMatchH,
-  noMatchW = get("stn", envir = .ap2)$gen_merge_noMatchW,
+  noMatchH = getstn()$gen_merge_noMatchH,
+  noMatchW = getstn()$gen_merge_noMatchW,
   resaTo = "best",
-  resaMethod = get("stn", envir = .ap2)$gen_resample_method,
-  dol = get("stn", envir = .ap2)$gen_merge_detectOutliers
+  resaMethod = getstn()$gen_resample_method,
+  dol = getstn()$gen_merge_detectOutliers
 )
 
 \S4method{mergeDatasets}{list,missing,missing}(
   ds1,
   ds2 = NULL,
   mergeLabels = NULL,
-  noMatchH = get("stn", envir = .ap2)$gen_merge_noMatchH,
-  noMatchW = get("stn", envir = .ap2)$gen_merge_noMatchW,
+  noMatchH = getstn()$gen_merge_noMatchH,
+  noMatchW = getstn()$gen_merge_noMatchW,
   resaTo = "best",
-  resaMethod = get("stn", envir = .ap2)$gen_resample_method,
-  dol = get("stn", envir = .ap2)$gen_merge_detectOutliers
+  resaMethod = getstn()$gen_resample_method,
+  dol = getstn()$gen_merge_detectOutliers
 )
 
 \S4method{mergeDatasets}{list,missing,aquap_mergeLabels}(
   ds1,
   ds2 = NULL,
   mergeLabels,
-  noMatchH = get("stn", envir = .ap2)$gen_merge_noMatchH,
-  noMatchW = get("stn", envir = .ap2)$gen_merge_noMatchW,
+  noMatchH = getstn()$gen_merge_noMatchH,
+  noMatchW = getstn()$gen_merge_noMatchW,
   resaTo = "best",
-  resaMethod = get("stn", envir = .ap2)$gen_resample_method,
-  dol = get("stn", envir = .ap2)$gen_merge_detectOutliers
+  resaMethod = getstn()$gen_resample_method,
+  dol = getstn()$gen_merge_detectOutliers
 )
 
 \S4method{mergeDatasets}{list,aquap_mergeLabels,missing}(
   ds1,
   ds2,
   mergeLabels = NULL,
-  noMatchH = get("stn", envir = .ap2)$gen_merge_noMatchH,
-  noMatchW = get("stn", envir = .ap2)$gen_merge_noMatchW,
+  noMatchH = getstn()$gen_merge_noMatchH,
+  noMatchW = getstn()$gen_merge_noMatchW,
   resaTo = "best",
-  resaMethod = get("stn", envir = .ap2)$gen_resample_method,
-  dol = get("stn", envir = .ap2)$gen_merge_detectOutliers
+  resaMethod = getstn()$gen_resample_method,
+  dol = getstn()$gen_merge_detectOutliers
 )
 }
 \arguments{

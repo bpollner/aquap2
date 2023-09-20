@@ -1,6 +1,6 @@
 plot_da_cube <- function(cube, aps="def", ...) {
-	autoUpS()
-	printEmpty <- .ap2$stn$gen_plot_printEmptySlots
+	stn <- autoUpS()
+	printEmpty <- stn$gen_plot_printEmptySlots
 	#
 	ap <- doApsTrick(aps, cube, ...)
 	ap <- ap_cleanZeroValuesCheckExistenceDefaults(ap, dataset=getDataset(cube[[1]]), haveExc=FALSE) # just take the first dataset, as we mainly need the header (and the wavelengths are already checked.. )
@@ -15,8 +15,8 @@ plot_da_cube <- function(cube, aps="def", ...) {
 } # EOF
 
 plot_rnf_cube <- function(cube, aps="def", ...) {
-	autoUpS()
-	printEmpty <- .ap2$stn$gen_plot_printEmptySlots
+	stn <- autoUpS()
+	printEmpty <- stn$gen_plot_printEmptySlots
 	#	
 	ap <- doApsTrick(aps, cube, ...)
 	ap <- ap_cleanZeroValuesCheckExistenceDefaults(ap, dataset=getDataset(cube[[1]]), haveExc=FALSE) # just take the first dataset, as we mainly need the header (and the wavelengths are already checked.. )
@@ -31,8 +31,8 @@ plot_rnf_cube <- function(cube, aps="def", ...) {
 } # EOF
 
 plot_svm_cube <- function(cube, aps="def", ...) {
-	autoUpS()
-	printEmpty <- .ap2$stn$gen_plot_printEmptySlots
+	stn <- autoUpS()
+	printEmpty <- stn$gen_plot_printEmptySlots
 	#	
 	ap <- doApsTrick(aps, cube, ...)
 	ap <- ap_cleanZeroValuesCheckExistenceDefaults(ap, dataset=getDataset(cube[[1]]), haveExc=FALSE) # just take the first dataset, as we mainly need the header (and the wavelengths are already checked.. )
@@ -47,8 +47,8 @@ plot_svm_cube <- function(cube, aps="def", ...) {
 } # EOF
 
 plot_nnet_cube <- function(cube, aps="def", ...) {
-	autoUpS()
-	printEmpty <- .ap2$stn$gen_plot_printEmptySlots
+	stn <- autoUpS()
+	printEmpty <- stn$gen_plot_printEmptySlots
 	#	
 	ap <- doApsTrick(aps, cube, ...)
 	ap <- ap_cleanZeroValuesCheckExistenceDefaults(ap, dataset=getDataset(cube[[1]]), haveExc=FALSE) # just take the first dataset, as we mainly need the header (and the wavelengths are already checked.. )

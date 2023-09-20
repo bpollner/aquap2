@@ -52,16 +52,16 @@ Other Extract Elements:
 \code{\link{siWl}()}
 
 Other Helper Functions: 
+\code{\link{ap2_settings_setup}()},
 \code{\link{genFolderStr}()},
 \code{\link{genNoiseRecExp}()},
 \code{\link{genTempCalibExp}()},
 \code{\link{getcd}()},
 \code{\link{getcm}()},
-\code{\link{instAquap2Examples}()},
+\code{\link{getstn}()},
 \code{\link{printStdColnames}()},
 \code{\link{reColor}()},
 \code{\link{saveAQdata}()},
-\code{\link{updateAquap2}()},
 \code{\link{updateSettings}()}
 }
 \concept{Classification Helpers}

@@ -1,6 +1,7 @@
 # old above ---------------------------------
 aq_makeNicePlottingFrame_circ <- function(aquCalcResult, selWls, masterScale) {
-	nrDigits <- .ap2$stn$aqg_nrDigitsAquagram
+	stn <- getstn()
+	nrDigits <- stn$aqg_nrDigitsAquagram
 	dataForPlotting <- aquCalcResult
 	colnames(dataForPlotting) <- as.character(selWls)
 #	rownames(dataForPlotting) <-calcAquagrResult$avg[,1]
@@ -22,8 +23,9 @@ aq_makeNicePlottingFrame_circ <- function(aquCalcResult, selWls, masterScale) {
 } # EOF
 
 aq_makeNicePlottingFrame_linear <- function(aquCalcResult, onMain, onSub, mod, Texp, customColor, clt, R, minus, inBoot=FALSE) {
-	settingsLT <- .ap2$stn$aqg_linetypes
-	ltyCI <- .ap2$stn$aqg_plot_ltyCIs
+	stn <- getstn()
+	settingsLT <- stn$aqg_linetypes
+	ltyCI <- stn$aqg_plot_ltyCIs
 	##
 	if (is.numeric(clt)) {
 		ltPlot <- ltLeg <- clt
@@ -168,8 +170,9 @@ aq_checkLegendTextMod <- function(mod, minus, TCalib, Texp) {
 } #EOF
 
 aq_checkSelWls <- function(mod, selWls) {
+	stn <- getstn()
 	if ((mod == "aucs") | (mod == "aucs-diff") | (mod == "aucs.tn") | (mod == "aucs.tn.dce") | (mod == "aucs.tn-diff") | (mod == "aucs.tn.dce-diff") | (mod == "aucs.dce") | (mod == "aucs.dce-diff") ) {
-	out <- paste("C", getOvertoneColnames(.ap2$stn$aqg_OT, apLoc=.ap2), sep="")
+	out <- paste("C", getOvertoneColnames(stn$aqg_OT, apLoc=.ap2), sep="")
 	} else {
 		out <- selWls
 	}
@@ -177,8 +180,8 @@ aq_checkSelWls <- function(mod, selWls) {
 } # EOF
 
 aq_checkPlotType <- function(mod) {
-
-	plotType <- .ap2$stn$aqg_plottingType
+	stn <- getstn()
+	plotType <- stn$aqg_plottingType
 	if (grepl(pv_AquagramModes[1], mod)) {
 		plotType <- "circular"
 	}
@@ -189,8 +192,9 @@ aq_checkPlotType <- function(mod) {
 }
 
 aq_makePolygons_OLD <- function(plotData, legendColor) {
+	stn <- getstn()
 	if (!is.null(plotData)) {
-		alpha <- .ap2$stn$aqg_plot_color_alpha_CIfill
+		alpha <- stn$aqg_plot_color_alpha_CIfill
 		#
 		xfwd <- seq(1, ncol(plotData))
 		xrev <- rev(xfwd)
@@ -206,9 +210,10 @@ aq_makePolygons_OLD <- function(plotData, legendColor) {
 } # EOF
 
 aq_makePolygons <- function(plotData, dataColor) {
+	stn <- getstn()
 	if (!is.null(plotData)) {
 		dataColor <- dataColor[seq(1, length(dataColor), by=3)]
-		alpha <- .ap2$stn$aqg_plot_color_alpha_CIfill
+		alpha <- stn$aqg_plot_color_alpha_CIfill
 		#
 		xfwd <- seq(1, ncol(plotData))
 		xrev <- rev(xfwd)
@@ -236,7 +241,8 @@ aq_getOrder <- function(groupsChar) {
 } # EOF
 
 aq_plotCore_sigTable <- function(aquCalc) {
-	plotSig <- .ap2$stn$aqg_plotSigTable
+	stn <- getstn()
+	plotSig <- stn$aqg_plotSigTable
 	#
 	if (plotSig & !is.null(aquCalc@ciTable)) {
 		sigTable <- aquCalc@ciTable
@@ -269,20 +275,21 @@ aq_plotCore_sigTable <- function(aquCalc) {
 	} # end if plot Sig
 } # EOF
 
-plot_aquagram_inner <- function(aquCalc, selWls=.ap2$stn$aqg_wlsAquagram, onSub, onMain, where, customColor, nrCorr, bootCI, mod, TCalib, minus, Texp, masterScaleAQ, masterScaleBoot, clt=NULL, R) {
+plot_aquagram_inner <- function(aquCalc, selWls=stn$aqg_wlsAquagram, onSub, onMain, where, customColor, nrCorr, bootCI, mod, TCalib, minus, Texp, masterScaleAQ, masterScaleBoot, clt=NULL, R) {
+	stn <- getstn()
 	if (!is.numeric(selWls)) {
 		stop("Please provide a numerical vector as input for the wavelengths. Thank you.", call.=FALSE)
 	}
 	plotType <- aq_checkPlotType(mod)
-	pdfSizeAdd <- .ap2$stn$aqg_plot_pdfSizeAdd
-	height <- .ap2$stn$pdf_Height_sq + pdfSizeAdd
-	width <- .ap2$stn$pdf_Width_ws + pdfSizeAdd
-	xAxisTitle <- .ap2$stn$aqg_linearXaxisTitle
-	legCex <- .ap2$stn$aqg_plot_linear_legendCex
-	plotWamacsLines <- .ap2$stn$aqg_plotWamacsLines
-	alwaysPlotAvgAqg <- .ap2$stn$aqg_alwaysPlotAvgAqg
+	pdfSizeAdd <- stn$aqg_plot_pdfSizeAdd
+	height <- stn$pdf_Height_sq + pdfSizeAdd
+	width <- stn$pdf_Width_ws + pdfSizeAdd
+	xAxisTitle <- stn$aqg_linearXaxisTitle
+	legCex <- stn$aqg_plot_linear_legendCex
+	plotWamacsLines <- stn$aqg_plotWamacsLines
+	alwaysPlotAvgAqg <- stn$aqg_alwaysPlotAvgAqg
 	doPlotAvg <- TRUE
-	maxElmsPerCol <- .ap2$stn$aqg_plot_maxNrLegendElements # the max number of elements in one column
+	maxElmsPerCol <- stn$aqg_plot_maxNrLegendElements # the max number of elements in one column
 	#
 	if (bootCI & !is.null(aquCalc@bootRes) & !alwaysPlotAvgAqg) { 
 		doPlotAvg <- FALSE
@@ -308,7 +315,7 @@ plot_aquagram_inner <- function(aquCalc, selWls=.ap2$stn$aqg_wlsAquagram, onSub,
 		caxislabels <- dfpList$Labels
 		if(where != "pdf" & Sys.getenv("RSTUDIO") != 1)  {dev.new(height=height, width=width)}
 		fmsb::radarchart(dataForPlotting, axistype=4, maxmin=T, axislabcol=1, seg=4, pty=32, caxislabels=caxislabels, pcol=Color, plty=ltPlot, cglwd=0.5, plwd=pLineWi, centerzero=T, cglty=3, sub=onSub, title=onMain)
-		legBgCol <- rgb(255,255,255, alpha=.ap2$stn$col_alphaForLegends, maxColorValue=255) # is a white with alpha to be determined in the settings
+		legBgCol <- rgb(255,255,255, alpha=stn$col_alphaForLegends, maxColorValue=255) # is a white with alpha to be determined in the settings
 		legend("topright", cex=0.8, xjust=0.5, yjust=0.5, legend=legText, col=legColor, lty=ltLeg, lwd=4, bg=legBgCol, ncol=ncLeg)
 		legend("bottomleft", cex=0.8, xjust=0.5, yjust=0.5, legend=legTextMod, bg=legBgCol)
 		mtext(mText, 1)
@@ -339,7 +346,7 @@ plot_aquagram_inner <- function(aquCalc, selWls=.ap2$stn$aqg_wlsAquagram, onSub,
 		if (plotWamacsLines) {
 			abline(v=seq(1, ncol(plotData)), col="lightgray", lwd=0.4)
 		}
-		legBgCol <- rgb(255,255,255, alpha=.ap2$stn$col_alphaForLegends, maxColorValue=255) # is a white with alpha to be determined in the settings
+		legBgCol <- rgb(255,255,255, alpha=stn$col_alphaForLegends, maxColorValue=255) # is a white with alpha to be determined in the settings
 		legend("topright", legend=legTxt, title=legTitle, cex=legCex, col=legendColor, lty=ltLeg, bg=legBgCol, ncol=ncLeg)
 		legend("bottomleft", legend=legTextMod, cex=legCex, bg=legBgCol)
 	} # EOIF		
@@ -357,7 +364,7 @@ plot_aquagram_inner <- function(aquCalc, selWls=.ap2$stn$aqg_wlsAquagram, onSub,
 			if (is.numeric(clt)) {
 				ltPlot <- ltLeg <- clt
 			} else {
-				ltPlot <- ltLeg <- .ap2$stn$aqg_linetypes
+				ltPlot <- ltLeg <- stn$aqg_linetypes
 			}
 			pLineWi <- 2.3
 	 		aq_plotCore_circ(standardData)
@@ -454,12 +461,13 @@ plotAvgSpectra <- function(avgSpectra, onSub, onMain, nrCorr, possNrPartic, ncpw
 	} 
 	matplot(wls, t(avgSpectra$NIR), type="l", lty=1, col=Color, xlab="Wavelength", ylab="avg Absorbance", sub=onSub, main=onMain)
 	abline(h=0, col="gray")
-	legBgCol <- rgb(255,255,255, alpha=.ap2$stn$col_alphaForLegends, maxColorValue=255) # is a white with alpha to be determined in the settings
+	legBgCol <- rgb(255,255,255, alpha=getstn()$col_alphaForLegends, maxColorValue=255) # is a white with alpha to be determined in the settings
 	legend("topright", legend=rownames(avgSpectra), col=Color, lwd=2.5, lty=1, bg=legBgCol)
 	mtext(mText, 4)
 } # EOF
 
 plotSubtrAvgSpectra <- function(subtrSpectra, onSub, onMain, nrCorr, possNrPartic, adPeakPlot=FALSE, adLines=FALSE, discrim=FALSE, itemIndex=NULL, minus, ranSubtrSpec, ncpwl) {
+	stn <- getstn()
 	a <- ncpwl
 	cns <- colnames(subtrSpectra$NIR)
 	wls <- as.numeric(substr(cns, a+1, nchar(cns)))
@@ -491,12 +499,12 @@ plotSubtrAvgSpectra <- function(subtrSpectra, onSub, onMain, nrCorr, possNrParti
 	legendText <- paste("Minus:", minus)
 	matplot(wls, t(subtrSpectra$NIR), type="l", lty=1, col=Color, xlab="Wavelength", ylab="delta avg Absorbance", sub=onSub, main=onMain, ylim=ranSubtrSpec)
 	abline(h=0, col="gray")
-	legBgCol <- rgb(255,255,255, alpha=.ap2$stn$col_alphaForLegends, maxColorValue=255) # is a white with alpha to be determined in the settings
+	legBgCol <- rgb(255,255,255, alpha=getstn()$col_alphaForLegends, maxColorValue=255) # is a white with alpha to be determined in the settings
 	legend("topright", legend=rownames(subtrSpectra), col=Color, lwd=2.5, lty=1, bg=legBgCol)
 	legend("bottomleft", legend=legendText, bg=legBgCol)
 	mtext(mText, 4)
 	if (adPeakPlot) {
-		bw <- .ap2$stn$pp_bandwidth
+		bw <- stn$pp_bandwidth
 		NIRnice <- as.data.frame(matrix(subtrSpectra$NIR, nrow=nrow(subtrSpectra$NIR)))
 		colnames(NIRnice) <- colnames(subtrSpectra$NIR)
 		rownames(NIRnice) <- rownames(subtrSpectra)
@@ -635,10 +643,10 @@ aq_checkTrippleDotsCalc <- function(...) {
 #'  }
 #' @export
 plot_aqg <- function(cube, aps="def", ...) {
-  	autoUpS()
-	printEmpty <- .ap2$stn$gen_plot_printEmptySlots
+  	stn <- autoUpS()
+	printEmpty <- stn$gen_plot_printEmptySlots
 	#  	
-  	if (class(cube) != "aquap_cube") {
+  	if (!is(cube, "aquap_cube")) {
   		stop("Please provide an object of class 'aquap_cube' to the argument 'cube'", call.=FALSE)
   	}
   	aq_checkTrippleDotsCalc(...) # to prevent the user to provide a calculation argument to the plotting function
@@ -657,16 +665,16 @@ plot_aqg <- function(cube, aps="def", ...) {
   	aq <- ap$aquagr
   	plotType <- aq_checkPlotType(aq$mod) # stops if plot type is neither circular nor linear
   	if (!is.logical(ap$aquagr$spectra)) {add <- "+spectra"; suffix <- "aquagr+Spect" } else {add <- ""; suffix <- "aquagr"}
-  	if (!.ap2$stn$allSilent & (where == "pdf" )) {cat(paste("Plotting Aquagrams", add, "... ", sep="")) }
-	pdfSizeAdd <- .ap2$stn$aqg_plot_pdfSizeAdd
+  	if (!stn$allSilent & (where == "pdf" )) {cat(paste("Plotting Aquagrams", add, "... ", sep="")) }
+	pdfSizeAdd <- stn$aqg_plot_pdfSizeAdd
  	if (plotType == "circular") {
- 	 	height <-.ap2$stn$pdf_Height_sq
-  		width <- .ap2$stn$pdf_Width_sq
+ 	 	height <-stn$pdf_Height_sq
+  		width <- stn$pdf_Width_sq
   	} else {
- 	 	height <-.ap2$stn$pdf_Height_ws + pdfSizeAdd
-  		width <- .ap2$stn$pdf_Width_ws + pdfSizeAdd
+ 	 	height <-stn$pdf_Height_ws + pdfSizeAdd
+  		width <- stn$pdf_Width_ws + pdfSizeAdd
   	}
-  	path <- .ap2$stn$fn_results
+  	path <- stn$fn_results
   	expName <- getExpName(cube)
   	minusText <- aq_getMinusText(aq$minus, aq$mod)	
   	filename <- paste(expName, suffix, sep="_")
@@ -687,7 +695,7 @@ plot_aqg <- function(cube, aps="def", ...) {
 		} # end for i
 	} # end for va
 	if (where == "pdf") {dev.off()}
-	if (!.ap2$stn$allSilent & (where == "pdf" )) {cat("ok\n") }
+	if (!stn$allSilent & (where == "pdf" )) {cat("ok\n") }
 } # EOF
 
 

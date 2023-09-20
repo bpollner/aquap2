@@ -1,7 +1,7 @@
 show_aquap_data <- function(object) {
-	autoUpS(cfs=FALSE)
+#	autoUpS(cfs=FALSE)
 	#
-	stn <- get("stn", envir=.ap2)
+	stn <- getstn()
 	maxShow <- stn$gen_showData_nrRows
 	#
 	cns <- colnames(object$NIR)
@@ -23,12 +23,13 @@ show_aquap_data <- function(object) {
 	} 
 	cat(showChar)
 	print(object$header[rs,])
-	if (.ap2$stn$gen_showData_NIR) {
+	if (stn$gen_showData_NIR) {
 		print(object$NIR[rs,cs])
 	}
 } # EOF
 
 showCube <- function(object) {
+	stn <- getstn()
 	stats <- checkCubeForRealStats(object)  ## list(cnt=cnt, char=char)
 	len <-  object@cpt@len
 	if (len > 1) {addPlural <- "s"} else {addPlural <- ""}	
@@ -49,7 +50,7 @@ showCube <- function(object) {
 	cat("\n")
 	cp <- getCP(object) # is a method
 	out <- cp
-	if (.ap2$stn$gen_showExtendedCube) {
+	if (stn$gen_showExtendedCube) {
 		a <- getCubeNrs(object)
 		nrRows <- a$nrRows
 		nrWls <- a$nrWls
@@ -133,12 +134,13 @@ getColRep_set <- function(object) { # object is a set
 }# EOF
 
 subtract_two_aquap_data_M <- function(e1, e2) { # e1 and e2 being each an object of class aquap_data
+	stn <- getstn()
 	if (nrow(e1) != 1 & nrow(e2) != 1) {
 		if (nrow(e1) != nrow(e2)) {
 			stop("The provided datasets do not have the same number of rows.\nFor successful subtraction via '-', both datasets have to have the same number of rows, or one dataset has to have exactly one (1) row.", call.=FALSE)
 		}
 		if (ncol(e1$NIR) != ncol(e2$NIR)) {
-			if (!.ap2$stn$gen_calc_allowSubtrDiffWavels) {
+			if (!stn$gen_calc_allowSubtrDiffWavels) {
 				stop("The provided datasets do not have the same number of wavelengths.\nFor successful subtraction via '-', both datasets have to have the same number of wavelengths, i.e. the same number of columns in their NIR data.", call.=FALSE)
 			} else { # so we do want to allow the subtractions between datasets that have possibly been touched by do_gapDer
 				cns1 <- colnames(e1$NIR)
@@ -163,7 +165,7 @@ subtract_two_aquap_data_M <- function(e1, e2) { # e1 and e2 being each an object
 		if (!identical(colnames(e1$NIR), colnames(e2$NIR))) {
 			stop("The provided datasets do not have the same wavelengths.\nFor successful subtraction via '-', there have to be the same wavelengths present in both datasets.", call.=FALSE)
 		}
-		if (!.ap2$stn$gen_calc_allowSubtrDiffHead) {	 # if the subtraction of datasets having a different header structure should be allowed.
+		if (!stn$gen_calc_allowSubtrDiffHead) {	 # if the subtraction of datasets having a different header structure should be allowed.
 			if (!identical(e1$header, e2$header)) {
  				stop("The provided datasets have a different structure. \nFor successful subraction via '-', both datasets must have the same structure, i.e. the same header.\nYou can change this behaviour in the setting.r file at the parameter 'gen_calc_allowSubtrDiffHead'.", call.=FALSE)
 			}
@@ -243,27 +245,27 @@ plot_nnet_cube_M <- function(object, ...) {
 
 
 # merge datasets ------------
-mergeDatasets_two_noLabels_M <- function(ds1, ds2, mergeLabels=NULL, noMatchH=get("stn", envir=.ap2)$gen_merge_noMatchH, noMatchW=get("stn", envir=.ap2)$gen_merge_noMatchW, resaTo="best", resaMethod=get("stn", envir=.ap2)$gen_resample_method, dol=get("stn", envir=.ap2)$gen_merge_detectOutliers) {
+mergeDatasets_two_noLabels_M <- function(ds1, ds2, mergeLabels=NULL, noMatchH=getstn()$gen_merge_noMatchH, noMatchW=getstn()$gen_merge_noMatchW, resaTo="best", resaMethod=getstn()$gen_resample_method, dol=getstn()$gen_merge_detectOutliers) {
 #	print("mergeDatasets_two_noLabels_M"); wait()
 	mergeDatasets_two(ds1, ds2, mergeLabels=NULL, noMatchH, noMatchW, resaTo, resaMethod, dol)
 } # EOF
 
-mergeDatasets_two_mergeLabels_M <- function(ds1, ds2, mergeLabels, noMatchH=get("stn", envir=.ap2)$gen_merge_noMatchH, noMatchW=get("stn", envir=.ap2)$gen_merge_noMatchW, resaTo="best", resaMethod=get("stn", envir=.ap2)$gen_resample_method, dol=get("stn", envir=.ap2)$gen_merge_detectOutliers) {
+mergeDatasets_two_mergeLabels_M <- function(ds1, ds2, mergeLabels, noMatchH=getstn()$gen_merge_noMatchH, noMatchW=getstn()$gen_merge_noMatchW, resaTo="best", resaMethod=getstn()$gen_resample_method, dol=getstn()$gen_merge_detectOutliers) {
 #	print("mergeDatasets_two_mergeLabels_M"); wait()
 	mergeDatasets_two(ds1, ds2, mergeLabels, noMatchH, noMatchW, resaTo, resaMethod, dol)
 } # EOF
 
-mergeDatasets_list_noLabels_M <- function(ds1, ds2=NULL, mergeLabels=NULL, noMatchH=get("stn", envir=.ap2)$gen_merge_noMatchH, noMatchW=get("stn", envir=.ap2)$gen_merge_noMatchW, resaTo="best", resaMethod=get("stn", envir=.ap2)$gen_resample_method, dol=get("stn", envir=.ap2)$gen_merge_detectOutliers) {
+mergeDatasets_list_noLabels_M <- function(ds1, ds2=NULL, mergeLabels=NULL, noMatchH=getstn()$gen_merge_noMatchH, noMatchW=getstn()$gen_merge_noMatchW, resaTo="best", resaMethod=getstn()$gen_resample_method, dol=getstn()$gen_merge_detectOutliers) {
 #	print("mergeDatasets_list_noLabels_M"); wait()
 	mergeDatasets_list(dsList=ds1, mergeLabels=NULL, noMatchH, noMatchW, resaTo, resaMethod, dol)
 } # EOF
 
-mergeDatasets_list_mergeLabels_M <- function(ds1, ds2=NULL, mergeLabels, noMatchH=get("stn", envir=.ap2)$gen_merge_noMatchH, noMatchW=get("stn", envir=.ap2)$gen_merge_noMatchW, resaTo="best", resaMethod=get("stn", envir=.ap2)$gen_resample_method, dol=get("stn", envir=.ap2)$gen_merge_detectOutliers) {
+mergeDatasets_list_mergeLabels_M <- function(ds1, ds2=NULL, mergeLabels, noMatchH=getstn()$gen_merge_noMatchH, noMatchW=getstn()$gen_merge_noMatchW, resaTo="best", resaMethod=getstn()$gen_resample_method, dol=getstn()$gen_merge_detectOutliers) {
 #	print("mergeDatasets_list_mergeLabels_M"); wait()
 	mergeDatasets_list(dsList=ds1, mergeLabels, noMatchH, noMatchW, resaTo, resaMethod, dol)
 } # EOF
 
-mergeDatasets_list_mergeLabels_2_M <- function(ds1, ds2, mergeLabels=NULL, noMatchH=get("stn", envir=.ap2)$gen_merge_noMatchH, noMatchW=get("stn", envir=.ap2)$gen_merge_noMatchW, resaTo="best", resaMethod=get("stn", envir=.ap2)$gen_resample_method, dol=get("stn", envir=.ap2)$gen_merge_detectOutliers) {
+mergeDatasets_list_mergeLabels_2_M <- function(ds1, ds2, mergeLabels=NULL, noMatchH=getstn()$gen_merge_noMatchH, noMatchW=getstn()$gen_merge_noMatchW, resaTo="best", resaMethod=getstn()$gen_resample_method, dol=getstn()$gen_merge_detectOutliers) {
 #	print("mergeDatasets_list_mergeLabels_2_M"); wait()
 	mergeDatasets_list(dsList=ds1, mergeLabels=ds2, noMatchH, noMatchW, resaTo, resaMethod, dol)
 } # EOF

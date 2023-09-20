@@ -30,16 +30,16 @@ gfd <- gfd() # imports noise raw-data and saves noise-data file in the
 \code{\link{genTempCalibExp}}, \code{\link{genFolderStr}}
 
 Other Helper Functions: 
+\code{\link{ap2_settings_setup}()},
 \code{\link{genFolderStr}()},
 \code{\link{genTempCalibExp}()},
 \code{\link{getcd}()},
 \code{\link{getcm}()},
-\code{\link{instAquap2Examples}()},
+\code{\link{getstn}()},
 \code{\link{printStdColnames}()},
 \code{\link{reColor}()},
 \code{\link{saveAQdata}()},
 \code{\link{siWlg}()},
-\code{\link{updateAquap2}()},
 \code{\link{updateSettings}()}
 
 Other Noise procedures: 

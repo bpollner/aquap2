@@ -38,8 +38,7 @@ Imports:
     plotrix,
     pracma,
     beeswarm,
-    devtools,
-    grid,
+        grid,
     gridExtra,
     ggplot2,
     gtable,
@@ -50,6 +49,8 @@ Imports:
     e1071,
     nnet
 Suggests:
+    uniset,
+    devtools,
     knitr,
     testthat (>= 3.0.0)
 VignetteBuilder: knitr
@@ -95,6 +96,8 @@ Collate:
     'prep_metadata.r'
     'prep_transformToAp2.r'
     'prep_writeMfiles.r'
+    'uniset_functions.R'
+    'uniset_globals.R'
     'zzz.r'
 RoxygenNote: 7.2.3
 Config/testthat/edition: 3

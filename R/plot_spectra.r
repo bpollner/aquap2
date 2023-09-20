@@ -1,7 +1,8 @@
 plotSpectra_outer <- function(dataset, colorBy, onMain, onSub, idString="", md, ...) {
+	stn <- getstn()
 	if (!is.null(colorBy)) {
 		if (any(colorBy == "all")) {	
-			cPref <- .ap2$stn$p_ClassVarPref
+			cPref <- stn$p_ClassVarPref
 			le <- nchar(cPref)
 			cns <- colnames(dataset$header)
 			cnsM <- substr(cns, 1, le)
@@ -25,6 +26,7 @@ plotSpectra_outer <- function(dataset, colorBy, onMain, onSub, idString="", md, 
 
 # the ablv and after that values used for making vertical lines when plotting the HNA/LNA cutoff (flowdex / Xiaoxia Paper)
 plotSpectra_inner <- function(dataset, singleColorBy, onMain, onSub, idString="", md, ablv=NULL, ablvCol="gray", ablvLty=3, bp=NULL, slwd=NULL, ...) {
+	stn <- getstn()
 	xlab <- md$meta$xaxDenom
 	ylab <- md$meta$yaxDenom
 	#
@@ -54,7 +56,7 @@ plotSpectra_inner <- function(dataset, singleColorBy, onMain, onSub, idString=""
 	wls <- getWavelengths(dataset)
 	#
 #	NIR <- getNIR(dataset)
-#	pickResult <- pickPeaks(as.data.frame(t(NIR)), bandwidth=.ap2$stn$pp_bandwidth, wavelengths=wls)
+#	pickResult <- pickPeaks(as.data.frame(t(NIR)), bandwidth=stn$pp_bandwidth, wavelengths=wls)
 #	plotPeaks(pires, onMain="", onSub="", adLines=TRUE, pcaVariances=NULL, customColor=NULL, ylim=NULL, wls, clty=NULL)
 	#
 	onSub <- paste(onSub, msg, partNMsg, sep=" ")
@@ -72,7 +74,7 @@ plotSpectra_inner <- function(dataset, singleColorBy, onMain, onSub, idString=""
 		abline(v=c(bp$bp[1], bp$bp[2]), col=bp$bpCol, lty=bp$bpLty, lwd=bp$bpLwd)
 	} # end if
 	if (makeLegend) {
-		legBgCol <- rgb(255,255,255, alpha=.ap2$stn$col_alphaForLegends, maxColorValue=255) # is a white with alpha to be determined in the settings
+		legBgCol <- rgb(255,255,255, alpha=stn$col_alphaForLegends, maxColorValue=255) # is a white with alpha to be determined in the settings
 #		legPosition <- getCheckLegendPosition(as.numeric(matrix(rep(wls, ncol(t(dataset$NIR))), nrow=1)), as.numeric(matrix(t(dataset$NIR), nrow=1, byrow=TRUE)))
 		legPosition <- "topright"
 #		print(legPosition)
@@ -81,7 +83,7 @@ plotSpectra_inner <- function(dataset, singleColorBy, onMain, onSub, idString=""
 } # EOF
 
 plot_spectra_Data <- function(x, colorBy=NULL, ...) {
-	autoUpS()
+	stn <- autoUpS()
 	dataset <- x
 	ap <- getap(...)
 	md <- getmd()
@@ -90,12 +92,12 @@ plot_spectra_Data <- function(x, colorBy=NULL, ...) {
 	onSub <- ap$genPlot$onSub
 	fns <- ap$genPlot$fns
 	#
-	if (!.ap2$stn$allSilent & (where == "pdf" )) {cat("Plotting raw spectra ... ")}
+	if (!stn$allSilent & (where == "pdf" )) {cat("Plotting raw spectra ... ")}
 #	expName <- getExpName(md)
 	expName <- getExpName(dataset)
-	height <-.ap2$stn$pdf_Height_ws
-	width <- .ap2$stn$pdf_Width_ws
-	path <- .ap2$stn$fn_results
+	height <-stn$pdf_Height_ws
+	width <- stn$pdf_Width_ws
+	path <- stn$fn_results
 	suffix <- "rawSpectra"
 	filename <- paste(expName, suffix, sep="_")
 	filename <- paste(path, "/", filename, fns, ".pdf", sep="")
@@ -104,27 +106,12 @@ plot_spectra_Data <- function(x, colorBy=NULL, ...) {
 	if (where != "pdf" & (Sys.getenv("RSTUDIO") != 1) & (!names(dev.cur()) == "quartz") ) {dev.new(height=height, width=width)}	
 	plotSpectra_outer(dataset, colorBy, onMain, onSub, md=md, ...)
 	if (where == "pdf") {dev.off()}
-	if (!.ap2$stn$allSilent & (where == "pdf" )) {cat("ok\n") }
-} # EOF
-
-plot_spectra_Data_nottoGutto_notInUse <- function(x, colorBy=NULL, ...) {
-	# x is a dataset
-	autoUpS()
-	ap <- getap(fn="def")
-	ap <- setAllSplitVarsToNull(ap)
-	cube <- gdmm(x, ap=ap) ##### generate the cube !!! ######
-	prev <- .ap2$stn$allSilent
-	.ap2$stn$allSilent <<- TRUE
-	origAp <- getAnproc(x)
-	origDptMods <- origAp$dpt$dptModules
-	cube@anproc$dpt$dptModules <- origDptMods # put the dpt info that we got from the dataset into the cube AFTER the gdmm, so that we do not do the treatment again!!
-	.ap2$stn$allSilent <<- prev
-	plot_spectra_Cube(cube, colorBy, ...)	
+	if (!stn$allSilent & (where == "pdf" )) {cat("ok\n") }
 } # EOF
 
 plot_spectra_Cube <- function(x, colorBy=NULL, ...) {
 	# the incoming x is the cube
-	autoUpS()
+	stn <- autoUpS()
 	ap <- getap(...)
 	md <- getmd()
 	where <- ap$genPlot$where
@@ -132,12 +119,12 @@ plot_spectra_Cube <- function(x, colorBy=NULL, ...) {
 	onSub <- ap$genPlot$onSub
 	fns <- ap$genPlot$fns
 	#
-	if (!.ap2$stn$allSilent & (where == "pdf" )) {cat("Plotting raw spectra ...  \n")}
+	if (!stn$allSilent & (where == "pdf" )) {cat("Plotting raw spectra ...  \n")}
 #	expName <- getExpName(md)
 	expName <- getExpName(x)
-	height <-.ap2$stn$pdf_Height_ws
-	width <- .ap2$stn$pdf_Width_ws
-	path <- .ap2$stn$fn_results
+	height <-stn$pdf_Height_ws
+	width <- stn$pdf_Width_ws
+	path <- stn$fn_results
 	suffix <- "rawSpectra"
 	filename <- paste(expName, suffix, sep="_")
 	filename <- paste(path, "/", filename, fns, ".pdf", sep="")
@@ -147,11 +134,11 @@ plot_spectra_Cube <- function(x, colorBy=NULL, ...) {
 	for (i in 1: length(x)) {
 		dataset <- getDataset(x[[i]]) # the sets are in the list within the cube
 		idString <- getIdString(x[[i]])
-		if (!.ap2$stn$allSilent & (where == "pdf" )) {cat(paste("   working on #", i, " of ", length(x), "\n", sep=""))}
+		if (!stn$allSilent & (where == "pdf" )) {cat(paste("   working on #", i, " of ", length(x), "\n", sep=""))}
 		plotSpectra_outer(dataset, colorBy, onMain, onSub, idString, md, ...)
 	} # end for i
 	if (where == "pdf") {dev.off()}
-	if (!.ap2$stn$allSilent & (where == "pdf" )) {cat("ok\n") }
+	if (!stn$allSilent & (where == "pdf" )) {cat("ok\n") }
 } # EOF
 
 #' @title Plot Raw Spectra

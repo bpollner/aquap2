@@ -1,8 +1,9 @@
 # Metadata --------------------------------------------
 check_mdDefaults <- function(fn) {
-	path <- .ap2$stn$fn_metadata
+	stn <- getstn()
+	path <- stn$fn_metadata
 	if (all(fn == "def")) {
-		fn <- .ap2$stn$fn_mDataDefFile
+		fn <- stn$fn_mDataDefFile
 	}
 	if (!all(is.character(fn)) | length(fn) != 1) {
 		stop("Please provide a length one character to the argument 'fn', thank you.", call.=FALSE)
@@ -17,11 +18,12 @@ check_mdDefaults <- function(fn) {
 
 check_mdDefaultValues <- function(localEnv) {
 	# realMeasurementLabel  
+	stn <- getstn()
 	le <- localEnv
 	#
 	noSplitVal <- le$commonValue
 	if (all(noSplitVal == "def")) {
-		noSplitVal <- .ap2$stn$p_commonNoSplit
+		noSplitVal <- stn$p_commonNoSplit
 	}
 	if (length(noSplitVal) != 1 | !all(is.character(noSplitVal))) {
 		stop("Please provide a character length one to the variable 'commonValue' in the metadata file.", call.=FALSE)
@@ -30,7 +32,7 @@ check_mdDefaultValues <- function(localEnv) {
 	#
 	ecl <- le$envControlLabel 
 	if (all(ecl == "def")) {
-		ecl <- .ap2$stn$p_envControlLabel
+		ecl <- stn$p_envControlLabel
 	}
 	if (length(ecl) != 1 | !all(is.character(ecl))) {
 		stop("Please provide a character length one to the variable 'envControlLabel' in the metadata file.", call.=FALSE)
@@ -39,7 +41,7 @@ check_mdDefaultValues <- function(localEnv) {
 	#
 	rml <- le$realMeasurementLabel
 	if (all(rml == "def")) {
-		rml <- .ap2$stn$p_realMeasurementLabel
+		rml <- stn$p_realMeasurementLabel
 	}
 	if (length(rml) != 1 | !all(is.character(rml))) {
 		stop("Please provide a character length one to the variable 'realMeasurementLabel' in the metadata file.", call.=FALSE)
@@ -48,7 +50,7 @@ check_mdDefaultValues <- function(localEnv) {
 	# 
 	ft <- le$filetype
 	if (all(ft == "def")) {
-		ft <- .ap2$stn$imp_specFileType
+		ft <- stn$imp_specFileType
 	}
 	if (length(ft) != 1 | !all(is.character(ft))) {
 		stop("Please provide a character length one to the variable 'filetype' in the metadata file.", call.=FALSE)
@@ -65,7 +67,7 @@ check_mdDefaultValues <- function(localEnv) {
 	#
 	nfn <- le$noiseFileName
 	if (all(nfn == "def")) {
-		nfn <- .ap2$stn$noi_noiseDataFilename
+		nfn <- stn$noi_noiseDataFilename
 	}
 	if (length(nfn) != 1 | !all(is.character(nfn))) {
 		stop("Please provide a character length one to the variable 'noiseFileName' in the metadata file resp. the argument 'noi_noiseDataFilename' in the settings file.", call.=FALSE)
@@ -74,7 +76,7 @@ check_mdDefaultValues <- function(localEnv) {
 	# 
 	tcfn <- le$tempCalibFileName
 	if (all(tcfn == "def")) {
-		tcfn <- .ap2$stn$aqg_tempCalib_Filename
+		tcfn <- stn$aqg_tempCalib_Filename
 	}
 	if (length(tcfn) != 1 | !all(is.character(tcfn))) {
 		stop("Please provide a character length one to the variable 'tempCalibFileName' in the metadata file resp. the argument 'aqg_tempCalib_Filename' in the settings file.", call.=FALSE)
@@ -92,12 +94,12 @@ check_mdDefaultValues <- function(localEnv) {
 	#
 	slClasses <- le$sl_classes
 	if (all(slClasses == "def")) {
-		slClasses <- .ap2$stn$fn_class_structure
+		slClasses <- stn$fn_class_structure
 	}
 	if (length(slClasses) != 1 | !all(is.character(slClasses))) {
 		stop("Please provide a character length one to the variable 'sl_classes' in the metadata file.", call.=FALSE)
 	}
-	foldLoc <- .ap2$stn$fn_metadata
+	foldLoc <- stn$fn_metadata
 	if (!file.exists(paste0(foldLoc, "/", slClasses, ".xlsx"))) {
  		stop(paste("The class-structure file \"", slClasses, ".xlsx\" does not seem to exist in the folder \"", foldLoc, "\". \nPlease check your input.", sep=""), call.=FALSE)
 	}
@@ -110,7 +112,7 @@ copyMetadataFile <- function(fromPath, toPath) {
 	if (ok) { cat("A fresh template of the metadata file has been copied from the package.\n")}			
 } # EOF
 
-check_mdVersion_I <- function(folderLocal, nameLocal) {
+check_mdVersion <- function(folderLocal, nameLocal) {
 	aa <- paste(path.package("aquap2"), "/templates/metadata.r", sep="")
 	if (!file.exists(aa)) {
 		aa <- paste(path.package("aquap2"), "/templates/metadata.r", sep="/inst")	# required in the case of devtools::load_all			
@@ -123,22 +125,17 @@ check_mdVersion_I <- function(folderLocal, nameLocal) {
 	}
 } # EOF
 
-check_mdVersion <- function(folderLocal, nameLocal) {
-	if (is.null(.ap2$.devMode)) {
-		check_mdVersion_I(folderLocal, nameLocal)
-	}
-} # EOF
-
 getClassStructureFromXlsx <- function(slClasses) {
+	stn <- getstn()
 	# is checked, everything coming in here should be a real existing xlsx file
-	foldLoc <-  .ap2$stn$fn_metadata
-	delCol <- .ap2$stn$p_deleteCol
+	foldLoc <-  stn$fn_metadata
+	delCol <- stn$p_deleteCol
 	slClassFilePath <- paste0(foldLoc, "/", slClasses, ".xlsx") # make it the complete path
 	#	
 	xTxt <- openxlsx::read.xlsx(xlsxFile = slClassFilePath, skipEmptyRows = FALSE, colNames = FALSE)	
 	#
-	clPref <- .ap2$stn$p_ClassVarPref
-	yPref <- .ap2$stn$p_yVarPref
+	clPref <- stn$p_ClassVarPref
+	yPref <- stn$p_yVarPref
 	
 	indNA <- sort(c(grep(clPref, xTxt[,1]), grep(yPref, xTxt[,1])))[-1]-1 # one row above each of the column names there MUST be an empty row, i.e. NA
 	if (!all(is.na(xTxt[,1])[indNA])) {
@@ -197,27 +194,28 @@ getClassStructureFromXlsx <- function(slClasses) {
 } # EOF
 
 getmd_core <- function(fn="def") {
+	stn <- getstn()
 	check_mdDefaults(fn) # is assigning
 	#
-	clPref <- .ap2$stn$p_ClassVarPref
-	yPref <- .ap2$stn$p_yVarPref
-	timeCol <- paste(clPref, .ap2$stn$p_timeCol, sep="")
-	ecrmCol <- paste(clPref, .ap2$stn$p_ECRMCol, sep="")
-	replCol <- paste(clPref, .ap2$stn$p_replicateCol, sep="")
-	groupCol <- paste(clPref, .ap2$stn$p_groupCol, sep="")
-	commCol <- paste(clPref, .ap2$stn$p_commonNoSplitCol, sep="")
-	tempCol <- paste(yPref, .ap2$stn$p_tempCol, sep="")
-	rhCol <- paste(yPref, .ap2$stn$p_RHCol, sep="")
+	clPref <- stn$p_ClassVarPref
+	yPref <- stn$p_yVarPref
+	timeCol <- paste(clPref, stn$p_timeCol, sep="")
+	ecrmCol <- paste(clPref, stn$p_ECRMCol, sep="")
+	replCol <- paste(clPref, stn$p_replicateCol, sep="")
+	groupCol <- paste(clPref, stn$p_groupCol, sep="")
+	commCol <- paste(clPref, stn$p_commonNoSplitCol, sep="")
+	tempCol <- paste(yPref, stn$p_tempCol, sep="")
+	rhCol <- paste(yPref, stn$p_RHCol, sep="")
 	# defaults:
-	defReplPref <- .ap2$stn$p_replicatePrefix
-	defNoTime <- .ap2$stn$p_noTimePointsLabel
+	defReplPref <- stn$p_replicatePrefix
+	defNoTime <- stn$p_noTimePointsLabel
 	##
-#	expNameCol <- paste(clPref, .ap2$stn$p_expNameCol, sep="")
-#	sampleNrCol <- paste(yPref, .ap2$stn$p_sampleNrCol, sep="")
-#	conSNrCol <- paste(yPref, .ap2$stn$p_conSNrCol, sep="")
-#	deleteCol <- paste(clPref, .ap2$stn$p_deleteCol, sep="")
+#	expNameCol <- paste(clPref, stn$p_expNameCol, sep="")
+#	sampleNrCol <- paste(yPref, stn$p_sampleNrCol, sep="")
+#	conSNrCol <- paste(yPref, stn$p_conSNrCol, sep="")
+#	deleteCol <- paste(clPref, stn$p_deleteCol, sep="")
 	### the above 4 are not used here
-	foldLoc <-  .ap2$stn$fn_metadata
+	foldLoc <-  stn$fn_metadata
 	check_mdVersion(folderLocal=foldLoc, nameLocal=fn) 	### Version check here !!
 	e <- new.env()
 	sys.source(paste(foldLoc, fn, sep="/"), envir=e)
@@ -277,7 +275,7 @@ getmd_core <- function(fn="def") {
 #' }
 #' @export
 getmd <- function(fn="def", ...) {
-	autoUpS()
+	stn <- autoUpS()
 	md <- getmd_core(fn)
 	old_expName <- md$meta$expName
 	modifyExpName <- function(expName=old_expName, ...) {
@@ -291,9 +289,10 @@ getmd <- function(fn="def", ...) {
 # Analysis Procedure --------------------------------------
 
 check_apDefaults <- function(fn) {
-	path <- .ap2$stn$fn_metadata
+	stn <- getstn()
+	path <- stn$fn_metadata
 	if (all(fn == "def")) {
-		fn <- .ap2$stn$fn_anProcDefFile
+		fn <- stn$fn_anProcDefFile
 	}
 	if (!all(is.character(fn)) | length(fn) != 1) {
 		stop("Please provide a length one character to the argument 'fn', thank you.", call.=FALSE)
@@ -311,7 +310,7 @@ copyAnProcFile <- function(fromPath, toPath) {
 	if (ok) { cat("A fresh template of the analysis procedure file has been copied from the package.\n")}			
 } # EOF
 
-check_apVersion_I <- function(folderLocal, nameLocal) {
+check_apVersion <- function(folderLocal, nameLocal) {
 	aa <- paste(path.package("aquap2"), "/templates/anproc.r", sep="")
 	if (!file.exists(aa)) {
 		aa <- paste(path.package("aquap2"), "/templates/anproc.r", sep="/inst")	# required in the case of devtools::load_all			
@@ -324,16 +323,11 @@ check_apVersion_I <- function(folderLocal, nameLocal) {
 	}
 } # EOF
 
-check_apVersion <- function(folderLocal, nameLocal) {
-	if (is.null(.ap2$.devMode)) {
-		check_apVersion_I(folderLocal, nameLocal)
-	}
-} # EOF
-
 getap_core_file <- function(fn="def") {
 	check_apDefaults(fn) # is assigning
+	stn <- getstn()
 	##
-	foldLoc <- .ap2$stn$fn_metadata
+	foldLoc <- stn$fn_metadata
 	check_apVersion(folderLocal=foldLoc, nameLocal=fn) 	### Version check here !!
 	e <- new.env()
 	sys.source(paste(foldLoc, fn, sep="/"), envir=e)
@@ -404,7 +398,7 @@ getap_core <- function(fn, .lafw_fromWhere="load", cube=NULL, ...) {
 		} else {
 			stop("An error at obtaining the analysis procedure occured. Please stay calm.", call.=FALSE) # this is not likely to ever happen
 		}
-	}
+	} # end else
 } # EOF
 
 modifyThisAp <- function(ap, ...) {

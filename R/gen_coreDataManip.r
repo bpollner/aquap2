@@ -108,7 +108,7 @@ do_snv <- function(dataset, exportModel=FALSE) {
 do_msc <- function(dataset, ref=NULL, extMscModel=NULL, exportModel=FALSE) {
 	autoUpS()
 	if (!is.null(ref)) {
-		if (class(ref) != "aquap_data") {
+		if (!is(ref, "aquap_data")) {
 			stop("Please provide an object of class 'aquap_data' to the argument 'ref'.", call.=FALSE)
 		}
 		if (nrow(ref) != 1) {
@@ -527,8 +527,8 @@ do_detrend<- function(dataset, src=NULL, trg="src", exportModel=FALSE) {
 #' @return The transformed dataset.
 #' @export
 do_dptSeq <- function(dataset, dptSeq, extraModelList=NULL, silent=TRUE) {
-	autoUpS(cfs=FALSE)
-	.ap2$stn$allSilent <- silent
+	stn <- autoUpS(cfs=FALSE)
+	stn$allSilent <- silent
 	return(performDPT_Core(dataset, dptSeq, extraModelList, allExportModels=FALSE))
 } # EOF
 
@@ -559,7 +559,7 @@ do_dptSeq <- function(dataset, dptSeq, extraModelList=NULL, silent=TRUE) {
 #' }
 #' @family Data pre-treatment functions 
 #' @export
-do_resampleNIR <- function(dataset, targetWls=NULL, tby=0.5, method=get("stn", envir=.ap2)$gen_resample_method) {
+do_resampleNIR <- function(dataset, targetWls=NULL, tby=0.5, method=getstn()$gen_resample_method) {
 	ncpwl <- dataset@ncpwl
 	charPrevWls <- substr(colnames(dataset$NIR)[1], 1, (ncpwl))
 	#
@@ -580,8 +580,9 @@ do_resampleNIR <- function(dataset, targetWls=NULL, tby=0.5, method=get("stn", e
 
 
 checkBlowUpInput_grouping <- function(header, grp) {
+	stn <- getstn()
 	cns <- colnames(header)
-	cPref <- .ap2$stn$p_ClassVarPref
+	cPref <- stn$p_ClassVarPref
 	cns <- cns[grep(cPref, cns)]
 	###
 	checkClassExistence <- function(X, char, ppv=TRUE) {
@@ -715,16 +716,17 @@ lotto_loop <- function(tn, an, size, n=2000) {
 #' @family Data pre-treatment functions 
 #' @export
 do_blowup <- function(dataset, grp=NULL, tn="x10", an="100%", cst=TRUE, conf=TRUE, pred=TRUE, replace=TRUE) {
-	cPref <- .ap2$stn$p_ClassVarPref
-	yPref <- .ap2$stn$p_yVarPref
-	snColSet <- .ap2$stn$p_sampleNrCol
+	stn <- autoUpS()
+	cPref <- stn$p_ClassVarPref
+	yPref <- stn$p_yVarPref
+	snColSet <- stn$p_sampleNrCol
 	snCol <- paste0(yPref, snColSet)
 	txtOrig <- "orig"
 	txtBlow <- "artif"
 	colNameBlow <- "blowup"
 	colOrig <- 1
 	colBlow <- 2
-	lottoLoopN <- .ap2$stn$cl_extDatPred_N_lottoLoop
+	lottoLoopN <- stn$cl_extDatPred_N_lottoLoop
 	#
 	header <- headerFac <- getHeader(dataset) # headerFac only used for grouping
 	colRep <- getColRep(dataset)
@@ -787,7 +789,7 @@ do_blowup <- function(dataset, grp=NULL, tn="x10", an="100%", cst=TRUE, conf=TRU
 	}
 	# future: check here the IndList for doubles !!
 	# now we have indList containing the header segments, NIRsplitList containing the NIR segments, and the indList that contains the indices to be averaged for each segment
-	if (!.ap2$stn$allSilent) {cat(paste0("Calculating (draw from ", an, ") and adding ", requiredN, " new observations to each of ", length(indList), " subgroups:\n"))}
+	if (!stn$allSilent) {cat(paste0("Calculating (draw from ", an, ") and adding ", requiredN, " new observations to each of ", length(indList), " subgroups:\n"))}
 	for (i in 1: length(indList)) { # i is the number of the splitSegment as defined by the grouping
 		for (k in 1: length(indList[[i]])) { # k is the number of spectra we will add to each subgroup  (k can be very large)   ######(parallelize this, NOT above !!)
 			inds <- indList[[i]][[k]]
@@ -795,7 +797,7 @@ do_blowup <- function(dataset, grp=NULL, tn="x10", an="100%", cst=TRUE, conf=TRU
 			newHeaderList[[i]][k,] <- splitList[[i]][inds[1],] # (splitList contains the header segments) just get the first of the obervations to be averaged
 			newColRepList[[i]][k,] <- colRepSplitList[[i]][inds[1],] # same
 		} # end for k
-		if (!.ap2$stn$allSilent) {cat(".")}
+		if (!stn$allSilent) {cat(".")}
 	} # end for i
 	# now we have to get the new elements out of the list into each one object
 	allNewHeader <- do.call("rbind", newHeaderList)
@@ -823,7 +825,7 @@ do_blowup <- function(dataset, grp=NULL, tn="x10", an="100%", cst=TRUE, conf=TRU
 		}
 	} # end for i
 	out <- new("aquap_data", data.frame(I(header), I(colRep), I(NIR)), metadata=dataset@metadata, anproc=dataset@anproc, ncpwl=dataset@ncpwl, version=dataset@version)
-	if (!.ap2$stn$allSilent) {cat(" ok.\n")}
+	if (!stn$allSilent) {cat(" ok.\n")}
 	return(out)
 	## XXX still required:
 	# include consec. scans together

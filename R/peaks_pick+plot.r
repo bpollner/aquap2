@@ -39,7 +39,8 @@ pickPeaks_RW <- function(x, span) {
 ##### dataset with wavelengths in the rows !!, the value-to-pick-peaks in  the column, so Factors in the column for PCA / PLSR
 ## ! provide only the loadings data as data frame! wavelengths have to be in the row!
 pickPeaksInner <- function(vectorToBePickedFrom, bandwidth, discrim, wavelengths) { 
-	bwPerc <- .ap2$stn$pp_bandwidth_Percent / 100 
+	stn <- getstn()
+	bwPerc <- stn$pp_bandwidth_Percent / 100 
 	#
 	vectorToBePickedFrom <- t(vectorToBePickedFrom)
 	vecInput <- vectorToBePickedFrom
@@ -53,7 +54,7 @@ pickPeaksInner <- function(vectorToBePickedFrom, bandwidth, discrim, wavelengths
 	rownames(positivePeakHeight) <- paste(rownames(vectorToBePickedFrom), "Hght_PosP", sep="-")
 	rownames(negativePeakPosition) <- paste(rownames(vectorToBePickedFrom), "Pos_NegP", sep="-")
 	rownames(negativePeakHeight) <- paste(rownames(vectorToBePickedFrom), "Hght_NegP", sep="-")
-	if (.ap2$stn$pp_AutoSmooth) {
+	if (stn$pp_AutoSmooth) {
 		vectorToBePickedFrom <- t(apply(vectorToBePickedFrom, 1, signal::sgolayfilt, p=2, n=5, m=0))
 		# XXX what in the case of non-linear spaces between wavelengths ?? gap-segment derivative?
 	} # end if autosmooth
@@ -106,7 +107,7 @@ pickPeaks <- function(ObjectToPickPeaks, bandwidth=25, comps=1:4, discrim=FALSE,
 		assign("aquagramPSettings", readInAquagramPSettings(), pos=.ap2) # need this later for defining the special wavelengths
 	}
 	##
-	if (class(ObjectToPickPeaks) == "mvr") {
+	if (is(ObjectToPickPeaks, "mvr")) {
 		allColNames <- colnames(ObjectToPickPeaks$coefficients[,,1:ObjectToPickPeaks$ncomp])
 		lastName <- allColNames[length(allColNames)]
 		if (!is.character(lastName)) {		## problem if there is only one component -- we do not get a name back then .... somehow ..
@@ -116,10 +117,10 @@ pickPeaks <- function(ObjectToPickPeaks, bandwidth=25, comps=1:4, discrim=FALSE,
 		dfToPickPeaks <- data.frame(X=mat)
 		colnames(dfToPickPeaks) <- lastName
 	}
-	if (class(ObjectToPickPeaks) == "PCA") {
+	if (is(ObjectToPickPeaks, "PCA")) {
 		dfToPickPeaks <- as.data.frame(ObjectToPickPeaks$loadings[,comps])
 	}
-	if (class(ObjectToPickPeaks) == "data.frame") {
+	if (is(ObjectToPickPeaks, "data.frame")) {
 		dfToPickPeaks <- ObjectToPickPeaks
 	}
 	pickResultList <- pickPeaksInner(dfToPickPeaks, bandwidth, discrim, wavelengths) 
@@ -128,16 +129,17 @@ pickPeaks <- function(ObjectToPickPeaks, bandwidth=25, comps=1:4, discrim=FALSE,
 
 ## needs the pick results object created by pickPeaks as input; contains the vector that was used for picking !
 plotPickResults <- function (pickResults, onMain="", onSub="", pcaVariances=NULL, customColor=NULL, ylim=NULL, wavelengths, clty=NULL) { 
+	stn <- getstn()
 	if (length(pickResults$rawVector) < 1) {
 		stop("An Error at plotPickResults occured. Sorry, really.", call.=FALSE)
 	}
 #	save(pickResults, file="se.r")
 	res <- pickResults$picks$pickResult
-	colPos <- .ap2$stn$pp_colPosPeaks
-	colNeg <-  .ap2$stn$pp_colNegPeaks
-	NrSize <- .ap2$stn$pp_NrSize
-	nrVertical <- .ap2$stn$pp_NrVertical 
-	dynamicNrColor <- .ap2$stn$pp_dynamicNrColor
+	colPos <- stn$pp_colPosPeaks
+	colNeg <-  stn$pp_colNegPeaks
+	NrSize <- stn$pp_NrSize
+	nrVertical <- stn$pp_NrVertical 
+	dynamicNrColor <- stn$pp_dynamicNrColor
 	Multi <- 10 	# this should be graphics related XXX
 	#
 	positionTable <-res[1: (nrow(res)/2) ,]
@@ -193,7 +195,7 @@ plotPickResults <- function (pickResults, onMain="", onSub="", pcaVariances=NULL
 	matplot(wavelengths, t(pickResults$rawVector), type="l", ylab="Coefficient", main=onMain, sub=onSubText, col=ColorYea, ylim=ylim, lty=clt, cex.sub=0.8, cex.main=1) #### here the matplot
 	abline(0,0, col="gray")
 	## legend see below, so that the text is not being overplotted on the legend!!
-#	legBgCol <- rgb(255,255,255, alpha=.ap2$stn$col_alphaForLegends, maxColorValue=255) # is a white with alpha to be determined in the settings
+#	legBgCol <- rgb(255,255,255, alpha=stn$col_alphaForLegends, maxColorValue=255) # is a white with alpha to be determined in the settings
 #	legend("topright", legend=legendText, lty=clt, col=ColorYea, lwd=2.5, bg=legBgCol) 	#### legend problem here
 	#
 #	colPosDynamic <- colNegDynamic <- vector("integer", (nrow(positionTable)/2))
@@ -223,12 +225,13 @@ plotPickResults <- function (pickResults, onMain="", onSub="", pcaVariances=NULL
 			} # end if all na check
 		} # end else
 	} # end for i
-	legBgCol <- rgb(255,255,255, alpha=.ap2$stn$col_alphaForLegends, maxColorValue=255) # is a white with alpha to be determined in the settings
+	legBgCol <- rgb(255,255,255, alpha=stn$col_alphaForLegends, maxColorValue=255) # is a white with alpha to be determined in the settings
 	legend("topright", legend=legendText, lty=clt, col=ColorYea, lwd=2.5, bg=legBgCol, cex=0.8) 	#### XXX legend problem here
 	return(list(customColor=ColorYea))
 }# EOF
 
 plotVerticalLinesFromPeaks <- function(pickResults, customColor=NULL) {
+	stn <- getstn()
 #	cc <- customColor
 	if (is.null(customColor)) {
 		cc <- 1:nrow(pickResults$rawVector)
@@ -236,9 +239,9 @@ plotVerticalLinesFromPeaks <- function(pickResults, customColor=NULL) {
 		cc <- customColor
 	}
 	res <- pickResults$picks$pickResult	
-#	colPos <- .ap2$stn$pp_colPosPeaks
-#	colNeg <- .ap2$stn$pp_colNegPeaks
-	droppLwd <- .ap2$stn$pp_droppLwd
+#	colPos <- stn$pp_colPosPeaks
+#	colNeg <- stn$pp_colNegPeaks
+	droppLwd <- stn$pp_droppLwd
 	positionTable <-res[1: (nrow(res)/2) ,]
 	heigthTable <-res[((nrow(res)/2)+1):nrow(res) , ]
 	for (i in 1: nrow(positionTable)) {
@@ -259,9 +262,10 @@ plotVerticalLinesFromPeaks <- function(pickResults, customColor=NULL) {
 } # EOF
 
 plotSpecialWlsLines <- function(pickResults) { # we need the pick results for determining the y-range
-	fac <- .ap2$stn$wamac_factor
-	specACol1 <- .ap2$stn$wamac_col1
-	specACol2 <- .ap2$stn$wamac_col2
+	stn <- getstn()
+	fac <- stn$wamac_factor
+	specACol1 <- stn$wamac_col1
+	specACol2 <- stn$wamac_col2
 	#
 	Yspan <- a <- range(pickResults$rawVector)[2] - range(pickResults$rawVector)[1]
 	height <- (Yspan*fac)/2
@@ -280,22 +284,24 @@ plotSpecialWlsLines <- function(pickResults) { # we need the pick results for de
 } # EOF
 
 plotHumidityWlsLines <- function(pickResults) {	
-	humWls <- .ap2$stn$hum_wls
-	humFact <- .ap2$stn$hum_fact
-	humLwd <- .ap2$stn$hum_lwd
-	humColor <- .ap2$stn$hum_color
+	stn <- getstn()
+	humWls <- stn$hum_wls
+	humFact <- stn$hum_fact
+	humLwd <- stn$hum_lwd
+	humColor <- stn$hum_color
 	Yspan <- range(pickResults$rawVector)[2] - range(pickResults$rawVector)[1]
 	height <- (Yspan*humFact)/2
 	segments(x0=humWls,  y0= -3.4*(height), y1= -1.9*(height), lwd=humLwd, col=humColor)
 } # EOF
 
 plotDelGiudiceAreas <- function(pickResults) {	
-	dga1 <- .ap2$stn$dga_dga1
-	dga2 <- .ap2$stn$dga_dga2
-	dga3 <- .ap2$stn$dga_dga3
-	cohCol <- .ap2$stn$dga_Coh_col
-	gasCol <- .ap2$stn$dga_Gas_col
-	facDga <- .ap2$stn$dga_facDga
+	stn <- getstn()
+	dga1 <- stn$dga_dga1
+	dga2 <- stn$dga_dga2
+	dga3 <- stn$dga_dga3
+	cohCol <- stn$dga_Coh_col
+	gasCol <- stn$dga_Gas_col
+	facDga <- stn$dga_facDga
 	Yspan <- range(pickResults$rawVector)[2] - range(pickResults$rawVector)[1]
 	height <- a <- ((Yspan*facDga)/2)
 	py <- c(-a, -a, a, a) - (Yspan/55)

@@ -12,16 +12,16 @@ settings.r file to stdout.
 }
 \seealso{
 Other Helper Functions: 
+\code{\link{ap2_settings_setup}()},
 \code{\link{genFolderStr}()},
 \code{\link{genNoiseRecExp}()},
 \code{\link{genTempCalibExp}()},
 \code{\link{getcd}()},
 \code{\link{getcm}()},
-\code{\link{instAquap2Examples}()},
+\code{\link{getstn}()},
 \code{\link{reColor}()},
 \code{\link{saveAQdata}()},
 \code{\link{siWlg}()},
-\code{\link{updateAquap2}()},
 \code{\link{updateSettings}()}
 }
 \concept{Helper Functions}

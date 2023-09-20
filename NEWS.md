@@ -1,6 +1,7 @@
 # Version 0.4.5
 ## New:
 * Started with testing
+* aquap2 is now making use of the package 'uniset' for handling the settings.R file.
 
 ## Improved:
 

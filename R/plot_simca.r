@@ -1,4 +1,5 @@
 simca_plotClassDistances <- function(SimcaPredObj, SimcaModel, distMat, where="", onMain="", onSub="", distType="od", dataset, grouping) {
+	stn <- getstn()
 	obj <- SimcaPredObj
 	m <- ncol(SimcaPredObj@ct)
 	XSimca <- substr(as.character(SimcaModel@call)[1], 1,6)
@@ -33,33 +34,34 @@ simca_plotClassDistances <- function(SimcaPredObj, SimcaModel, distMat, where=""
 	for (i in 1:(m-1)) {
 		for (k in (i+1):m) {
 		#	if (where != "pdf" & Sys.getenv("RSTUDIO") != 1) {dev.new()}	
-				Dist <- round(distMat[i,k], .ap2$stn$simca_nrDigitsRoundDist)
+				Dist <- round(distMat[i,k], stn$simca_nrDigitsRoundDist)
 				xLab <- colnames(distMat)[i]
 				yLab <- rownames(distMat)[k]
 				subText <- paste0(onSub, "   all N=", sumPart, "  (", version, ") ", " class distance (", strsplit(xLab, "@")[[1]][[1]], ", ", yLab, ") = ", Dist)
 				plot(score[,i], score[,k], col=classColors, xlab=xLab, ylab=yLab, main=mainText, sub=subText)
 				abline(h=1, v=1, col="gray")
-				legBgCol <- rgb(255,255,255, alpha=.ap2$stn$col_alphaForLegends, maxColorValue=255) # is a white with alpha to be determined in the settings
+				legBgCol <- rgb(255,255,255, alpha=stn$col_alphaForLegends, maxColorValue=255) # is a white with alpha to be determined in the settings
 				legend("topright", legend=legendText, pch=1, col=legendColors, bg=legBgCol, cex=legCex, ncol=legNrCols)
 		} # end for k
 	} # end for i
 } # EOF
 
 simca_barplotClassDistances <- function(classDistanceMatrix, where="", onMain="", onSub="", dataset, grouping, icdRan) {
+	stn <- getstn()
 	cdm <- classDistanceMatrix
 	###
 	aa <- extractColorLegendValues(dataset, groupBy=grouping)  # color_data, color_unique, color_legend, txt, txtE, sumPart, dataGrouping, pch_data, pch_legend
 	legendText <- aa$txt
 	legendColors <- aa$color_legend	
 	### 
-	legBgCol <- rgb(255,255,255, alpha=.ap2$stn$col_alphaForLegends, maxColorValue=255) # is a white with alpha to be determined in the settings
+	legBgCol <- rgb(255,255,255, alpha=stn$col_alphaForLegends, maxColorValue=255) # is a white with alpha to be determined in the settings
 	mainText <- paste0("grp: ", grouping, "   ", onMain)
 	oldMai <- par()$mai
 	par(mai=c(2.2, 0.82, 0.82, 0.42))
 	insetVal <- c(0, -0.37)
 	subDownVal <- 6.5
 	roPerc <- 10 # the percents to add to the range of the object for the ylim
-	icHorizon <- .ap2$stn$simca_BarBlot_horizontalLine
+	icHorizon <- stn$simca_BarBlot_horizontalLine
 	if (!all(is.numeric(icHorizon)) | length(icHorizon) != 1) {icHorizon <- NULL}
 	plotBarsPlusLegend <- function(obj, legTxt, ran=icdRan) {
 		if (!is.null(ran)) {
@@ -80,7 +82,7 @@ simca_barplotClassDistances <- function(classDistanceMatrix, where="", onMain=""
 	##
 	plotBarsPlusLegend(cdm, legTxt=legendText)
 	##
-	mx <- .ap2$stn$simca_maxBarsPerGraph
+	mx <- stn$simca_maxBarsPerGraph
 	if (ncol(cdm) > mx) {
 		a <- floor(ncol(cdm)/mx)
 		prevInd <- 0
@@ -97,6 +99,7 @@ simca_barplotClassDistances <- function(classDistanceMatrix, where="", onMain=""
 } # EOF
 
 makeSimcaClassDistPlots_inner <- function(set, ap, where, onMain, onSub, con_simcaTable=NULL, distType, icdRan) { # is working within a single set, we can have more than one grouping variable !!
+	stn <- getstn()
 	groupingVec <- getCorrectSimcaClasses(set)
 	leng <- length(groupingVec)
 	mods <- getSIMCAModels(set)
@@ -113,7 +116,7 @@ makeSimcaClassDistPlots_inner <- function(set, ap, where, onMain, onSub, con_sim
 		simca_plotClassDistances(preds[[i]], mods[[i]], icDists[[i]], where, onMain, onSub, distType, dataset, groupingVec[i])
 #		mainText <- paste(groupingVec[i], " - ", onMain, sep="")
 		mainText <- paste0("grp: ", groupingVec[i], "   ", onMain)
-		if (.ap2$stn$simca_tablesToTxt == TRUE) {	
+		if (stn$simca_tablesToTxt == TRUE) {	
 			if (where == "pdf") {
 				sink(file=con_simcaTable, append = TRUE, type = c("output"), split = FALSE)
 			}
@@ -125,7 +128,7 @@ makeSimcaClassDistPlots_inner <- function(set, ap, where, onMain, onSub, con_sim
 			print(icDists[[i]])
 			print(preds[[i]])
 			cat("------------------\n\n")
-			cat(paste("Predictions based on ", .ap2$stn$simca_percNewData_CV, "% new data:\n", sep=""))
+			cat(paste("Predictions based on ", stn$simca_percNewData_CV, "% new data:\n", sep=""))
 			print(preds_cv[[i]])
 			cat("-----------------------------------------\n")
 			if (where == "pdf") {
@@ -142,6 +145,7 @@ makeSimcaClassDistPlots <- function(cube, ap, where, onMain, onSub, con_simcaTab
 } # EOF
 
 checkSimcaPlottingValues <- function(sim.distType, sim.icdRan) {
+	stn <- getstn()
 	distType <- sim.distType
 	if (!all(is.character(distType)) | length(distType) != 1) {
 		stop("Please provide a character length one to the argunent 'sim.distType'.", call.=FALSE)
@@ -154,7 +158,7 @@ checkSimcaPlottingValues <- function(sim.distType, sim.icdRan) {
 	icdRan <- sim.icdRan
 	if (!is.null(icdRan)) {
 		if (all(icdRan == "def")) {
-			icdRan <- .ap2$stn$simca_rangeForDistBarPlots
+			icdRan <- stn$simca_rangeForDistBarPlots
 		}
 		if (!is.null(icdRan)) {
 			if (!all(is.numeric(icdRan)) | length(icdRan) != 1) {
@@ -172,8 +176,8 @@ checkSimcaPlottingValues <- function(sim.distType, sim.icdRan) {
 
 ### CORE ###
 plot_simca_cube <- function(cube, aps="def", sim.distType="od", sim.icdRan="def", ...) {
-	autoUpS()
-	printEmpty <- .ap2$stn$gen_plot_printEmptySlots
+	stn <- autoUpS()
+	printEmpty <- stn$gen_plot_printEmptySlots
 	#	
 	distType <- icdRan <- NULL
 	checkSimcaPlottingValues(sim.distType, sim.icdRan) # !! is assigning here: distType, icdRan
@@ -190,21 +194,21 @@ plot_simca_cube <- function(cube, aps="def", sim.distType="od", sim.icdRan="def"
 	onSub <- ap$genPlot$onSub
 	fns <- ap$genPlot$fns
 	expName <- getExpName(cube)
-	height <-.ap2$stn$pdf_Height_sq
-	width <- .ap2$stn$pdf_Width_sq
-	path <- .ap2$stn$fn_results
+	height <-stn$pdf_Height_sq
+	width <- stn$pdf_Width_sq
+	path <- stn$fn_results
 	suffix <- "SimcaDist"
 	con_simcaTable <- NULL
 	#
-	if (.ap2$stn$simca_tablesToTxt) { add <- "and CV tables" } else { add <- "" }
-	if (!.ap2$stn$allSilent & (where == "pdf" )) {cat(paste0("Plotting SIMCA plots ", add, "... ")) }
+	if (stn$simca_tablesToTxt) { add <- "and CV tables" } else { add <- "" }
+	if (!stn$allSilent & (where == "pdf" )) {cat(paste0("Plotting SIMCA plots ", add, "... ")) }
 	filename <- filenameTables <- paste(expName, suffix, sep="_")
 	filename <- paste(path, "/", filename, fns, ".pdf", sep="")
 	fnSimcaClassTables <- paste(path, "/", filenameTables, fns, "_tables", ".txt", sep="")
 	onMain <- paste(expName, onMain, sep=" ")
 	if (where == "pdf") { 
 		pdf(file=filename, width, height, onefile=TRUE, family='Helvetica', pointsize=12)
-		if (.ap2$stn$simca_tablesToTxt == TRUE) {	
+		if (stn$simca_tablesToTxt == TRUE) {	
 			con_simcaTable <- file(fnSimcaClassTables, "wt")   # open connection to text file
 		}
 	}
@@ -212,11 +216,11 @@ plot_simca_cube <- function(cube, aps="def", sim.distType="od", sim.icdRan="def"
 	makeSimcaClassDistPlots(cube, ap, where, onMain, onSub, con_simcaTable, distType, icdRan)
 	if (where == "pdf") {
 		dev.off()
-		if (.ap2$stn$simca_tablesToTxt == TRUE) {	
+		if (stn$simca_tablesToTxt == TRUE) {	
 			close(con_simcaTable)
 		}	
 	}
-	if (!.ap2$stn$allSilent & (where == "pdf" )) {cat(paste("ok\n")) }
+	if (!stn$allSilent & (where == "pdf" )) {cat(paste("ok\n")) }
 } # EOF
 
 

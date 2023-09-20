@@ -35,10 +35,6 @@ For a list of all parameters that can be used in the \code{...}
 argument in \code{\link{getap}} and in the \code{\link{plot}} functions 
 please see \code{\link{anproc_file}}.
 }
-\examples{
-\dontrun{
-}
-}
 \seealso{
 \code{\link{plot_rnf}}, \code{\link{siWlg}} for reducing the number of 
 wavelengths in a dataset

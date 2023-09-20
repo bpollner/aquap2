@@ -56,16 +56,16 @@ str(fd_2_pls)
 \code{\link{do_emsc}}, \code{\link{dpt_modules}}
 
 Other Helper Functions: 
+\code{\link{ap2_settings_setup}()},
 \code{\link{genFolderStr}()},
 \code{\link{genNoiseRecExp}()},
 \code{\link{genTempCalibExp}()},
 \code{\link{getcd}()},
-\code{\link{instAquap2Examples}()},
+\code{\link{getstn}()},
 \code{\link{printStdColnames}()},
 \code{\link{reColor}()},
 \code{\link{saveAQdata}()},
 \code{\link{siWlg}()},
-\code{\link{updateAquap2}()},
 \code{\link{updateSettings}()}
 
 Other Extract Elements: 

@@ -1,7 +1,8 @@
 # read spectra ----------------------------------------------------------------------
 readSpec_checkDefaults <- function(possibleFiletypes, md, filetype, naString) {
+	stn <- getstn()
 	if (all(filetype == "def")) {
-		filetype <- .ap2$stn$imp_specFileType
+		filetype <- stn$imp_specFileType
 		# If a value other than "def" is provided in the argument "filetype" in "getFullData", this is overriding the value of "filetype" in the metadata file.
 		if (md$meta$filetype != filetype) { # we only look at the value for "filetype" in the metadata if filetype in getFullData is "def"
 			filetype <- md$meta$filetype
@@ -31,12 +32,12 @@ readSpec_checkDefaults <- function(possibleFiletypes, md, filetype, naString) {
 		stop("Please provide a character length one to the argument 'naString'.", call.=FALSE)
 	}
 	###
-	if (class(md) == "aquap_md") {
+	if (is(md, "aquap_md")) {
 		filename <- md$meta$expName
 	} else {
 		stop("Please provide a valid metadata object to the argument 'md'", call.=FALSE)
 	}
-	rawFolder <- .ap2$stn$fn_rawdata
+	rawFolder <- stn$fn_rawdata
 	a <- list.files(rawFolder)
 	if (!any(grepl(filename, a, fixed=TRUE))) {
 		stop(paste("The file \"", filename, "\" does not seem to exist in \"", rawFolder, "\", sorry. \n", sep=""), call.=FALSE)
@@ -56,11 +57,11 @@ readSpec_checkDefaults <- function(possibleFiletypes, md, filetype, naString) {
 #' @family Development Functions
 #' @export
 readSpectra <- function(md=getmd(), filetype="def", naString="NA") {
-	autoUpS()
+	stn <- autoUpS()
 	possibleFiletypes <- pv_filetypes #global constant, they get handed down to the checking function !  	# 	pv_filetypes <- c("vision_NSAS.da", "tabDelim.txt", "Pirouette.pir", "xlsx")
 	filename <- NULL # will be changed in the checking
 	readSpec_checkDefaults(possibleFiletypes, md, filetype, naString)
-	rawFolder <- .ap2$stn$fn_rawdata
+	rawFolder <- stn$fn_rawdata
 	folderFile <- paste(rawFolder, "/", filename, sep="")
 	##
 	if (filetype == possibleFiletypes[1]) {
@@ -194,18 +195,19 @@ gfd_check_imports <- function(specImp) {
 } # EOF
 
 gfd_makeNiceColumns <- function(specImp) {
-	yPref <- .ap2$stn$p_yVarPref
-	cPref <- .ap2$stn$p_ClassVarPref
-	sampleNrColn <- .ap2$stn$p_sampleNrCol
-	conSNrColn <- .ap2$stn$p_conSNrCol
-	timePointsColn <- .ap2$stn$p_timeCol
-	ecrmColn <- .ap2$stn$p_ECRMCol
-	replColn <- .ap2$stn$p_replicateCol
-	groupColn <- .ap2$stn$p_groupCol
-	tempColn <- .ap2$stn$p_tempCol
-	relHumColn <- .ap2$stn$p_RHCol
-	absTime <- .ap2$stn$p_absTime
-	chron <- .ap2$stn$p_chron
+	stn <- getstn()
+	yPref <- stn$p_yVarPref
+	cPref <- stn$p_ClassVarPref
+	sampleNrColn <- stn$p_sampleNrCol
+	conSNrColn <- stn$p_conSNrCol
+	timePointsColn <- stn$p_timeCol
+	ecrmColn <- stn$p_ECRMCol
+	replColn <- stn$p_replicateCol
+	groupColn <- stn$p_groupCol
+	tempColn <- stn$p_tempCol
+	relHumColn <- stn$p_RHCol
+	absTime <- stn$p_absTime
+	chron <- stn$p_chron
 
 	nr <- nrow(specImp$NIR)
 	##
@@ -288,8 +290,8 @@ gfd_makeNiceColumns <- function(specImp) {
 		specImp$Y_cols <- data.frame(DELETE = rep(NA, nr))
 	}
 	if (!is.null(specImp$timestamp)) {
-		if (.ap2$stn$imp_makeTimeDistanceColumn) {
-			startDate <- as.POSIXct(.ap2$stn$imp_startDate)
+		if (stn$imp_makeTimeDistanceColumn) {
+			startDate <- as.POSIXct(stn$imp_startDate)
 			startDateNr <- as.double(startDate)
 			a <- unclass(specImp$timestamp[,1])
 			MinuteTimStamp <- as.numeric(round((a - startDateNr)/60, 2))
@@ -320,22 +322,23 @@ gfd_checkNrOfRows <- function(header, headerFilePath, nrowsNIR, spectraFilePath,
 } # EOF
 
 gfd_getExpNameNoSplit <- function(metadata, nRows) {
-	cPref <- .ap2$stn$p_ClassVarPref
-	makeExpNameColumn <- .ap2$stn$imp_makeExpNameColumn
-#	makeNoSplitColumn <- .ap2$stn$imp_makeNoSplitColumn
+	stn <- getstn()
+	cPref <- stn$p_ClassVarPref
+	makeExpNameColumn <- stn$imp_makeExpNameColumn
+#	makeNoSplitColumn <- stn$imp_makeNoSplitColumn
 	makeNoSplitColumn <- TRUE
 	##
 	if (makeExpNameColumn) {
 		expName <- data.frame(rep(metadata$meta$expName, nRows))
-		colnames(expName) <- paste(cPref, .ap2$stn$p_expNameCol, sep="")
+		colnames(expName) <- paste(cPref, stn$p_expNameCol, sep="")
 	} else {
 		expName <- data.frame(DELETE = rep(NA, nRows))
 	}
 	assign("expName", expName, pos=parent.frame(n=1))
 	##
 	if (makeNoSplitColumn) {
-		noSplit <- data.frame(rep(.ap2$stn$p_commonNoSplit, nRows))
-		colnames(noSplit) <- paste(cPref, .ap2$stn$p_commonNoSplitCol, sep="")
+		noSplit <- data.frame(rep(stn$p_commonNoSplit, nRows))
+		colnames(noSplit) <- paste(cPref, stn$p_commonNoSplitCol, sep="")
 	} else {
 		noSplit <- data.frame(DELETE = rep(NA, nRows))	
 	}
@@ -376,14 +379,14 @@ gfd_checkLoadSaveLogic <- function(ttl, stf) {
 } # EOF
 
 gfd_checkMetadata <- function(md) {
-	if (class(md) != "aquap_md") {
+	if (!is(md, "aquap_md")) {
 		stop("Please provide a valid metadata object of class 'aquap_md' to the argument 'md'", call.=FALSE)
 	}
 } # EOF
 
 gfd_TRH_checkCustomImport <- function(trhImp) {
 	possVals <- c("Time", "Temp", "RelHum")
-	if (class(trhImp) != "data.frame") {
+	if (!is(trhImp, "data.frame")) {
 		stop("The returned value of your custom-import function for importing temp. and rel.hum. has to be a data frame.", call.=FALSE)
 	}
 	if (ncol(trhImp) != 3) {
@@ -401,8 +404,9 @@ gfd_TRH_checkCustomImport <- function(trhImp) {
 } # EOF
 
 readTRHlogfile <- function(trhLog) {
-	rawFolder <- .ap2$stn$fn_rawdata
-	logfileName <- .ap2$stn$imp_TRH_logfile_name
+	stn <- getstn()
+	rawFolder <- stn$fn_rawdata
+	logfileName <- stn$imp_TRH_logfile_name
 	if (trhLog == "ESPEC") {
 		ext <- ".txt"
 		path <- paste(rawFolder, "/", logfileName, ext, sep="")
@@ -422,9 +426,10 @@ readTRHlogfile <- function(trhLog) {
 } # EOF
 
 alignTempRelHum <- function(timeDataset, TRHlog) {	
-	narrowMinutes <-.ap2$stn$imp_narrowMinutes
-	secsNarrowPrecision <-.ap2$stn$imp_secsNarrowPrecision
-	mtp <-.ap2$stn$imp_minutesTotalPrecision
+	stn <- getstn()
+	narrowMinutes <-stn$imp_narrowMinutes
+	secsNarrowPrecision <-stn$imp_secsNarrowPrecision
+	mtp <-stn$imp_minutesTotalPrecision
 	diffT <- abs(difftime(TRHlog$Time[1], TRHlog$Time[2], units="secs"))
 	TIndUpRange <- round((narrowMinutes*60)/as.double(diffT), 0) ## for a narrowed-down area of narrowMinutes
 	rowNr <- rep(NA, length(timeDataset))
@@ -467,14 +472,15 @@ alignTempRelHum <- function(timeDataset, TRHlog) {
 } # EOF
 
 gfd_importMakeTRH_alignment <- function(header, trhLog) {
+	stn <- getstn()
 	a <- which(colnames(header) == "Timestamp")
 	if (length(a) == 0 & trhLog != FALSE) {
 		message(paste("There is no 'Timestamp' column in your dataset to which data from a logger could be aligned. \n(Alignment is controlled by argument 'trhLog'.) "))
 		message("Importing continues without the alignment of log data.")
 	}
 	if (length(a) !=0 ) {	 # so only do all this if we actually have a timestamp in the columns
-		tempCol <- paste(.ap2$stn$p_yVarPref, .ap2$stn$p_tempCol, sep="")
-		rhCol <- paste(.ap2$stn$p_yVarPref, .ap2$stn$p_RHCol, sep="")
+		tempCol <- paste(stn$p_yVarPref, stn$p_tempCol, sep="")
+		rhCol <- paste(stn$p_yVarPref, stn$p_RHCol, sep="")
 		if (trhLog == FALSE) {
 			return(header)
 		}
@@ -493,9 +499,9 @@ gfd_importMakeTRH_alignment <- function(header, trhLog) {
 			rhInd <- which(colnames(header) == rhCol)
 		}
 		TRHimp <- readTRHlogfile(trhLog)
-		if (!.ap2$stn$allSilent) {cat("   Aligning temp. and rel.hum. values to timestamp...\n") }
+		if (!stn$allSilent) {cat("   Aligning temp. and rel.hum. values to timestamp...\n") }
 		TRH_alig <- alignTempRelHum(header$Timestamp, TRHimp)
-		if (!.ap2$stn$allSilent) {cat("   Done.\n") }
+		if (!stn$allSilent) {cat("   Done.\n") }
 #			tempF <- data.frame(SpectTime= header$Timestamp, LogTime = TRH_alig$Time, Temp=TRH_alig$Temp, Hum=TRH_alig$RelHum)
 #			print(tempF[1:20,]); wait()
 		header[tInd] <- TRH_alig$Temp
@@ -505,9 +511,10 @@ gfd_importMakeTRH_alignment <- function(header, trhLog) {
 } # EOF
 
 gfd_check_trhLog_defaults <- function(trhLog) {
+	stn <- getstn()
 	# can be: FALSE, 'def' "ESPEC", "custom@name.r"
-	filename <- .ap2$stn$imp_TRH_logfile_name
-	rawFolder <- .ap2$stn$fn_rawdata
+	filename <- stn$imp_TRH_logfile_name
+	rawFolder <- stn$fn_rawdata
 	possibleValues <- c("ESPEC") ## XXXVARXXX
 	stopMsg <- "Please refer to the help for 'getFullData' to find out about the possible values for the argument 'trhLog'"
 	if (trhLog == TRUE) {
@@ -515,7 +522,7 @@ gfd_check_trhLog_defaults <- function(trhLog) {
 	}
 	if (!is.logical(trhLog)) {
 		if (all(trhLog == "def")) {
-			trhLog <- .ap2$stn$imp_use_TRH_logfile
+			trhLog <- stn$imp_use_TRH_logfile
 		}
 	}
 	afix <- any(possibleValues %in% trhLog)
@@ -547,9 +554,10 @@ gfd_check_trhLog_defaults <- function(trhLog) {
 } # EOF
 
 flagOutliers_allScope <- function(NIR, detectOutliers) {
+	stn <- getstn()
 	# first check the content of detectOutliers
 	if (all(detectOutliers == "def") & !is.null(detectOutliers)) {
-		detectOutliers <- .ap2$stn$imp_flagOutliers
+		detectOutliers <- stn$imp_flagOutliers
 	}
 	if (!all(is.logical(detectOutliers)) | length(detectOutliers) > 1) {
 		stop("Please provide either TRUE or FALSE (or 'def') to the argument 'dol'.", call.=FALSE)
@@ -558,14 +566,14 @@ flagOutliers_allScope <- function(NIR, detectOutliers) {
 	if (!detectOutliers) {
 		return(data.frame(DELETE = rep(NA, nrow(NIR))))
 	} else {
-		cPref <- .ap2$stn$p_ClassVarPref
-		cnOtl <- paste0(.ap2$stn$p_outlierCol, .ap2$stn$p_outlierCol_allSuffix)
-		tol <- .ap2$stn$simca_tolerance
-		kmax <- .ap2$stn$simca_kMax
+		cPref <- stn$p_ClassVarPref
+		cnOtl <- paste0(stn$p_outlierCol, stn$p_outlierCol_allSuffix)
+		tol <- stn$simca_tolerance
+		kmax <- stn$simca_kMax
 		flatDf <- data.frame(grouping=rep("x", nrow(NIR)))
 		flatDf <- cbind(flatDf, as.data.frame(NIR))
 #		kmax <- 10
-		if (!.ap2$stn$allSilent) {cat("   detecting outliers... ")}
+		if (!stn$allSilent) {cat("   detecting outliers... ")}
 		simcaMod <- rrcovHD::RSimca(grouping ~ ., data=flatDf, kmax=kmax, tol=tol)  ## k=0 does not work ??, but still calculating k
 		flags <- as.factor(!simcaMod@flag) # to invert them and tranform to factor, having TRUE for the outliers
 		nrOutliers <- length(which(flags == TRUE))
@@ -575,7 +583,7 @@ flagOutliers_allScope <- function(NIR, detectOutliers) {
 		} else {
 			msg <- paste("found *", nrOutliers, "*. [Using ", usedK, " components.] ", sep="")
 		}
-		if (!.ap2$stn$allSilent) {cat(paste(msg, "\n", sep=""))}
+		if (!stn$allSilent) {cat(paste(msg, "\n", sep=""))}
 #		print(str(simcaMod))
 		outlierFlags <- data.frame(flags)
 		colnames(outlierFlags) <- paste(cPref, cnOtl, sep="")
@@ -584,7 +592,8 @@ flagOutliers_allScope <- function(NIR, detectOutliers) {
 } # EOF
 
 checkDatasetVersion <- function(dataset, dsName=NULL) {
-	if (.ap2$stn$gen_versionCheckDataset) {
+	stn <- getstn()
+	if (stn$gen_versionCheckDataset) {
 		if (dataset@version != pv_versionDataset) {
 			if (is.null(dsName)) {
 				dsName <- deparse(substitute(dataset))
@@ -595,7 +604,8 @@ checkDatasetVersion <- function(dataset, dsName=NULL) {
 } # EOF
 
 checkForPresenceOfData <- function() {
-	rawFolder <- .ap2$stn$fn_rawdata
+	stn <- getstn()
+	rawFolder <- stn$fn_rawdata
 	aa <- list.files(rawFolder)
 	if (length(aa) == 0) {
 		stop(paste0("Sorry, it appears there are no data in the current '", rawFolder, "' folder."), call.=FALSE)
@@ -615,7 +625,7 @@ turnStringsIntoFactors <- function(header) {
 #' @template mr_getFullData
 #' @export
 getFullData <- function(md=getmd(), filetype="def", naString="NA", slType="def", trhLog="def", multiplyRows="def", ttl=TRUE, stf=TRUE, dol="def") {
-	autoUpS()
+	stn <- autoUpS()
 	gfd_checkLoadSaveLogic(ttl, stf)
 	gfd_checkMetadata(md)
 	dataset <- NULL
@@ -624,12 +634,12 @@ getFullData <- function(md=getmd(), filetype="def", naString="NA", slType="def",
 	}
 	if(!is.null(dataset)) { # so the path existed and it could be loaded
 		checkDatasetVersion(dataset, md$meta$expName)
-		if(!.ap2$stn$allSilent) {cat(paste("Dataset \"", md$meta$expName, "\" was loaded.\n", sep="")) }
+		if(!stn$allSilent) {cat(paste("Dataset \"", md$meta$expName, "\" was loaded.\n", sep="")) }
 		return(invisible(dataset)) # returns the dataset and we exit here
 	}
   	# import starts 
   	checkForPresenceOfData()
-  	if(!.ap2$stn$allSilent) {cat("Importing data...\n")}	
+  	if(!stn$allSilent) {cat("Importing data...\n")}	
 	gfd_check_trhLog_defaults(trhLog)
 	headerFilePath <- NULL # gets assigned in readHeader()
 	header <- readHeader(md, slType, multiplyRows) ## re-assigns 'slType' and 'multiplyRows' also here -- in parent 2 level frame 
@@ -654,7 +664,7 @@ getFullData <- function(md=getmd(), filetype="def", naString="NA", slType="def",
 	# ? check for existence of sample number column as well ?
 	gfd_checkForDoubleColumns(headerFusion, spectraFilePath, headerFilePath, slType)
 	headerFusion <- gfd_importMakeTRH_alignment(headerFusion, trhLog)
-	if (.ap2$stn$imp_autoCopyYvarsAsClass) {  # if TRUE, copy all columns containing a Y-variable as class variable
+	if (stn$imp_autoCopyYvarsAsClass) {  # if TRUE, copy all columns containing a Y-variable as class variable
 		headerFusion <- copyYColsAsClass(headerFusion)
 	}
 	headerFusion <- remakeTRHClasses_sys(headerFusion)
@@ -679,7 +689,7 @@ getFullData <- function(md=getmd(), filetype="def", naString="NA", slType="def",
 	if (stf) {
 		saveAQdata(fullData, md, verbose=TRUE)
 	} else {
-		if(!.ap2$stn$allSilent) {cat("Done. (not saved) \n")}	
+		if(!stn$allSilent) {cat("Done. (not saved) \n")}	
 	}
 	return(invisible(fullData))
 } # EOF
@@ -714,14 +724,14 @@ gfd <- function(md=getmd(), filetype="def", naString="NA", slType="def", trhLog=
 #' }
 #' @export
 saveAQdata <- function(dataset, md=getmd(), verbose=TRUE) {
-	autoUpS()
-  	if (class(dataset) != "aquap_data") {
+	stn <- autoUpS()
+  	if (!is(dataset, "aquap_data")) {
     	stop("Please provide an object of class 'aquap_data' to the argument 'dataset'", call.=FALSE)
   	}
   	expName <- md$meta$expName
-	path <- paste(.ap2$stn$fn_rdata, expName, sep="/")
+	path <- paste(stn$fn_rdata, expName, sep="/")
 	save(dataset, file=path)
-	if (verbose & !.ap2$stn$allSilent) {
+	if (verbose & !stn$allSilent) {
 		cat(paste("Dataset saved under \"", path, "\".\n", sep=""))
 	}
 } # EOF
@@ -729,12 +739,12 @@ saveAQdata <- function(dataset, md=getmd(), verbose=TRUE) {
 #' @rdname saveAQdata
 #' @export
 loadAQdata <- function(md=getmd(), verbose=TRUE) {
-	autoUpS()
+	stn <- autoUpS()
   	expName <- md$meta$expName
-	path <- paste(.ap2$stn$fn_rdata, expName, sep="/")
+	path <- paste(stn$fn_rdata, expName, sep="/")
 	if (file.exists(path)){
 		a <- load(path)
-		if (verbose & !.ap2$stn$allSilent) {
+		if (verbose & !stn$allSilent) {
 			cat(paste("Dataset \"", path, "\" loaded.", sep=""))
 		}
 		return(invisible(eval(parse(text=a))))
@@ -761,14 +771,15 @@ generateHeatMapColorCoding <- function(whatColors, numbers) {
 } # EOF
 
 extractClassesForColRep_old <- function(header) { ## does not need "NIR" present in the data frame
-	tempCol <- .ap2$stn$p_tempCol ## depends on "grepl" or not
-	RHCol <- .ap2$stn$p_RHCol
-	absTimeCol <- .ap2$stn$p_absTime
-	chronCol <- .ap2$stn$p_chron
-	TRHColors <- .ap2$stn$col_RampForTRH
-	TimesColors <- .ap2$stn$col_RampForTimes
-	userRampColors <- .ap2$stn$col_userDefinedRamps # is a list
-	userColnames <- .ap2$stn$p_userDefinedSpecialColnames # is a vector
+	stn <- getstn()
+	tempCol <- stn$p_tempCol ## depends on "grepl" or not
+	RHCol <- stn$p_RHCol
+	absTimeCol <- stn$p_absTime
+	chronCol <- stn$p_chron
+	TRHColors <- stn$col_RampForTRH
+	TimesColors <- stn$col_RampForTimes
+	userRampColors <- stn$col_userDefinedRamps # is a list
+	userColnames <- stn$p_userDefinedSpecialColnames # is a vector
 	out <- data.frame(matrix(NA, nrow=nrow(header)))
 	for (i in 1: ncol(header)) {
 		if (is.factor(header[,i])) {
@@ -809,14 +820,15 @@ extractClassesForColRep_old <- function(header) { ## does not need "NIR" present
 } # EOF 
 
 extractClassesForColRep <- function(header) { ## does not need "NIR" present in the data frame
-	tempCol <- .ap2$stn$p_tempCol ## depends on "grepl" or not
-	RHCol <- .ap2$stn$p_RHCol
-	absTimeCol <- .ap2$stn$p_absTime
-	chronCol <- .ap2$stn$p_chron
-	TRHColors <- .ap2$stn$col_RampForTRH
-	TimesColors <- .ap2$stn$col_RampForTimes
-	userRampColors <- .ap2$stn$col_userDefinedRamps # is a list
-	userColnames <- .ap2$stn$p_userDefinedSpecialColnames # is a vector
+	stn <- getstn()
+	tempCol <- stn$p_tempCol ## depends on "grepl" or not
+	RHCol <- stn$p_RHCol
+	absTimeCol <- stn$p_absTime
+	chronCol <- stn$p_chron
+	TRHColors <- stn$col_RampForTRH
+	TimesColors <- stn$col_RampForTimes
+	userRampColors <- stn$col_userDefinedRamps # is a list
+	userColnames <- stn$p_userDefinedSpecialColnames # is a vector
 	out <- data.frame(matrix(NA, nrow=nrow(header)))
 	for (i in 1: ncol(header)) {
 		if (is.factor(header[,i])) {
@@ -861,8 +873,9 @@ extractClassesForColRep <- function(header) { ## does not need "NIR" present in 
 } # EOF 
 
 copyYColsAsClass <- function(sampleList) {
-	yPref <- .ap2$stn$p_yVarPref
-	cPref <- .ap2$stn$p_ClassVarPref
+	stn <- getstn()
+	yPref <- stn$p_yVarPref
+	cPref <- stn$p_ClassVarPref
 	ind  <- grep(yPref, colnames(sampleList))
 #	print(ind); wait()
 #	print(colnames(sampleList[ind])); wait()
@@ -880,17 +893,18 @@ copyYColsAsClass <- function(sampleList) {
 	return(data.frame(sampleList, add))
 } # EOF
 
-remakeTRHClasses_sys <- function(headerOnly, TDiv=.ap2$stn$imp_TClassesDiv, TRound=.ap2$stn$imp_TRounding, RHDiv=.ap2$stn$imp_RHClassesDiv, RHRound= .ap2$stn$imp_RHRounding) {
+remakeTRHClasses_sys <- function(headerOnly, TDiv=stn$imp_TClassesDiv, TRound=stn$imp_TRounding, RHDiv=stn$imp_RHClassesDiv, RHRound= stn$imp_RHRounding) {
+	stn <- getstn()
 	options(warn=-1)
-	cPref <- .ap2$stn$p_ClassVarPref
-	yPref <- .ap2$stn$p_yVarPref
-	YTemp <- paste(yPref, .ap2$stn$p_tempCol, sep="")
-	YRH <- paste(yPref, .ap2$stn$p_RHCol, sep="")
-	Tpat <- paste(cPref, .ap2$stn$p_tempCol, sep="") 						# read in the prefix for class and temperature from settings
-	RHpat <- paste(cPref, .ap2$stn$p_RHCol, sep="")							# read in the prefix for class and rel. humidity from settings
-	alwaysReduceClasses <- .ap2$stn$imp_alwaysReduceTRHClasses												
+	cPref <- stn$p_ClassVarPref
+	yPref <- stn$p_yVarPref
+	YTemp <- paste(yPref, stn$p_tempCol, sep="")
+	YRH <- paste(yPref, stn$p_RHCol, sep="")
+	Tpat <- paste(cPref, stn$p_tempCol, sep="") 						# read in the prefix for class and temperature from settings
+	RHpat <- paste(cPref, stn$p_RHCol, sep="")							# read in the prefix for class and rel. humidity from settings
+	alwaysReduceClasses <- stn$imp_alwaysReduceTRHClasses												
 	
-#	TInd <- grep(.ap2$stn$p_tempCol, colnames(headerOnly), fixed=TRUE)		# find column-index that has the temperatur - the source
+#	TInd <- grep(stn$p_tempCol, colnames(headerOnly), fixed=TRUE)		# find column-index that has the temperatur - the source
 	TInd <- which(colnames(headerOnly) == YTemp)			 				# find column-index that has the temperatur - the source
 	if (length(TInd) > 0) {
 #		TClInd  <- grep(Tpat, colnames(headerOnly), fixed=TRUE)					# find column-index that the temperatur already as class - the target
@@ -901,7 +915,7 @@ remakeTRHClasses_sys <- function(headerOnly, TDiv=.ap2$stn$imp_TClassesDiv, TRou
 		}
 	}
 	##
-#	RHInd <- grep(.ap2$stn$p_RHCol, colnames(headerOnly), fixed=TRUE)		# find column-index that has the rel. hum.
+#	RHInd <- grep(stn$p_RHCol, colnames(headerOnly), fixed=TRUE)		# find column-index that has the rel. hum.
 	RHInd <- which(colnames(headerOnly) == YRH)
 	if (length(RHInd) > 0 ) {
 #		RHClInd  <- grep(RHpat, colnames(headerOnly), fixed=TRUE)				# find column-index that the re.hum. already as class - the target
@@ -917,8 +931,9 @@ remakeTRHClasses_sys <- function(headerOnly, TDiv=.ap2$stn$imp_TClassesDiv, TRou
 
 # read header ----------------------------------------------------------------
 convertYColsToNumeric <- function(sampleList) {
+	stn <- getstn()
 	options(warn=-1)
-	pref <- .ap2$stn$p_yVarPref
+	pref <- stn$p_yVarPref
 	ind  <- grep(pref, colnames(sampleList))
 	if (length(ind) > 0) {
 		for (i in 1: length(ind)) {
@@ -931,6 +946,7 @@ convertYColsToNumeric <- function(sampleList) {
 
 ### x-fold every line (Nr. Cons. Measurements), and add a numbering for each of the consecutive scans
 multiplySampleListRows <- function(sampleList, nrScans) {
+	stn <- getstn()
 	multiList <- NULL
 #	sampleList <- as.data.frame(sampleList)
 	for (i in 1:nrScans) {
@@ -948,15 +964,16 @@ multiplySampleListRows <- function(sampleList, nrScans) {
 		a <- data.frame(a[1], ConSNr=ConSNr) # insert into data frame		
 	}
 	ColNames <- colnames(a)
-	ColNames[2] <- paste(.ap2$stn$p_yVarPref, .ap2$stn$p_conSNrCol, sep="")
+	ColNames[2] <- paste(stn$p_yVarPref, stn$p_conSNrCol, sep="")
 	colnames(a) <- ColNames
 	rownames(a) <- seq(1:nrow(a)) # correct all the rownames
 	return(a)
 } # EOF
 
 readHeader_checkDefaults <- function(slType, possibleValues, md, multiplyRows) {
+	stn <- getstn()
 	if (all(slType == "def") & !is.null(slType)) {
-		slType <- .ap2$stn$imp_sampleListType
+		slType <- stn$imp_sampleListType
 	}
 	if (!is.null(slType)) {
 		if (!all(is.character(slType)) | length(slType) != 1) {
@@ -970,7 +987,7 @@ readHeader_checkDefaults <- function(slType, possibleValues, md, multiplyRows) {
 	assign("slType", slType, pos=parent.frame(n=2)) # that is needed to always have the correct value for slType in the getFullData function
 	assign(".slType", slType, envir=.ap2)
 	###
-	if (class(md) == "aquap_md") {
+	if (is(md, "aquap_md")) {
 		filename <- md$meta$expName
 	} else {
 		stop("Please provide a valid metadata object of class 'aquap_md' to the argument 'md'", call.=FALSE)
@@ -978,7 +995,7 @@ readHeader_checkDefaults <- function(slType, possibleValues, md, multiplyRows) {
 	assign("filename", filename, pos=parent.frame(n=1))
 	###
 	if (all(multiplyRows == "def")) {
-		multiplyRows <- .ap2$stn$imp_multiplyRows
+		multiplyRows <- stn$imp_multiplyRows
 	} else {
 		if (!all(is.logical(multiplyRows)) | length(multiplyRows) != 1) {
 			stop("Please provide either 'TRUE' or 'FALSE' to the argument 'multiplyRows'.", call.=FALSE)
@@ -989,7 +1006,8 @@ readHeader_checkDefaults <- function(slType, possibleValues, md, multiplyRows) {
 } # EOF
 
 check_sl_existence <- function(filename, ext) {
-	slInFolder <- paste(.ap2$stn$fn_sampleLists, "/", .ap2$stn$fn_sampleListIn, sep="")
+	stn <- getstn()
+	slInFolder <- paste(stn$fn_sampleLists, "/", stn$fn_sampleListIn, sep="")
 	fn <- paste(filename, ext, sep="")
 	a <- paste(slInFolder, "/", fn, sep="")
 	if (!file.exists(a)) {
@@ -998,8 +1016,9 @@ check_sl_existence <- function(filename, ext) {
 } # EOF
 
 check_conScanColumn <- function(header, headerFilePath, spectraFilePath, slType, filetype) {
+	stn <- getstn()
 	custImp <- grepl("custom@", filetype)
-	a <- paste(.ap2$stn$p_yVarPref, .ap2$stn$p_conSNrCol, sep="")
+	a <- paste(stn$p_yVarPref, stn$p_conSNrCol, sep="")
 	lookHelp <- ""
 	if (!any(a %in% colnames(header))) {
 		if (is.null(slType)) {
@@ -1024,7 +1043,8 @@ check_conScanColumn <- function(header, headerFilePath, spectraFilePath, slType,
 } # EOF
 
 check_conScanColumn_2 <- function(header, filename, ext) {
-	a <- paste(.ap2$stn$p_yVarPref, .ap2$stn$p_conSNrCol, sep="")
+	stn <- getstn()
+	a <- paste(stn$p_yVarPref, stn$p_conSNrCol, sep="")
 	if (!any(a %in% colnames(header))) {
 		stop(paste("You do not have a column for the nr of the consecutive scan in your sample list called \"", filename, ext, "\". \nPlease, add a column called \"", a, "\" to the file as the second column and provide the right values in this column. \n(You probably encounter this error because you did choose to *not* multiply the rows of the sample list by the nr. of consecutive scans.)\nPlease refer to the help for 'getFullData' for further information.", sep=""), call.=FALSE)
 	}
@@ -1051,11 +1071,11 @@ check_conScanColumn_2 <- function(header, filename, ext) {
 #' @family Development Functions
 #' @export
 readHeader <- function(md=getmd(), slType="def", multiplyRows="def") {
-	autoUpS()
+	stn <- autoUpS()
 	poss_sl_types <- c("csv", "txt", "xls") 			### XXXVARXXX
 	filename <- NULL # will be changed in the checking
 	readHeader_checkDefaults(slType, poss_sl_types, md, multiplyRows)
-	slInFolder <- paste(.ap2$stn$fn_sampleLists, "/", .ap2$stn$fn_sampleListIn, "/", sep="")
+	slInFolder <- paste(stn$fn_sampleLists, "/", stn$fn_sampleListIn, "/", sep="")
 	if (is.null(slType)) {
 		return(NULL)
 	}
@@ -1143,17 +1163,17 @@ readHeader <- function(md=getmd(), slType="def", multiplyRows="def") {
 #' }
 #' @export
 imp_searchAskColumns <- function(allC_var, allY_var, slType=.ap2$.slType) {
-	autoUpS()
-	yPref <- .ap2$stn$p_yVarPref
-	cPref <- .ap2$stn$p_ClassVarPref
-	sampleNrColn <- .ap2$stn$p_sampleNrCol
-	conSNrColn <- .ap2$stn$p_conSNrCol
-	timePointsColn <- .ap2$stn$p_timeCol
-	ecrmColn <- .ap2$stn$p_ECRMCol
-	replColn <- .ap2$stn$p_replicateCol
-	groupColn <- .ap2$stn$p_groupCol
-	tempColn <- .ap2$stn$p_tempCol
-	relHumColn <- .ap2$stn$p_RHCol
+	stn <- autoUpS()
+	yPref <- stn$p_yVarPref
+	cPref <- stn$p_ClassVarPref
+	sampleNrColn <- stn$p_sampleNrCol
+	conSNrColn <- stn$p_conSNrCol
+	timePointsColn <- stn$p_timeCol
+	ecrmColn <- stn$p_ECRMCol
+	replColn <- stn$p_replicateCol
+	groupColn <- stn$p_groupCol
+	tempColn <- stn$p_tempCol
+	relHumColn <- stn$p_RHCol
 	## XXXVARXXX
 	listElementNames_C <- c("timePoints", "ecrm", "repl", "group")
 	stdColumnNames_C <- c(paste(cPref, timePointsColn, sep=""), paste(cPref, ecrmColn, sep=""), paste(cPref, replColn, sep=""), paste(cPref, groupColn, sep=""))

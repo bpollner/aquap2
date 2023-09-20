@@ -1,16 +1,17 @@
 
 makeSingleBlock <- function(ClassVar, header, metaData) {
+	stn <- getstn()
 	ind <- which(colnames(header)==ClassVar)
 	levelsChar <- levels(header[,ind])
-	classPrefix <- .ap2$stn$p_ClassVarPref
+	classPrefix <- stn$p_ClassVarPref
 	strippedClassVar <- unlist(strsplit(ClassVar, classPrefix))[2]
 	if (is.na(strippedClassVar)) {
-		classPrefix <- .ap2$stn$p_yVarPref
+		classPrefix <- stn$p_yVarPref
 		strippedClassVar <- unlist(strsplit(ClassVar, classPrefix))[2]
 	}
 	EClabel <- metaData$postProc$ECRMLabel[1]
 #	if (get("stngs")$autoRemoveECs & (strippedClassVar != get("stngs")$ECRMCol))
-	if (TRUE & (strippedClassVar != .ap2$stn$p_ECRMCol)) { 
+	if (TRUE & (strippedClassVar != stn$p_ECRMCol)) { 
 		ind <- which(levelsChar==EClabel)
 		if (length(ind) == 0) {		## so if is a logical(0) ((also possible: !length(ind) -- gives a TRUE or FALSE
 			ind <- 0				## to avoid comparing against "integer(0)" in the next step
@@ -163,9 +164,10 @@ makeCompPattern <- function(header, md, ap) {
 } # EOF
 
 ap_cleanOutZeroValues <- function(ap, dataset) {
-	cPref <- .ap2$stn$p_ClassVarPref
-	yPref <- .ap2$stn$p_yVarPref
-	noSplitCol <- .ap2$stn$p_commonNoSplitCol
+	stn <- getstn()
+	cPref <- stn$p_ClassVarPref
+	yPref <- stn$p_yVarPref
+	noSplitCol <- stn$p_commonNoSplitCol
 	if (is.null(ap$ucl$splitClasses)) {
 		stdCol <- paste(cPref, noSplitCol, sep="")
 		ind <-which(colnames(dataset$header) == stdCol)
@@ -204,11 +206,12 @@ ap_cleanOutZeroValues <- function(ap, dataset) {
 } # EOF
 
 ap_reCheckAqgBootR <- function(ap, dataset) {
+	stn <- getstn()
 	###
 #	R <- ap$aquagr$R
 	R <- ap$aquagr$ROrig # because we have to re-evaluate, as, due to subsplitting in groups, the nrow very probably did change!!! 
 	if (all(R=="def")) {
-		R <- .ap2$stn$aqg_bootR
+		R <- stn$aqg_bootR
 	}
 	if (!grepl("nrow@", R)) {
 		if (!is.numeric(R) | (length(R)!=1)) {
@@ -225,12 +228,13 @@ ap_reCheckAqgBootR <- function(ap, dataset) {
 } # EOF
 
 ap_checkAquagramDefaults <- function(ap, header) {
+	stn <- getstn()
 	if (!is.null(ap$aquagr)) {
 		a <- ap$aquagr
 		###
 		nrCorr <- a$nrCorr
 		if (all(nrCorr == "def")) {
-			nrCorr <- .ap2$stn$aqg_correctNrOfObs
+			nrCorr <- stn$aqg_correctNrOfObs
 		}
 		if (!is.logical(nrCorr)) {
 			stop("Please provide either 'def', 'TRUE' or 'FALSE' for the argument 'aqg.nrCorr'.", call.=FALSE)
@@ -252,7 +256,7 @@ ap_checkAquagramDefaults <- function(ap, header) {
 		mod <- a$mod
 		possibleValues <- pv_AquagramModes
 		if (all(mod=="def")) {
-			mod <- .ap2$stn$aqg_defaultMod
+			mod <- stn$aqg_defaultMod
 		}
 		if (!any(mod %in% possibleValues) | length(mod) !=1 ) {
 			stop(paste("Please provide one of \n", paste(possibleValues, collapse=", "), "; \nor 'def' for reading in the default from the settings.r file to the argument 'aqg.mod'.", sep=""), call.=FALSE)
@@ -290,7 +294,7 @@ ap_checkAquagramDefaults <- function(ap, header) {
 		TCalib <- a$TCalib
 		if (!is.null(TCalib)) {
 			if (all(TCalib == "def")) {
-				TCalib <- .ap2$stn$aqg_calibTRange
+				TCalib <- stn$aqg_calibTRange
 			}
 		}
 		if (!is.null(TCalib)) {
@@ -311,7 +315,7 @@ ap_checkAquagramDefaults <- function(ap, header) {
 		###
 		Texp <- a$Texp
 		if (all(Texp=="def")) {
-			Texp <- .ap2$stn$aqg_Texp
+			Texp <- stn$aqg_Texp
 		}
 		if (!is.numeric(Texp) | (length(Texp) != 1) ) {
 			stop("Please provide either 'def', or a length 1 numeric for the argument 'aqg.Texp'.", call.=FALSE)			
@@ -320,7 +324,7 @@ ap_checkAquagramDefaults <- function(ap, header) {
 		###
 		bootCI <- a$bootCI
 		if (all(bootCI=="def")) {
-			bootCI <- .ap2$stn$aqg_bootCI
+			bootCI <- stn$aqg_bootCI
 		}
 		if (!is.logical(bootCI)) {
 			stop("Please provide either 'def', 'TRUE' or 'FALSE' for the argument 'aqg.bootCI'.", call.=FALSE)		
@@ -338,7 +342,7 @@ ap_checkAquagramDefaults <- function(ap, header) {
 		###
 		R <- ROrig <- a$R
 		if (all(R=="def")) {
-			R <- .ap2$stn$aqg_bootR
+			R <- stn$aqg_bootR
 		}
 		if (!grepl("nrow@", R)) {
 			if (!is.numeric(R) | (length(R)!=1)) {
@@ -358,7 +362,7 @@ ap_checkAquagramDefaults <- function(ap, header) {
 		###
 		selWls <- a$selWls
 		if (all(selWls=="def")) {
-			selWls <- .ap2$stn$aqg_wlsAquagram
+			selWls <- stn$aqg_wlsAquagram
 		}
 		if ( !all(is.numeric(selWls)) ) {
 			stop("Please provide either 'def',  or a numeric vector for the argument 'aqg.selWls'.", call.=FALSE)			
@@ -401,7 +405,7 @@ ap_checkAquagramDefaults <- function(ap, header) {
 		###
 		clt <- a$clt
 		if (all(clt=="def")) {
-			clt <- .ap2$stn$aqg_linetypes
+			clt <- stn$aqg_linetypes
 		}
 		msg <- "Please provide an integer vector to the argument 'aqg.clt'."
 		if ( !all(is.numeric(clt)) ) {
@@ -414,7 +418,7 @@ ap_checkAquagramDefaults <- function(ap, header) {
 		###
 		pplot <- a$pplot
 		if (all(pplot=="def")) {
-			pplot <- .ap2$stn$aqg_adPeakPlot
+			pplot <- stn$aqg_adPeakPlot
 		}
 		if (!all(is.logical(pplot)) | length(pplot) != 1) {
 			stop("Please provide either 'def', or 'TRUE' or 'FALSE' to the argument 'aqg.pplot'", call.=FALSE)
@@ -423,7 +427,7 @@ ap_checkAquagramDefaults <- function(ap, header) {
 		###
 		plines <- a$plines
 		if (all(plines=="def")) {
-			plines <- .ap2$stn$aqg_AdLines
+			plines <- stn$aqg_AdLines
 		}
 		msg <- "Please provide an integer vector to the argument 'aqg.plines'"
 		if (!all(is.logical(plines))) {
@@ -438,7 +442,7 @@ ap_checkAquagramDefaults <- function(ap, header) {
 		###
 		discr <- a$discr
 		if (all(discr=="def")) {
-			discr <- .ap2$stn$aqg_discrim
+			discr <- stn$aqg_discrim
 		}
 		if (!all(is.logical(discr)) | length(discr) != 1) {
 	#		stop("Please provide either 'def' or TRUE or FALSE to the argument 'aqg.discr'", call.=FALSE)
@@ -450,6 +454,7 @@ ap_checkAquagramDefaults <- function(ap, header) {
 } # EOF
 
 ap_check_pca_defaults <- function(ap, header) {
+	stn <- getstn()
 	if (!is.null(ap$pca)) {
 		a <- ap$pca
 		###
@@ -479,7 +484,7 @@ ap_check_pca_defaults <- function(ap, header) {
 		elci <- a$elci
 		if (!is.null(elci)) {
 			if (all(elci=="def")) {
-				elci <- .ap2$stn$pca_CI_ellipse_level
+				elci <- stn$pca_CI_ellipse_level
 			}
 			if (!all(is.numeric(elci)) | length(elci) != 1) {
 				stop("Please provide a length one numeric to the argument 'pca.elci'.", call.=FALSE)
@@ -505,6 +510,7 @@ ap_check_pca_defaults <- function(ap, header) {
 } # EOF
 
 ap_check_gp_generalPlottingDefaults <- function(ap) {
+	stn <- getstn()
 	if (!is.null(ap$genPlot)) {
 		pg <- ap$genPlot
 		###
@@ -516,7 +522,7 @@ ap_check_gp_generalPlottingDefaults <- function(ap) {
 		###
 		checkForLengthOneChar(pg$where, "pg.where")
 		if (pg$where == "def") {
-			aa <- .ap2$stn$gen_plot_pgWhereDefault
+			aa <- stn$gen_plot_pgWhereDefault
 		} else {
 			aa <- pg$where
 		}
@@ -548,8 +554,9 @@ ap_check_dptModules <- function(ap) {
 } # EOF
 
 ap_check_plsr_Input <- function(ap, header) {
+	stn <- getstn()
 	if (!is.null(ap$plsr)) {
-		cPref <- .ap2$stn$p_ClassVarPref
+		cPref <- stn$p_ClassVarPref
 		##
 		e <- ap$plsr
 		## ncomp
@@ -565,7 +572,7 @@ ap_check_plsr_Input <- function(ap, header) {
 		## the validity of the regressOn has already been checked, so we can rely here on the fact that all the regressOn is correct
 		regrOn <- e$regressOn # can be a vector 1..n
 		if (all(e$valid ==  "def")) {
-			e$valid <- .ap2$stn$plsr_calc_typeOfCrossvalid
+			e$valid <- stn$plsr_calc_typeOfCrossvalid
 		}
 		if (all(e$valid == "LOO")) {
 			e$valid <- "LOO"
@@ -601,7 +608,7 @@ ap_check_plsr_Input <- function(ap, header) {
 		regrOn <- e$regressOn # can be a vector 1..n
 		exOut <- e$exOut
 		if (all(exOut ==  "def")) {
-			exOut <- .ap2$stn$plsr_calc_excludePlsrOutliers
+			exOut <- stn$plsr_calc_excludePlsrOutliers
 		}
 		if ( (length(exOut) > 1) & (length(exOut) != length(regrOn)) ) {
 			stop(paste0("Please provide either an input of length '1', or of equal length as the input in 'pls.regOn' in the argument 'pls.exOut'. Please check your input resp. the analysis procedure."), call.=FALSE)
@@ -643,12 +650,13 @@ ap_check_plsr_Input <- function(ap, header) {
 } # EOF
 
 ap_check_classifier_Input <- function(ap, header) {
+	stn <- getstn()
 	if (!is.null(ap$classif)) {
 		pvAllXDA <- pv_classificationFuncs_XDA
 		pvNonDA <- pv_nonDAClassifiers
 		pvAllClassif <- pv_allClassificationFuncs
 		cns <- colnames(header)
-		cPref <- .ap2$stn$p_ClassVarPref
+		cPref <- stn$p_ClassVarPref
 		cns <- cns[grep(cPref, cns)]
 		###
 		checkClassExistence <- function(X, char, ppv=FALSE) {
@@ -746,10 +754,11 @@ ap_check_classifier_Input <- function(ap, header) {
 } # EOF
 
 ap_checExistence_Defaults <- function(ap, dataset, haveExc, checkWlsRange) {
-	cPref <- .ap2$stn$p_ClassVarPref
-	yPref <- .ap2$stn$p_yVarPref
+	stn <- getstn()
+	cPref <- stn$p_ClassVarPref
+	yPref <- stn$p_yVarPref
 	if (haveExc) {	
-		outlierChar <- .ap2$stn$p_outlierCol # we have to define an exception for the checking the existence
+		outlierChar <- stn$p_outlierCol # we have to define an exception for the checking the existence
 	} else {
 		outlierChar <- NULL
 	}
@@ -868,25 +877,14 @@ selectWls <- function(dataset, from, to) {
 	return(dataset)
 } # EOF
 
-performSmoothing_old <- function(dataset, siCsAvg) { # not in use
-	if (siCsAvg) {
-		sgp <- .ap2$stn$sm_savGolayOrder_p
-		sgn <- .ap2$stn$sm_savGolayLength_n
-		sgm <- .ap2$stn$sm_savGolayDeriv_m 
-		if (!.ap2$stn$allSilent) {cat("      averaging consecutive scans...")}
-		dataset$NIR <- t(apply(dataset$NIR, 1, signal::sgolayfilt, p=sgp, n=sgn, m=sgm))
-		if (!.ap2$stn$allSilent) {cat(" ok\n")}
-	}
-	return(dataset)
-} # EOF
-
 performConSAvg <- function(dataset, siCsAvg, numbers=NULL) {
+	stn <- getstn()
 	if (siCsAvg) {
-		yVarPref <- .ap2$stn$p_yVarPref
-		classVarPref <- .ap2$stn$p_ClassVarPref
-		usePar <- .ap2$stn$gen_useParallel
+		yVarPref <- stn$p_yVarPref
+		classVarPref <- stn$p_ClassVarPref
+		usePar <- stn$gen_useParallel
 		md <- getMetadata(dataset)
-		if (!.ap2$stn$allSilent) {cat("      averaging consecutive scans...")}
+		if (!stn$allSilent) {cat("      averaging consecutive scans...")}
 		if (is.null(numbers)) {
 			numbers <- seq(1: md$postProc$nrConScans) # this is selecting *all* the consecutive scans
 		}
@@ -895,8 +893,8 @@ performConSAvg <- function(dataset, siCsAvg, numbers=NULL) {
 		originalNIRColnames <- colnames(NIR)
 		colnames(NIR) <- paste("NIRwlx.", seq(1,ncol(NIR)), sep="")
 		datasetTX <- cbind(header, NIR)
-		csName <- paste(yVarPref, .ap2$stn$p_conSNrCol, sep="")
-		snName <- paste(yVarPref, .ap2$stn$p_sampleNrCol, sep="")		
+		csName <- paste(yVarPref, stn$p_conSNrCol, sep="")
+		snName <- paste(yVarPref, stn$p_sampleNrCol, sep="")		
 		#
 		dfSelector <- data.frame(numbers) 	## XXX numbers could be user defined in a future version
 		colnames(dfSelector) <- csName		## so first get only those cons. scans of interest in ALL the sample numbers, then via plyr::ddply grouped by sample number calculate their mean
@@ -918,34 +916,36 @@ performConSAvg <- function(dataset, siCsAvg, numbers=NULL) {
 		rownames(NIR) <- rownames(datasetRed)
 		datasetRed$NIR <- I(NIR)
 		dataset <- reFactor(datasetRed)		## to adjust for the changed factor-level situation in the class for the cons scans
-		if (!.ap2$stn$allSilent) {cat(" ok\n")}
+		if (!stn$allSilent) {cat(" ok\n")}
 	} # end if (siCsAvg) 
 	return(dataset)
 }# EOF
 
 performNoise <- function(dataset, siNoise, noiseFile) {
+	stn <- getstn()
 	if (siNoise) {
-		noiMode <- .ap2$stn$noi_addMode 
-		if (!.ap2$stn$allSilent) {cat(paste0("      adding ", noiMode, " noise..."))}
+		noiMode <- stn$noi_addMode 
+		if (!stn$allSilent) {cat(paste0("      adding ", noiMode, " noise..."))}
 		dataset <- noi_performNoise(dataset, noiseFile)	
-		if (!.ap2$stn$allSilent) {cat(" ok\n")}
+		if (!stn$allSilent) {cat(" ok\n")}
 	}
 	return(dataset)
 } # EOF
 
 performExcludeOutliers <- function(dataset, siExOut, ap) {
+	stn <- getstn()
 	eov <- ap$dpt$excludeOutliers$exOutVar # the grouping variables from the analysis procedure by which grouping the outliers should be detected
 	doExOut <- ap$dpt$excludeOutliers$exOut
 	keepRaw <- ap$dpt$excludeOutliers$exOutRaw
 	if (doExOut & keepRaw) {oneBlock <- FALSE; twoBlocks <- TRUE} else {oneBlock <- TRUE; twoBlocks <- FALSE}
-	cnOutlier <- .ap2$stn$p_outlierCol
-	cPref <- .ap2$stn$p_ClassVarPref
+	cnOutlier <- stn$p_outlierCol
+	cPref <- stn$p_ClassVarPref
 	if (!is.null(eov)) { 
 		eovTitleChar <- paste(unlist(lapply(strsplit(eov, cPref), function(x) x[2])), collapse=".")
 	}
 	if (keepRaw | siExOut) {
-		kmax <- .ap2$stn$simca_kMax
-		tol <- .ap2$stn$simca_tolerance
+		kmax <- stn$simca_kMax
+		tol <- stn$simca_tolerance
 		header <- getHeader(dataset)
 		indOut <- NULL
 		if ((twoBlocks & !siExOut) | oneBlock) {
@@ -955,7 +955,7 @@ performExcludeOutliers <- function(dataset, siExOut, ap) {
 			} # end for i
 			fusionFac <- as.factor(apply(header[indOut], 1, function(x) paste(x, collapse="_"))) # extract the selected columns from the header and paste each row together
 			flatDf <- makeFlatDataFrame(dataset, fusionGroupBy=fusionFac)
-			if (!.ap2$stn$allSilent) {cat("      detecting & flagging outliers... ")}
+			if (!stn$allSilent) {cat("      detecting & flagging outliers... ")}
 			simcaMod <- rrcovHD::RSimca(grouping ~ ., data=flatDf, kmax=kmax, tol=tol)  ## k=0 does not work ??, but still calculating k
 			singleFlags <- paste(unlist(lapply(simcaMod@pcaobj, function(x) length(which(x@flag == FALSE)))), collapse="|")
 			flags <- as.logical(simcaMod@flag) #  having FALSE for outliers
@@ -963,7 +963,7 @@ performExcludeOutliers <- function(dataset, siExOut, ap) {
 			usedK <- paste(simcaMod@k, collapse="|")
 			finderMsg <- "found"
 		} else { # end if ((twoBlocks & siExOut) | oneBlock)
-			if (!.ap2$stn$allSilent) {cat("      flagging outliers:")}
+			if (!stn$allSilent) {cat("      flagging outliers:")}
 			finderMsg <- ""
 		}
 		if (twoBlocks & siExOut) {
@@ -986,7 +986,7 @@ performExcludeOutliers <- function(dataset, siExOut, ap) {
 			}
 		}
 #		if (siExOut) {crMsg <- ""} else {crMsg <- "\n"}
-		if (!.ap2$stn$allSilent) {cat(paste(msg, remMsg, sep=""))}
+		if (!stn$allSilent) {cat(paste(msg, remMsg, sep=""))}
 		if (twoBlocks & !siExOut) {
 			.ap2$.outlierFlags$allFlags <- c(.ap2$.outlierFlags$allFlags, list(flags))
 			.ap2$.outlierFlags$nrOutliers <- c(.ap2$.outlierFlags$nrOutliers, list(nrOutliers))
@@ -1014,7 +1014,7 @@ performExcludeOutliers <- function(dataset, siExOut, ap) {
 		dataset$colRep <- colRepNew
 	} # end if keepRaw | siExOut
 	if (siExOut) {
-		if (!.ap2$stn$allSilent & oneBlock) {cat(", removing outliers.\n")}
+		if (!stn$allSilent & oneBlock) {cat(", removing outliers.\n")}
 		dataset <- dataset[flags] # as the outliers are FALSE, we are so removing the outliers
 	}
 	return(dataset)
@@ -1025,10 +1025,11 @@ performDPT_Core <- function(dataset, dptSeq, extraModelList=NULL, allExportModel
 # pv_dptModules <- c("sgol", "snv", "msc", "emsc", "osc", "deTr", "gapDe")
 # the modules itself are already checked
 #print(dptSeq); 
+	stn <- getstn()
 	pvMod <- pv_dptModules	
 	if (!is.null(dptSeq)) {
 	first <- unlist(lapply(strsplit(dptSeq, "@"), function(x) x[1])) # get only the characters before an eventual '@'
-		if (!.ap2$stn$allSilent) {
+		if (!stn$allSilent) {
 			cat(paste("      Data treatment: ", paste(dptSeq, collapse=", "), "\n", sep=""))
 		}
 		for (i in 1: length(first)) {
@@ -1064,7 +1065,7 @@ performDPT_Core <- function(dataset, dptSeq, extraModelList=NULL, allExportModel
 					if (!exists(ords)) {
 						stop(paste(pvMod[3], "@", ords, ":Sorry, the object with the name \"", ords, "\" does not seem to exist.\nPlease check the analysis procedure / your input (part data pre / post treatment)", sep=""), call.=FALSE)
 					}
-					if (class(eval(parse(text=ords))) != "aquap_data") {
+					if (!is(eval(parse(text=ords)), "aquap_data")) {
 						stop(paste("Please make sure that the specified object \"", ords, "\" is of class 'aquap_data'", sep=""), call.=FALSE)
 					}
 					if (nrow(eval(parse(text=ords))) != 1) {
@@ -1094,15 +1095,15 @@ performDPT_Core <- function(dataset, dptSeq, extraModelList=NULL, allExportModel
 						stop(paste(pvMod[4], "@", loadvecObjChar, ": Sorry, the object with the name \"", loadvecObjChar, "\" does not seem to exist.\nPlease check the analysis procedure / your input (part data pre / post treatment); see ?dpt_modules for further details.", sep=""), call.=FALSE)					
 				} 
 				lvObj <- eval(parse(text=loadvecObjChar)) # here get from the character only the real object
-				if (class(lvObj) != "matrix" & class(lvObj) != "data.frame" ) {
+				if ( !is(lvObj, "matrix") & !is(lvObj, "data.frame") ) {
 					stop(paste(pvMod[4], "@", loadvecObjChar, ": Please make sure that the specified object \"", loadvecObjChar, "\" is of class 'matrix' or 'data.frame'.\nPlease see ?dpt_modules for further details", sep=""), call.=FALSE)
-				}		
+				} # end if		
 				if (ncol(lvObj) > 2) {
 					stop(paste("For successful ", pvMod[4], "@", loadvecObjChar, ", the provided dataframe/matrix can have max. 2 columns. \nPlease see ?dpt_modules for further details.", sep=""), call.=FALSE)
-				}
+				} # end if
 				if (nrow(lvObj) != ncol(dataset$NIR) ) {
 					stop(paste(pvMod[4], "@", loadvecObjChar, ":The length (nrow) of the provided dataframe/matrix is ", nrow(lvObj), ", while the current dataset has ", ncol(dataset$NIR), " wavelengths.\nThe length of the loading/regression vector and the number of wavelengths in the NIR-data must be the same.\nPlease provide a loading / regression vector with the right length fitting *all* the datasets in your 'cube', or re-think your (possible) data-splitting procedure when generating the 'cube' object. \nPlease see ?dpt_modules and ?do_emsc for further details.", sep=""), call.=FALSE)
-				}				
+				} # end if	
 				dataset <- do_emsc(dataset, vecLoad = lvObj, exportModel=allExportModels) # a data frame with max 2 columns (loadings or a regression vector)
 			} # end emsc
 		###########
@@ -1230,7 +1231,8 @@ initializeExtraModelsList <- function() {
 } # EOF
 
 processSingleRow_CPT <- function(dataset, siClass, siValue, siWlSplit, siCsAvg, siNoise, siExOut, ap, noiseFile) { # si for single
-	keepEC <- .ap2$stn$gd_keepECs
+	stn <- getstn()
+	keepEC <- stn$gd_keepECs
 	newDataset <- ssc_s(dataset, siClass, siValue, keepEC) 
 	if (is.null(newDataset)) { # character "nixnox" is returned if a variable combination yields no data. That is because returning NULL introduced a bug if it was on the end of the list... probably...
 #		return("nixnox")
@@ -1349,6 +1351,7 @@ checkCubeForRealStats <- function(cube) {
 } # EOF
 
 createOutlierFlagList <- function() {
+	stn <- getstn()
 	.ap2$.ocnt <- 1 # a counter
 	.ap2$.outlierFlags <- list()
 		.ap2$.outlierFlags$allFlags <- list()
@@ -1358,12 +1361,13 @@ createOutlierFlagList <- function() {
 } # EOF
 
 checkLoadNoiseFile <- function(header, maxNir, ap, md, noiseFile) {
+	stn <- getstn()
 	useNoise <- ap$dpt$noise$useNoise
-	noiMode <- .ap2$stn$noi_addMode 
+	noiMode <- stn$noi_addMode 
 	pvNM <- pv_noiseAddModes
 	if (useNoise & noiMode != pvNM[4]) { # also do not do this if we have the static mode
 		if (all(noiseFile == "def")) { # the incoming 'noiseFile' is from the gdmm function. If any other than 'def' we do not even look at the metadata
-			noiseFile <- .ap2$stn$noi_noiseDataFilename
+			noiseFile <- stn$noi_noiseDataFilename
 			# If a value other than "def" is provided in the argument "noiseFile" in "gdmm", this is overriding the value of "noiseFileName" in the metadata file.
 			if (md$meta$noiseFile != noiseFile) { # we only look at the value for 'noiseFileName' in the metadata if 'noiseFile' in gdmm is "def"
 				noiseFile <- md$meta$noiseFile
@@ -1380,16 +1384,16 @@ checkLoadNoiseFile <- function(header, maxNir, ap, md, noiseFile) {
 			stop(paste0("The R-data file \"", noiseFile, "\" that should contain noise-data does not seem to exist in \n\"", pathSH, "\".\nProvide either 'def' to read in the default value from the settings (parameter 'noi_noiseDataFilename'), or the name of an existing R-data file. ", addInfo), call.=FALSE)
 		}
 		noiDataset <- eval(parse(text=load(noisePath)))
-		if (class(noiDataset) != "aquap_data") {
+		if (!is(noiDataset, "aquap_data")) {
 			stop(paste0("Please make sure that the noise-data file '", noiseFile, "' is of class 'aquap_data' (as generated by the function 'gfd').\n", addInfo), call.=FALSE)
 		}
 		##
 		checkDatasetVersion(noiDataset, noiseFile) # stops if the version of dataset is too old
 		## check outliers
-		if (.ap2$stn$noi_forceExclusionOfOutliers) {
-			clPrev <- .ap2$stn$p_ClassVarPref
-			cnOl <- .ap2$stn$p_outlierCol
-			allSuff <- .ap2$stn$p_outlierCol_allSuffix
+		if (stn$noi_forceExclusionOfOutliers) {
+			clPrev <- stn$p_ClassVarPref
+			cnOl <- stn$p_outlierCol
+			allSuff <- stn$p_outlierCol_allSuffix
 			cnOutlier <- paste0(clPrev, cnOl, allSuff)
 			cns <- colnames(noiDataset$header)
 			if (!cnOutlier %in% cns) {
@@ -1400,28 +1404,28 @@ checkLoadNoiseFile <- function(header, maxNir, ap, md, noiseFile) {
 		## check age-difference		
 		tsData <- header[1,]$Timestamp
 		tsNoise <- noiDataset$header[1,]$Timestamp # both get returned as NULL if the column is not available !!
-		if (.ap2$stn$noi_forceTimeDifferenceCheck & !is.null(tsData) & !is.null(tsNoise)) {
+		if (stn$noi_forceTimeDifferenceCheck & !is.null(tsData) & !is.null(tsNoise)) {
 			diffT <- as.numeric(difftime(tsData, tsNoise, units="days"))
-			accDiff <-  .ap2$stn$noi_acceptTimeDiffDays
+			accDiff <-  stn$noi_acceptTimeDiffDays
 			if (diffT > accDiff) {
 				stop(paste0("Sorry, the time difference between the first spectrum of the noise file and the first spectrum of the dataset is more than ", accDiff, " days (parameter 'noi_acceptTimeDiffDays' in the settings file).\n(You can deactivate the checking of time differences between noise-data file and actual dataset in the settings at the argument 'noi_forceTimeDifferenceCheck'.)"), call.=FALSE)
 			}
 		}
 		## check noise plausibility
-		if (.ap2$stn$noi_forceNoisePlausibility) {
-			accPer <- .ap2$stn$noi_plausPercentage ;  	setCheck_NumericLengthOne(accPer, "noi_plausPercentage")
+		if (stn$noi_forceNoisePlausibility) {
+			accPer <- stn$noi_plausPercentage ;  	setCheck_NumericLengthOne(accPer, "noi_plausPercentage")
 			maxAccept <- (maxNir/100)* accPer # maxNir coming from the actual dataset
 			if (max(noiDataset$NIR) > maxAccept) {
 				stop(paste0("It seems to be unlikely that the data in the R-data file '", noiseFile, "' in your AQUAP2SH-folder actually are noise-data, as their spectral maximum is exceeding ", accPer, "% of the spectral maximum in the actual dataset. \n(You can deactivate the checking of the plausibility of the noise-data file in the settings at the argument 'noi_forceNoisePlausibility'.)"), call.=FALSE)
 			}
 		}
 		## check noise mode
-		noiMode <- .ap2$stn$noi_addMode
+		noiMode <- stn$noi_addMode
 		if (!all(noiMode %in% pv_noiseAddModes) | length(noiMode) != 1) { # c("sd", "extrema")
 			stop(paste0("Please provide one of '", paste(pv_noiseAddModes, collapse="', '"), "' to the argument 'noi_addMode' in the settings file."), call.=FALSE)
 		}
 		## check sample size
-		sampSize <- .ap2$stn$noi_sampleSize
+		sampSize <- stn$noi_sampleSize
 		if (!all(is.numeric(sampSize)) | length(sampSize) != 1 | !all(is.wholenumber(sampSize)) | !all(sampSize > 0) ) {
 			stop(paste0("Please provide a positive integer length one to the argument 'noi_sampleSize' in the settings.r file."), call.=FALSE)
 		}
@@ -1444,13 +1448,14 @@ haveClassicAqg <- function(ap) {
 } # EOF
 
 checkTempCalibFile <- function(tempFile, ap, md) {
+	stn <- getstn()
 	if (!is.null(ap$aquagr)) { 
 		if (!haveClassicAqg(ap)) { 
-			clPrev <- .ap2$stn$p_ClassVarPref
-			yPrev <- .ap2$stn$p_yVarPref
+			clPrev <- stn$p_ClassVarPref
+			yPrev <- stn$p_yVarPref
 			#
 			if (all(tempFile == "def")) { # the incoming 'tempFile' is from the gdmm function. If any other than 'def' we do not even look at the metadata
-				tempFile <- .ap2$stn$aqg_tempCalib_Filename
+				tempFile <- stn$aqg_tempCalib_Filename
 				# If a value other than "def" is provided in the argument "tempFile" in "gdmm", this is overriding the value of "tempCalibFileName" in the metadata file.
 				if (md$meta$tempFile != tempFile) { # we only look at the value for 'noiseFileName' in the metadata if 'noiseFile' in gdmm is "def"
 					tempFile <- md$meta$tempFile
@@ -1467,15 +1472,15 @@ checkTempCalibFile <- function(tempFile, ap, md) {
 				stop(paste0("The R-data file \"", tempFile, "\" that should contain temperature calibration data does not seem to exist in \n\"", pathSH, "\".\nProvide either 'def' to read in the default value from the settings (parameter 'aqg_tempCalib_Filename'), or the name of an existing R-data file. ", addInfo), call.=FALSE)
 			}
 			tempDataset <- eval(parse(text=load(tempPath)))
-			if (class(tempDataset) != "aquap_data") {
+			if (!is(tempDataset, "aquap_data")) {
 				stop(paste0("Please make sure that the temperature calibration data file '", tempFile, "' is of class 'aquap_data' (as generated by the function 'gfd').\n", addInfo), call.=FALSE)
 			}
 			##
 			checkDatasetVersion(tempDataset, tempFile) # stops if the version of dataset is too old
 			## check outliers
-			if (.ap2$stn$aqg_tempCalib_forceOutlExcl) {
-				cnOl <- .ap2$stn$p_outlierCol
-				allSuff <- .ap2$stn$p_outlierCol_allSuffix
+			if (stn$aqg_tempCalib_forceOutlExcl) {
+				cnOl <- stn$p_outlierCol
+				allSuff <- stn$p_outlierCol_allSuffix
 				cnOutlier <- paste0(clPrev, cnOl, allSuff)
 				cns <- colnames(tempDataset$header)
 				if (!cnOutlier %in% cns) {
@@ -1486,9 +1491,9 @@ checkTempCalibFile <- function(tempFile, ap, md) {
 	#		## check age-difference		
 	#		tsData <- header[1,]$Timestamp
 	#		tsNoise <- noiDataset$header[1,]$Timestamp # both get returned as NULL if the column is not available !!
-	#		if (.ap2$stn$noi_forceTimeDifferenceCheck & !is.null(tsData) & !is.null(tsNoise)) {
+	#		if (stn$noi_forceTimeDifferenceCheck & !is.null(tsData) & !is.null(tsNoise)) {
 	#			diffT <- as.numeric(difftime(tsData, tsNoise, units="days"))
-	#			accDiff <-  .ap2$stn$noi_acceptTimeDiffDays
+	#			accDiff <-  stn$noi_acceptTimeDiffDays
 	#			if (diffT > accDiff) {
 	#				stop(paste0("Sorry, the time difference between the first spectrum of the noise file and the first spectrum of the dataset is more than ", accDiff, " days (parameter 'noi_acceptTimeDiffDays' in the settings file).\n(You can deactivate the checking of time differences between noise-data file and actual dataset in the settings at the argument 'noi_forceTimeDifferenceCheck'.)"), call.=FALSE)
 	#			}
@@ -1564,8 +1569,8 @@ checkTempCalibFile <- function(tempFile, ap, md) {
 #' @family Core functions
 #' @export
 gdmm <- function(dataset, ap=getap(), noiseFile="def", tempFile="def") {
-	autoUpS(); ap;
-	if (class(dataset) != "aquap_data") {
+	stn <- autoUpS(); ap;
+	if (!is(dataset, "aquap_data")) {
 		stop("Please provide an object of class 'aquap_data' to the argument 'dataset'.", call.=FALSE)
 	}
 	checkDatasetVersion(dataset)
@@ -1601,12 +1606,12 @@ gdmm <- function(dataset, ap=getap(), noiseFile="def", tempFile="def") {
 	noise <- cpt@noise # is a vector
 	exOut <- cpt@exOut # is a vector
 	### generate datasets
-	if (!.ap2$stn$allSilent) {cat("Generating Datasets...\n")}
+	if (!stn$allSilent) {cat("Generating Datasets...\n")}
 	for (i in 1:len) {
-		if (!.ap2$stn$allSilent) {cat(paste("   Working on #", i, " of ", len, "\n", sep=""))}
+		if (!stn$allSilent) {cat(paste("   Working on #", i, " of ", len, "\n", sep=""))}
 		cubeList[[i]] <- processSingleRow_CPT(dataset, as.data.frame(classes[i,,drop=F]), as.data.frame(values[i,,drop=F]), wlSplit[[i]], csAvg[i], noise[i], exOut[i], ap, noiseFile) # the "as.data.frame" is necessary if we only have one column
 	} # end for i
-	if (!.ap2$stn$allSilent) {cat("Done.\n")}
+	if (!stn$allSilent) {cat("Done.\n")}
 	###
 	### clean out the NULL-datasets
 #	nullInd <- which(unlist(lapply(cubeList, is.null))) # which one of the split by variable resulted in zero rows (has been returned as NULL in ssc_s)
@@ -1623,10 +1628,10 @@ gdmm <- function(dataset, ap=getap(), noiseFile="def", tempFile="def") {
 	
 	### now make the models (so far, we have only the dataset and the id-string in the set)
 	stat <- checkForStats(ap) 	#  check the ap if and where we calculate a model
-	if (!.ap2$stn$allSilent & (stat$cnt != 0)) {cat("\nCalculating models...\n")}
+	if (!stn$allSilent & (stat$cnt != 0)) {cat("\nCalculating models...\n")}
 	maybeGeneratePlsrCluster(ap)
 	for (i in 1: cpt@len) {
-		if (!.ap2$stn$allSilent & (stat$cnt != 0)) {cat(paste("   Working on dataset #", i, " of ", cpt@len, " (", getIdString(cubeList[[i]]), ") \n", sep=""))}
+		if (!stn$allSilent & (stat$cnt != 0)) {cat(paste("   Working on dataset #", i, " of ", cpt@len, " (", getIdString(cubeList[[i]]), ") \n", sep=""))}
 
 		cubeList[[i]] <- makeAllModels(cubeList[[i]], md, ap, tempFile) ###### CORE #########  CORE ############ CORE ##############
 	} # end for i
@@ -1636,8 +1641,8 @@ gdmm <- function(dataset, ap=getap(), noiseFile="def", tempFile="def") {
 	if ( (any(ap$aquagr$fsa!=FALSE) | any(ap$aquagr$fss!=FALSE)) & !is.null(ap$aquagr) ) {
 		rangesColl <- collectRanges(cubeList, length(ap$aquagr$vars)) # returns a list with each element representing the range through all sets in a classVariable, so, one list-element for each class-variable
 	}
-	if (!.ap2$stn$allSilent & (stat$cnt != 0)) {cat("Done.\n")}
-	if (!.ap2$stn$allSilent & (stat$cnt == 0)) {cat("No models were calculated.\n")}
+	if (!stn$allSilent & (stat$cnt != 0)) {cat("Done.\n")}
+	if (!stn$allSilent & (stat$cnt == 0)) {cat("No models were calculated.\n")}
 	###
 	
 	##

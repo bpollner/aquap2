@@ -14,9 +14,6 @@
 #' @template mr_pg_genParams
 #' @seealso \code{\link{plot_da}}, \code{\link{siWlg}} for reducing the number of 
 #' wavelengths in a dataset
-#' @examples
-#' \dontrun{
-#' }
 #' @family Plot arguments
 #' @family DA documentation
 #' @name plot_discrimAnalysis_args
@@ -36,9 +33,6 @@ NULL
 #' @template mr_classif_XDA_calc_param
 #' @seealso \code{\link{gdmm}}, \code{\link{siWlg}} for reducing the number of 
 #' wavelengths in a dataset
-#' @examples
-#' \dontrun{
-#' }
 #' @family Calc. arguments
 #' @family Classification functions
 #' @family DA documentation
@@ -61,9 +55,6 @@ NULL
 #' @template mr_pg_genParams
 #' @seealso \code{\link{plot_rnf}}, \code{\link{siWlg}} for reducing the number of 
 #' wavelengths in a dataset
-#' @examples
-#' \dontrun{
-#' }
 #' @family Plot arguments
 #' @family RNF documentation
 #' @name plot_randomForest_args
@@ -83,9 +74,6 @@ NULL
 #' @template mr_classif_RNF_calc_param
 #' @seealso \code{\link{gdmm}}, \code{\link{siWlg}} for reducing the number of 
 #' wavelengths in a dataset
-#' @examples
-#' \dontrun{
-#' }
 #' @family Calc. arguments
 #' @family Classification functions
 #' @family RNF documentation
@@ -108,9 +96,6 @@ NULL
 #' @template mr_pg_genParams
 #' @seealso \code{\link{plot_svm}}, \code{\link{siWlg}} for reducing the number of 
 #' wavelengths in a dataset
-#' @examples
-#' \dontrun{
-#' }
 #' @family Plot arguments
 #' @family SVM documentation
 #' @name plot_SVM_args
@@ -130,9 +115,6 @@ NULL
 #' @template mr_classif_SVM_calc_param
 #' @seealso \code{\link{gdmm}}, \code{\link{siWlg}} for reducing the number of 
 #' wavelengths in a dataset
-#' @examples
-#' \dontrun{
-#' }
 #' @family Calc. arguments
 #' @family Classification functions
 #' @family SVM documentation
@@ -154,9 +136,6 @@ NULL
 #' @template mr_pg_genParams
 #' @seealso \code{\link{plot_nnet}}, \code{\link{siWlg}} for reducing the number of 
 #' wavelengths in a dataset
-#' @examples
-#' \dontrun{
-#' }
 #' @family Plot arguments
 #' @family NNET documentation
 #' @name plot_NNET_args
@@ -176,9 +155,6 @@ NULL
 #' @template mr_classif_NNET_calc_param
 #' @seealso \code{\link{gdmm}}, \code{\link{siWlg}} for reducing the number of 
 #' wavelengths in a dataset
-#' @examples
-#' \dontrun{
-#' }
 #' @family Calc. arguments
 #' @family Classification functions
 #' @family NNET documentation

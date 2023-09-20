@@ -6,8 +6,8 @@
 genMergeLabels_checkInput <- function(ds1, ds2, varNames, varTypes, values, numVec) {	
 	if (length(varTypes) == 1) {
 		varTypes <- rep(varTypes, length(varNames))
-	}
-	if (class(ds1) == "aquap_data" & is.null(ds2)) {
+	} 
+	if (is(ds1, "aquap_data") & is.null(ds2)) {
 		stop("Please provide a dataset to the argument 'ds2'.", call.=FALSE)
 	} # end if
 	if (!is.character(varNames) | !is.character(varTypes)) {
@@ -40,10 +40,11 @@ genMergeLabels_checkType <- function(valueList, varTypes, varNames) { # checks i
 
 ###### method (documentation below) #######
 generateMergeLabels_sys <- function(ds1, ds2=NULL, varNames, varTypes, values=NULL) {
-	clpref <- .ap2$stn$p_ClassVarPref
-	ypref <- .ap2$stn$p_yVarPref
+	stn <- getstn()
+	clpref <- stn$p_ClassVarPref
+	ypref <- stn$p_yVarPref
 	#
-	if (class(ds1) == "list") {
+	if (is(ds1, "list")) {
 		numVec <- sapply(ds1, nrow)			### numVec is a numeric vector, giving the number of repeats for each value, the length of numVec is the number of datasets to be merged
 		dsList <- ds1
 		dsNameVec <- names(dsList)
@@ -108,7 +109,7 @@ merge_makeNewLabelBlock <- function(mergeLabels) {   # here creating the repeats
 	return(outdf)	
 } # EOF
 ######
-mergeDatasets_two <- function(ds1, ds2, mergeLabels, noMatchH=get("stn", envir=.ap2)$gen_merge_noMatchH, noMatchW=get("stn", envir=.ap2)$gen_merge_noMatchW, resaTo="best", resaMethod=get("stn", envir=.ap2)$gen_resample_method, dol=get("stn", envir=.ap2)$gen_merge_detectOutliers) { # newLabels can come in as NULL
+mergeDatasets_two <- function(ds1, ds2, mergeLabels, noMatchH=getstn()$gen_merge_noMatchH, noMatchW=getstn()$gen_merge_noMatchW, resaTo="best", resaMethod=getstn()$gen_resample_method, dol=getstn()$gen_merge_detectOutliers) { # newLabels can come in as NULL
 	dsList <- list(ds1, ds2)
 #	names(dsList) <- c(deparse(substitute(ds1)), deparse(substitute(ds2))) # get the names of the provided objects ### does NOT work
 	names(dsList) <- paste0("dataset_", c(1,2))
@@ -254,7 +255,7 @@ merge_makeMissVisualNIR <- function(wlsList, dsNames) {
 } # EOF
 
 merge_checkListInput <- function(dsList) {
-	if (class(dsList) == "aquap_data") {
+	if (is(dsList, "aquap_data")) {
 		stop(paste0("Wrong or missing input. Please refer to the manual (?mergeDatasets) for possible options."), call.=FALSE)
 	} # end if
 } # EOF
@@ -308,7 +309,7 @@ merge_checkWlsDeltas <- function(wlsList) {
 } # EOF
 
 merge_checkResaToInput <- function(resaTo, dsNames, wlsList, noMatchW) {
-	stn <- get("stn", envir=.ap2)
+	stn <- getstn()
 	thisSilent <- stn$allSilent
 	#
 	if (all(resaTo == "best")) {
@@ -581,9 +582,9 @@ merge_findBestResaToWls <- function(dsList, cutFill) {
 } # EOF
 
 ###### CORE #########
-mergeDatasets_list <- function(dsList, mergeLabels, noMatchH=get("stn", envir=.ap2)$gen_merge_noMatchH, noMatchW=get("stn", envir=.ap2)$gen_merge_noMatchW, resaTo="best", resaMethod=get("stn", envir=.ap2)$gen_resample_method, dol=get("stn", envir=.ap2)$gen_merge_detectOutliers) { # newLabels can come in as NULL   ####CORE####
+mergeDatasets_list <- function(dsList, mergeLabels, noMatchH=getstn()$gen_merge_noMatchH, noMatchW=getstn()$gen_merge_noMatchW, resaTo="best", resaMethod=getstn()$gen_resample_method, dol=getstn()$gen_merge_detectOutliers) { # newLabels can come in as NULL   ####CORE####
 	autoUpS()
-	stn <- get("stn", envir=.ap2)
+	stn <- getstn()
 	clpref <- stn$p_ClassVarPref
 	ypref <- stn$p_yVarPref
 	olc <- stn$p_outlierCol
@@ -992,7 +993,7 @@ combine_checkEntry <- function(dataset, sourceVars, name, sep) {
 		} 
 	} # EOIF
 	##
-	if (class(dataset) != "aquap_data") {
+	if (!is(dataset, "aquap_data")) {
 		stop("Please provide an object of class 'aquap_data' in the argument 'dataset'", call.=FALSE)
 	} # end if
 	if (is.null(sourceVars)) {
@@ -1043,7 +1044,7 @@ combine_checkEntry <- function(dataset, sourceVars, name, sep) {
 #' @export
 combineVariable <- function(dataset, sourceVars=NULL, name=NULL, sep="_") {
 	autoUpS()
-	stn <- get("stn", envir=.ap2)
+	stn <- getstn()
 	clpref <- stn$p_ClassVarPref
 	#
 	combine_checkEntry(dataset, sourceVars, name, sep) # checks all input, makes sure that all provided source variables are present in the dataset
@@ -1065,7 +1066,7 @@ calculate_checkEntry <- function(dataset, cexpr, name, type) {
 		} 
 	} # EOIF
 	##
-	if (class(dataset) != "aquap_data") {
+	if (!is(dataset, "aquap_data")) {
 		stop("Please provide an object of class 'aquap_data' in the argument 'dataset'", call.=FALSE)
 	} # end if
 	if (is.null(name)) {
@@ -1086,7 +1087,7 @@ calculate_checkEntry <- function(dataset, cexpr, name, type) {
 } # EOF
 
 calculate_postChecking <- function(header, newDF, name, type) {
-	stn <- get("stn", envir=.ap2)
+	stn <- getstn()
 	allSilent <- stn$allSilent
 	#
 	if (type == "n") {
@@ -1155,7 +1156,7 @@ calculate_postChecking <- function(header, newDF, name, type) {
 #' @export
 calculateVariable <- function(dataset, cexpr=expression(""), name=NULL, type="c") {
 	autoUpS()
-	stn <- get("stn", envir=.ap2)
+	stn <- getstn()
 	clpref <- stn$p_ClassVarPref
 	ypref <- stn$p_yVarPref
 	#
@@ -1175,7 +1176,7 @@ calculateVariable <- function(dataset, cexpr=expression(""), name=NULL, type="c"
 	colnames(newDF) <- newColname
 	for (i in 1: nrow(header)) {   # I know. Something with "apply" or so would be way more elegant. Could not quickly find how to do that. Sorry. :-) 
 		aa <- 	try(with(header[i,], eval(cexpr)), silent=TRUE)   ###### CORE ######
-		if (class(aa) != "try-error") { # so all went well
+		if (!is(aa, "try-error")) {  # so all went well
 			newDF[i,1] <- aa
 			# check for warnigns. No. Maybe an other time. It is late now.
 		} else { # so we have an error

@@ -56,14 +56,9 @@ The default 'def' reads in the default value from the settings.r file.}
 \item{realMeasurementLabel}{Character. The label for the "real measurements". 
 The default 'def' reads in the default value from the settings.r file.}
 
-\item{columnNamesL1}{Character vector. The column names for the L1-variables.}
-
-\item{columnNamesL2}{Character vector. The column names for the L2-variables, 
-they have to have the same length as the L1 column names.}
-
-\item{L1}{A list, containing a list for each L1-variable.}
-
-\item{L2}{A list, containing a list for each L2-variable.}
+\item{sl_classes}{Character length one. The name of the xlsx file located in 
+the metadata folder holding the desired class structure for the experiment, 
+see details.}
 
 \item{Repls}{Numeric. How many replicates of each sample to measure. The values 
 in the dataset wil be prefixed with the default character for the replicates, 
@@ -77,16 +72,17 @@ classes into, like e.g. experiment and control. Please see details.}
 The metadata file contains all the metadata of an experiment 
 like experiment name etc. It is also used to design the experiment and 
 to export a randomized sample list that then can be used in the data 
- acquisition process. Additionally, the references to the temperature 
+acquisition process. Additionally, the references to the temperature 
 calibration file (necessary for plotting Aquagrams) and to the file containing 
 the noise-spectra are kept here.
 }
 \details{
-For examples on the use of the arguments \code{columnNamesL1}, 
-\code{columnNamesL2}, \code{L1} and \code{L2} please refer to the example 
-metadata files provided in the root-folder of this package. (Type 
-\code{path.package("aquap2")}, then go there and look at and try out the 
-files in \code{examples/metadata}.)
+While the parameters \code{TimePoints, nrConScans, spacing, Repls} 
+and \code{Group} can be used to further modify an existing sample list, the 
+class structure as provided in the Excel file referenced at argument 
+\code{sl_classes} is defining the basic class-structure of an experiment. 
+Please refer to XXX for examples on how define the class structure via 
+xlsx-input.
 }
 \seealso{
 \code{\link{getmd}}

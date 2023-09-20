@@ -369,13 +369,14 @@ calc_minus_avg_aquagram_spectra <- function(avgAquagrSpectra, minus) {
  ######################
  
 tempCalibTransformDataset <- function(tempCalibDataset) {
-	if (!.ap2$stn$allSilent) {cat(" * Reading in temperature data... ")}
-	yPref <- .ap2$stn$p_yVarPref
+	stn <- getstn()
+	if (!stn$allSilent) {cat(" * Reading in temperature data... ")}
+	yPref <- stn$p_yVarPref
 	wtcn <- paste0(yPref, pv_YcolumnNameSampleTemp)
 	header <- data.frame(sample=rep("RM", nrow(tempCalibDataset)), temp_W=as.numeric(tempCalibDataset$header[,wtcn])) # we already checked for the existence of the water temp column
 	nir <- getNIR(tempCalibDataset)
 	out <- cbind(header, nir)
-	if (!.ap2$stn$allSilent) {cat("ok\n")}
+	if (!stn$allSilent) {cat("ok\n")}
 	return(out)
 } # EOF
 
@@ -422,11 +423,12 @@ tempCalibMakeAvgTable <- function(fdata, smoothN=17, TRange=NULL, ot=c(1300, 160
 } # EOF
 
 calcUnivAucTable <- function(smoothN=17, ot=c(1300, 1600), tcdName) {
+	stn <- getstn()
 	dataset <- get(tcdName, pos=.ap2)
-	if (!.ap2$stn$allSilent) {cat(" * Calculating universal AUC table... ")}
+	if (!stn$allSilent) {cat(" * Calculating universal AUC table... ")}
 	avgTable <- tempCalibMakeAvgTable(dataset, smoothN, TRange=NULL, ot)
 	aucd <- calcAUCtable(avgTable, .ap2)$aucd
-	if (!.ap2$stn$allSilent) {cat("ok\n")}
+	if (!stn$allSilent) {cat("ok\n")}
 	return(aucd)
 } #EOF
 
@@ -572,6 +574,7 @@ getTempNormAUCPercTable <- function(univAucTable, Texp, aucExtrema) {
 
 ## gets called once in gdmm only if we will calculate an aquagram, so if tempCalibDataset does NOT come in as NULL
 aq_loadGlobalAquagramCalibData <- function(tempCalibDataset, tempFile) {
+	stn <- getstn()
 	if (!is.null(tempCalibDataset)) {
 		tcdName <- paste0(tempFile, "_tcd")
 		if (!exists(tcdName, where=.ap2)) {
@@ -582,7 +585,7 @@ aq_loadGlobalAquagramCalibData <- function(tempCalibDataset, tempFile) {
 		}
 		univAucTableName <- paste0(tempFile, "_univAucTable")
 		if (!exists(univAucTableName, where=.ap2)) {
-			aut <-  calcUnivAucTable(smoothN=.ap2$stn$aqg_smoothCalib, ot=getOvertoneCut(.ap2$stn$aqg_OT), tcdName)
+			aut <-  calcUnivAucTable(smoothN=stn$aqg_smoothCalib, ot=getOvertoneCut(stn$aqg_OT), tcdName)
 			assign(univAucTableName, aut, pos=.ap2)
 		}
 	} # end !is.null(tempCalibDataset)
@@ -794,6 +797,7 @@ aq_calculateCItable <- function(bootRes, groupAvg) {
 } # EOF
 
 calcAquagramSingle <- function(dataset, md, ap, classVar, minus, idString, apLoc) {
+	stn <- getstn()
 	##
 	ap <- ap_reCheckAqgBootR(ap, dataset) # we have to re-asses the bootstrap R, as after splitting, avg. of cons scans etc, the number of observation is, of course, different than when the datasets for the cube were made.
 	a <- ap$aquagr
@@ -838,7 +842,7 @@ calcAquagramSingle <- function(dataset, md, ap, classVar, minus, idString, apLoc
 		subtrSpec <- a$subtrSpec
 	} # end calc spectra
 	if (bootCI & !haveClassicAqg(ap)) { # should make it impossible to run a bootstrap on the classic aquagram
-		if (.ap2$stn$aqg_bootUseParallel == TRUE) {
+		if (stn$aqg_bootUseParallel == TRUE) {
 			if (Sys.info()["sysname"] == "Windows") {
 				useMC <- "snow"
 			} else {
@@ -919,15 +923,16 @@ calcAquagramSingle <- function(dataset, md, ap, classVar, minus, idString, apLoc
 #' @family Temperature calibration procedures
 #' @export
 genTempCalibExp <- function(Tcenter=NULL, Tdelta=5, stepBy=1, repls=4) {
+	stn <- autoUpS()
 	if(is.null(Tcenter)) {
 		stop("Please provide a numeric value for 'Tcenter'.", call.=FALSE)
 	}
 	genFolderStr()
-	fn_metadata <- .ap2$stn$fn_metadata # folder name for metadata
-	fn_mDataDefFile <- .ap2$stn$fn_mDataDefFile
-	deleteCol <- .ap2$stn$p_deleteCol
-	clPref <- .ap2$stn$p_ClassVarPref
-	yPref <- .ap2$stn$p_yVarPref
+	fn_metadata <- stn$fn_metadata # folder name for metadata
+	fn_mDataDefFile <- stn$fn_mDataDefFile
+	deleteCol <- stn$p_deleteCol
+	clPref <- stn$p_ClassVarPref
+	yPref <- stn$p_yVarPref
 	#
 	temps <- as.character(Tcenter + seq(-Tdelta, Tdelta, by=stepBy))
 	temps <- rep(temps, each=repls)

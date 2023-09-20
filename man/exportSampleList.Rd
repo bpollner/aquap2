@@ -22,9 +22,9 @@ esl(
 )
 }
 \arguments{
-\item{md}{List. An object with the metadata of the experiment. Defaults to 
-    \code{getmd()}, what is calling the default filename for the metadata file. 
-See \code{\link{getmd}} and \code{\link{metadata_file}}.}
+\item{md}{An object of class \code{aquap_md} containing the metadata of the 
+experiment. Defaults to \code{getmd()}, what is calling the default filename 
+for the metadata file. See \code{\link{getmd}} and \code{\link{metadata_file}}.}
 
 \item{form}{Character, can be 'txt' to export the sample list in a tab 
 delimited text file, 'xls' to export as an Excel file, or if left at the 
@@ -33,8 +33,7 @@ default 'def' is reading in the value from the settings.r file (parameter
 
 \item{rnd}{Logical, if the sample list should be randomized or not, defaults 
 to TRUE. (Having a non-randomized sample list can be interesting to check the 
-correctness of the sample list when designing the experiment, i.e. when 
-providing the values for the argument 'L1' and 'L2' in the metadata file.)}
+correctness of the sample list when designing the experiment.}
 
 \item{showFirstRows}{Logical. If the first rows of the sample list should be 
 displayed.}
@@ -43,19 +42,21 @@ displayed.}
 }
 \value{
 An (invisible) data frame with a (randomized) sample list resp. this 
-list saved to  a file.
+list saved to a file.
 }
 \description{
 Creates and exports the randomized sample list to file.
 }
 \details{
-Possible formats to export are XXX. For the time estimates, 
-	you can fill in your own values at the bottom of the settings.r file.
+Possible formats to export are tab delimited text or Excel. 
+When the appropriate values at the bottom of the settings.r file are provided, 
+an approximate time estimate of how long it will take to work through the 
+sample list is given.
 }
 \section{Note}{
  You can provide your own values for how many seconds you 
 need for a single scan etc. at the bottom of the settings.r file to make the 
-time estimate valid for you.
+time estimate valid.
 }
 
 \examples{

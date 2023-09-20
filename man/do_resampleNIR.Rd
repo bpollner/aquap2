@@ -8,7 +8,7 @@ do_resampleNIR(
   dataset,
   targetWls = NULL,
   tby = 0.5,
-  method = get("stn", envir = .ap2)$gen_resample_method
+  method = getstn()$gen_resample_method
 )
 }
 \arguments{

@@ -1,4 +1,3 @@
-
 makeSingleClass <- function(L1, L1index, L2) {
 	out <- NULL
 	L1mat <- matrix()[-1]
@@ -148,8 +147,9 @@ out
 } # EOF
 
 insertTRH <- function(sampleList) { # insert a column for Temperatur and RH (to be filled in by hand)
-	tempName <- .ap2$stn$p_tempCol
-	RHName <- .ap2$stn$p_RHCol
+	stn <- getstn()	
+	tempName <- stn$p_tempCol
+	RHName <- stn$p_RHCol
 	mat <- matrix("", nrow(sampleList), 2)
 	DF <- data.frame(mat)
 	names(DF) <- c(tempName, RHName)
@@ -157,7 +157,8 @@ insertTRH <- function(sampleList) { # insert a column for Temperatur and RH (to 
 } # EOF
 
 createSingleTimePointSampleList <- function(expMetaData, rnd) {
-	delChar <- .ap2$stn$p_deleteCol
+	stn <- getstn()
+	delChar <- stn$p_deleteCol
 	spacing <- expMetaData$postProc$spacing
 	rndList <- createRandomizedSampleList(expMetaData$expClasses, rnd) 
 	envList <- insertEnvControls(rndList, expMetaData$postProc) 
@@ -185,17 +186,19 @@ makeTimeLabelSampleList <- function(expMetaData, rnd) {
 } # EOF
 
 insertEnumeration <- function(sampleList) {  # so that the row-numbers stay during export
+	stn <- getstn()
 	nrs <- seq(1: nrow(sampleList))
 	mat <- matrix(nrs, nrow(sampleList))
 	a <- data.frame(SampleNr=mat)
-	colnames(a) <- paste(.ap2$stn$p_yVarPref, .ap2$stn$p_sampleNrCol, sep="")
+	colnames(a) <- paste(stn$p_yVarPref, stn$p_sampleNrCol, sep="")
 	out <- data.frame(a, sampleList)
 	out
 } # EOF
 
 esl_checkDefaults <- function(form) {
+	stn <- getstn()
 	if (form == "def") {
-		form <- .ap2$stn$p_sampleListExportFormat
+		form <- stn$p_sampleListExportFormat
 	} else {
 		if (form != "txt" & form != "xls") {
 			stop("Please provide either 'txt' or 'xls' to the 'form' argument to export either a tab-delimited text file or an Excel-file.", call.=FALSE)
@@ -246,19 +249,19 @@ esl_checkDefaults <- function(form) {
 #' @family Core functions
 #' @export exportSampleList
 exportSampleList <- function(md=getmd(), form="def", rnd=TRUE, showFirstRows=TRUE, timeEstimate=FALSE) {
-	autoUpS()
+	stn <- autoUpS()
 	esl_checkDefaults(form)
-	fn_sl <- .ap2$stn$fn_sampleLists
-	fn_sl_out <- .ap2$stn$fn_sampleListOut
-		durationSingleScan <- .ap2$stn$misc_durationSingleScan
-		handlingTime <- .ap2$stn$misc_handlingTime
+	fn_sl <- stn$fn_sampleLists
+	fn_sl_out <- stn$fn_sampleListOut
+		durationSingleScan <- stn$misc_durationSingleScan
+		handlingTime <- stn$misc_handlingTime
 	expName <- md$meta$expName
 	timeLabels <- md$expClasses$timeLabels
 	nrConScans <- md$postProc$nrConScans
 		scanSeconds <- 	(nrConScans+1) * durationSingleScan 	## +1 because of the reference scan !
 		totalTime <- scanSeconds + handlingTime
 	##
-	if(!.ap2$stn$allSilent) {cat("Creating sample list...\n")}
+	if(!stn$allSilent) {cat("Creating sample list...\n")}
 	a <- makeTimeLabelSampleList(md, rnd)
 	b <- insertEnumeration(a)
 	##
@@ -273,7 +276,7 @@ exportSampleList <- function(md=getmd(), form="def", rnd=TRUE, showFirstRows=TRU
 		toTab <- FALSE
 	}
 	filename <- paste(fn_sl, "/",fn_sl_out , "/", expName, ending, sep="")
-	if(!.ap2$stn$allSilent) {cat("Writing sample list to file...\n")}
+	if(!stn$allSilent) {cat("Writing sample list to file...\n")}
 	if (toTab) {
 		write.table(b, filename, sep="\t", row.names=FALSE)	
 	} else {

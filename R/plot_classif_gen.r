@@ -42,6 +42,7 @@ secureTRUE_FALSE_inColnames <- function(tbl) {
 
 ### CORE ###
 plot_classif_typeClassOn <- function(type, classOn, cvSummaryList, testSummaryList, method, apCl, ap, expName, idString, colorLegValues, apClUser, nrCvTrain, nrCvPred, grpCvPred, nrTestCv, nrTestPred, grpTestPred, exDat) { # we are already in the PDF or not
+	stn <- getstn()
 #	cat(paste0("Type: ", type, "; classOn: ", classOn, " (", method, ")\n")) ; cat("CV Summary \n") ; print(cvSummaryList); cat("Test Summary \n"); print(testSummaryList); wait()
 #	cat(paste0("nrCvTrain: ", nrCvTrain, "; nrCvPred: ", nrCvPred, "\ngrpCvPred:\n")); print(grpCvPred); cat("\n\n\n")
 	# ap is the ap coming from where the user wants it (the aps trick)
@@ -49,20 +50,20 @@ plot_classif_typeClassOn <- function(type, classOn, cvSummaryList, testSummaryLi
 	# apCl is the classification specific part taken from the master list, i.e. that was added to the calculation results
 	####
 	# read in from the settings
-	cvTestInOnePage <- .ap2$stn$cl_plot_CVandTestInOnePage
-	txtSizeTables <- .ap2$stn$cl_plot_baseTextSizeTables
-	charCV <- .ap2$stn$cl_plot_CharForCV
-	charTest <- .ap2$stn$cl_plot_CharForTest
-	charIndPredExternal <- .ap2$stn$cl_plot_CharForIndepPredExtData
-	charPcaRed <- .ap2$stn$cl_plot_CharForPcaReduction
-	addConfTables <- .ap2$stn$cl_plot_addConfusionTables
-	inclSDtable <- .ap2$stn$cl_plot_includeSDtables
-	titTblAvg <- .ap2$stn$cl_plot_avgTableTitle
-	titTblSD <- .ap2$stn$cl_plot_sdTableTitle	
-	tlbPad <- .ap2$stn$cl_plot_confTablePadding
-	useDataCols <- .ap2$stn$cl_plot_useColorsFromDataset
-	colorErrorbar <- .ap2$stn$cl_plot_colorErrorBar
-	rndNoo <- .ap2$stn$cl_gen_digitsRoundNrObservations
+	cvTestInOnePage <- stn$cl_plot_CVandTestInOnePage
+	txtSizeTables <- stn$cl_plot_baseTextSizeTables
+	charCV <- stn$cl_plot_CharForCV
+	charTest <- stn$cl_plot_CharForTest
+	charIndPredExternal <- stn$cl_plot_CharForIndepPredExtData
+	charPcaRed <- stn$cl_plot_CharForPcaReduction
+	addConfTables <- stn$cl_plot_addConfusionTables
+	inclSDtable <- stn$cl_plot_includeSDtables
+	titTblAvg <- stn$cl_plot_avgTableTitle
+	titTblSD <- stn$cl_plot_sdTableTitle	
+	tlbPad <- stn$cl_plot_confTablePadding
+	useDataCols <- stn$cl_plot_useColorsFromDataset
+	colorErrorbar <- stn$cl_plot_colorErrorBar
+	rndNoo <- stn$cl_gen_digitsRoundNrObservations
 	SD <- avg <- predicted <- true <- NULL # to prevent warnings in checking (needed when creating the plots)
 	tilde <- "~"
 	#
@@ -246,30 +247,31 @@ plot_classif_CubeElement <- function(set, slotChar, ap, expName, apClUser) { # h
 } # EOF
 
 plot_classif_generalHandover <- function(cube, ap, slotChar, apClCube, apClUser) { # cycling through the cube elements; the slotChar comes in from the specific function in file "plot_classif_spec.r"
+	stn <- getstn()
 	# ap is the ap coming from where the user wants it (the aps trick)
 	# apClUser is the classification specific part of the ap taken from the user-defined ap (above)
 	# apClCube is the classification specific part of the ap taken from the cube (where the status at the time of calculation is reflected)
 	where <- ap$genPlot$where
 	fns <- ap$genPlot$fns
-	height <-.ap2$stn$pdf_Height_classif
-	width <- .ap2$stn$pdf_Width_classif
+	height <-stn$pdf_Height_classif
+	width <- stn$pdf_Width_classif
 	if (apClCube$percTest <= 0 ) {
 		height <- height/2
 	}
-	path <- .ap2$stn$fn_results
+	path <- stn$fn_results
 	suffix <- paste0("classification_")
 #	message <- paste0("classification")
 	expName <- getExpName(cube)
 	filename <- paste(expName, suffix, sep="_")
 	filename <- paste(path, "/", filename, fns, "_", slotChar, ".pdf", sep="")
-	if (!.ap2$stn$allSilent & (where == "pdf" )) {cat(paste0("Plotting ", slotChar, " classification... "))}
+	if (!stn$allSilent & (where == "pdf" )) {cat(paste0("Plotting ", slotChar, " classification... "))}
 	if (where == "pdf") { pdf(file=filename, width, height, onefile=TRUE) }
 	if (where != "pdf" & Sys.getenv("RSTUDIO") != 1) {dev.new(height=height, width=width)}	
 	for (i in 1: length(cube)) {
 		plot_classif_CubeElement(set=cube[[i]], slotChar, ap, expName, apClUser)
 	}		
 	if (where == "pdf") {dev.off()}
-	if (!.ap2$stn$allSilent & (where == "pdf" )) {cat("ok\n") }
+	if (!stn$allSilent & (where == "pdf" )) {cat("ok\n") }
 } # EOF
 
 
@@ -297,25 +299,26 @@ plot_classif_PredListElement <- function(siPredLi, expName, apCube, anpPlot) { #
 } # EOF
 
 makeIndepClassifXValidationPlots <- function(predList, anpPlot) {
+	stn <- getstn()
 	apCube <- getAnproc(predList)
 	expName <- getExpName(predList)
 	where <- anpPlot$genPlot$where 
 	fns <- anpPlot$genPlot$fns
-	height <- (.ap2$stn$pdf_Height_classif) / 2
-	width <- .ap2$stn$pdf_Width_classif
-	path <- .ap2$stn$fn_results
+	height <- (stn$pdf_Height_classif) / 2
+	width <- stn$pdf_Width_classif
+	path <- stn$fn_results
 	suffix <- paste0("indepClassif")
 #	message <- paste0("classification")
 	filename <- paste(expName, suffix, sep="_")
 	filename <- paste(path, "/", filename, fns, ".pdf", sep="")
-	if (!.ap2$stn$allSilent & (where == "pdf" )) {cat("Plotting classification for external data... ")}
+	if (!stn$allSilent & (where == "pdf" )) {cat("Plotting classification for external data... ")}
 	if (where == "pdf") { pdf(file=filename, width, height, onefile=TRUE) }
 	if (where != "pdf" & Sys.getenv("RSTUDIO") != 1) {dev.new(height=height, width=width)}	
 	for (i in 1: length(predList)) { # the outermost list in predList reflects the cube elements
 		plot_classif_PredListElement(predList[[i]], expName, apCube, anpPlot)
 	}		
 	if (where == "pdf") {dev.off()}
-	if (!.ap2$stn$allSilent & (where == "pdf" )) {cat("ok\n") }
+	if (!stn$allSilent & (where == "pdf" )) {cat("ok\n") }
 } # EOF
 
 
@@ -402,7 +405,7 @@ makeIndepClassifXValidationPlots <- function(predList, anpPlot) {
 #' @family Plot functions
 #' @export
 plot_classifX_indepPred <- function(indepDataset, cube, ccv=NULL, icv=NULL, pl=TRUE, toxls="def", info="def", confirm="def", predList=NULL, apPlot="def", ...) {
-	autoUpS()
+	stn <- autoUpS()
 	if (!is.null(predList)) {
 		anpPlot <- modifyThisAp(getAnproc(predList), ...)
 	}
@@ -413,25 +416,25 @@ plot_classifX_indepPred <- function(indepDataset, cube, ccv=NULL, icv=NULL, pl=T
 		cubeID <- paste(cubeName, cube@timestamp, sep=" @ ")
 		check_indXClassifPrediction_input(indepDataset, cube, ccv, icv, cubeName, dsName, toxls, info, confirm) ## !! is assigning ccv, icv, toxls, info, confirm
 		apCu <- getap(.lafw_fromWhere="cube", cube=cube)
-		if (!.ap2$stn$allSilent & .ap2$stn$cl_indepPred_printPairingMsg) {
+		if (!stn$allSilent & stn$cl_indepPred_printPairingMsg) {
 			printMessagePairing_classif(ccv, icv, info, confirm)
 		}	
 		if (length(cube) == 1) {ad1 <- ""} else {ad1 <- "s"};  	if (length(ccv) == 1) {ad2 <- ""} else {ad2 <- "s"}
-		if (!.ap2$stn$allSilent) {cat(paste0("Calc. classification predictions for ", length(cube), " cube element", ad1, " (", length(ccv), " model", ad2, " each)... "))}
+		if (!stn$allSilent) {cat(paste0("Calc. classification predictions for ", length(cube), " cube element", ad1, " (", length(ccv), " model", ad2, " each)... "))}
 		predList <- calculateIndepClassifXPrediction(indepDataset, cube, ccv, icv, apCu, cubeID) #### CORE #### calculation 
-		if (!.ap2$stn$allSilent) {cat("ok\n")}
+		if (!stn$allSilent) {cat("ok\n")}
 		###
 		toxls=FALSE # XXX dev only
 		if (toxls) {
-			if (!.ap2$stn$allSilent) {cat(paste0("Exporting predicted data to excel file... "))}
+			if (!stn$allSilent) {cat(paste0("Exporting predicted data to excel file... "))}
 			message("NOT YET IMPLEMENTED")		
 		#	exportPredListToExcel(cube, predList, anpPlot) #### export to excel ####
-			if (!.ap2$stn$allSilent) {cat("ok\n")}
+			if (!stn$allSilent) {cat("ok\n")}
 		} # end predToXls
 		###
 	} else { # end is.null(predList) # so we provide a predList, that means we want only to plot
 		# so here we HAVE provided input to `predList`
-		if (class(predList) != "aquap_ipl") {
+		if (!is(predList, "aquap_ipl")) {
 			stop(paste0("Please provide an object of class `aquap_ipl` to the argument `predList`."), call.=FALSE)
 		}
 		pl=TRUE
@@ -439,7 +442,7 @@ plot_classifX_indepPred <- function(indepDataset, cube, ccv=NULL, icv=NULL, pl=T
 	# now plot, please (use the ap2 now!)
 	if (pl) {
 		aa <- try(makeIndepClassifXValidationPlots(predList, anpPlot)) #### plot the results ####
-		if (class(aa) == "try-error") {
+		if (is(aa, "try-error")) {
 			message("Sorry, there was an error during plotting.")
 		}
 	}

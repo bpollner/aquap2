@@ -1,9 +1,10 @@
 makePCAScorePlots <- function(cube, ap, comps=c(1:5), pcs=c(1,2), onMain="", onSub="") {
+	stn <- getstn()
 #	plot(0, type="n")
-	trRobust <- .ap2$stn$pca_CI_ellipse_robust
-	trCenterPch <- .ap2$stn$pca_CI_ellipse_centerPch
-	trLty <- .ap2$stn$pca_CI_ellipse_lty
-	trLwd <- .ap2$stn$pca_CI_ellipse_lwd
+	trRobust <- stn$pca_CI_ellipse_robust
+	trCenterPch <- stn$pca_CI_ellipse_centerPch
+	trLty <- stn$pca_CI_ellipse_lty
+	trLwd <- stn$pca_CI_ellipse_lwd
 	trElci <- ap$pca$elci
 	trKeyBGCol <- "white"
 	trAlphaBG <- 0.85 # 0 is completely transparent
@@ -26,7 +27,7 @@ makePCAScorePlots <- function(cube, ap, comps=c(1:5), pcs=c(1,2), onMain="", onS
 		PCAObject <- getPCAObject(set)
 #		idString <- getIdString(set)
 		idString <- adaptIdStringForDpt(ap, getIdString(set))
-		allVariancesPCs <- round((ChemometricsWithR::variances(PCAObject) / PCAObject$totalvar)*100, .ap2$stn$pca_nrDigitsVariance)
+		allVariancesPCs <- round((ChemometricsWithR::variances(PCAObject) / PCAObject$totalvar)*100, stn$pca_nrDigitsVariance)
 		cumSumVars <- cumsum(allVariancesPCs)
 		ind99 <- which(cumSumVars >= 99)[1]
 		ind99Txt <- paste("   [", ind99, " PCs for 99% var.]", sep="")
@@ -121,11 +122,12 @@ makePCAScorePlots <- function(cube, ap, comps=c(1:5), pcs=c(1,2), onMain="", onS
 } #EOF
 
 plotPCA_Scores <- function(cube, ap, where="pdf", comps= c(1:5), pcs=c(1,2), onMain="", onSub="", fns="") {
-	if (!.ap2$stn$allSilent & (where == "pdf" )) {cat("Plotting PCA score plots... ")}
+	stn <- getstn()
+	if (!stn$allSilent & (where == "pdf" )) {cat("Plotting PCA score plots... ")}
 	expName <- getExpName(cube)
-	height <-.ap2$stn$pdf_Height_sq
-	width <- .ap2$stn$pdf_Width_sq
-	path <- .ap2$stn$fn_results
+	height <-stn$pdf_Height_sq
+	width <- stn$pdf_Width_sq
+	path <- stn$fn_results
 	suffix <- "pcaScores"
 	message <- "PCA Scores"
 	filename <- paste(expName, suffix, sep="_")
@@ -135,7 +137,7 @@ plotPCA_Scores <- function(cube, ap, where="pdf", comps= c(1:5), pcs=c(1,2), onM
 	if (where != "pdf" & Sys.getenv("RSTUDIO") != 1) {dev.new(height=height, width=width)}	
 	makePCAScorePlots(cube, ap, comps, pcs, onMain, onSub)
 	if (where == "pdf") {dev.off()}
-	if (!.ap2$stn$allSilent & (where == "pdf" )) {cat("ok\n") }
+	if (!stn$allSilent & (where == "pdf" )) {cat("ok\n") }
 } # EOF
 
 # not in use; the template from demar
@@ -169,8 +171,9 @@ makePCALoadingPlots<- function(cube, ap, comps=c(1:5), onMain="", onSub="", wher
 
 ## npcs defining the range of the loadings that we want to see
 makePCALoadingPlots2 <- function (cube, ap, comps, onMain="", onSub="", where="", bandwidth=25, adLines=TRUE, ccol=NULL, clty=NULL) { 
-	discrim <- .ap2$stn$pca_loadings_discrim
-	nrDigitsVariance <- .ap2$stn$pca_nrDigitsVariance
+	stn <- getstn()
+	discrim <- stn$pca_loadings_discrim
+	nrDigitsVariance <- stn$pca_nrDigitsVariance
 	#
 	for (k in 1: length(cube)) {
 		set <- cube[[k]]
@@ -188,11 +191,12 @@ makePCALoadingPlots2 <- function (cube, ap, comps, onMain="", onSub="", where=""
 } #EOF
 
 plotPCA_Loadings <- function(cube, ap, where="pdf", comps=c(1:5), onMain="", onSub="", fns="", bandwidth=25, adLines=TRUE, ccol=NULL, clty=NULL) {
-	if (!.ap2$stn$allSilent & (where == "pdf" )) {cat("Plotting PCA loading plots... ")}
+	stn <- getstn()
+	if (!stn$allSilent & (where == "pdf" )) {cat("Plotting PCA loading plots... ")}
 	expName <- getExpName(cube)
-	height <-.ap2$stn$pdf_Height_ws
-	width <- .ap2$stn$pdf_Width_ws
-	path <- .ap2$stn$fn_results
+	height <-stn$pdf_Height_ws
+	width <- stn$pdf_Width_ws
+	path <- stn$fn_results
 	suffix <- "pcaLoadings"
 	filename <- paste(expName, suffix, sep="_")
 	filename <- paste(path, "/", filename, fns, ".pdf", sep="")
@@ -201,12 +205,13 @@ plotPCA_Loadings <- function(cube, ap, where="pdf", comps=c(1:5), onMain="", onS
 	if (where != "pdf" & Sys.getenv("RSTUDIO") != 1) {dev.new(height=height, width=width)}	
 	makePCALoadingPlots2(cube, ap, comps, onMain, onSub, where, bandwidth, adLines, ccol, clty)
 	if (where == "pdf") {dev.off()}
-	if (!.ap2$stn$allSilent & (where == "pdf" )) {cat("ok\n") }
+	if (!stn$allSilent & (where == "pdf" )) {cat("ok\n") }
 } # EOF
 
 plot_pca_checkDefaultsParams <- function(ld.bandwidth, ld.adLines, ld.col, ld.lty) {
+	stn <- getstn()
 	if (all(ld.bandwidth == "def")) {
-		ld.bandwidth <- .ap2$stn$pp_bandwidth
+		ld.bandwidth <- stn$pp_bandwidth
 	}
 	if (!all(is.numeric(ld.bandwidth)) | length(ld.bandwidth) != 1) {
 		stop("Please provide a numeric length one for the argument 'ld.bandwidth'.", call.=FALSE)
@@ -215,7 +220,7 @@ plot_pca_checkDefaultsParams <- function(ld.bandwidth, ld.adLines, ld.col, ld.lt
 	##
 	aa <- ld.adLines
 	if (all(aa == "def")) {
-		aa <- .ap2$stn$pca_AdLines
+		aa <- stn$pca_AdLines
 	}
 	if (!is.logical(aa)) {
 		if (!all(is.wholenumber(aa)) | (min(aa) < 2) | (max(aa) > 5)) {
@@ -226,7 +231,7 @@ plot_pca_checkDefaultsParams <- function(ld.bandwidth, ld.adLines, ld.col, ld.lt
 	##
 	ccol <- ld.col
 	if (all(ccol == "def")) {
-		ccol <- .ap2$stn$pca_ld_customColor
+		ccol <- stn$pca_ld_customColor
 	}
 	if (!is.null(ccol)) {
 		# XXX ? how to check for existence, validity of the provided colors ?
@@ -235,7 +240,7 @@ plot_pca_checkDefaultsParams <- function(ld.bandwidth, ld.adLines, ld.col, ld.lt
 	##
 	lty <- ld.lty
 	if (all(lty == "def")) {
-		lty <- .ap2$stn$pca_ld_customLinetype
+		lty <- stn$pca_ld_customLinetype
 	}
 	if (!is.null(lty)) {
 		if (!all(is.wholenumber(lty)) | !all(lty > 0) ) {
@@ -248,8 +253,8 @@ plot_pca_checkDefaultsParams <- function(ld.bandwidth, ld.adLines, ld.col, ld.lt
 
 #### CORE ###
 plot_pca_cube <- function(cube, aps="def", ld.bandwidth="def", ld.adLines="def", ld.col="def", ld.lty="def", ...) {
-	autoUpS()
-	printEmpty <- .ap2$stn$gen_plot_printEmptySlots
+	stn <- autoUpS()
+	printEmpty <- stn$gen_plot_printEmptySlots
 	#
 	ap <- doApsTrick(aps, cube, ...)
 	ap <- ap_cleanZeroValuesCheckExistenceDefaults(ap, dataset=getDataset(cube[[1]]), haveExc=FALSE) # just take the first dataset, as we mainly need the header (and the wavelengths are already checked.. )
@@ -295,7 +300,7 @@ setAllSplitVarsToNull <- function(ap) {
 
 ## core for dataset ##
 plot_pca_data <- function(dataset, aps="def", ...) {
-	autoUpS()
+	stn <- autoUpS()
 	aps <- checkApsChar(aps)
 	if (aps=="cube") {
 		message("'aps=cube' is not meaningful in this context, aps switched to be 'def', meaning the default anproc filename will be used.\nAll is good.")
@@ -306,15 +311,15 @@ plot_pca_data <- function(dataset, aps="def", ...) {
 	ap <- setAllSplitVarsToNull(ap)
 	##
 
-	prev <- .ap2$stn$allSilent
-	.ap2$stn$allSilent <<- TRUE
+	prev <- stn$allSilent
+	stn$allSilent <<- TRUE
 	cube <- gdmm(dataset, ap=ap) ##### generate the cube !!! ######
 	prevIdString <- getIdString(cube[[1]]) # cube has only 1 set here !!
 	origAp <- getAnproc(dataset)
 	origDptMods <- origAp$dpt$dptModules
 #	cube[[1]]@idString <- adaptIdStringForDpt(dptSource=origAp, prevIdString) # put all the data treatment info in the idString
 	cube@anproc$dpt$dptModules <- origDptMods # put the dpt info that we got from the dataset into the cube AFTER the gdmm, so that we do not do the treatment again!!
-	.ap2$stn$allSilent <<- prev
+	stn$allSilent <<- prev
 	plot_pca_cube(cube, aps="cube", ...)
 } # EOF
 

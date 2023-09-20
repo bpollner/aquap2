@@ -1,10 +1,11 @@
 noi_calculateNoiseDistribution <- function(noiseDataset, noiseFileName) { # is called from gdmm; if no noise, the noiseDataset comes in as NULL
+	stn <- getstn()
 	# noiseDataset also comes in as NULL when we are having the static noise mode, is checked in the checking function when calling gdmm
 	if (!is.null(noiseDataset)) { # so we want to do some noise, and do not have the static mode
 		noiseDistName <- paste0(pv_noiseDistPrefix, noiseFileName)
 		if (!exists(noiseDistName, where=.ap2)) {
-			noiMode <- .ap2$stn$noi_addMode 		## pv_noiseAddModes <- c("sdNorm", "sdUnif", "extrema", "static")
-			if (!.ap2$stn$allSilent) {cat(paste0("Calculating specific noise distribution from noise-data file '", noiseFileName, "' with ",noiMode , " method..."))}	
+			noiMode <- stn$noi_addMode 		## pv_noiseAddModes <- c("sdNorm", "sdUnif", "extrema", "static")
+			if (!stn$allSilent) {cat(paste0("Calculating specific noise distribution from noise-data file '", noiseFileName, "' with ",noiMode , " method..."))}	
 			aa <- pv_noiseAddModes
 			if (noiMode == aa[1] | noiMode == aa[2]) { # so we want the sd method
 				meanV <- apply(noiseDataset$NIR, 2, mean)
@@ -26,22 +27,23 @@ noi_calculateNoiseDistribution <- function(noiseDataset, noiseFileName) { # is c
 			noiseDist <- list(hull=hullValues, confInt=confInt, meanV=meanV, sdV=sdV, wls=wls)
 			###
 			assign(noiseDistName, noiseDist, pos=.ap2) # we could hand it over in the functions, but we require this to be done only once the first time
-			if (!.ap2$stn$allSilent) {cat("ok\n")}
+			if (!stn$allSilent) {cat("ok\n")}
 		} # end if !exists noiseDist
 	} # end if !is.null noiseDataset
 } # EOF
 
 test_plotNoiseData <- function(doTest=FALSE, noiseFile) {
+	stn <- getstn()
 	if (doTest) {
 		C_outlier_all <- NULL
-		ss <- .ap2$stn$noi_sampleSize
-		modus <- .ap2$stn$noi_addMode
+		ss <- stn$noi_sampleSize
+		modus <- stn$noi_addMode
 		pathSH <- Sys.getenv("AQUAP2SH")
 		noisePath <- paste(pathSH, noiseFile, sep="/")
 		noiDataset <- eval(parse(text=load(noisePath)))
 		noiDataset@metadata$meta$expName <- paste0("Noise Data (", noiseFile, ")")
 		if (modus == "sdNorm") {
-			halfSdAdd <- paste0("halfSD = ", .ap2$stn$noi_sdNormHalfOnly)
+			halfSdAdd <- paste0("halfSD = ", stn$noi_sdNormHalfOnly)
 		} else {
 			halfSdAdd <- ""
 		}
@@ -78,6 +80,7 @@ test_plotSDValues <- function(doTest=FALSE, nodi) {
 } # EOF
 
 test_plotSinglePool <- function(doTest=FALSE, swl, pool, nc, out) {
+	stn <- getstn()
 	if (doTest) {
 		if (.ap2$.poolCnt < nc) {
 			n <- length(pool)
@@ -87,7 +90,7 @@ test_plotSinglePool <- function(doTest=FALSE, swl, pool, nc, out) {
 		#	points(swl, out, col="red", pch=3)
 			assign(".poolCnt", .ap2$.poolCnt+1, pos=.ap2)
 		}
-	}
+	} # end if toTest
 } # EOF
 
 test_plotSingleResult <- function(doTest=FALSE, wls, siRow) {
@@ -97,8 +100,9 @@ test_plotSingleResult <- function(doTest=FALSE, wls, siRow) {
 } # EOF
 
 test_plotSingleResult_static <- function(doTest=FALSE, wls, siRow) {
+	stn <- getstn()
 	if (doTest) {
-		statSd <- .ap2$stn$noi_staticValue
+		statSd <- stn$noi_staticValue
 		lines(wls, siRow, col="red", lwd=0.7)
 		abline(h=0, col="black", lwd=0.7)
 		abline(h=c(-statSd, statSd), col="black", lty=2, lwd=0.7)
@@ -106,9 +110,10 @@ test_plotSingleResult_static <- function(doTest=FALSE, wls, siRow) {
 } # EOF
 
 test_plotStaticNoise <- function(doTest=FALSE, nc) {
+	stn <- getstn()
 	if (doTest) {
-		statSd <- .ap2$stn$noi_staticValue
-		ss <- .ap2$stn$noi_sampleSize
+		statSd <- stn$noi_staticValue
+		ss <- stn$noi_sampleSize
 		ti <- 3
 		subT <- paste0("sample size = ", ss, ", static sd = ", statSd)
 		plot(0, xlim=c(0, nc), ylim=c(-(ti*statSd), ti*statSd), ylab="random noise value", col="white", sub=subT, main="Static Noise")
@@ -118,8 +123,9 @@ test_plotStaticNoise <- function(doTest=FALSE, nc) {
 
 ### CORE ### is called in file: cube_generateDatasets.r
 noi_performNoise <- function(dataset, noiseFile)	{ # is working on a single dataset, i.e. within each single element of the cube
-	noiMode <- .ap2$stn$noi_addMode 
-	sampSize <- .ap2$stn$noi_sampleSize
+	stn <- getstn()
+	noiMode <- stn$noi_addMode 
+	sampSize <- stn$noi_sampleSize
 	pvnad <- pv_noiseAddModes  # ## c("sdNorm", "sdUnif", "extrema", "static")
 	nr <- nrow(dataset$NIR)
 	nc <- ncol(dataset$NIR)
@@ -127,7 +133,7 @@ noi_performNoise <- function(dataset, noiseFile)	{ # is working on a single data
 	doTest <- FALSE
 	######
 	if (noiMode == pvnad[4]) { # the static method
-		statSd <- .ap2$stn$noi_staticValue
+		statSd <- stn$noi_staticValue
 		iw_static <- function(x) {
 			pool <- rnorm(sampSize, mean=0, sd=statSd)
 			out <- sample(pool, 1)
@@ -163,7 +169,7 @@ noi_performNoise <- function(dataset, noiseFile)	{ # is working on a single data
 	noiseHull <- noiseHull[, selInd]
 	noiseWls <- noiseWls[selInd]
 	##
-	halfOnly <- .ap2$stn$noi_sdNormHalfOnly; 	if (!is.logical(halfOnly)) { halfOnly <- TRUE} ; 	if (halfOnly) {	div <- 2 } else { div <- 1 }
+	halfOnly <- stn$noi_sdNormHalfOnly; 	if (!is.logical(halfOnly)) { halfOnly <- TRUE} ; 	if (halfOnly) {	div <- 2 } else { div <- 1 }
 	#
 	if (noiMode == pvnad[1] | noiMode == pvnad[2]) {  ## so we want the sd method	
 		meanV <- matrix(nodi$meanV[selInd], nrow=1) # possibly have to cut them down
@@ -241,18 +247,18 @@ noi_performNoise <- function(dataset, noiseFile)	{ # is working on a single data
 #' @family Data pre-treatment functions 
 #' @export
 do_addNoise <- function(dataset, noiseFile="def", md=getmd()) {
-	autoUpS()
+	stn <- autoUpS()
 	ap <- getap()
 	ap$dpt$noise$useNoise <- TRUE
 	dsName <- deparse(substitute(dataset))
 	#
-	noiMode <- .ap2$stn$noi_addMode 
-	if (!.ap2$stn$allSilent) {cat(paste0("Adding ", noiMode, " noise to dataset '", dsName, "'... "))}
+	noiMode <- stn$noi_addMode 
+	if (!stn$allSilent) {cat(paste0("Adding ", noiMode, " noise to dataset '", dsName, "'... "))}
 	#
 	noiseDataset <- checkLoadNoiseFile(dataset$header, max(dataset$NIR), ap, md, noiseFile) # only if noise is added; if not returns NULL; is assigning noiseFile !!
 	noi_calculateNoiseDistribution(noiseDataset, noiseFile) # only if noise: calculate noise distribution, save as global variable in .ap2
 	noiDat <- noi_performNoise(dataset, noiseFile)
-	if (!.ap2$stn$allSilent) {cat("ok.\n")}
+	if (!stn$allSilent) {cat("ok.\n")}
 	return(noiDat)
 } # EOF 
 
@@ -279,10 +285,11 @@ do_addNoise <- function(dataset, noiseFile="def", md=getmd()) {
 #' @export
 genNoiseRecExp <- function() {
 	genFolderStr()
-	fn_metadata <- .ap2$stn$fn_metadata # folder name for metadata
-	fn_mDataDefFile <- .ap2$stn$fn_mDataDefFile
-	deleteCol <- .ap2$stn$p_deleteCol
-	clPref <- .ap2$stn$p_ClassVarPref
+	stn <- autoUpS()
+	fn_metadata <- stn$fn_metadata # folder name for metadata
+	fn_mDataDefFile <- stn$fn_mDataDefFile
+	deleteCol <- stn$p_deleteCol
+	clPref <- stn$p_ClassVarPref
 	pathMd <- paste(fn_metadata, fn_mDataDefFile, sep="/")
 	con <- file(pathMd, open="rt")
 	txt <- readLines(con)
