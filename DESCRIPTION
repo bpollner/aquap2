@@ -23,7 +23,6 @@ Imports:
     doParallel,
     openxlsx,
     signal,
-    ChemometricsWithR,
     plyr,
     geometry,
     som,
@@ -63,6 +62,7 @@ Collate:
     'calc_simca.r'
     'cl_classFunctions.r'
     'cl_classDefs.r'
+    'crw_cp.R'
     'cube_generateDatasets.r'
     'cube_makeModels.r'
     'doc_anproc.r'

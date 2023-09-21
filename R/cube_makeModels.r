@@ -5,7 +5,7 @@ calculatePCA <- function(dataset, md, ap) {
 		return(NULL)
 	}
 	if (!stn$allSilent) {cat("      calc. PCA...")}
-	pcaModel <- ChemometricsWithR::PCA(scale(dataset$NIR, scale=FALSE))
+	pcaModel <- rw_PCA(scale(dataset$NIR, scale=FALSE))
 	if (!stn$allSilent) {cat(" ok\n")}
 	return(list(model=pcaModel))
 } # EOF

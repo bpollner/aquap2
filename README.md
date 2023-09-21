@@ -4,7 +4,14 @@ Authors: Bernhard Pollner & Zoltan Kovacs
 
 [![DOI](https://zenodo.org/badge/30932899.svg)](https://zenodo.org/badge/latestdoi/30932899)
 
-## Getting Started
+## Summary
+aquap2 can be useful in three distinct areas in NIRS:
+* **Experiment Design**: Outline the class-structure and generate a truly randomized sample list.
+* **Data Acquisition**: While recording spectra, the previously generated sample list can be used, thus eliminating errors in assigning classes.
+* **Data Analysis**: aquap2 provides an array of standard chemometric procedures as well as some specialized methods used in Aquaphotomics.
+
+
+## Installation
 To install the R-package "aquap2", do a github-install via devtools, in that way all dependencies should get installed as well.
 
 If you work on a Windows-machine, first download and install [R-tools](https://cran.r-project.org/bin/windows/Rtools/). (Re-start the R-session.)

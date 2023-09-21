@@ -27,7 +27,7 @@ makePCAScorePlots <- function(cube, ap, comps=c(1:5), pcs=c(1,2), onMain="", onS
 		PCAObject <- getPCAObject(set)
 #		idString <- getIdString(set)
 		idString <- adaptIdStringForDpt(ap, getIdString(set))
-		allVariancesPCs <- round((ChemometricsWithR::variances(PCAObject) / PCAObject$totalvar)*100, stn$pca_nrDigitsVariance)
+		allVariancesPCs <- round((rw_variances(PCAObject) / PCAObject$totalvar)*100, stn$pca_nrDigitsVariance)
 		cumSumVars <- cumsum(allVariancesPCs)
 		ind99 <- which(cumSumVars >= 99)[1]
 		ind99Txt <- paste("   [", ind99, " PCs for 99% var.]", sep="")
@@ -146,7 +146,7 @@ makePCALoadingPlots<- function(cube, ap, comps=c(1:5), onMain="", onSub="", wher
 		set <- cube[[k]]
 		PCAObject <- getPCAObject(set)
 		selLoadings <- PCAObject$loadings[, comps]
-		allVariancesPCs <- round((ChemometricsWithR::variances(PCAObject) / PCAObject$totalvar)*100, get(".dstn")$nrDigitsVariance)
+		allVariancesPCs <- round((rw_variances(PCAObject) / PCAObject$totalvar)*100, get(".dstn")$nrDigitsVariance)
 		ind99 <- which(cumsum(allVariancesPCs) > 99)[1]
 		ind90 <- which(cumsum(allVariancesPCs) > 90)[1]
 		ind80 <- which(cumsum(allVariancesPCs) > 80)[1]
@@ -161,7 +161,7 @@ makePCALoadingPlots<- function(cube, ap, comps=c(1:5), onMain="", onSub="", wher
 	#	plotFeaturesAreas(demarMod, range(selLoadings), what="all")
 		if (get(".dstn")$addScreeplot) {
 			if (where != "pdf" & Sys.getenv("RSTUDIO") != 1) {dev.new()}	
-			ChemometricsWithR::screeplot(PCAObject, "percentage", main=onMain, sub=onSub)
+			rw_screeplot(PCAObject, "percentage", main=onMain, sub=onSub)
 			abline(v=ind99, col="red")
 			abline(v=ind90, col="green")
 			abline(v=ind80, col="blue")
@@ -180,7 +180,7 @@ makePCALoadingPlots2 <- function (cube, ap, comps, onMain="", onSub="", where=""
 		mainTxt <- paste(onMain, adaptIdStringForDpt(ap, getIdString(set)), sep=" ")
 		wavelengths <- getWavelengths(set) # the set contains the dataset
 		PCAObject <- getPCAObject(set)
-		allVariancesPCs <- round((ChemometricsWithR::variances(PCAObject) / PCAObject$totalvar)*100, nrDigitsVariance)
+		allVariancesPCs <- round((rw_variances(PCAObject) / PCAObject$totalvar)*100, nrDigitsVariance)
 		ind99 <- which(cumsum(allVariancesPCs) > 99)[1]
 		selVariancesPCs <- allVariancesPCs[comps]
 		pcaVariances <- list(ind99=ind99, vars=selVariancesPCs)
@@ -441,8 +441,6 @@ NULL
 #'  
 #' \code{gdmm(dataset, ap=getap(...))}
 #' 
-#' @section Note: Calculation of PCA is done with the function 
-#' \code{\link[ChemometricsWithR]{PCA}}
 #' @template mr_details_allParams
 #' @template mr_pca_calc_param
 #' @seealso \code{\link{gdmm}}

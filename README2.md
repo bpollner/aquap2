@@ -1,12 +1,5 @@
-<!-- badges: start -->
-
-<!-- [![R-CMD-check](https://github.com/bpollner/uniset/workflows/R-CMD-check/badge.svg)](https://github.com/bpollner/uniset/actions) [![codecov](https://codecov.io/gh/bpollner/uniset/branch/master/graph/badge.svg?token=QK8GPB9XLM)](https://app.codecov.io/gh/bpollner/uniset?branch=master) [![CRAN_Status_Badge](https://www.r-pkg.org/badges/version/uniset)](https://cran.r-project.org/package=uniset) [![metacran downloads](https://cranlogs.r-pkg.org/badges/grand-total/uniset)](https://cran.r-project.org/package=uniset) <img src="man/figures/logo.png" align="right" height="139"/> -->
-
-<!-- badges: end -->
-
-# aquap2
-
-Package `aquap2` provides methods and tools for multivariate data analysis in R, with an additional focus on specialized Aquaphotomics procedures and methods.
+# aquap2 - Multivariate Data Analysis Tools for R including Aquaphotomics Methods
+Authors: Bernhard Pollner & Zoltan Kovacs
 
 ## Summary
 aquap2 can be useful in three distinct areas in NIRS:
@@ -38,3 +31,19 @@ ap2_settings_setup()
 ```
 This adds an entry to the `.Renviron` file and generates the corresponding folder containing the `aquap2_settings.R` file.
 (You might have to restart R.)
+
+---
+
+## Course Material
+### Japan 2018
+The repository [aquap2_courseMaterial](https://github.com/bpollner/aquap2_courseMaterial) contains a demo dataset with some exploratory and quantitative data analysis steps designed to give a first impression of some of the functions of aquap2.
+This is the same demo-dataset as handed out at [The 3rd Aquaphotomics Symposium](http://conference.aquaphotomics.com/) in Japan in December 2018.
+
+### Rome 2023
+The course material for the Summer School on Aquaphotomics in the course of the [The 3rd European Aquaphotomics Symposium](https://www.3aec.sisnir.org/) (September 2023, Rome) can be found [here](https://github.com/bpollner/aquap2_course_Rome2023).
+
+---
+
+## Important
+Please note that the package in its current state is in several parts still considered to be beta:
+* From the cross-validated classifier methods, only "fda" and "lda" have undergone a certain amount of testing, the other methods (nnet etc.) have been built in, but still require testing and the implementation of optimization options
