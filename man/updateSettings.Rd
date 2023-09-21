@@ -9,8 +9,13 @@ updateSettings(silent = FALSE)
 \arguments{
 \item{silent}{Logical, defaults to FALSE.}
 }
+\value{
+An (invisible) list with the key=value pairs from the settings.R 
+file.
+}
 \description{
-Update the Settings
+Is first updating the settings.R file itself, and then is reading 
+in the key=value pairs from the setting.R file.
 }
 \seealso{
 Other Helper Functions: 

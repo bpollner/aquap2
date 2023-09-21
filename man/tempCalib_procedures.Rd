@@ -7,7 +7,7 @@
 Record a special temperature dataset and use these data as a 
 kind of calibration data for all of the aquagram calculations except the 
 'classic' and 'sfc' modes. In other words, you need the temperature dataset 
-in order to be able to calculate Aquagrams of the 'auc'modes. It is strongly 
+in order to be able to calculate Aquagrams of the 'auc' modes. It is strongly 
 recommended that you do generate the temperature data and so can also use 
 the advanced features of these AUC (area under curve) stabilized Aquagrams.
 }
@@ -23,7 +23,8 @@ object that you moved into the \code{AQUAP2SH} folder. Whenever now an Aquagram
 is calculated, first and only once per R-session this temperate data file is 
 read in and used to calculate the necessary data enabling the calculation of 
 'auc' Aquagrams. These temperature-datafile specific objects are stored in 
-the environment \code{.ap2} (\code{ls(.ap2)}), starting with the name of the 
+\code{aquap2_globalData} on the search path 
+(\code{ls(aquap2_globalData, all.names=T)}), starting with the name of the 
 temperature data file followed by an '_' underscore.
 }
 \section{Procedure}{

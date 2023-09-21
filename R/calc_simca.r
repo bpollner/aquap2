@@ -38,29 +38,15 @@ makeSimcaModels <- function(dataset, groupingVector, k=0, version, inCV=FALSE) {
 		modMsg <- " CV"
 	}
 	if (!stn$allSilent) {cat(paste(modMsg, "...", sep="")) }
-#	doPar <- stn$gen_useParallel
-#	if (doPar) { registerParallelBackend() } else { registerDoSEQ() }
-#	if ( checkHaveParallel() ) { parFill <- ".par" }
-#	modelList <- foreach(i = 1:leng) %dopar% {
-#		a <- try(makeSimcaModel_inner(dataset, groupingVector[i], k, version, stnLoc), silent=TRUE)
-#		if (is(a, "try-error")) {
-#			.ap2$.gs <- "*error*"
-#			.ap2$.charCollect <- c(.ap2$.charCollect, groupingVector[i])
-#			out <- NULL
-#		} else {
-#			out <- a
-#		}
-#		out # that gets returned
-#	} # end foreach i
 	#
 	for (i in 1: leng) {
 	#	mod <- makeSimcaModel_inner(dataset, groupingVector[i], k, version, stnLoc)
 		a <- try(makeSimcaModel_inner(dataset, groupingVector[i], k, version, stnLoc), silent=TRUE)
 		if (is(a, "try-error")) {
-			.ap2$.gs <- "\n         ***error***:"
+			assign(".gs", "\n         ***error***:", pos=gl_ap2GD)
 			if (inCV) {aa <- "cv."} else {aa <- ""}
 			add <- paste(aa, groupingVector[i], sep="")
-			.ap2$.charCollect <- paste(.ap2$.charCollect, add, sep=", ")
+			assign(".charCollect", paste(get(".charCollect", pos=gl_ap2GD), add, sep=", "), pos=gl_ap2GD)
 			modelList <- c(modelList, list(NULL))			
 		} else {
 			modelList <- c(modelList, list(a))

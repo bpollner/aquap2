@@ -4,7 +4,11 @@
 \alias{imp_searchAskColumns}
 \title{Search and Ask for Column Representation}
 \usage{
-imp_searchAskColumns(allC_var, allY_var, slType = .ap2$.slType)
+imp_searchAskColumns(
+  allC_var,
+  allY_var,
+  slType = get(".slType", pos = gl_ap2GD)
+)
 }
 \arguments{
 \item{allC_var}{A data frame containing only class variables.}
@@ -14,7 +18,7 @@ imp_searchAskColumns(allC_var, allY_var, slType = .ap2$.slType)
 \item{slType}{What type of sample list is used during the import. If no 
 additional sample list is used (slType = 'NULL'), the function stops if no 
 column for the nr. of consec. scan is present or gets assigned. You can get 
-the current slType with '.ap2$.slType' - see example.}
+the current slType with 'get(".slType", pos=gl_ap2GD)' - see example.}
 }
 \value{
 All the list elements needed in the \code{\link{custom_import}} function 
@@ -51,7 +55,7 @@ spectralImport <- function(dataFile) {
    NIR <- as.matrix(import[, 12:18])
    rownames(NIR) <- paste("S", 1:nrow(NIR), sep="")
    timestamp <- NULL
-   imp_searchAskColumns(allC_var, allY_var, .ap2$.slType) 
+   imp_searchAskColumns(allC_var, allY_var, get(".slType", pos=gl_ap2GD)) 
    # assigns all list elements except timestamp, info and NIR
    #
    return(list(sampleNr=sampleNr, conSNr=conSNr, timePoints=timePoints, 

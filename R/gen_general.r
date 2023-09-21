@@ -375,7 +375,7 @@ checkForExperimentFolderStructure <- function() {
 #' @export
 genFolderStr <- function() {
 	stn <- autoUpS(cfs=FALSE) # no checking of folder structure here!
-	fn_analysisData <- .ap2$fn_analysisData 
+	fn_analysisData <- stn$fn_analysisData 
 	fn_exports <- stn$fn_exports
 	fn_rcode <- stn$fn_rcode 
 	fn_rawdata <- stn$fn_rawdata
@@ -742,7 +742,8 @@ countDecimals <- function(x, nrDec=25) {
 } # EOF
 
 readInSpecAreas <- function() {
-	out <- as.data.frame(t(getOvertoneWls(getstn()$aqg_OT, .ap2)))  # getOvertoneWls() is in the file "calc_aqg.r"
+	stn <- getstn()
+	out <- as.data.frame(t(getOvertoneWls(getstn()$aqg_OT, stn)))  # getOvertoneWls() is in the file "calc_aqg.r"
 return(out)
 } # EOF
 
@@ -1109,7 +1110,7 @@ makeColorsTransparent <- function(colVec, alpha=100) {
 	return(colVec)
 } # EOF
 
-exportAdditionalModelToAp2Env <- function(doExport, thisMod, thisType) {
+exportAdditionalModelToAp2GD <- function(doExport, thisMod, thisType) {
 #	print("----------"); print(str(thisMod)); print(thisType); print(doExport); wait()
 	if (doExport) {
 		# the initial list is initialized in processSingleRow_CPT
@@ -1117,11 +1118,11 @@ exportAdditionalModelToAp2Env <- function(doExport, thisMod, thisType) {
 			thisMod <- list(NULL)
 		}
 		modColName <- pv_extraMods # global variable
-		existing <- get(modColName, pos=.ap2)
+		existing <- get(modColName, pos=gl_ap2GD)
 		typeCol <- c(existing$type, thisType)
 		modCol <- c(existing$mod, list(thisMod)) # add the model to the list
 		out <- list(type=typeCol, mod=modCol)
- 		assign(modColName, out, pos=.ap2) # if from gdmm: we do that in each set
+ 		assign(modColName, out, pos=gl_ap2GD) # if from gdmm: we do that in each set
 	} # end if do export
 	return(invisible(NULL))
 } # EOF

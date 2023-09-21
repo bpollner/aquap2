@@ -56,11 +56,11 @@ aquCoreCalc_Classic_diff <- function(dataset, smoothN, reference, msc, selIndsWL
 
 aquCoreCalc_AUCstabilized <- function(dataset, smoothN, colInd, apLoc) {
 	if (is.numeric(smoothN)){
-		dataset <- do_sgolay_sys(dataset, p=2, n=smoothN, m=0) # we get an .ap2 error in autoUpS() when in parallel !
+		dataset <- do_sgolay_sys(dataset, p=2, n=smoothN, m=0) # we get an gl_ap2GD error in autoUpS() when in parallel !
 	}
 	dataset$NIR <- calcAUCtable(dataset$NIR, apLoc)$aucd 		## "NIR" being actually the area under the curve divided by its fullArea for every row in every coordinate
 	groupAverages <- do_ddply(dataset, colInd)	## the group averages of the area under the curve, still in raw area units
-	perc <- calcAUCPercent(groupAverages, apLoc$aucEx) ## .aucEx being the package-based calibration data for the min. and max. AUC for each coordinate.
+	perc <- calcAUCPercent(groupAverages, get("aucEx", pos=gl_ap2GD)) ## aucEx being the package-based calibration data for the min. and max. AUC for each coordinate.
 } #EOF
 
 aquCoreCalc_AUCstabilized_diff <- function(dataset, smoothN, colInd, minus, apLoc) {
@@ -227,7 +227,7 @@ calc_aquagr_bootCI <- function(dataset, smoothN, reference, msc, selIndsWL, colI
 	} # EOIF
 	if (!apLoc$stn$allSilent) {cat(paste0("      calc. ", R, " bootstrap replicates (", parChar, ")... ")) }
 	thisR <- R
-	nCPUs <- getDesiredNrCPUs(allowNA=FALSE) # ! here we have some .ap2 ! (but should be ok)
+	nCPUs <- getDesiredNrCPUs(allowNA=FALSE) # ! here we have some gl_ap2GD ! (but should be ok)
 	###
 	bootResult <- boot::boot(dataset, innerWorkings, R=thisR, strata=dataset$header[,colInd], parallel=useMC, ncpus=nCPUs, smoN=smoothN, ref=reference, ms=msc, selIndW=selIndsWL, colI=colInd, mo=mod, minu=minus, TCali=TCalib, Tex=Texp, apLo=apLoc, parInfo=useMC)   	### here the bootstrap replicates happen
 	###
@@ -424,29 +424,19 @@ tempCalibMakeAvgTable <- function(fdata, smoothN=17, TRange=NULL, ot=c(1300, 160
 
 calcUnivAucTable <- function(smoothN=17, ot=c(1300, 1600), tcdName) {
 	stn <- getstn()
-	dataset <- get(tcdName, pos=.ap2)
+	dataset <- get(tcdName, pos=gl_ap2GD)
 	if (!stn$allSilent) {cat(" * Calculating universal AUC table... ")}
 	avgTable <- tempCalibMakeAvgTable(dataset, smoothN, TRange=NULL, ot)
-	aucd <- calcAUCtable(avgTable, .ap2)$aucd
+	aucd <- calcAUCtable(avgTable, getstn())$aucd
 	if (!stn$allSilent) {cat("ok\n")}
 	return(aucd)
 } #EOF
 
 ## !gives back a list!; 
 ## calculates the AUC-value in every coordinate for every single row (so we get back same number of rows, but only e.g. 15 columns)
-calcAUCtable <- function(NIRdata, apLoc) { 
-#	class(NIRdata) <- "matrix"
-#	cns <- dimnames(NIRdata)[[2]] 
-#	print(cns[1:4])
-#	kk <- .ap2
-#	wls <- as.numeric(substr(cns, 2, nchar(cns))) # leaving out the first charcter
+calcAUCtable <- function(NIRdata, stnLoc) { 
 	wls <- as.numeric(substr(colnames(NIRdata), 2, nchar(colnames(NIRdata)) ))	
-#	kk <- .ap2
-	
-#	Call <- t(readInSpecAreasFromSettings())
-	Call <- getOvertoneWls(otNumberChar=apLoc$stn$aqg_OT, apLoc=apLoc)
-#	wlCrossPoint=1438
-#	indCrossPoint <- which(wlsOt == wlCrossPoint)
+	Call <- getOvertoneWls(otNumberChar=stnLoc$aqg_OT, apLoc=stnLoc)
 	saCorRes <- NULL
 	saCorRes_d <- NULL
 ###  looping through the single rows
@@ -478,7 +468,7 @@ calcAUCtable <- function(NIRdata, apLoc) {
 		saCorRes_d <- rbind(saCorRes_d, saCorOut_d)
 	} # end for i
 	rownames(saCorRes) <- rownames(saCorRes_d) <- rownames(NIRdata)
-	colnames(saCorRes) <- colnames(saCorRes_d) <- getOvertoneColnames(otNumberChar=apLoc$stn$aqg_OT, apLoc=apLoc)
+	colnames(saCorRes) <- colnames(saCorRes_d) <- getOvertoneColnames(otNumberChar=stnLoc$aqg_OT, apLoc=stnLoc)
 	return(list(auc=saCorRes, aucd=saCorRes_d))
 } # EOF
 	
@@ -577,16 +567,16 @@ aq_loadGlobalAquagramCalibData <- function(tempCalibDataset, tempFile) {
 	stn <- getstn()
 	if (!is.null(tempCalibDataset)) {
 		tcdName <- paste0(tempFile, "_tcd")
-		if (!exists(tcdName, where=.ap2)) {
-			assign(tcdName, tempCalibTransformDataset(tempCalibDataset), pos=.ap2) 
+		if (!exists(tcdName, where=gl_ap2GD)) {
+			assign(tcdName, tempCalibTransformDataset(tempCalibDataset), pos=gl_ap2GD) 
 		}
-		if (!exists("aquagramPSettings",  where=.ap2)) {
-			assign("aquagramPSettings", readInAquagramPSettings(), pos=.ap2)
+		if (!exists("aquagramPSettings",  where=gl_ap2GD)) {
+			assign("aquagramPSettings", readInAquagramPSettings(), pos=gl_ap2GD)
 		}
 		univAucTableName <- paste0(tempFile, "_univAucTable")
-		if (!exists(univAucTableName, where=.ap2)) {
+		if (!exists(univAucTableName, where=gl_ap2GD)) {
 			aut <-  calcUnivAucTable(smoothN=stn$aqg_smoothCalib, ot=getOvertoneCut(stn$aqg_OT), tcdName)
-			assign(univAucTableName, aut, pos=.ap2)
+			assign(univAucTableName, aut, pos=gl_ap2GD)
 		}
 	} # end !is.null(tempCalibDataset)
 } # EOF
@@ -595,44 +585,38 @@ aq_loadGlobalAquagramCalibData <- function(tempCalibDataset, tempFile) {
 aq_makeGlobals <- function(TCalib, Texp, ot, smoothN, tempFile) {
 	univAucTableName <- paste0(tempFile, "_univAucTable")
 	#
-	dataset <- get(paste0(tempFile, "_tcd"), pos=.ap2)
-	assign("tempCalibFCtable", tempCalibMakeTable(dataset, TCalib, ot), pos=.ap2)	# probably only used for mode "sfc"	
-	assign("aucEx", getAUCcalibExtrema(get(univAucTableName, pos=.ap2), TCalib), pos=.ap2)
-	assign("tempNormAUCPerc", getTempNormAUCPercTable(get(univAucTableName, pos=.ap2), Texp, .ap2$aucEx), pos=.ap2)
+	dataset <- get(paste0(tempFile, "_tcd"), pos=gl_ap2GD)
+	assign("tempCalibFCtable", tempCalibMakeTable(dataset, TCalib, ot), pos=gl_ap2GD)	# probably only used for mode "sfc"	
+	assign("aucEx", getAUCcalibExtrema(get(univAucTableName, pos=gl_ap2GD), TCalib), pos=gl_ap2GD)
+	assign("tempNormAUCPerc", getTempNormAUCPercTable(get(univAucTableName, pos=gl_ap2GD), Texp, get("aucEx", pos=gl_ap2GD)), pos=gl_ap2GD)
 } # EOF
 
 #########
 readInAquagramPSettings <- function() {
-	if (exists(".devMode", envir=.ap2)) {
-		filepath <- .ap2$.devDataPath
-		filepath <- paste(filepath, "aqugrStngs", sep="")
-	} else {
-		a <- path.package("aquap2")
-		File <- "/pData/aqugrStngs"
-		filepath <- paste(a, File, sep="")
-		if (!file.exists(filepath)) {
-			filepath <- paste(a, File, sep="/inst")		# required for the case of devtools::load_all
-		} # end if
-	}
-#	load(filepath)
+	a <- path.package("aquap2")
+	File <- "/pData/aqugrStngs"
+	filepath <- paste(a, File, sep="")
+	if (!file.exists(filepath)) {
+		filepath <- paste(a, File, sep="/inst")		# required for the case of devtools::load_all
+	} # end if
 	return(eval(parse(text=load(filepath))))
-#	out <- get(".aquagramPSettings")
-#	return(out)
 } #EOF
 
 getOvertoneCut <- function(otNumberChar) {
 	if (otNumberChar == "1st") {
-		return(.ap2$aquagramPSettings$ot1$cut)
+		val <- get("aquagramPSettings", pos=gl_ap2GD)
+		return(val$ot1$cut)
 	}
 } # EOF
 
 getOvertoneWls <- function(otNumberChar, apLoc) {
+	val <- get("aquagramPSettings", pos=gl_ap2GD)
 	if (otNumberChar == "1st") {
-		if (apLoc$stn$aqq_nCoord == 12) {
-			return(apLoc$aquagramPSettings$ot1$wls$wls12)
+		if (apLoc$aqq_nCoord == 12) {
+			return(val$ot1$wls$wls12)
 		} else {
-			if (apLoc$stn$aqq_nCoord == 15) {
-				return(apLoc$aquagramPSettings$ot1$wls$wls15)
+			if (apLoc$aqq_nCoord == 15) {
+				return(val$ot1$wls$wls15)
 			} else {
 				stop("Please provide either '12' or '15' as the numbers of coordinates for the first overtone in the settings. Thank you.", call.=FALSE)
 			}
@@ -641,12 +625,13 @@ getOvertoneWls <- function(otNumberChar, apLoc) {
 } # EOF
 
 getOvertoneColnames <- function(otNumberChar, apLoc) {
+	val <- get("aquagramPSettings", pos=gl_ap2GD)
 	if (otNumberChar == "1st") {
-		if (apLoc$stn$aqq_nCoord == 12) {
-			return(apLoc$aquagramPSettings$ot1$cns$cns12)
+		if (apLoc$aqq_nCoord == 12) {
+			return(val$ot1$cns$cns12)
 		} else {
-			if (apLoc$stn$aqq_nCoord == 15) {
-				return(apLoc$aquagramPSettings$ot1$cns$cns15)
+			if (apLoc$aqq_nCoord == 15) {
+				return(val$ot1$cns$cns15)
 			} else {
 				stop("Please provide either '12' or '15' as the numbers of coordinates for the first overtone in the settings. Thank you.", call.=FALSE)
 			}
@@ -656,7 +641,7 @@ getOvertoneColnames <- function(otNumberChar, apLoc) {
 ##########################
 ##########################
 aq_checkTempCalibRangeFromUnivFile <- function(TCalibRange, tempFile) {
-	temp <- as.numeric(rownames(get(paste0(tempFile, "_univAucTable"), pos=.ap2)))
+	temp <- as.numeric(rownames(get(paste0(tempFile, "_univAucTable"), pos=gl_ap2GD)))
 	if (all(TCalibRange >= min(temp)) & all(TCalibRange <= max(temp)) ) { ## to check if we are in the temperature-range of the calibration file
 		return(TCalibRange)
 	} else {
@@ -684,7 +669,7 @@ aq_getTCalibRange <- function(ap, tempFile) {
 				}
 			} else { # so TCalib is null
 				if (!haveClassicAqg(ap)) { 
-					temp <- as.numeric(rownames(get(paste0(tempFile, "_univAucTable"), pos=.ap2)))
+					temp <- as.numeric(rownames(get(paste0(tempFile, "_univAucTable"), pos=gl_ap2GD)))
 					TCalib <- range(temp)
 				} 
 			}
@@ -832,7 +817,6 @@ calcAquagramSingle <- function(dataset, md, ap, classVar, minus, idString, apLoc
 		possibleNrPartic <- possN <- checkRes$nrPart
 		selInds <- checkRes$selInds
 	dataset <- dataset[selInds,]  	### it might be reduced or not
-	apLoc <- .ap2
 	groupAverage <- avg <- as.matrix(calc_aquagr_CORE(dataset, smoothN, reference, msc, selIndsWL, colInd, mod, minus, TCalib, Texp, apLoc))
 	avgSpec <- subtrSpec <- rawSpec <-  NULL
 	if (is.character(plotSpectra)) {
@@ -964,7 +948,7 @@ genTempCalibExp <- function(Tcenter=NULL, Tdelta=5, stepBy=1, repls=4) {
 #' @description Record a special temperature dataset and use these data as a 
 #' kind of calibration data for all of the aquagram calculations except the 
 #' 'classic' and 'sfc' modes. In other words, you need the temperature dataset 
-#' in order to be able to calculate Aquagrams of the 'auc'modes. It is strongly 
+#' in order to be able to calculate Aquagrams of the 'auc' modes. It is strongly 
 #' recommended that you do generate the temperature data and so can also use 
 #' the advanced features of these AUC (area under curve) stabilized Aquagrams.
 #' @details For generating a new experiment with all the necessary defaults to 
@@ -978,7 +962,8 @@ genTempCalibExp <- function(Tcenter=NULL, Tdelta=5, stepBy=1, repls=4) {
 #' is calculated, first and only once per R-session this temperate data file is 
 #' read in and used to calculate the necessary data enabling the calculation of 
 #' 'auc' Aquagrams. These temperature-datafile specific objects are stored in 
-#' the environment \code{.ap2} (\code{ls(.ap2)}), starting with the name of the 
+#' \code{aquap2_globalData} on the search path 
+#' (\code{ls(aquap2_globalData, all.names=T)}), starting with the name of the 
 #' temperature data file followed by an '_' underscore.
 #' @section Procedure: The procedure to work with a temperature-data file (or 
 #' more of them of course) and use it to calculate area-under-curve 'auc' 

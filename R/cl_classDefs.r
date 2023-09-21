@@ -63,8 +63,6 @@ setMethod("[<-", signature(x="aquap_mergeLabels"), definition=function(x, i, j, 
 				Data[,j] <- value	
 			}
 			if (missing(j)) { # wo we have i --> all columns, selected row (would be weird to do in this case)
-			#	Data[i,] <- value
-			#	if (!.ap2$stn$allSilent) {message("Values for an entire row (across several variables) have been set.\nPlease use '[,j]' to set values for an entire column.")}
 				stop("Please use, in this case, '[,j]' to set values for an entire column", call.=FALSE)
 			}
 			if (!missing(i) & !missing(j)) { # so we got both

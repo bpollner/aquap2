@@ -6,6 +6,10 @@
 \usage{
 getstn()
 }
+\value{
+An (invisible) list with the key=value pairs from the settings.R 
+file.
+}
 \description{
 Is reading in the key=value pairs from the setting.R file.
 }

@@ -3,7 +3,7 @@ noi_calculateNoiseDistribution <- function(noiseDataset, noiseFileName) { # is c
 	# noiseDataset also comes in as NULL when we are having the static noise mode, is checked in the checking function when calling gdmm
 	if (!is.null(noiseDataset)) { # so we want to do some noise, and do not have the static mode
 		noiseDistName <- paste0(pv_noiseDistPrefix, noiseFileName)
-		if (!exists(noiseDistName, where=.ap2)) {
+		if (!exists(noiseDistName, where=gl_ap2GD)) {
 			noiMode <- stn$noi_addMode 		## pv_noiseAddModes <- c("sdNorm", "sdUnif", "extrema", "static")
 			if (!stn$allSilent) {cat(paste0("Calculating specific noise distribution from noise-data file '", noiseFileName, "' with ",noiMode , " method..."))}	
 			aa <- pv_noiseAddModes
@@ -26,7 +26,7 @@ noi_calculateNoiseDistribution <- function(noiseDataset, noiseFileName) { # is c
 			wls <- getWavelengths(noiseDataset)
 			noiseDist <- list(hull=hullValues, confInt=confInt, meanV=meanV, sdV=sdV, wls=wls)
 			###
-			assign(noiseDistName, noiseDist, pos=.ap2) # we could hand it over in the functions, but we require this to be done only once the first time
+			assign(noiseDistName, noiseDist, pos=gl_ap2GD) # we could hand it over in the functions, but we require this to be done only once the first time
 			if (!stn$allSilent) {cat("ok\n")}
 		} # end if !exists noiseDist
 	} # end if !is.null noiseDataset
@@ -56,7 +56,7 @@ test_plotNoiseData <- function(doTest=FALSE, noiseFile) {
 #		print(subT)
 		plot_spectra(ssc(noiDataset, C_outlier_all == FALSE), pg.where="", pg.sub="outliers excluded ")
 		mtext(subT, side=1, line=2)
-		assign(".poolCnt", 0, pos=.ap2) # for testing the pool data
+		assign(".poolCnt", 0, pos=gl_ap2GD) # for testing the pool data
 		#
 	}
 } # EOF
@@ -82,13 +82,13 @@ test_plotSDValues <- function(doTest=FALSE, nodi) {
 test_plotSinglePool <- function(doTest=FALSE, swl, pool, nc, out) {
 	stn <- getstn()
 	if (doTest) {
-		if (.ap2$.poolCnt < nc) {
+		if (get(".poolCnt", pos=gl_ap2GD) < nc) {
 			n <- length(pool)
 			x <- rep(swl, n)
 			y <- pool
 			points(x, y, col="gray")
 		#	points(swl, out, col="red", pch=3)
-			assign(".poolCnt", .ap2$.poolCnt+1, pos=.ap2)
+			assign(".poolCnt", get(".poolCnt", pos=gl_ap2GD)+1, pos=gl_ap2GD)
 		}
 	} # end if toTest
 } # EOF
@@ -117,7 +117,7 @@ test_plotStaticNoise <- function(doTest=FALSE, nc) {
 		ti <- 3
 		subT <- paste0("sample size = ", ss, ", static sd = ", statSd)
 		plot(0, xlim=c(0, nc), ylim=c(-(ti*statSd), ti*statSd), ylab="random noise value", col="white", sub=subT, main="Static Noise")
-		assign(".poolCnt", 0, pos=.ap2) # for testing the pool data
+		assign(".poolCnt", 0, pos=gl_ap2GD) # for testing the pool data
 	}
 }
 
@@ -153,10 +153,10 @@ noi_performNoise <- function(dataset, noiseFile)	{ # is working on a single data
 	test_plotNoiseData(doTest, noiseFile)
 	#
 	noiseDistName <- paste0(pv_noiseDistPrefix, noiseFile)
-	if (!exists(noiseDistName, where=.ap2)) {
+	if (!exists(noiseDistName, where=gl_ap2GD)) {
 		stop("Sorry, an error with calculating the noise distribution appeared. Please restart the R-process.", call.=FALSE)
 	}
-	nodi <- get(noiseDistName, pos=.ap2) ##### get the noise distribution ####
+	nodi <- get(noiseDistName, pos=gl_ap2GD) ##### get the noise distribution ####
 	noiseHull <- nodi$hull
 	noiseWls <- nodi$wls
 	dataWls <- getWavelengths(dataset)
@@ -256,7 +256,7 @@ do_addNoise <- function(dataset, noiseFile="def", md=getmd()) {
 	if (!stn$allSilent) {cat(paste0("Adding ", noiMode, " noise to dataset '", dsName, "'... "))}
 	#
 	noiseDataset <- checkLoadNoiseFile(dataset$header, max(dataset$NIR), ap, md, noiseFile) # only if noise is added; if not returns NULL; is assigning noiseFile !!
-	noi_calculateNoiseDistribution(noiseDataset, noiseFile) # only if noise: calculate noise distribution, save as global variable in .ap2
+	noi_calculateNoiseDistribution(noiseDataset, noiseFile) # only if noise: calculate noise distribution, save as global variable in gl_ap2GD
 	noiDat <- noi_performNoise(dataset, noiseFile)
 	if (!stn$allSilent) {cat("ok.\n")}
 	return(noiDat)
@@ -344,8 +344,9 @@ mod_md_num <- function(where, numVal, target) {
 #' your input. If, and only if, you choose to add noise, first (and only once per 
 #' R-session) the noise R-data file is read in and used to calculate the specific 
 #' noise distribution. It is stored in an object where the name is starting with 
-#' \code{nd_} (for 'noise distribution') in the environment \code{.ap2}; 
-#' (\code{ls(.ap2)}). This noise distribution is then used to specifically add, 
+#' \code{nd_} (for 'noise distribution') in the search-path object 
+#' \code{aquap2_globalData}; (\code{ls(aquap2_globalData, all.names=T)}). 
+#' This noise distribution is then used to specifically add, 
 #' according to the selected mode (see section 'Modes for noise calculation' 
 #' below), noise to each single wavelength in each single observation in the 
 #' individual dataset within the cube. If you do not want to use a specific 

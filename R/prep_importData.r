@@ -985,7 +985,7 @@ readHeader_checkDefaults <- function(slType, possibleValues, md, multiplyRows) {
 	}
 	assign("slType", slType, pos=parent.frame(n=1))
 	assign("slType", slType, pos=parent.frame(n=2)) # that is needed to always have the correct value for slType in the getFullData function
-	assign(".slType", slType, envir=.ap2)
+	assign(".slType", slType, pos=gl_ap2GD)
 	###
 	if (is(md, "aquap_md")) {
 		filename <- md$meta$expName
@@ -1131,7 +1131,7 @@ readHeader <- function(md=getmd(), slType="def", multiplyRows="def") {
 #' @param slType What type of sample list is used during the import. If no 
 #' additional sample list is used (slType = 'NULL'), the function stops if no 
 #' column for the nr. of consec. scan is present or gets assigned. You can get 
-#' the current slType with '.ap2$.slType' - see example.
+#' the current slType with 'get(".slType", pos=gl_ap2GD)' - see example.
 #' @return All the list elements needed in the \code{\link{custom_import}} function 
 #' except 'timestamp', 'info' and 'NIR get assigned in the environment from where 
 #' this function was called.
@@ -1152,7 +1152,7 @@ readHeader <- function(md=getmd(), slType="def", multiplyRows="def") {
 #'    NIR <- as.matrix(import[, 12:18])
 #'    rownames(NIR) <- paste("S", 1:nrow(NIR), sep="")
 #'    timestamp <- NULL
-#'    imp_searchAskColumns(allC_var, allY_var, .ap2$.slType) 
+#'    imp_searchAskColumns(allC_var, allY_var, get(".slType", pos=gl_ap2GD)) 
 #'    # assigns all list elements except timestamp, info and NIR
 #'    #
 #'    return(list(sampleNr=sampleNr, conSNr=conSNr, timePoints=timePoints, 
@@ -1162,7 +1162,7 @@ readHeader <- function(md=getmd(), slType="def", multiplyRows="def") {
 #'  } # EOF
 #' }
 #' @export
-imp_searchAskColumns <- function(allC_var, allY_var, slType=.ap2$.slType) {
+imp_searchAskColumns <- function(allC_var, allY_var, slType=get(".slType", pos=gl_ap2GD)) {
 	stn <- autoUpS()
 	yPref <- stn$p_yVarPref
 	cPref <- stn$p_ClassVarPref

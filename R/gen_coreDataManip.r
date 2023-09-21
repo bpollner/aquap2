@@ -27,14 +27,14 @@ do_sgolay <- function(dataset, p=2, n=21, m=0, exportModel=FALSE) {
  	cns <- colnames(dataset$NIR)
 	rns <- rownames(dataset$NIR)
 	NIR <- t(apply(dataset$NIR, 1, signal::sgolayfilt, p=p, n=n, m=m))
-	exportAdditionalModelToAp2Env(doExport=exportModel, thisMod=NULL, thisType=pv_dptModules[1]) # sgol
+	exportAdditionalModelToAp2GD(doExport=exportModel, thisMod=NULL, thisType=pv_dptModules[1]) # sgol
 	colnames(NIR) <- cns
 	rownames(NIR) <- rns
 	dataset$NIR <- I(NIR)
 	return(dataset)
 } # EOF
 
-# is used when we have no access to .ap2 like in parallel operations
+# is used when we have no access to gl_ap2GD like in parallel operations
 do_sgolay_sys <- function(dataset, p=2, n=21, m=0) {
  	cns <- colnames(dataset$NIR)
 	rns <- rownames(dataset$NIR)
@@ -64,7 +64,7 @@ do_sgolay_sys <- function(dataset, p=2, n=21, m=0) {
 do_snv <- function(dataset, exportModel=FALSE) {
 	autoUpS()
 	NIR <- t(scale(t(dataset$NIR),center=TRUE,scale=TRUE))
-	exportAdditionalModelToAp2Env(doExport=exportModel, thisMod=NULL, thisType=pv_dptModules[2]) # snv
+	exportAdditionalModelToAp2GD(doExport=exportModel, thisMod=NULL, thisType=pv_dptModules[2]) # snv
 	colnames(NIR) <- colnames(dataset$NIR)
 	rownames(NIR) <- rownames(dataset$NIR)
 	dataset$NIR <- I(NIR)
@@ -126,7 +126,7 @@ do_msc <- function(dataset, ref=NULL, extMscModel=NULL, exportModel=FALSE) {
 	} else {
 		NIR <- predict(extMscModel, as.matrix(dataset$NIR))
 	}
-	exportAdditionalModelToAp2Env(doExport=exportModel, thisMod=NIR, thisType=pv_dptModules[3]) # msc
+	exportAdditionalModelToAp2GD(doExport=exportModel, thisMod=NIR, thisType=pv_dptModules[3]) # msc
 	colnames(NIR) <- colnames(dataset$NIR)
 	rownames(NIR) <- rownames(dataset$NIR)
 	dataset$NIR <- I(NIR)
@@ -292,7 +292,7 @@ do_emsc <- function(dataset, vecLoad=NULL, exportModel=FALSE) {
 		stop("Please provide a data frame with one or two loading vectors or one regression vector to the argument 'vecLoad' (do_emsc).", call.=FALSE)
 	}
 	NIR <- as.matrix(calc_emsc(dataset, input))
-	exportAdditionalModelToAp2Env(doExport=exportModel, thisMod=NULL, thisType=pv_dptModules[4]) # emsc
+	exportAdditionalModelToAp2GD(doExport=exportModel, thisMod=NULL, thisType=pv_dptModules[4]) # emsc
 	rownames(NIR) <- rownames(dataset)
 	colnames(NIR) <- colnames(dataset$NIR)
 	dataset$NIR <- I(NIR)
@@ -367,7 +367,7 @@ do_gapDer <- function(dataset, m=1, w=1, s=1, deltaW, exportModel=FALSE) {
 #	colnames(NIR) <- colnames(dataset$NIR)
 #	rownames(NIR) <- rownames(dataset$NIR)
 #	NIR <- as.matrix(NIR) # because otherwise the "AsIs" is behaving strange
-	exportAdditionalModelToAp2Env(doExport=exportModel, thisMod=NULL, thisType=pv_dptModules[7]) # gapDer
+	exportAdditionalModelToAp2GD(doExport=exportModel, thisMod=NULL, thisType=pv_dptModules[7]) # gapDer
 	dataset$NIR <- I(NIR)
 	return(dataset)
 } # EOF
@@ -507,7 +507,7 @@ do_detrend<- function(dataset, src=NULL, trg="src", exportModel=FALSE) {
 #		NIR[i,] <- as.numeric(nirTrg[i,]) - mods[1,i] - mods[2,i]*wlsTrg
 #	}
 	NIRnew <- t(sapply(1:nrow(nirTrg), function(i) as.numeric(nirTrg[i,]) - mods[1,i] - mods[2,i]*wlsTrg))
-	exportAdditionalModelToAp2Env(doExport=exportModel, thisMod=NULL, thisType=pv_dptModules[6]) # deTrend
+	exportAdditionalModelToAp2GD(doExport=exportModel, thisMod=NULL, thisType=pv_dptModules[6]) # deTrend
 	colnames(NIRnew) <- cnsNew <- colnames(nirTrg)
 	cnsOld <- colnames(dataset$NIR)
 	indHere <- which(cnsOld %in% cnsNew)

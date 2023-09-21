@@ -23,8 +23,9 @@ datasets or not (parameter \code{spl.do.noise} in the analysis procedure resp.
 your input. If, and only if, you choose to add noise, first (and only once per 
 R-session) the noise R-data file is read in and used to calculate the specific 
 noise distribution. It is stored in an object where the name is starting with 
-\code{nd_} (for 'noise distribution') in the environment \code{.ap2}; 
-(\code{ls(.ap2)}). This noise distribution is then used to specifically add, 
+\code{nd_} (for 'noise distribution') in the search-path object 
+\code{aquap2_globalData}; (\code{ls(aquap2_globalData, all.names=T)}). 
+This noise distribution is then used to specifically add, 
 according to the selected mode (see section 'Modes for noise calculation' 
 below), noise to each single wavelength in each single observation in the 
 individual dataset within the cube. If you do not want to use a specific 

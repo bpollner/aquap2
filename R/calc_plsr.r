@@ -230,8 +230,8 @@ makePLSRModels <- function(dataset, md, ap) {
 maybeAssignPlsrClusterToPlsrFunction <- function() {
 	stn <- getstn()
 	if (stn$plsr_calcInParallel) {
-		if (exists(".plsrClust", where=.ap2)) {
-			pls::pls.options(parallel = .ap2$.plsrClust)
+		if (exists(".plsrClust", where=gl_ap2GD)) {
+			pls::pls.options(parallel = get(".plsrClust", pos=gl_ap2GD))
 			out <- " (par.)"
 		} else {
 			pls::pls.options(parallel = NULL)
@@ -249,17 +249,17 @@ maybeGeneratePlsrCluster <- function(ap) { # this is happening in gdmm before go
 	if (stn$plsr_calcInParallel & !is.null(ap$plsr)) {
 		if (length(ap$plsr$regressOn) == 1) {
 			nrWorkers <- getDesiredNrCPUs(allowNA=FALSE)
-			if (!exists(".plsrClust", where=.ap2)) {
-				assign(".plsrClust", parallel::makePSOCKcluster(nrWorkers), pos=.ap2)
+			if (!exists(".plsrClust", where=gl_ap2GD)) {
+				assign(".plsrClust", parallel::makePSOCKcluster(nrWorkers), pos=gl_ap2GD)
 			}	
 		}
 	}
 } # EOF
 
 maybeStopPlsrCluster <- function() { # this is happening in gdmm after going through the cube
-	if (exists(".plsrClust", where=.ap2)) {
-		try(parallel::stopCluster(.ap2$.plsrClust), silent=TRUE)
-		rm(".plsrClust", pos=.ap2)
+	if (exists(".plsrClust", where=gl_ap2GD)) {
+		try(parallel::stopCluster(get(".plsrClust", pos=gl_ap2GD)), silent=TRUE)
+		rm(".plsrClust", pos=gl_ap2GD)
 	}
 } # EOF
 

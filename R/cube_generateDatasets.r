@@ -967,13 +967,16 @@ performExcludeOutliers <- function(dataset, siExOut, ap) {
 			finderMsg <- ""
 		}
 		if (twoBlocks & siExOut) {
-			flags <- .ap2$.outlierFlags$allFlags[[.ap2$.ocnt]] # use the counter established in function createOutlierFlaglist in gdmm to subscript the list containing all the flag-data
-			nrOutliers <- .ap2$.outlierFlags$nrOutliers[[.ap2$.ocnt]]
-			singleFlags <- .ap2$.outlierFlags$singleFlagCounter[[.ap2$.ocnt]]
-			usedK <- .ap2$.outlierFlags$usedK[[.ap2$.ocnt]]
+			olFs <- get(".outlierFlags", pos=gl_ap2GD)
+			ocnt <- get(".ocnt", pos=gl_ap2GD)
+			flags <- olFs$allFlags[[ocnt]]  # use the counter established in function createOutlierFlaglist in gdmm to subscript the list containing all the flag-data
+			nrOutliers <- 
+			nrOutliers <- olFs$nrOutliers[[ocnt]]
+			singleFlags <- olFs$singleFlagCounter[[ocnt]]
+			usedK <- olFs$usedK[[ocnt]]
 			if(is.null(nrOutliers) | is.null(singleFlags) | is.null(usedK)) {stop("This should not be NULL!!!")}
-			.ap2$.ocnt <- .ap2$.ocnt +1
-		}
+			assign(".ocnt", ocnt+1, pos=gl_ap2GD)
+		} # end twoBlocks $ siExOut
 		if (nrOutliers == 0) {
 			msg <- "none. "
 			remMsg <- "\n"
@@ -988,10 +991,10 @@ performExcludeOutliers <- function(dataset, siExOut, ap) {
 #		if (siExOut) {crMsg <- ""} else {crMsg <- "\n"}
 		if (!stn$allSilent) {cat(paste(msg, remMsg, sep=""))}
 		if (twoBlocks & !siExOut) {
-			.ap2$.outlierFlags$allFlags <- c(.ap2$.outlierFlags$allFlags, list(flags))
-			.ap2$.outlierFlags$nrOutliers <- c(.ap2$.outlierFlags$nrOutliers, list(nrOutliers))
-			.ap2$.outlierFlags$singleFlagCounter <- c(.ap2$.outlierFlags$singleFlagCounter, list(singleFlags))
-			.ap2$.outlierFlags$usedK <- c(.ap2$.outlierFlags$usedK, list(usedK))
+			.outlierFlags$allFlags <- c(.outlierFlags$allFlags, list(flags))
+			.outlierFlags$nrOutliers <- c(.outlierFlags$nrOutliers, list(nrOutliers))
+			.outlierFlags$singleFlagCounter <- c(.outlierFlags$singleFlagCounter, list(singleFlags))
+			.outlierFlags$usedK <- c(.outlierFlags$usedK, list(usedK))
 		}
 		## now flag the outliers
 		flagsFacDf <- data.frame(as.factor(!flags)) # having TRUE for outlier
@@ -1227,7 +1230,7 @@ makeIdString <- function(siClass, siValue, siWlSplit, siCsAvg, siNoise, siExOut,
 
 initializeExtraModelsList <- function() {
 	aa <- list(type=NULL, mod=NULL)
-	assign(pv_extraMods, aa, pos=.ap2)
+	assign(pv_extraMods, aa, pos=gl_ap2GD)
 } # EOF
 
 processSingleRow_CPT <- function(dataset, siClass, siValue, siWlSplit, siCsAvg, siNoise, siExOut, ap, noiseFile) { # si for single
@@ -1248,11 +1251,11 @@ processSingleRow_CPT <- function(dataset, siClass, siValue, siWlSplit, siCsAvg, 
 	##
 	idString <- makeIdString(siClass, siValue, siWlSplit, siCsAvg, siNoise, siExOut, ap)
 	newDataset@anproc <- ap
-	exMod <- get(pv_extraMods, pos=.ap2)
+	exMod <- get(pv_extraMods, pos=gl_ap2GD)
 #	exMod <- new("aquap_extMod", type=exMod$type, mod=exMod$mod)
 	exMod <- list(type=exMod$type, mod=exMod$mod) # this should not be necessary !
 	out <- new("aquap_set", dataset=newDataset, idString=idString, extraModels=exMod) 
-	rm(list=(pv_extraMods), pos=.ap2) ### lower end (happens every time we are done with a single cube-element)
+	rm(list=(pv_extraMods), pos=gl_ap2GD) ### lower end (happens every time we are done with a single cube-element)
 #	print(str(out@extraModels)); wait()
 	return(out)
 } # EOF
@@ -1352,12 +1355,12 @@ checkCubeForRealStats <- function(cube) {
 
 createOutlierFlagList <- function() {
 	stn <- getstn()
-	.ap2$.ocnt <- 1 # a counter
-	.ap2$.outlierFlags <- list()
-		.ap2$.outlierFlags$allFlags <- list()
-		.ap2$.outlierFlags$nrOutliers <- list()
-		.ap2$.outlierFlags$singleFlagCounter <- list()
-		.ap2$.outlierFlags$usedK <- list()
+	assign(".octn", 1, pos=gl_ap2GD)
+	assign(".outlierFlags", list(), pos=gl_ap2GD)
+		.outlierFlags$allFlags <- list()
+		.outlierFlags$nrOutliers <- list()
+		.outlierFlags$singleFlagCounter <- list()
+		.outlierFlags$usedK <- list()
 } # EOF
 
 checkLoadNoiseFile <- function(header, maxNir, ap, md, noiseFile) {
@@ -1586,10 +1589,10 @@ gdmm <- function(dataset, ap=getap(), noiseFile="def", tempFile="def") {
 	}
 	##
 	noiseDataset <- checkLoadNoiseFile(dataset$header, max(dataset$NIR), ap, md, noiseFile) # only if noise is added; if not returns NULL; is assigning noiseFile !!
-	noi_calculateNoiseDistribution(noiseDataset, noiseFile) # only if noise: calculate noise distribution, save as global variable in .ap2
+	noi_calculateNoiseDistribution(noiseDataset, noiseFile) # only if noise: calculate noise distribution, save as global variable in gl_ap2GD
 	##
 	tempCalibDataset <- checkTempCalibFile(tempFile, ap, md) # only if we are calculating an aquagram; if not returns NULL; is assigning tempFile
-	aq_loadGlobalAquagramCalibData(tempCalibDataset, tempFile) # only if aquagram: calculate AUC etc., save as global variable in .ap2
+	aq_loadGlobalAquagramCalibData(tempCalibDataset, tempFile) # only if aquagram: calculate AUC etc., save as global variable in gl_ap2GD
 	ap <- aq_checkTCalibRange(ap, tempFile) # only if Aquagram: is stopping if the temperatuer range is out of reach
 	##
 	a <- makeCompPattern(dataset$header, md, ap)

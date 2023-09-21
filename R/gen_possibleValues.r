@@ -1,6 +1,10 @@
+# in onLoad and onUnload, and connected
+gl_ap2GD <- "aquap2_globalData" # the name for entry in the search path where the .auqp2Env is stored
+
+
+
 ## regarding Aquagram
 pv_AquagramModes <- c("classic", "classic-diff", "sfc", "sfc-diff", "aucs", "aucs-diff", "aucs.tn", "aucs.tn-diff", "aucs.tn.dce", "aucs.tn.dce-diff", "aucs.dce",  "aucs.dce-diff")
-
 
 
 ## PCA plotting

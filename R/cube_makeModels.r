@@ -27,7 +27,9 @@ calculateSIMCA <- function(dataset, md, ap) { # is working on a single set. i.e.
 	if (is.null(ap$simca)) {
 		return(NULL)
 	}
-	.ap2$.gs <- " ok";  .ap2$.charCollect <- NULL;  mods_cv <- preds_cv <- NULL
+	assign(".gs", " ok", pos=gl_ap2GD)
+	assign(".charCollect", NULL, pos=gl_ap2GD)
+	mods_cv <- preds_cv <- NULL
 	simcaVersion <- stn$simca_version
 #	simcaClasses <- ap$simca$simcOn # comes in already checked, so it is a character vector of at least length one
 	simcaClasses <- correctSimcaGroupingForDataset(dataset, groupingVector=ap$simca$simcOn) # will return NULL if there is no appropriate grouping / nr. of spectra; see below
@@ -68,11 +70,11 @@ calculateSIMCA <- function(dataset, md, ap) { # is working on a single set. i.e.
 		}
 	} # end if tables to text
 	#
-	whatErr <- gsub(stn$p_ClassVarPref, "", .ap2$.charCollect)
+	whatErr <- gsub(stn$p_ClassVarPref, "", get(".charCollect", pos=gl_ap2GD))
 	whatErr <- substr(whatErr, 2, nchar(whatErr)) # to cut away the first comma
-	if (!stn$allSilent) {cat(paste(.ap2$.gs, whatErr, "\n", sep="")) }
-	.ap2$.charCollect <- NULL
-	.ap2$.gs <- " ok"
+	if (!stn$allSilent) {cat(paste(get(".gs", pos=gl_ap2GD), whatErr, "\n", sep="")) }
+	assign(".charCollect", NULL, pos=gl_ap2GD)
+	assign(".gs", " ok", pos=gl_ap2GD)
 	return(list(mods=mods, preds=preds, mods_cv=mods_cv, preds_cv=preds_cv, icDists=icDists, groupingVector=simcaClasses))
 } # EOF
 
@@ -81,7 +83,8 @@ calculateAquagram <- function(dataset, md, ap, idString, tempFile) {
 	if (is.null(ap$aquagr)) {
 		return(NULL)
 	}
-	apLoc <- .ap2
+	apLoc <- list()
+	apLoc$stn <- stn # add the "stn" before the values, so simulate the old dotAp2 structure
 #	aq_loadGlobalAquagramCalibData()
 	if (ap$aquagr$bootCI) {
 		registerParallelBackend()  ## will be used in the calculation of confidence intervals

@@ -103,8 +103,8 @@ pickPeaksInner <- function(vectorToBePickedFrom, bandwidth, discrim, wavelengths
 ## Master
 ## the universal input, checking for the class of the input-object
 pickPeaks <- function(ObjectToPickPeaks, bandwidth=25, comps=1:4, discrim=FALSE, wavelengths) {		### universal peak picker / extractor
-	if (!exists("aquagramPSettings",  where=.ap2)) {
-		assign("aquagramPSettings", readInAquagramPSettings(), pos=.ap2) # need this later for defining the special wavelengths
+	if (!exists("aquagramPSettings",  where=gl_ap2GD)) {
+		assign("aquagramPSettings", readInAquagramPSettings(), pos=gl_ap2GD) # need this later for defining the special wavelengths
 	}
 	##
 	if (is(ObjectToPickPeaks, "mvr")) {
