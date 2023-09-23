@@ -107,18 +107,17 @@ check_mdDefaultValues <- function(localEnv) {
 	#
 } # EOF
 
-copyMetadataFile <- function(fromPath, toPath) {
-	ok <- file.copy(fromPath, toPath, overwrite=TRUE)
-	if (ok) { cat("A fresh template of the metadata file has been copied from the package.\n")}			
-} # EOF
-
 check_mdVersion <- function(folderLocal, nameLocal) {
+	fiEl <- gl_firstElement_metadata
+	tmpl <- gl_templateSuffix_mdAp
+	manMax <- gl_maxEmptyMd # the max empty lines after deleting and adding keys
+	#
 	aa <- paste(path.package("aquap2"), "/templates/metadata.r", sep="")
 	if (!file.exists(aa)) {
 		aa <- paste(path.package("aquap2"), "/templates/metadata.r", sep="/inst")	# required in the case of devtools::load_all			
 	} # end if	
-	pathToLocal <- paste(folderLocal, nameLocal, sep="/")
-	out <- checkFileVersionPossiblyModify(pathToPack=aa, pathToLocal, folderLocal, nameLocal)
+#	pathToLocal <- paste(folderLocal, nameLocal, sep="/")
+	out <- checkFileVersionPossiblyModify(pathToPack=aa, folderLocal, nameLocal, pm=fiEl, tmpl, manMax) # pm: the first key in the file
 	if (out == FALSE) {
 	#	stop("Please update the metadata files in your experiments according to the latest template.", call.=FALSE)
 		stop(call.=FALSE)
@@ -144,12 +143,25 @@ getClassStructureFromXlsx <- function(slClasses) {
 
 	# get the column names
 	indL1 <- sort(c(grep(clPref, xTxt[,1]), grep(yPref, xTxt[,1])))
+	if (length(indL1) == 0) {
+		stop(paste0("The column names for class- and numerical variables in the xlsx-file \n'", slClasses, "' must be preceded by '", clPref, "' resp. '", yPref, "'."), call.=FALSE)
+	} # 
+	
 	colNamesL1 <- xTxt[,1][indL1]
-	colNamesL2 <- xTxt[,2][indL1]
-	colNamesL2[which(is.na(colNamesL2))] <- paste0(clPref, delCol) # is inserting "C_DELETE" into empty Level2 column names
+	if (ncol(xTxt) > 1) {
+		colNamesL2 <- xTxt[,2][indL1]
+		colNamesL2[which(is.na(colNamesL2))] <- paste0(clPref, delCol) # is inserting "C_DELETE" into empty Level2 column names
+	} else {
+		colNamesL2 <- paste0(clPref, delCol) 
+	} # end else
 
 	cleanOutNAs <- function(vals) {
-		vnas <- which(is.na(vals)) # the indices of vals that are NAs
+		# the indices of vals that are NAs XXX But are we sure that in every locale in xlsx empty cells come back as "NA" ?
+		# when vals was only characters, empty cells get back as real NA
+		# when vals was numeric, then as.character, then empty cells get back as "NA" as character
+		naInd <- grep("NA", vals) # first look for "NA" as character
+		vals[naInd] <- NA			# make it a real NA
+		vnas <- which(is.na(vals)) #
 		if (length(vnas) > 0) {
 			if (length(vnas) == length(vals)) { #  so we have only NAs, we need to keep only one
 				return("x")
@@ -167,35 +179,39 @@ getClassStructureFromXlsx <- function(slClasses) {
 	for (i in seq_along(indL1)) {
 		fr <- aa[i]+1
 		to <- aa[i+1]-1
-		vals <- xTxt[fr:to, 1]
+		vals <- as.character(xTxt[fr:to, 1])
 		vals <- cleanOutNAs(vals)
 		valL1[[i]] <- vals
 	} # end for i
-	
+
 	## L2
 	valL2 <- list(NULL)
 	length(valL2) <- length(indL1)
-	cols <- 2: ncol(xTxt) # the colnumns, ranging from 2 to ncol
-	for (i in seq_along(indL1)) {
-		rnFr <- aa[i]+1
-		nrRows <- length(valL1[[i]])
-		L2inner <- list(NULL)
-		length(L2inner) <- nrRows
-		for (k in 0 : (nrRows-1)) {
-			vals <- as.character(xTxt[rnFr+k, cols])
-			vals <- cleanOutNAs(vals)
-			L2inner[[k+1]] <- vals
-		} # end for k
-		valL2[[i]] <- L2inner
-	} # end for i
+	if (ncol(xTxt) == 1) {
+		valL2 <- valL1
+	} else {
+		cols <- 2: ncol(xTxt) # the colnumns, ranging from 2 to ncol
+		for (i in seq_along(indL1)) {
+			rnFr <- aa[i]+1
+			nrRows <- length(valL1[[i]])
+			L2inner <- list(NULL)
+			length(L2inner) <- nrRows
+			for (k in 0 : (nrRows-1)) {
+				vals <- as.character(xTxt[rnFr+k, cols])
+				vals <- cleanOutNAs(vals)
+				L2inner[[k+1]] <- vals
+			} # end for k
+			valL2[[i]] <- L2inner
+		} # end for i
+	} # end else
 	#	
 	outList <- list(cnsL1=colNamesL1, cnsL2=colNamesL2, valL1=valL1, valL2=valL2)
 	return(outList)
 } # EOF
 
-getmd_core <- function(fn="def") {
-	stn <- getstn()
+getmd_core <- function(fn="def", stn) {
 	check_mdDefaults(fn) # is assigning
+	checkTransitTo_SLxlsx_MaybeMakeMetadataBackup(fn, stn)
 	#
 	clPref <- stn$p_ClassVarPref
 	yPref <- stn$p_yVarPref
@@ -276,7 +292,7 @@ getmd_core <- function(fn="def") {
 #' @export
 getmd <- function(fn="def", ...) {
 	stn <- autoUpS()
-	md <- getmd_core(fn)
+	md <- getmd_core(fn, stn)
 	old_expName <- md$meta$expName
 	modifyExpName <- function(expName=old_expName, ...) {
 		return(expName)
@@ -305,18 +321,17 @@ check_apDefaults <- function(fn) {
 	}	
 } # EOF
 
-copyAnProcFile <- function(fromPath, toPath) {
-	ok <- file.copy(fromPath, toPath, overwrite=TRUE)
-	if (ok) { cat("A fresh template of the analysis procedure file has been copied from the package.\n")}			
-} # EOF
-
 check_apVersion <- function(folderLocal, nameLocal) {
+	fiEl <- gl_firstElement_anProc
+	tmpl <- gl_templateSuffix_mdAp
+	manMax <- gl_maxEmptyAp # the max empty lines after deleting and adding keys	
+	#
 	aa <- paste(path.package("aquap2"), "/templates/anproc.r", sep="")
 	if (!file.exists(aa)) {
 		aa <- paste(path.package("aquap2"), "/templates/anproc.r", sep="/inst")	# required in the case of devtools::load_all			
 	} # end if	
 	pathToLocal <- paste(folderLocal, nameLocal, sep="/")
-	out <- checkFileVersionPossiblyModify(pathToPack=aa, pathToLocal, folderLocal, nameLocal)
+	out <- checkFileVersionPossiblyModify(pathToPack=aa, folderLocal, nameLocal, pm=fiEl, tmpl, manMax) # pm: the first key in the file	
 	if (out == FALSE) {
 	#	stop("Please update the analysis procedure files in your experiments according to the latest template.", call.=FALSE)
 		stop(call.=FALSE)
@@ -359,35 +374,38 @@ getap_core_file <- function(fn="def") {
 
 getap_core <- function(fn, .lafw_fromWhere="load", cube=NULL, ...) {
 	### check if any unknown argument is there
+	##
 	checkTdArgs <- function(pv, ...) {
 		a <- substitute(c(...))
 		chars <- names(eval(a))
 		if (!is.null(chars)) {
-		## begin nameX correction
-		for (i in 2:20) { # to correct for the 'nameX'behaviour for the arguments that can have more than one value
-			ind <- grep(i, chars)
+			## begin nameX correction
+			for (i in 2:20) { # to correct for the 'nameX'behaviour for the arguments that can have more than one value
+				ind <- grep(i, chars)
+				if (length(ind) != 0) {
+					chars <- chars[-ind]
+				} # end if
+			} # end for i
+			ind <- grep(1, chars)
 			if (length(ind) != 0) {
-				chars <- chars[-ind]
-			}
-		} # end for i
-		ind <- grep(1, chars)
-		if (length(ind) != 0) {
 				chars[ind] <- substr(chars[ind], 1, nchar(chars[ind])-1) # cut away the "1" from the remaining chars that have a "1" 
-		}
-		## end nameX correction		
+			} # end if
+			## end nameX correction		
 			out <- NULL
 			for (i in 1: length(chars)) {
 				ind <- which(pv == chars[i])
 				if (length(ind) == 0) {
 					out <- c(out, i)
-				}
-			}
+				} # end if
+			} # end for i
 			if (!is.null(out)) {
 				msg <- paste("Sorry, the provided arguments '", paste(chars[out], collapse="', '"), "' can not be recognized.", sep="")
 				stop(msg, call.=FALSE)
-			}
-		}
+			} # end if
+		} # end if (!is.null(chars))
 	} # EOIF
+	##
+	##
 	checkTdArgs(pv_tripleDotsMod, ...)
 	#####	
 	if (.lafw_fromWhere == "load") {
@@ -397,7 +415,7 @@ getap_core <- function(fn, .lafw_fromWhere="load", cube=NULL, ...) {
 			return(cube@anproc)
 		} else {
 			stop("An error at obtaining the analysis procedure occured. Please stay calm.", call.=FALSE) # this is not likely to ever happen
-		}
+		} # end else
 	} # end else
 } # EOF
 

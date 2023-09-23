@@ -85,8 +85,9 @@ ap2_settings_setup <- function(path=NULL) {
 #' @family Helper Functions
 #' @export
 updateSettings <- function(silent=FALSE) {
+	checkTransitToUniset_MaybeRenameSettingsFile() # is renaming the settings.R file
 	if (checkOnTest() | checkOnLocal()) {
-		return(test_getLocalStn())
+		return(invisible(test_getLocalStn() ))
 	} # end if
 	#
 	stn <- uniset::uniset_updateSettings(get("uniset_handover"),
@@ -124,8 +125,11 @@ autoUpS <- function(cfs=getstn()$defCfs) {
 	if (cfs) {	
 		checkForExperimentFolderStructure()
 	} # end if
+	#
+	checkTransitToUniset_MaybeRenameSettingsFile() # is renaming the settings.R file 
+	#
 	if (checkOnTest() | checkOnLocal()) {
-		return(test_getLocalStn())
+		return(invisible(test_getLocalStn()))
 	} # end if
 	#
 	stn <- uniset::uniset_autoUpS(get("uniset_handover"),

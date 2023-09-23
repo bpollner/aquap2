@@ -37,7 +37,7 @@ Imports:
     plotrix,
     pracma,
     beeswarm,
-        grid,
+    grid,
     gridExtra,
     ggplot2,
     gtable,
@@ -76,6 +76,7 @@ Collate:
     'doc_settings.r'
     'gen_coreDataManip.r'
     'gen_general.r'
+    'gen_metaAp_modF.R'
     'gen_parallel.r'
     'gen_possibleValues.r'
     'gen_roxygenHelpers.r'
@@ -95,6 +96,7 @@ Collate:
     'prep_interpolate.r'
     'prep_metadata.r'
     'prep_transformToAp2.r'
+    'prep_transition.R'
     'prep_writeMfiles.r'
     'uniset_functions.R'
     'uniset_globals.R'

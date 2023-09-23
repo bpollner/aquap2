@@ -19,14 +19,10 @@ nrConScans <- 3							## how many consecutive scans for every sample?
 spacing <- 5							## the space between environmental control samples (set to FALSE for not inserting environmental controls)
 ###
 sl_classes <- "def"						## the name of the xlsx file in the metadata folder holding the class structure. Leave at 'def' to get the default from the settings (parameter 'fn_class_structure').
-columnNamesL1 <- c("C_DELETE")			## please note that there is a special prefix for class- and numerical variables: the default is "C_" for class-variables and "Y_" for numerical variables
-columnNamesL2 <- c("C_DELETE")			## "DELETE" is the default character for those columns that, after the generation of the sample list, should be omitted
-L1  <- list(list("")) 					## Please look at the vignette 'Examples for Experiment-Design' for more information on the use of the arguments L1 and L2.
-L2  <- list(list("")) 
 ###
 Repls <- 10								## how many replications for each sample?
-Group <- c("no") 						## additional groups to split the above generated classes into, like e.g. experiment and control
-
+Group <- c("no") 						## additional groups to split the classes defined in the Excel file named above into, like e.g. experiment and control. Provide a character vector of any length.
+###
 
 ### do NOT change the names of the variables !!  ####
 ####################################################################
