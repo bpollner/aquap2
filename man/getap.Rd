@@ -18,7 +18,7 @@ forget the '.r' at the end.)}
 override the value in the analysis procedure .r file.}
 }
 \value{
-A list with the analysis procedure.
+An (invisible) list with the analysis procedure.
 }
 \description{
 Read in the analysis procedure from the default or a custom 

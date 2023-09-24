@@ -30,14 +30,13 @@ registerParallelBackend <- function() {
 	haveParallel <- checkHaveParallel()
 	if (!haveParallel) {
 		if (is.na(nrWorkers)) { # could still be NA if automatic detection could not find anything
-			registerDoParallel()
+			doParallel::registerDoParallel()
 		} else {
 			if (is.numeric(nrWorkers) & (length(nrWorkers) == 1)) {
-				registerDoParallel(nrWorkers)		
+				doParallel::registerDoParallel(nrWorkers)		
 			} else {
 				stop("Please provide a length one numeric as the number of worker processes in the settings file. Thank you very much.", call.=FALSE)
 			}
 		}
 	}
 } # EOF
-

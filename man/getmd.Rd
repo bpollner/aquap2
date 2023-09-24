@@ -17,7 +17,7 @@ the '.r' at the end.)}
 specified in the metadata.r file.}
 }
 \value{
-A list with all the metadata of the experiment.
+An (invisible) list with all the metadata of the experiment.
 }
 \description{
 Read in the metadata from the default or a custom metadata file 

@@ -19,8 +19,9 @@ Depends:
 Encoding: UTF-8
 Imports:
     methods,
-    foreach,
+    uniset,
     doParallel,
+    foreach,
     openxlsx,
     signal,
     plyr,
@@ -48,7 +49,6 @@ Imports:
     e1071,
     nnet
 Suggests:
-    uniset,
     devtools,
     knitr,
     testthat (>= 3.0.0)

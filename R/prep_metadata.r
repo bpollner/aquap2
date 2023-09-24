@@ -16,7 +16,7 @@ check_mdDefaults <- function(fn) {
 	}	
 } # EOF
 
-check_mdDefaultValues <- function(localEnv) {
+check_mdDefaultValues <- function(localEnv, tePaSH=NULL) {
 	# realMeasurementLabel  
 	stn <- getstn()
 	le <- localEnv
@@ -57,7 +57,11 @@ check_mdDefaultValues <- function(localEnv) {
 	}
 	if (grepl("custom@", ft)) {
 		cfn <- strsplit(ft, "custom@")[[1]][2] # isolate the filename
-		pathSH <- Sys.getenv("AQUAP2SH")
+		if (checkOnTest()) {
+			pathSH <- tePaSH
+		} else {
+			pathSH <- Sys.getenv("AQUAP2SH")
+		} # end else
 		path <- paste(pathSH,  cfn, sep="/")
 		if (!file.exists(path)) {
 			stop(paste("The custom data-import file with the name '", cfn, "' does not seem to exist in \n\"", pathSH, "\".", sep=""), call.=FALSE)
@@ -279,7 +283,7 @@ getmd_core <- function(fn="def", stn) {
 #' the '.r' at the end.)
 #' @param ... Provide the argument 'expName' to override the experiment name 
 #' specified in the metadata.r file.
-#' @return A list with all the metadata of the experiment.
+#' @return An (invisible) list with all the metadata of the experiment.
 #' @seealso \code{\link{metadata_file}}, \code{\link{getap}}, \code{\link{gdmm}}
 #' @examples
 #' \dontrun{
@@ -298,7 +302,7 @@ getmd <- function(fn="def", ...) {
 		return(expName)
 	} # EOIF
 	md$meta$expName <- modifyExpName(...)
-	return(md)
+	return(invisible(md))
 } # EOF
 
 
@@ -580,7 +584,7 @@ modifyThisAp <- function(ap, ...) {
 #' @param ... Any of the arguments of the analysis procedure - please see 
 #' \code{\link{anproc_file}}. Any argument/value provided via \code{...} will 
 #' override the value in the analysis procedure .r file.
-#' @return A list with the analysis procedure.
+#' @return An (invisible) list with the analysis procedure.
 #' @seealso \code{\link{anproc_file}}, \code{\link{getmd}}, \code{\link{gdmm}}
 #' @examples
 #' \dontrun{
@@ -598,5 +602,5 @@ getap <- function(fn="def", ...) {
 								# depending on a possible additional argument in ... (.lafw_fromWhere), either the ap from the file is loaded, or,  in case of a call from a plotting function, the ap from the cube (what then is also present in the ... argument) is taken
 	###
 	apMod <- modifyThisAp(ap, ...)
-	return(apMod)
+	return(invisible(apMod))
 } # EOF

@@ -1,7 +1,7 @@
 # functions to check and maybe modify (delete keys or add keys) the metadata or analysis procedure file.access
 # modeled after the code used in uniset
 
-getCheckForDoubleNames <- function(pathToLocal, pathToPack, pmu) {
+getCheckForDoubleNames <- function(pathToLocal, pathToPack, pmu, folderLocal, nameLocal) {
     #
     checkIt <- function(charVec, what) {
         aa <- length(charVec)
@@ -15,7 +15,13 @@ getCheckForDoubleNames <- function(pathToLocal, pathToPack, pmu) {
     } # EOIF
     ##
     lenv <- new.env()
-    sys.source(pathToLocal, envir=lenv)
+    aa <- try(sys.source(pathToLocal, envir=lenv), silent=TRUE)
+	if (is(aa, "try-error")) {
+		message(paste0("An error occurred while trying to source content from the file \n'", pathToLocal, "' in the folder '", folderLocal, "'."))
+		cat("Probably some unsavoury punctuation (e.g.',' or '=') got introduced at some point... by someone other than you, of course :-).\nA template with correct syntax will be made available.\n")
+		pleaaseCopyAsTemplate(pathToPack, folderLocal, nameLocal)
+		stop(call.=FALSE)
+	} # end if 
     txt <- paste0("sort(names(lenv", pmu, "))") # *
     locNames <- eval(parse(text=txt))
     penv <- new.env()
@@ -250,6 +256,7 @@ addMissingKeys <- function(ftLocal, splitChar, taPaObj, pathToPack, folderLocal,
 	if (DEV) {print("Missing Keys: "); print(missingKeys);}
     if (length(missingKeys != 0)) { # so we do have to add something
         ftLocalR <- getKeysOnlyFromText(ftLocal, splitChar)
+        ftLocalR <- cleanOutLastEmptiesFromftLocalR(locNames, ftLocalR) # because, after deletion it might be possible that we have some "" empty chars on the end. Things are complicated here... 
         if (DEV) {print("FIRST ftLocalR"); print(ftLocalR);}
         ftPack <- getKeyTxtCenter(pathToPack, taPaObj, lastCharPack)
         ftPackR <- getKeysOnlyFromText(ftPack, splitChar)
@@ -332,14 +339,24 @@ addMissingKeys <- function(ftLocal, splitChar, taPaObj, pathToPack, folderLocal,
 } # EOF
 
 deleteSurplusKeys <- function(folderLocal, nameLocal, ftLocal, splitChar, taPaObj, locNames, pacNames, maxS, manMax=NULL) {
+   DEV <- FALSE
+#  DEV <- TRUE
+   #
     surplusKeys <- locNames[which(!locNames %in% pacNames)]
+    if (DEV) {print("surplusKeys"); print(surplusKeys); print("---------");}
     if (length(surplusKeys != 0)) { # so we do have to delete something
         ftLocalR <- getKeysOnlyFromText(ftLocal, splitChar) # the incoming ftLocal is "stn" only, and was possibly modified above in the additions
+        if (DEV) {print("Initial ftLocalR: "); print(ftLocalR); print("---------");}
+   #    if (DEV) {print("Initial ftLocal: "); print(ftLocal); print("---------");}
         for (i in 1: length(surplusKeys)) { # we are collecting possible single line comments above a block
             indKey <- which(ftLocalR == surplusKeys[i])
+            if (DEV) {print("indKey (local del.): "); print(indKey); print("working on: "); print(surplusKeys[i]); print("---------");}
             aa <- trimws(ftLocal) # so that tabs etc go to ""
+            if (DEV) {print("ftLocal trimmed: "); print(aa); print("---------");}
             ikm <- NULL
-            if ( (aa[indKey-1] != "")  & (aa[indKey-2] == "") ) { # that means we have a single line of comment above a key
+            min1 <- indKey -1 ; if (min1 < 1) {min1 <- 1}
+            min2 <- indKey -2 ; if (min2 < 1) {min2 <- 1} # so we can delete also on second place
+            if ( (aa[min1] != "")  & (aa[min2] == "") ) { # that means we have a single line of comment above a key
                 ikm <- indKey-1 # ikm: index key minus
                 if (ftLocalR[ikm] %in% locNames) { # now this above could be a key, check....
                     ikm <- NULL
@@ -364,15 +381,12 @@ deleteSurplusKeys <- function(folderLocal, nameLocal, ftLocal, splitChar, taPaOb
 } # EOF
 
 pleaaseCopyAsTemplate <- function(pathToPack, folderLocal, nameLocal) {
+	# pathToPack comes in "inst-test" corrected; it contains the complete path to the metadata or anproc file in the package. 
+	# nameLocal does contain the .R at the end
     tmpl <- "_TEMPLATE.R"
     #
-    td <- tempdir()
-    ok <- file.copy(pathToPack, td, overwrite = TRUE)
-    nfn <- paste0(td, "/", nameLocal) # why go via tempdir ??
-    nfn_T <- paste0(nfn, tmpl)
-    ok <- file.rename(nfn, nfn_T)
-    ok <- file.copy(nfn_T, folderLocal, overwrite = TRUE)
-    unlink(nfn_T)
+	localPath <- paste0(folderLocal, "/", nameLocal, tmpl) # nameLocal does have the .R already
+    ok <- file.copy(from=pathToPack, to=localPath, overwrite = TRUE) # 
     if (!ok) {
         message("Sorry, for unknown reasons the required template file could not be copied.\n")
         return(invisible(FALSE))
@@ -384,6 +398,7 @@ pleaaseCopyAsTemplate <- function(pathToPack, folderLocal, nameLocal) {
 
 checkFileVersionPossiblyModify <- function(pathToPack, folderLocal, nameLocal, pm=NULL, tmpl, manMax=NULL){
 	# pm comes in either as the first key of the metadata or the first key of the analysis procedure
+    # pathToPack comes in "inst-corrected", so it is test-safe
     pv_suffixForTemplates <- tmpl
     taPaObj <- pm
     splitChar <- "<-"
@@ -392,7 +407,7 @@ checkFileVersionPossiblyModify <- function(pathToPack, folderLocal, nameLocal, p
     loc <- pathToLocal <- paste0(folderLocal, "/", nameLocal)
     pac <- pathToPack
     #
-    aa <- getCheckForDoubleNames(pathToLocal, pathToPack, pmu) # is checking for non-unique keys
+    aa <- getCheckForDoubleNames(pathToLocal, pathToPack, pmu, folderLocal, nameLocal) # is checking for non-unique keys
     if (identical(aa$locNames, aa$pacNames)) {
         return(invisible(TRUE))
     } # end if identical
@@ -441,30 +456,34 @@ checkFileVersionPossiblyModify <- function(pathToPack, folderLocal, nameLocal, p
     #
     ftLocal <- getKeyTxtCenter(pathToLocal, taPaObj, lastCharLocal) # might need that in the deletions. !!! gets possibly modified in the additions below
     maxS <- getMaxSpace(ftLocal) # get the maximum number of continuous empty lines
-    #######    
-    aa <- deleteSurplusKeys(folderLocal, nameLocal, ftLocal, splitChar, taPaObj, locNames, pacNames, maxS, manMax) # *************** # usually does not crash
+    #######  
+    msgAd <- "not "
+    aa <- try(deleteSurplusKeys(folderLocal, nameLocal, ftLocal, splitChar, taPaObj, locNames, pacNames, maxS, manMax), silent=TRUE) # *************** # usually does not crash
+    if (!is(aa, "try-error")) {    
         ftLocal <- aa$ftLocal
         locNames <- aa$locNames # locNames have to updated due a possible deletion of keys
-    ftLocal <- try(addMissingKeys(ftLocal, splitChar, taPaObj, pathToPack, folderLocal, nameLocal, pacNames, locNames, maxS, lastCharPack, manMax), silent=TRUE) # ************** loves to craash
+		ftLocal <- try(addMissingKeys(ftLocal, splitChar, taPaObj, pathToPack, folderLocal, nameLocal, pacNames, locNames, maxS, lastCharPack, manMax), silent=TRUE) # ************** loves to craash
+    	msgAd <- "not completely "
+    } # end if 
     #######
     # now write into local file if also adding did not produce an error
     if (!is(ftLocal, "try-error")) {
 		fconLocal <- file(loc, open="w")
-		writeLines(c(txtAbove, ftLocal, txtBelow), fconLocal) # write the new file to settings.r in pathSH
+		writeLines(c(txtAbove, ftLocal, txtBelow), fconLocal) # write the new file to settings.r in pathSH. # If deleting already fails, the original file gets written back.
 		close(fconLocal)
     } # end if
     #
     # just to be sure, check again
     aa <- getCheckForDoubleNames(pathToLocal, pathToPack, pmu)
-    if (!identical(aa$locNames, aa$pacNames)) { # this should never happen
-        message(paste0("Sorry, for unknown reasons the keys in the file '", nameLocal, "' in the folder '", folderLocal, "' could not be updated."))
+    if (!identical(aa$locNames, aa$pacNames)) { # can happen if things fail above
+        message(paste0("We are very sorry, but the keys in the file '", nameLocal, "' in the folder '", folderLocal, "' could ", msgAd, "be updated."))
     	  	fconLocal <- file(loc, open="w")
-		   	writeLines(ftLocalBackup, fconLocal) # write the backup file to settings.r in pathSH
+		   	writeLines(ftLocalBackup, fconLocal) # just to be sure; write the original backup file to the file
     	   	close(fconLocal)
         cat(paste0("A template containing the required key-value pairs will be made available.\n"))
         pleaaseCopyAsTemplate(pathToPack, folderLocal, nameLocal)
         return(invisible(FALSE))
-    } # end if identical
+    } # end if !identical
     #
     return(invisible(TRUE))
 } # EOF

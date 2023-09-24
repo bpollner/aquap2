@@ -44,9 +44,11 @@ genFolderStr <- function() {
 	fn_sampleListOut <- stn$fn_sampleListOut
 	fn_sampleListIn <- stn$fn_sampleListIn
 	pAdd <- ""
-	
+	#
 	fn_mDataDefFile <- stn$fn_mDataDefFile
 	fn_anProcDefFile <- stn$fn_anProcDefFile
+	fn_slClassesFile <- stn$fn_class_structure
+	#
 	pp <- c(fn_analysisData, fn_exports, fn_rcode, fn_rawdata, fn_rdata, fn_metadata, fn_results, fn_sampleLists)
 	dirOk <- NULL
 	for (p in pp) {
@@ -63,8 +65,10 @@ genFolderStr <- function() {
 	pathFrom <- paste(a, pAdd, "/templates/", sep="")
 	file.copy(paste(pathFrom, "metadata.r", sep=""), fn_metadata)
 	file.copy( paste(pathFrom, "anproc.r", sep=""), fn_metadata)
+	file.copy( paste(pathFrom, "sl_classes.xlsx", sep=""), fn_metadata)
 	file.rename(paste(fn_metadata, "metadata.r", sep="/"), paste(fn_metadata, fn_mDataDefFile, sep="/"))
 	file.rename(paste(fn_metadata, "anproc.r", sep="/"), paste(fn_metadata, fn_anProcDefFile, sep="/"))
+	file.rename(paste(fn_metadata, "sl_classes.xlsx", sep="/"), paste(fn_metadata, fn_slClassesFile, sep="/"))
 	if (all(dirOk)) {
 		if (!stn$allSilent) {	cat("Folder structure created.\n")}
 	} else {
