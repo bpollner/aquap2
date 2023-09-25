@@ -63,12 +63,9 @@ genFolderStr <- function() {
 		pAdd <- "/inst"
 	} # end if
 	pathFrom <- paste(a, pAdd, "/templates/", sep="")
-	file.copy(paste(pathFrom, "metadata.r", sep=""), fn_metadata)
-	file.copy( paste(pathFrom, "anproc.r", sep=""), fn_metadata)
-	file.copy( paste(pathFrom, "sl_classes.xlsx", sep=""), fn_metadata)
-	file.rename(paste(fn_metadata, "metadata.r", sep="/"), paste(fn_metadata, fn_mDataDefFile, sep="/"))
-	file.rename(paste(fn_metadata, "anproc.r", sep="/"), paste(fn_metadata, fn_anProcDefFile, sep="/"))
-	file.rename(paste(fn_metadata, "sl_classes.xlsx", sep="/"), paste(fn_metadata, fn_slClassesFile, sep="/"))
+	file.copy( paste(pathFrom, "metadata.r", sep=""), paste(fn_metadata, fn_mDataDefFile, sep="/"), overwrite=TRUE)
+	file.copy( paste(pathFrom, "anproc.r", sep=""), paste(fn_metadata, fn_anProcDefFile, sep="/"), overwrite=TRUE)
+	file.copy( paste(pathFrom, "sl_classes.xlsx", sep=""),  paste0(fn_metadata, "/", fn_slClassesFile, ".xlsx"), overwrite=TRUE)
 	if (all(dirOk)) {
 		if (!stn$allSilent) {	cat("Folder structure created.\n")}
 	} else {

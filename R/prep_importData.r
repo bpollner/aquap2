@@ -58,7 +58,8 @@ readSpec_checkDefaults <- function(possibleFiletypes, md, filetype, naString) {
 #' @export
 readSpectra <- function(md=getmd(), filetype="def", naString="NA") {
 	stn <- autoUpS()
-	possibleFiletypes <- pv_filetypes #global constant, they get handed down to the checking function !  	# 	pv_filetypes <- c("vision_NSAS.da", "tabDelim.txt", "Pirouette.pir", "xlsx")
+	possibleFiletypes <- pv_filetypes #global constant, they get handed down to the checking function !  	
+# 	pv_filetypes <- c("vision_NSAS.da", "tabDelim.txt", "Pirouette.pir", "xlsx")
 	filename <- NULL # will be changed in the checking
 	readSpec_checkDefaults(possibleFiletypes, md, filetype, naString)
 	rawFolder <- stn$fn_rawdata
