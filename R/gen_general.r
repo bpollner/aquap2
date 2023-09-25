@@ -1,18 +1,24 @@
-
-checkForExperimentFolderStructure <- function() {
+checkForExperimentFolderStructure <- function(where=getwd(), stopIfBad = TRUE) {
 	stn <- getstn()
+	ad <- stn$fn_analysisData
 	aa <- stn$fn_exports
+	cc <- stn$fn_metadata
 	aaa  <- stn$fn_rcode
 	bb <- stn$fn_rawdata
 	bbb  <- stn$fn_rdata
-	cc <- stn$fn_metadata
 	ccc <- stn$fn_results
 	dd  <- stn$fn_sampleList
-	folderNames <- c(aa, aaa, bb, bbb, cc, ccc, dd)
+	folderNames <- c(ad, aa, aaa, bb, bbb, cc, ccc, dd)
 	#
-	if(!all(folderNames %in% list.files()) ) {
-		stop(paste0("Sorry, it appears the current working directory is not within the required standard folder structure.\nPlease change the working directory or use 'genFolderStr()' to create an appropriate folder structure in the current working directory."), call.=FALSE)
-	}
+	if(!all(folderNames %in% list.files(where)) ) {
+		if (stopIfBad) {
+			stop(paste0("Sorry, it appears the directory \n'", where, "' \nis not within the required standard folder structure.\nPlease consider using 'genFolderStr()' to create an appropriate folder structure in this directory."), call.=FALSE)
+		} else {
+			return(FALSE)
+		} # end else
+	} else { # so all is good
+		return(TRUE)
+	} # end else
 } # EOF
 
 ################################################################
@@ -23,15 +29,17 @@ checkForExperimentFolderStructure <- function() {
 #' @description Generate the required folder structure for a new experiment in 
 #' the current working directory.
 #' @details \code{genFolderStr} will generate all the required folders in the 
-#' current working directory that 'aquap2' needs to work properly. Templates 
-#' for metadata and analysis procedure will be copied into the metadata-folder.
-#' You can change the defaults for the folder names in the settings file.
-#' @return Folders get created in the current working directory.
+#' directory specified at \code{where} that 'aquap2' needs to work properly. 
+#' Templates for metadata and analysis procedure will be copied into the 
+#' metadata-folder.
+#' @param where Character length one, the root folder of a single experiment.
+#' Defaults to \code{getwd()}.
+#' @return Used for its side effects, i.e. folders get created.
 #' @family Helper Functions
 #' @seealso \code{\link{settings_file}}, \code{\link{noise_procedures}}, 
 #' \code{\link{genNoiseRecExp}} 
 #' @export
-genFolderStr <- function() {
+genFolderStr <- function(where=getwd()) {
 	stn <- autoUpS(cfs=FALSE) # no checking of folder structure here!
 	fn_analysisData <- stn$fn_analysisData 
 	fn_exports <- stn$fn_exports
@@ -50,22 +58,25 @@ genFolderStr <- function() {
 	fn_slClassesFile <- stn$fn_class_structure
 	#
 	pp <- c(fn_analysisData, fn_exports, fn_rcode, fn_rawdata, fn_rdata, fn_metadata, fn_results, fn_sampleLists)
+	pp <- paste0(where, "/", pp) # here all folder names get prepended with a full path (coming from where)
 	dirOk <- NULL
 	for (p in pp) {
 		dirOk <- c(dirOk, dir.create(p, showWarnings=FALSE))
 	}
-	slin <- paste(fn_sampleLists, fn_sampleListIn, sep="/")
-	slout <- paste(fn_sampleLists, fn_sampleListOut, sep="/")
-	dirOk <- c(dirOk, dir.create(slin, showWarnings=FALSE))
-	dirOk <- c(dirOk, dir.create(slout, showWarnings=FALSE))
+	slin <- paste(where, fn_sampleLists, fn_sampleListIn, sep="/")
+	slout <- paste(where, fn_sampleLists, fn_sampleListOut, sep="/")
+	shW <- TRUE
+	dirOk <- c(dirOk, dir.create(slin, showWarnings=shW))
+	dirOk <- c(dirOk, dir.create(slout, showWarnings=shW))
 	a <- path.package("aquap2")
 	if (dir.exists(paste0(a, "/inst"))) { # needed for local tests
 		pAdd <- "/inst"
 	} # end if
 	pathFrom <- paste(a, pAdd, "/templates/", sep="")
-	file.copy( paste(pathFrom, "metadata.r", sep=""), paste(fn_metadata, fn_mDataDefFile, sep="/"), overwrite=TRUE)
-	file.copy( paste(pathFrom, "anproc.r", sep=""), paste(fn_metadata, fn_anProcDefFile, sep="/"), overwrite=TRUE)
-	file.copy( paste(pathFrom, "sl_classes.xlsx", sep=""),  paste0(fn_metadata, "/", fn_slClassesFile, ".xlsx"), overwrite=TRUE)
+	# adapt to maybe locally different default names
+	file.copy( paste(pathFrom, "metadata.r", sep=""), paste0(where, "/", fn_metadata, "/", fn_mDataDefFile), overwrite=TRUE) # they have the .R in the name
+	file.copy( paste(pathFrom, "anproc.r", sep=""), paste0(where, "/", fn_metadata, "/", fn_anProcDefFile), overwrite=TRUE) # they have the .R in the name
+	file.copy( paste(pathFrom, "sl_classes.xlsx", sep=""),  paste0(where, "/", fn_metadata, "/", fn_slClassesFile, ".xlsx"), overwrite=TRUE)
 	if (all(dirOk)) {
 		if (!stn$allSilent) {	cat("Folder structure created.\n")}
 	} else {
@@ -73,6 +84,118 @@ genFolderStr <- function() {
 	} # end else
 } # EOF
 
+#' @title Download Example Experiment
+#' @description Checks if a dataset is present. If not, it is downloading a 
+#' single example experiment from a server, generating the required folder 
+#' structure and inserting the downloaded files into their appropriate folder.
+#' @details If the experiment home folder is already present at the location 
+#' given in \code{where}, no data will be downloaded and the existing experiment 
+#' home folder will be left unchanged. The experiment home folder, if already 
+#' present, has to end in \code{@home} in order to be recognized correctly.
+#' If the experiment home folder does not exist it will be created.
+#' Currently, this function is primary intended to be used in testing 
+#' and to help create executable examples.
+#' @param where Character length one. The path where the experiment home folder
+#' should be looked for. The experiment home folder, if already existing,  
+#' has to end in \code{@home} in order to be recognized correctly.
+#' @param expName Character length one, the name of the experiment.
+#' @param force_download Logical. If data should be downloaded anyway. If set 
+#' to \code{TRUE} and \code{where} is pointing to an already existing experiment 
+#' home folder, the latter one will be deleted, the experiment data will be 
+#' downloaded and a new folder structure will be created.
+#' @return Used for its side effect, i.e. do download example data and to 
+#' create a working experiment folder structure. Returns \code{NULL} if no data
+#' were downloaded, \code{FALSE} if data should have been downloaded but it 
+#' failed, and \code{TRUE} if data were downloaded, the experiment folder 
+#' structure was created successfully, and the data files were copied.
+#' @family Helper Functions
+#' @export
+ap2dme <- function(where, expName, force_download = FALSE) {
+	stn <- getstn()
+	#
+	gdExpRoot <- gl_gdLinkToExperiments # the google drive link to the folder "experiments"
+	expHomeSuffix <- gl_expHomeSuffix
+	td <- tempdir()
+	fn_metadata <- stn$fn_metadata
+	fn_rawdata <- stn$fn_rawdata
+	fn_sampleLists <- stn$fn_sampleLists
+	fn_sampleListIn <- stn$fn_sampleListIn
+	ap2dme <- FALSE
+	#
+	expHome <- paste0(expName, expHomeSuffix)
+	if (!dir.exists(where)) {
+		stop(paste0("Sorry, the folder '", where, "' \nthat should or will contain the experiment home folder \n'", expHome, "' does not seem to exist."), call.=FALSE)
+	} # end if
+	ptExpHome <- paste0(where, "/", expHome)
+	if (dir.exists(ptExpHome)) {
+		fsok <- checkForExperimentFolderStructure(where = ptExpHome, stopIfBad = FALSE)
+		if (!fsok) { # delete it all
+			unlink(ptExpHome, recursive=TRUE)
+		} else { # by now we have the correct folder structure in expHome,
+			ap2dmeFile <- paste0(ptExpHome, "/ap2dme")
+			if (file.exists(ap2dmeFile)) {
+				ap2dme <- readRDS(ap2dmeFile)
+			} # end if
+			if (ap2dme) {
+				return(NULL) # no data download, all is good			
+			} else { # so we have an ap2dme, but is is FALSE
+				unlink(ptExpHome, recursive=TRUE)
+			} # end else
+		} # end else
+	} # end if
+	#
+	# if we are here ptExpHome does NOT exist (any more)
+	ok <- dir.create(ptExpHome)
+	if (!ok) {
+		stop(paste0("Sorry, the folder '", expHome, "' could not be created in '", where, "' "), call.=FALSE)
+	} # end if
+	genFolderStr(ptExpHome)
+	#
+	# now download data from google drive
+	gdSource <- paste0(gdExpRoot, "/", expName, ".zip")
+	targZip <- paste0(td, "/", expName, ".zip")
+	ok <- 0
+#	ok <- download.file(gdSource, targZip, mode="wb")
+#	ok <- download.file(gdSource, targZip)
+	if (ok != 0) {
+		message(paste0("Sorry, the download failed."))
+		return(FALSE)
+	} # end if ok != 0
+	aa <- 1
+    aa <- try(utils::unzip(targZip, exdir = td))
+    if (is.null(aa)) {
+    	ap2dme <- FALSE
+   		saveRDS(ap2dme, paste0(ptExpHome, "/ap2dme"))
+		return(FALSE)
+    } # end if
+	#
+	# now insert the downloaded elements into the previously generated folder structure
+	ok <- NULL
+	foFr <- paste0(td, "/", expName, "/") # folder from
+	tfn <- "_readme.txt"
+	ok <- file.copy(from=paste0(foFr, tfn), to=paste0(ptExpHome, "/", tfn))
+	tfn <- "metadata.R"
+	ok <- c(ok, file.copy(from=paste0(foFr, tfn), to=paste0(ptExpHome, "/", fn_metadata, "/", tfn), overwrite=TRUE))
+	tfn <- "sl_classes.xlsx"
+	ok <- c(ok, file.copy(from=paste0(foFr, tfn), to=paste0(ptExpHome, "/", fn_metadata, "/", tfn), overwrite=TRUE)	)
+	tfn <- "TRHlog.txt"
+	ok <- c(ok, file.copy(from=paste0(foFr, tfn), to=paste0(ptExpHome, "/", fn_rawdata, "/", tfn)))
+	tfn <- paste0(expName, "-in.xlsx")
+	ok <- c(ok, file.copy(from=paste0(foFr, tfn), to=paste0(ptExpHome, "/", fn_sampleLists, "/", fn_sampleListIn, "/", tfn)))
+	tfn <- paste0(expName, ".da")
+	ok <- c(ok, file.copy(from=paste0(foFr, tfn), to=paste0(ptExpHome, "/", fn_rawdata, "/", tfn)))
+	# XXX is not yet fully universal	
+	if (all(ok)) {
+		ap2dme <- TRUE
+	} else {
+		ap2dme <- FALSE
+	} # end else
+	saveRDS(ap2dme, paste0(ptExpHome, "/ap2dme"))
+	return(ap2dme)
+} # EOF
+
+################################################################
+################################################################
 
 getStdColnames <- function() {
 	stn <- getstn()

@@ -10,6 +10,10 @@ gl_maxEmptyMd <- 2
 gl_maxEmptyAp <- 4
 
 
+# download data (google drivde)
+gl_gdLinkToExperiments <- "https://drive.google.com/drive/folders/10cRklRSmeIO509LlRKJLXN7K8LafJFXX?usp=sharing"
+gl_expHomeSuffix <- "@home"
+
 ## regarding Aquagram
 pv_AquagramModes <- c("classic", "classic-diff", "sfc", "sfc-diff", "aucs", "aucs-diff", "aucs.tn", "aucs.tn-diff", "aucs.tn.dce", "aucs.tn.dce-diff", "aucs.dce",  "aucs.dce-diff")
 
