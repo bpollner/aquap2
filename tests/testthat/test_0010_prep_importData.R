@@ -34,11 +34,10 @@ cpxs <- function() {
 cpxs()
 setwd(paste0(rootF, "/", xsCompHome))
 
-
 #### now import fine nice data 
 test_that("gfd basic", { 
   msg <- "Aligning temp. and rel.hum"
-#  expect_output(gfd(trhLog = "ESPEC", ttl=F), msg)
+  expect_output(gfd(trhLog = "ESPEC", ttl=F), msg)
   expect_s4_class(gfd(), "aquap_data")
   print(getwd())
 }) # EOT
