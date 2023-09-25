@@ -11,8 +11,13 @@ gl_maxEmptyAp <- 4
 
 
 # download data (google drivde)
-gl_gdLinkToExperiments <- "https://drive.google.com/drive/folders/10cRklRSmeIO509LlRKJLXN7K8LafJFXX?usp=sharing"
+# gl_LinkToExperiments <- "https://drive.google.com/drive/folders/10cRklRSmeIO509LlRKJLXN7K8LafJFXX?usp=sharing" # is corrupting the zip file ?
+# gl_LinkToExperiments <- "https://github.com/bpollner/aquap2_Data/blob/edb28f0c9a4557c50eaed3b2880e40c2bbbc3aad/experiments"
+gl_LinkToExperiments <- "https://github.com/bpollner/aquap2_Data/archive/refs/heads/main.zip" # the complete repository "aquap2_Data"
 gl_expHomeSuffix <- "@home"
+
+
+
 
 ## regarding Aquagram
 pv_AquagramModes <- c("classic", "classic-diff", "sfc", "sfc-diff", "aucs", "aucs-diff", "aucs.tn", "aucs.tn-diff", "aucs.tn.dce", "aucs.tn.dce-diff", "aucs.dce",  "aucs.dce-diff")

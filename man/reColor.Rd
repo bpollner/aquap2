@@ -31,6 +31,7 @@ fd2 <- reColor(fd)
 \seealso{
 Other Helper Functions: 
 \code{\link{ap2_settings_setup}()},
+\code{\link{ap2dme}()},
 \code{\link{genFolderStr}()},
 \code{\link{genNoiseRecExp}()},
 \code{\link{genTempCalibExp}()},

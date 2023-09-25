@@ -4,10 +4,14 @@
 \alias{genFolderStr}
 \title{Generate Folder Structure}
 \usage{
-genFolderStr()
+genFolderStr(where = getwd())
+}
+\arguments{
+\item{where}{Character length one, the root folder of a single experiment.
+Defaults to \code{getwd()}.}
 }
 \value{
-Folders get created in the current working directory.
+Used for its side effects, i.e. folders get created.
 }
 \description{
 Generate the required folder structure for a new experiment in 
@@ -15,9 +19,9 @@ the current working directory.
 }
 \details{
 \code{genFolderStr} will generate all the required folders in the 
-current working directory that 'aquap2' needs to work properly. Templates 
-for metadata and analysis procedure will be copied into the metadata-folder.
-You can change the defaults for the folder names in the settings file.
+directory specified at \code{where} that 'aquap2' needs to work properly. 
+Templates for metadata and analysis procedure will be copied into the 
+metadata-folder.
 }
 \seealso{
 \code{\link{settings_file}}, \code{\link{noise_procedures}}, 
@@ -25,6 +29,7 @@ You can change the defaults for the folder names in the settings file.
 
 Other Helper Functions: 
 \code{\link{ap2_settings_setup}()},
+\code{\link{ap2dme}()},
 \code{\link{genNoiseRecExp}()},
 \code{\link{genTempCalibExp}()},
 \code{\link{getcd}()},

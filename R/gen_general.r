@@ -65,7 +65,7 @@ genFolderStr <- function(where=getwd()) {
 	}
 	slin <- paste(where, fn_sampleLists, fn_sampleListIn, sep="/")
 	slout <- paste(where, fn_sampleLists, fn_sampleListOut, sep="/")
-	shW <- TRUE
+	shW <- FALSE
 	dirOk <- c(dirOk, dir.create(slin, showWarnings=shW))
 	dirOk <- c(dirOk, dir.create(slout, showWarnings=shW))
 	a <- path.package("aquap2")
@@ -88,32 +88,35 @@ genFolderStr <- function(where=getwd()) {
 #' @description Checks if a dataset is present. If not, it is downloading a 
 #' single example experiment from a server, generating the required folder 
 #' structure and inserting the downloaded files into their appropriate folder.
-#' @details If the experiment home folder is already present at the location 
-#' given in \code{where}, no data will be downloaded and the existing experiment 
-#' home folder will be left unchanged. The experiment home folder, if already 
+#' @details The experiment home folder, if already 
 #' present, has to end in \code{@home} in order to be recognized correctly.
 #' If the experiment home folder does not exist it will be created.
 #' Currently, this function is primary intended to be used in testing 
 #' and to help create executable examples.
+#' The downloaded folder containing all available example datasets is stored in 
+#' \code{tempdir()}. If already present, it will not be downloaded again.
 #' @param where Character length one. The path where the experiment home folder
 #' should be looked for. The experiment home folder, if already existing,  
 #' has to end in \code{@home} in order to be recognized correctly.
 #' @param expName Character length one, the name of the experiment.
-#' @param force_download Logical. If data should be downloaded anyway. If set 
-#' to \code{TRUE} and \code{where} is pointing to an already existing experiment 
-#' home folder, the latter one will be deleted, the experiment data will be 
-#' downloaded and a new folder structure will be created.
-#' @return Used for its side effect, i.e. do download example data and to 
-#' create a working experiment folder structure. Returns \code{NULL} if no data
-#' were downloaded, \code{FALSE} if data should have been downloaded but it 
-#' failed, and \code{TRUE} if data were downloaded, the experiment folder 
+#' @param ffs Logical. If the folder structure should be generated in all cases.
+#' If set to \code{TRUE} and \code{where} is pointing to an already existing 
+#' experiment home folder, the latter one will be deleted and a new folder 
+#' structure will be created.
+#' @param fdo Logical. If the download should always be enforced
+#' @return Used for its side effect, i.e. do (possibly) download example data 
+#' and to create a working experiment folder structure. 
+#' Returns \code{NULL} if no data were downloaded, \code{FALSE} if data 
+#' should have been downloaded but it failed, and \code{TRUE} if data were 
+#' possibly downloaded, the experiment folder 
 #' structure was created successfully, and the data files were copied.
 #' @family Helper Functions
 #' @export
-ap2dme <- function(where, expName, force_download = FALSE) {
+ap2dme <- function(where, expName, ffs = FALSE, fdo = FALSE) {
 	stn <- getstn()
 	#
-	gdExpRoot <- gl_gdLinkToExperiments # the google drive link to the folder "experiments"
+#	gdExpRoot <- gl_LinkToExperiments # the server link to the complete rep aquap2_Data
+	dataRepRoot <- gl_LinkToExperiments # the server link to the complete rep aquap2_Data
 	expHomeSuffix <- gl_expHomeSuffix
 	td <- tempdir()
 	fn_metadata <- stn$fn_metadata
@@ -121,12 +124,17 @@ ap2dme <- function(where, expName, force_download = FALSE) {
 	fn_sampleLists <- stn$fn_sampleLists
 	fn_sampleListIn <- stn$fn_sampleListIn
 	ap2dme <- FALSE
+	remRepName <- "aquap2_Data-main"
+	expFolder <- "experiments"
 	#
 	expHome <- paste0(expName, expHomeSuffix)
 	if (!dir.exists(where)) {
 		stop(paste0("Sorry, the folder '", where, "' \nthat should or will contain the experiment home folder \n'", expHome, "' does not seem to exist."), call.=FALSE)
 	} # end if
 	ptExpHome <- paste0(where, "/", expHome)
+	if (dir.exists(ptExpHome) & ffs) {
+		unlink(ptExpHome, recursive=TRUE)
+	} # end if
 	if (dir.exists(ptExpHome)) {
 		fsok <- checkForExperimentFolderStructure(where = ptExpHome, stopIfBad = FALSE)
 		if (!fsok) { # delete it all
@@ -151,27 +159,44 @@ ap2dme <- function(where, expName, force_download = FALSE) {
 	} # end if
 	genFolderStr(ptExpHome)
 	#
-	# now download data from google drive
-	gdSource <- paste0(gdExpRoot, "/", expName, ".zip")
-	targZip <- paste0(td, "/", expName, ".zip")
-	ok <- 0
-#	ok <- download.file(gdSource, targZip, mode="wb")
-#	ok <- download.file(gdSource, targZip)
-	if (ok != 0) {
-		message(paste0("Sorry, the download failed."))
-		return(FALSE)
-	} # end if ok != 0
-	aa <- 1
-    aa <- try(utils::unzip(targZip, exdir = td))
-    if (is.null(aa)) {
-    	ap2dme <- FALSE
-   		saveRDS(ap2dme, paste0(ptExpHome, "/ap2dme"))
-		return(FALSE)
-    } # end if
+	
+	# now check if the main folder is already in tempdir: if yes, we do not have to download
+	if (!dir.exists(paste0(td, "/", remRepName)) | fdo) {
+		# now download data 
+		repSource <- paste0(dataRepRoot, "") # already contains ".zip"
+		targZip <- paste0(td, "/", remRepName, ".zip")	
+		ok <- download.file(repSource, targZip, mode="wb") # is downloading the complete repository
+		if (ok != 0) {
+			message(paste0("Sorry, the download failed."))
+			return(FALSE)
+		} # end if ok != 0
+		# unzip main folder
+		aa <- try(utils::unzip(targZip, exdir = td)) # unzip the main folder
+		if (is.null(aa)) {
+			ap2dme <- FALSE
+			saveRDS(ap2dme, paste0(ptExpHome, "/ap2dme"))
+			return(FALSE)
+		} # end if	
+	} # end if not exist main data folder
 	#
+	
+	# now check if the single experiment is already unzipped 
+    if (!dir.exists(paste0(td, "/", remRepName, "/", expFolder, "/", expName))) {    
+		# unzip single experiment
+		targZip <- paste0(td, "/", remRepName, "/", expFolder, "/", expName, ".zip")
+		toDir <-  paste0(td, "/", remRepName, "/", expFolder)
+		bb <- try(utils::unzip(targZip, exdir = toDir)) # now unzip the single experiment
+		if (is.null(bb)) {
+			ap2dme <- FALSE
+			saveRDS(ap2dme, paste0(ptExpHome, "/ap2dme"))
+			return(FALSE)   
+		} # end if
+	#
+    } # end if not is unzipped single experiment
+		
 	# now insert the downloaded elements into the previously generated folder structure
 	ok <- NULL
-	foFr <- paste0(td, "/", expName, "/") # folder from
+	foFr <- paste0(td, "/", remRepName, "/", expFolder, "/", expName, "/") # folder from
 	tfn <- "_readme.txt"
 	ok <- file.copy(from=paste0(foFr, tfn), to=paste0(ptExpHome, "/", tfn))
 	tfn <- "metadata.R"

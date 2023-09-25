@@ -20,6 +20,7 @@ in the key=value pairs from the setting.R file.
 \seealso{
 Other Helper Functions: 
 \code{\link{ap2_settings_setup}()},
+\code{\link{ap2dme}()},
 \code{\link{genFolderStr}()},
 \code{\link{genNoiseRecExp}()},
 \code{\link{genTempCalibExp}()},

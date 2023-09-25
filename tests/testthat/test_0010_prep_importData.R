@@ -5,12 +5,6 @@ library(testthat)
 td <- tempdir()
 rootF <- paste0(td, "/ap2Test_R")
 dir.create(rootF, showWarnings = FALSE)
-ptp <- path.package("aquap2")
-#
-fn_inTempAsRenvSH <- "aquap2SH"
-path_inTempAsRenvSH <- tePaSH <- paste0(rootF, "/", fn_inTempAsRenvSH)
-dir.create(path_inTempAsRenvSH, showWarnings = FALSE)
-
 # gpic: get package inst-folder content
 gpic <- function() {
   tp <- path.package("aquap2")
@@ -21,26 +15,65 @@ gpic <- function() {
   }
   return(ptpInst)
 } # EOF
+ptp <- gpic()
+#
+fn_inTempAsRenvSH <- "aquap2SH"
+path_inTempAsRenvSH <- tePaSH <- paste0(rootF, "/", fn_inTempAsRenvSH)
+dir.create(path_inTempAsRenvSH, showWarnings = FALSE)
 
-## use xsComp for data import etc.
-# first copy from examples/experiments/xsComp@home
-exs <- "examples/experiments"
+setwd(rootF)
+
+
+#### ### ### ### ### ### ### ### ### ### ### ### ### 
+#### ### ### ### ### ### ### ### ### ### ### ### ### 
+########## import Data ##########
+
+
+#### ### ### ### ### ### ### ### ### ### ### ### ### 
+  ### download and install example experiments ###
+remRepName <- "aquap2_Data-main"
+eNa <- "xsComp"
+eWhere <- rootF
+ptmd <- paste0(td, "/", remRepName)
+
+if (dir.exists(ptmd)) {
+  unlink(ptmd, recursive=TRUE)
+}# end if
+ptxsc <- paste0(rootF, "/", eNa, "@home")
+if (dir.exists(ptxsc)) {
+  unlink(ptxsc, recursive = TRUE)
+}# end if
+
+test_that("ap2dme", { 
+  expect_error(ap2dme(paste0(eWhere, "/blabla"), eNa))
+  expect_true(ap2dme(eWhere, eNa))
+  expect_equal(ap2dme(eWhere, eNa), NULL)
+  unlink(paste0(ptxsc, "/rawdata"), recursive=TRUE)
+  expect_true(ap2dme(eWhere, eNa))
+}) # EOT
+
+test_that("ap2dme - forcing", { 
+  expect_true(ap2dme(eWhere, eNa, ffs=T))
+  expect_equal(ap2dme(eWhere, eNa, ffs=F, fdo=T), NULL)
+  expect_true(ap2dme(eWhere, eNa, ffs=T, fdo=T))
+  }) # EOT
+# so, now we have a nice folder called "xsComp@home" where we can run tests on gfd etc
+
+
+#### ### ### ### ### ### ### ### ### ### ### ### ### 
+              ### import data ###
 xsCompHome <- "xsComp@home"
-xsCompFrom <- paste0(gpic(), "/", exs, "/", xsCompHome)
-cpxs <- function() {
-  ok <- file.copy(xsCompFrom, to=rootF, recursive = TRUE)
-  if (!ok) {stop()}
-} # EOF
-cpxs()
 setwd(paste0(rootF, "/", xsCompHome))
 
-#### now import fine nice data 
 test_that("gfd basic", { 
   msg <- "Aligning temp. and rel.hum"
   expect_output(gfd(trhLog = "ESPEC", ttl=F), msg)
   expect_s4_class(gfd(), "aquap_data")
-  print(getwd())
 }) # EOT
+
+# gfd(trhLog = "ESPEC", ttl=F)
+
+
 
 # now get fancy: 
     # import from other data sources / formats, 
