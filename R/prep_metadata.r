@@ -109,6 +109,41 @@ check_mdDefaultValues <- function(localEnv, tePaSH=NULL) {
 	}
 	assign("slClasses", slClasses, pos=parent.frame(n=1))
 	#
+	#
+	slType <- le$sampleListType
+	if (all(slType == "def")) {
+		slType <- stn$imp_sampleListType
+	}
+	if (!is.null(slType)) {
+		if (length(slType) != 1 | !all(is.character(slType))) {
+			stop("Please provide a character length one to the variable 'sampleListType' in the metadata file.", call.=FALSE)
+		}
+	}
+	assign("slType", slType, pos=parent.frame(n=1))
+	#
+	trhLog <- le$tempHumLog
+	if (all(trhLog == "def")) {
+		trhLog <- stn$imp_use_TRH_logfile
+	}
+	if (trhLog == TRUE) {
+		stop("Please provide either 'FALSE' or a character length one to the variable 'tempHumLog' in the metadata file.", call.=FALSE)
+	}
+	if (trhLog != FALSE) {
+		if (length(trhLog) != 1 | !all(is.character(trhLog))) {
+			stop("Please provide a character length one to the variable 'tempHumLog' in the metadata file.", call.=FALSE)
+		}	
+	}
+	assign("trhLog", trhLog, pos=parent.frame(n=1))
+	#
+	multRows <- le$multiplyRows
+	if (all(multRows == "def")) {
+		multRows <- stn$imp_multiplyRows
+	}
+	if (length(multRows) != 1 | !all(is.logical(multRows))) {
+		stop("Please provide either 'TRUE' or 'FALSE' to the variable 'multiplyRows' in the metadata file.", call.=FALSE)
+	}
+	assign("multRows", multRows, pos=parent.frame(n=1))
+
 } # EOF
 
 check_mdVersion <- function(folderLocal, nameLocal) {
@@ -239,7 +274,7 @@ getmd_core <- function(fn="def", stn) {
 	check_mdVersion(folderLocal=foldLoc, nameLocal=fn) 	### Version check here !!
 	e <- new.env()
 	sys.source(paste(foldLoc, fn, sep="/"), envir=e)
-	noSplitLabel <- ECLabel <- RMLabel <- filetype <- noiseFileName <- tempCalibFileName <- slClasses <- NULL # gets assigned below
+	noSplitLabel <- ECLabel <- RMLabel <- filetype <- noiseFileName <- tempCalibFileName <- slClasses <- slType <- trhLog <- multRows <- NULL # gets assigned below
 	check_mdDefaultValues(localEnv=e) ### checking and assigning
 	##
 	Repls <- (paste(defReplPref, seq(1, e$Repls), sep=""))
@@ -262,7 +297,7 @@ getmd_core <- function(fn="def", stn) {
 	## put together
  	expClasses <- list(L1=classStructure$valL1, L2=classStructure$valL2, Repls=Repls, Group=Group, timeLabels=TimePoints)
  	postProc <- list(spacing=e$spacing, ECRMLabel=c(ECLabel, RMLabel), noSplitLabel=noSplitLabel, nrConScans=e$nrConScans)
- 	meta <- list(expName=e$expName, coluNames=coluNames, filetype=filetype, noiseFile=noiseFileName, tempFile=tempCalibFileName, xaxDenom=e$xaxDenominator, yaxDenom=e$yaxDenominator)
+ 	meta <- list(expName=e$expName, coluNames=coluNames, filetype=filetype, noiseFile=noiseFileName, tempFile=tempCalibFileName, slType=slType, trhLog=trhLog, multRows=multRows, xaxDenom=e$xaxDenominator, yaxDenom=e$yaxDenominator)
 	expMetaData <- list(expClasses = expClasses, postProc = postProc, meta = meta)
 	return(new("aquap_md", expMetaData))
 } # EOF

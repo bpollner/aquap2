@@ -541,6 +541,7 @@ gfd_check_trhLog_defaults <- function(trhLog) {
 	}
 	if (bcust) {
 		shPath <- Sys.getenv("AQUAP2SH")
+		# XXX modify here for testing !!
 		customFilename <- strsplit(trhLog, "custom@")[[1]][2]
 		if (!file.exists(paste(shPath, "/", customFilename, sep=""))) {
 			stop(paste("The file \"", customFilename, "\" does not seem to exist in ", shPath, ", sorry.", sep=""), call.=FALSE)
@@ -622,6 +623,46 @@ turnStringsIntoFactors <- function(header) {
 	return(header)
 } # EOF
 
+gfd_checkOverwrite_sl_trh_multRows <- function(md, slType, trhLog, multiplyRows) {
+	# if in the input arguments (slType, trhLog, multiplyRows) in getFullData there is anything other than "def", this should be used instead of the values in the md object
+	# assign the three args from md, if other than "def" in the function use that
+	# if all three are left at "def", use what is in the md
+	use_slType <- md$meta$slType
+	use_trhLog <- md$meta$trhLog
+	use_multRows <- md$meta$multRows
+	#
+	if (slType != "def") {
+		if (!is.null(slType)) {
+			if (length(slType) != 1 | !all(is.character(slType))) {
+				stop("Please provide a character length one to the argument 'slType'.", call.=FALSE)
+			} # end if
+		} # end check
+		use_slType <- slType
+	} # end slType
+	assign("slType", use_slType, pos=parent.frame(n=1))	
+	#
+	if (trhLog != "def") {
+		if (trhLog == TRUE) {
+			stop("Please provide either 'FALSE' or a character length one to the argument 'trhLog'.", call.=FALSE)
+		}
+		if (trhLog != FALSE) {
+			if (length(trhLog) != 1 | !all(is.character(trhLog))) {
+				stop("Please provide a character length one to the argument 'trhLog'.", call.=FALSE)
+			} # end if	
+		} # end check
+		use_trhLog <- trhLog
+	} # end trhLog
+	assign("trhLog", use_trhLog, pos=parent.frame(n=1))
+	#
+	if (multiplyRows != "def") {
+		if (length(multiplyRows) != 1 | !all(is.logical(multiplyRows))) {
+			stop("Please provide either 'TRUE' or 'FALSE' to the argument 'multiplyRows'.", call.=FALSE)
+		} # end check
+		use_multRows <- multiplyRows
+	} # end multRows
+	assign("multiplyRows", use_multRows, pos=parent.frame(n=1))	
+} # EOF
+
 # get full data ---------------------------------------------------------------
 #' @template mr_getFullData
 #' @export
@@ -638,10 +679,13 @@ getFullData <- function(md=getmd(), filetype="def", naString="NA", slType="def",
 		if(!stn$allSilent) {cat(paste("Dataset \"", md$meta$expName, "\" was loaded.\n", sep="")) }
 		return(invisible(dataset)) # returns the dataset and we exit here
 	}
-  	# import starts 
+	# some more checking
   	checkForPresenceOfData()
-  	if(!stn$allSilent) {cat("Importing data...\n")}	
+  	gfd_checkOverwrite_sl_trh_multRows(md, slType, trhLog, multiplyRows) # is possible re-assigning: slType, trhLog, multiplyRows
 	gfd_check_trhLog_defaults(trhLog)
+
+  	# import starts 
+  	if(!stn$allSilent) {cat("Importing data...\n")}	
 	headerFilePath <- NULL # gets assigned in readHeader()
 	header <- readHeader(md, slType, multiplyRows) ## re-assigns 'slType' and 'multiplyRows' also here -- in parent 2 level frame 
 													## if slType is NULL, header will be returned as NULL as well
