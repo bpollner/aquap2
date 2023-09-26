@@ -59,7 +59,7 @@
 #' information.
 #' @param tempCalibFileName The name of the corresponding temperature-data file 
 #' residing in the AQUAP2SH folder. Leave at \code{def} to get the default from 
-#' the settings (parameter \code{\link{aqg_tempCalib_Filename}}). If a value 
+#' the settings (parameter \code{aqg_tempCalib_Filename}). If a value 
 #' other than \code{def} is provided in the argument \code{tempFile} in the 
 #' function \code{\link{gdmm}}, this is overriding the value of 
 #' \code{tempCalibFileName}here in the metadata file. Please refer to 
