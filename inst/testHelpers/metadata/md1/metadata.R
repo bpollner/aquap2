@@ -23,6 +23,11 @@ sl_classes <- "def"   					## the name of the xlsx file in the metadata folder h
 Repls <- 4								## how many replications for each sample?
 Group <- c("Cont", "GDum", "GPos")		## additional groups to split the above generated classes into, like e.g. experiment and control
 
+sampleListType <- "def"					## The type of sample-list file in the sampleLists/sl_in folder. Leave at 'def' to get the default from the settings (parameter 'imp_sampleListType').  If a value other than "def" is provided in the argument "slType" in the function "getFullData", this is overriding the value of "sampleListType" in the metadata file. Please refer to the help for ?getFullData for possible values.
+tempHumLog <- "def"						## If data from temperature and rel.humidity logger should be imported and aligned to a timestamp in the dataset. Leave at 'def' to get the default from the settings (parameter 'imp_use_TRH_logfile').  If a value other than "def" is provided in the argument "trhLog" in the function "getFullData", this is overriding the value of "tempHumLog" in the metadata file. Please refer to the help for ?getFullData for possible values.
+multiplyRows <- "def"					## Character ('def') or Logical. If all the rows in the sample list should be multiplied by the number of consecutive scans as specified in the metadata of the experiment. Leave at 'def' to get the default from the settings (parameter 'imp_multiplyRows'). If a value other than "def" is provided in the argument "multiplyRows" in the function "getFullData", this is overriding the value of "multiplyRows" in the metadata file. Please refer to the help for ?getFullData for possible values.
+
+
 
 ### do NOT change the names of the variables !!  ####
 ####################################################################
