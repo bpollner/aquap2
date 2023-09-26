@@ -84,7 +84,47 @@ genFolderStr <- function(where=getwd()) {
 	} # end else
 } # EOF
 
-#' @title Download Example Experiment
+# only used when packing an example folder, it contains the instructions of which file to put where
+# param ptFolder is the path to the folder that gets zipped later
+# param dest A character vector with the destination for each element in the ptFolder
+# returns a named list, with the names being the filenames in the ptFolder,
+# and the values being the full paths (coming from ptFolder) to the destination folder
+# possible values for destination are defined as globals
+# Not required to be used by the end user, so no exporting this function
+make_ap2dme_instructions <- function(ptFolder, dest = NULL) {
+	rdsName <- gl_copyDestObj
+	pvCdn <- pv_copyDestNames
+	#
+	allF <- sort(list.files(ptFolder))
+	if (rdsName %in% allF) {
+		allF <- allF[-(which(allF == rdsName))] # kick out the copyInstructions if here
+	} # end if
+	destList <- vector("list", length(allF))
+	names(destList) <- allF
+	if (is.null(dest)) {
+		return(destList)
+	} # end if
+	if (length(destList) != length(dest)) {
+		print(destList); print("---------");print(dest)
+		stop("Length of provided destination does not match files", call.=FALSE)
+	} # end if
+	if (!all(dest %in% pvCdn)) {
+		txt <- "Some of the provided destinations are non-standard"
+		message(txt)
+		cat(paste0("The standard destinations are:\n", paste(pvCdn, collapse="\n"), "\n") )
+		stop(call.=FALSE)
+	} # end if
+	for (i in seq_along(destList)) {
+		destList[[i]] <- dest[i]
+	} # end for i
+	# 
+	# now destList is fine, save as RDS object in ptFolder
+	saveRDS(destList, file=paste0(ptFolder, "/", rdsName))
+	cat("Copy instructions saved.\n")
+	return(invisible(destList))
+} # EOF
+
+#' @title Download and Make Example Experiment
 #' @description Checks if a dataset is present. If not, it is downloading a 
 #' single example experiment from a server, generating the required folder 
 #' structure and inserting the downloaded files into their appropriate folder.
@@ -118,11 +158,23 @@ ap2dme <- function(where, expName, ffs = FALSE, fdo = FALSE) {
 #	gdExpRoot <- gl_LinkToExperiments # the server link to the complete rep aquap2_Data
 	dataRepRoot <- gl_LinkToExperiments # the server link to the complete rep aquap2_Data
 	expHomeSuffix <- gl_expHomeSuffix
+	cpyObj <- gl_copyDestObj
+	pvDest <- pv_copyDestNames
 	td <- tempdir()
-	fn_metadata <- stn$fn_metadata
+	###
+	fn_analysisData <- stn$fn_analysisData 
+	fn_exports <- stn$fn_exports
+	fn_rcode <- stn$fn_rcode 
 	fn_rawdata <- stn$fn_rawdata
+	fn_rdata <- stn$fn_rdata 
+	fn_metadata <- stn$fn_metadata
+	fn_results <- stn$fn_results 
 	fn_sampleLists <- stn$fn_sampleLists
+	fn_sampleListOut <- stn$fn_sampleListOut
 	fn_sampleListIn <- stn$fn_sampleListIn
+	fn_analysisData <- stn$fn_analysisData
+	fn_exports <- stn$fn_exports
+	###
 	ap2dme <- FALSE
 	remRepName <- "aquap2_Data-main"
 	expFolder <- "experiments"
@@ -157,7 +209,7 @@ ap2dme <- function(where, expName, ffs = FALSE, fdo = FALSE) {
 	if (!ok) {
 		stop(paste0("Sorry, the folder '", expHome, "' could not be created in '", where, "' "), call.=FALSE)
 	} # end if
-	genFolderStr(ptExpHome)
+	genFolderStr(ptExpHome) ######## here generate the folder structure #######
 	#
 	
 	# now check if the main folder is already in tempdir: if yes, we do not have to download
@@ -178,12 +230,12 @@ ap2dme <- function(where, expName, ffs = FALSE, fdo = FALSE) {
 			return(FALSE)
 		} # end if	
 	} # end if not exist main data folder
-	#
 	
 	# now check if the single experiment is already unzipped 
-    if (!dir.exists(paste0(td, "/", remRepName, "/", expFolder, "/", expName))) {    
+	pathExper <- paste0(td, "/", remRepName, "/", expFolder, "/", expName)
+    if (!dir.exists(pathExper)) {    
 		# unzip single experiment
-		targZip <- paste0(td, "/", remRepName, "/", expFolder, "/", expName, ".zip")
+		targZip <- paste0(pathExper, ".zip")
 		toDir <-  paste0(td, "/", remRepName, "/", expFolder)
 		bb <- try(utils::unzip(targZip, exdir = toDir)) # now unzip the single experiment
 		if (is.null(bb)) {
@@ -191,26 +243,66 @@ ap2dme <- function(where, expName, ffs = FALSE, fdo = FALSE) {
 			saveRDS(ap2dme, paste0(ptExpHome, "/ap2dme"))
 			return(FALSE)   
 		} # end if
-	#
     } # end if not is unzipped single experiment
-		
+	
+	# read the copy instructions
+	paCopyObj <- paste0(td, "/", remRepName, "/", expFolder, "/", expName, "/", cpyObj)
+	if (!file.exists(paCopyObj)) {
+		stop(paste0("Sorry, the object containing the required copy destinations for the experiment '", expName, "' \ndoes not seem to exist in \n'", pathExper, "' "), call.=FALSE)
+	} # end if
+	cpDest <- readRDS(file=paCopyObj)
+	#
 	# now insert the downloaded elements into the previously generated folder structure
-	ok <- NULL
-	foFr <- paste0(td, "/", remRepName, "/", expFolder, "/", expName, "/") # folder from
-	tfn <- "_readme.txt"
-	ok <- file.copy(from=paste0(foFr, tfn), to=paste0(ptExpHome, "/", tfn))
-	tfn <- "metadata.R"
-	ok <- c(ok, file.copy(from=paste0(foFr, tfn), to=paste0(ptExpHome, "/", fn_metadata, "/", tfn), overwrite=TRUE))
-	tfn <- "sl_classes.xlsx"
-	ok <- c(ok, file.copy(from=paste0(foFr, tfn), to=paste0(ptExpHome, "/", fn_metadata, "/", tfn), overwrite=TRUE)	)
-	tfn <- "TRHlog.txt"
-	ok <- c(ok, file.copy(from=paste0(foFr, tfn), to=paste0(ptExpHome, "/", fn_rawdata, "/", tfn)))
-	tfn <- paste0(expName, "-in.xlsx")
-	ok <- c(ok, file.copy(from=paste0(foFr, tfn), to=paste0(ptExpHome, "/", fn_sampleLists, "/", fn_sampleListIn, "/", tfn)))
-	tfn <- paste0(expName, ".da")
-	ok <- c(ok, file.copy(from=paste0(foFr, tfn), to=paste0(ptExpHome, "/", fn_rawdata, "/", tfn)))
-	# XXX is not yet fully universal	
-	if (all(ok)) {
+	##
+	mtfina <- function(folderName, tifona= tfn) {
+		return(paste0(ptExpHome, "/", folderName, "/", tifona))
+	} # EOIF
+	##
+	
+	## copy each file to the folder as instructed
+	ok <- vector("list", length(cpDest))
+	names(ok) <- names(cpDest)
+	foFr <- paste0(td, "/", remRepName, "/", expFolder, "/", expName, "/") # folder from	
+#	pvDest; c("root", "anData", "exports", "metadata", "R-code", "R-data", "rawdata", "results", "sl_in", "sl_out")
+	for (i in seq_along(cpDest)) {
+		tfn <- names(cpDest)[i] # this file name
+		fileFrom <- paste0(foFr, tfn) # fileFrom now contains the complete path to a file in the experiment folder
+		toWhere <- cpDest[[i]]
+		if (FALSE) {print("This file name: "); print(tfn); print("To Where: "); print(toWhere); print("---------")}
+		if (toWhere == pvDest[1]) { # "root"
+			fileTo <- paste0(ptExpHome, "/", tfn)
+			ok[[i]] <- file.copy(fileFrom, fileTo, overwrite=TRUE)
+		} else if (toWhere == pvDest[2]) { # "anData"
+			fileTo <- mtfina(fn_analysisData)
+			ok[[i]] <- file.copy(fileFrom, fileTo, overwrite=TRUE)
+		} else if (toWhere == pvDest[3]) { # "exports"
+			fileTo <- mtfina(fn_exports)
+			ok[[i]] <- file.copy(fileFrom, fileTo, overwrite=TRUE)	
+		} else if (toWhere == pvDest[4]) { # "metadata"
+			fileTo <- mtfina(fn_metadata)
+			ok[[i]] <- file.copy(fileFrom, fileTo, overwrite=TRUE)
+		} else if (toWhere == pvDest[5]) { # "R-code"
+			fileTo <- mtfina(fn_rcode)
+			ok[[i]] <- file.copy(fileFrom, fileTo, overwrite=TRUE)
+		} else if (toWhere == pvDest[6]) { # "R-data"
+			fileTo <- mtfina(fn_rdata)
+			ok[[i]] <- file.copy(fileFrom, fileTo, overwrite=TRUE)
+		} else if (toWhere == pvDest[7]) { # "rawdata"
+			fileTo <- mtfina(fn_rawdata)
+			ok[[i]] <- file.copy(fileFrom, fileTo, overwrite=TRUE)
+		} else if (toWhere == pvDest[8]) { # "results"
+			fileTo <- mtfina(fn_results)
+			ok[[i]] <- file.copy(fileFrom, fileTo, overwrite=TRUE)
+		} else if (toWhere == pvDest[9]) { # "sl_in"
+			fileTo <- mtfina(paste0(fn_sampleLists, "/", fn_sampleListIn))
+			ok[[i]] <- file.copy(fileFrom, fileTo, overwrite=TRUE)
+		} else if (toWhere == pvDest[10]) { # "sl_out"
+			fileTo <- mtfina(paste0(fn_sampleLists, "/", fn_sampleListOut))
+			ok[[i]] <- file.copy(fileFrom, fileTo, overwrite=TRUE)
+		} # end else if
+	} # end for i going through the elements of cpDest
+	####
+	if (all(unlist(ok))) {
 		ap2dme <- TRUE
 	} else {
 		ap2dme <- FALSE

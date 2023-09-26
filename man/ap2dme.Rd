@@ -2,7 +2,7 @@
 % Please edit documentation in R/gen_general.r
 \name{ap2dme}
 \alias{ap2dme}
-\title{Download Example Experiment}
+\title{Download and Make Example Experiment}
 \usage{
 ap2dme(where, expName, ffs = FALSE, fdo = FALSE)
 }

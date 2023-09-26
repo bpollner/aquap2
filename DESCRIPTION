@@ -76,7 +76,7 @@ Collate:
     'doc_settings.r'
     'gen_coreDataManip.r'
     'gen_general.r'
-    'gen_metaAp_modF.R'
+    'gen_mdApVerCheck.R'
     'gen_parallel.r'
     'gen_possibleValues.r'
     'gen_roxygenHelpers.r'
