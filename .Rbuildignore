@@ -8,3 +8,4 @@ man-roxygen
 README2.md
 ^codecov\.yml$
 ^\.github$
+_config.yml
