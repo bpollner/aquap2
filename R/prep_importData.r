@@ -745,8 +745,8 @@ getFullData <- function(md=getmd(), filetype="def", slType="def", trhLog="def", 
 
 #' @rdname getFullData
 #' @export
-gfd <- function(md=getmd(), filetype="def", naString="NA", slType="def", trhLog="def", multiplyRows="def", ttl=TRUE, stf=TRUE, dol="def") {
-	return(getFullData(md, filetype, naString, slType, trhLog, multiplyRows, ttl, stf, dol))
+gfd <- function(md=getmd(), filetype="def", slType="def", trhLog="def", multiplyRows="def", ttl=TRUE, stf=TRUE, naString="NA", dol="def") {
+	return(getFullData(md, filetype, slType, trhLog, multiplyRows, ttl, stf, naString, dol))
 } # EOF
 
 
@@ -1004,7 +1004,7 @@ gfd_possibly_multiplySampleListRows <- function(sampleList, nrScans, multiplyRow
  	if (doMultiply) {
 		# if we are here doMultiply must be TRUE
 		# if we multiply, it can be with or without error column
-		if (!stn$allSilent) {cat("    Multiplying rows in sample list... \n")}
+		if (!stn$allSilent) {cat("   Multiplying rows in sample list... \n")}
 		errValUse <- rep(nrScans, nrow(sampleList))
 		errValZero <- vector("numeric", nrow(sampleList))
 		remErrCol <- FALSE
@@ -1024,7 +1024,7 @@ gfd_possibly_multiplySampleListRows <- function(sampleList, nrScans, multiplyRow
 				msgTxt <- paste0(len, " sample", cha1, " show", cha2, " aberrant number of consecutive scans.\n")
 			} # end else
 			if (!stn$allSilent) {
-				cat(paste0("        Error column present, ", msgTxt))
+				cat(paste0("       Error column present, ", msgTxt))
 			} # end if
 			#	
 		} # end if errCol present

@@ -417,7 +417,6 @@ test_that("esl - multiply rows", {
 
 
 
-
 ##################### clean up ###################### 
 ## delete all files in td metadata
 allinMd <- list.files(paste0(expHomeF, "/metadata"), full.names = TRUE)

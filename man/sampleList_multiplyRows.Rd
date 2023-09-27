@@ -4,19 +4,28 @@
 \alias{sampleList_multiplyRows}
 \title{Multiply Rows in Sample List}
 \usage{
-sampleList_multiplyRows(md = getmd())
+sampleList_multiplyRows(md = getmd(), overwrite = FALSE)
 }
 \arguments{
 \item{md}{An object of class \code{aquap_md} containing the metadata of the 
 experiment. Defaults to \code{getmd()}, what is calling the default filename 
 for the metadata file. See \code{\link{getmd}} and \code{\link{metadata_file}}.}
+
+\item{overwrite}{Logical. If the single line sample list file should be 
+overwritten. If \code{FALSE} (the default), the single line file remains in 
+\code{sampleLists/sl_in}, but it will be renamed.}
+}
+\value{
+Invisible TRUE if the sample list was multiplied and the old sample 
+list was renamed; invisible FALSE if not multiplication of the sample list 
+took place.
 }
 \description{
 Reads in the sample list located in the folder 
 \code{sampleLists/sl_in} and, if it contains only one row for each sample, 
 is multiplying each row by the number of consecutive scans as defined in 
-\code{nrConScans} in the metadata file. If a correction value in  is present, 
-it is applied. XXX
+\code{nrConScans} in the metadata file. If a correction value in an error
+column is present, it is applied when multiplying the rows of the sample list.
 }
 \seealso{
 Other Import-Export: 

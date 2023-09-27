@@ -20,12 +20,12 @@ getFullData(
 gfd(
   md = getmd(),
   filetype = "def",
-  naString = "NA",
   slType = "def",
   trhLog = "def",
   multiplyRows = "def",
   ttl = TRUE,
   stf = TRUE,
+  naString = "NA",
   dol = "def"
 )
 }

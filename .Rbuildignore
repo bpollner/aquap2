@@ -6,3 +6,5 @@
 index.md
 man-roxygen
 README2.md
+^codecov\.yml$
+^\.github$

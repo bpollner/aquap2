@@ -1,3 +1,7 @@
+<!-- badges: start -->
+[![Codecov test coverage](https://codecov.io/gh/bpollner/aquap2/branch/master/graph/badge.svg)](https://app.codecov.io/gh/bpollner/aquap2?branch=master)
+<!-- badges: end -->
+
 # aquap2 - Multivariate Data Analysis Tools for R including Aquaphotomics Methods
 Authors: Bernhard Pollner & Zoltan Kovacs
 

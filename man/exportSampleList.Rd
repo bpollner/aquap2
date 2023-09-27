@@ -31,13 +31,13 @@ each sample in the sample list. Potential abberations from the planned number
 of consecutive scans can be noted in the inserted column called 
 \code{conScanError} by providing \code{±n}, with 'n' being the number the 
 actual number of consecutive scans is differing from the intended. 
-\item \code{TRUE} If \code{multiplyRows} is set to \code{TRUE}, each row in the generated 
-sample list is multiplied by the number of consecutive scans as specified at 
-\code{nrConScans} in the metadata file. In this case there is no error column 
-allowing to denote errors, but the user has to manually delete or add rows 
-for each sample where the number of consecutive scans is differing from 
-from the intended. If rows were added, each cell in the row has to be filled 
-accordingly. 
+\item \code{TRUE} If \code{multiplyRows} is set to \code{TRUE}, each row in 
+the generated sample list is multiplied by the number of consecutive scans 
+as specified at \code{nrConScans} in the metadata file. In this case there 
+is no error column allowing to denote errors, but the user has to manually 
+delete or add rows for each sample where the number of consecutive scans is 
+differing from the intended. If rows were added, each cell in the row has 
+to be filled accordingly. 
 }
 Please also refer to \code{\link{getFullData}} and the explanations for the 
 argument \code{multiplyRows} therein.}
