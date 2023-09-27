@@ -13,7 +13,7 @@ The default is to get the metadata file via  \code{\link{getmd}}.}
 \item{slType}{Character. The type of sample-list file in the sampleLists/
 sl_in folder. Possible values are:
 \itemize{
-   \item "def" Gets the default value from the settings.r file.
+   \item "def" Gets the default value from the settings.r file
          (variable 'imp_sampleListType')
    \item NULL By providing 'NULL' to the argument 'slType' you indicate that 
          no sample-list should be imported to create the header. This would 
@@ -25,22 +25,23 @@ sl_in folder. Possible values are:
          You can use a custom function to import spectral data and at the same 
          time import additional variables from a sample-list file by providing 
          one of the characters listed below.
-   \item "csv" a comma separated text file ending in '.csv'
-   \item "txt" a tab delimited text file ending in '.txt'
    \item "xls" an Excel file ending in '.xlsx'
 }}
 
 \item{multiplyRows}{Character or Logical. If all the rows in the sample list 
-should be multiplied by the number of consecutive scans as specified in the 
-metadata of the experiment. 
-If left at 'def' the value from the settings.r file is used. 
-If 'FALSE' (what would be the case if you are using a sample list and, during 
-your measurements, had to divert from the planned number of consecutive scans
-or had to make other changes so that the number of consecutive scans is not 
+should be multiplied by the number of consecutive scans as specified 
+(in parameter \code{nrConScans}) in the metadata of the experiment. 
+If the argument \code{multiplyRows} in the function \code{getFullData} is 
+left at \code{def} the value (\code{TRUE} or \code{FALSE}) from  
+\code{multiplyRows} from the **metadata file** is used. If \code{multiplyRows} 
+is \code{FALSE} (what would be the case if you are using a sample list and, 
+during your measurements, had to divert from the planned number of consecutive 
+scans or had to make other changes so that the number of consecutive scans is not 
 the same for every sample) you have to manually insert the column (default name 
 would be 'C_conSNr') into the sample list and provide the values for every row.
-Set to 'TRUE' for multiplying every row in the sample list by the number of 
-consecutive scans as specified in the metadata of the experiment.}
+Set to \code{TRUE} for multiplying every row in the sample list by the number of 
+consecutive scans as specified in \code{nrConScans} in the metadata of the 
+experiment.}
 }
 \description{
 This functions reads in the sample-list file and prepares the 

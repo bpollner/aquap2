@@ -6,34 +6,47 @@
 \title{Create and Export Sample Lists}
 \usage{
 exportSampleList(
-  md = getmd(),
-  form = "def",
+  multiplyRows = FALSE,
   rnd = TRUE,
+  md = getmd(),
   showFirstRows = TRUE,
   timeEstimate = FALSE
 )
 
 esl(
-  md = getmd(),
-  form = "def",
+  multiplyRows = FALSE,
   rnd = TRUE,
+  md = getmd(),
   showFirstRows = TRUE,
   timeEstimate = FALSE
 )
 }
 \arguments{
-\item{md}{An object of class \code{aquap_md} containing the metadata of the 
-experiment. Defaults to \code{getmd()}, what is calling the default filename 
-for the metadata file. See \code{\link{getmd}} and \code{\link{metadata_file}}.}
-
-\item{form}{Character, can be 'txt' to export the sample list in a tab 
-delimited text file, 'xls' to export as an Excel file, or if left at the 
-default 'def' is reading in the value from the settings.r file (parameter 
-\code{p_sampleListExportFormat}).}
+\item{multiplyRows}{Logical, defaults to \code{FALSE}. If each row in the 
+generated sample list should be multiplied by the number of consecutive scans 
+as specified at \code{nrConScans} in the metadata file. 
+\itemize{
+\item If left at the default \code{FALSE}, there is one row for each sample 
+in the sample list. Potential abberations from the planned number of 
+consecutive scans can be noted in the inserted column called 
+\code{conScanError} by providing \code{±n}, with 'n' being the number the 
+actual number of consecutive scans is differing from the intended. 
+\item  If \code{multiplyRows} is set to \code{TRUE}, each row in the generated 
+sample list is multiplied by the number of consecutive scans as specified at 
+\code{nrConScans} in the metadata file. In this case there is no column 
+allowing to denote errors, but the user has to manually delete or add rows 
+for each sample where the number of consecutive scans is differing from 
+from the intended. If rows were added, each cell in the row has to be filled 
+accordingly. 
+}}
 
 \item{rnd}{Logical, if the sample list should be randomized or not, defaults 
 to TRUE. (Having a non-randomized sample list can be interesting to check the 
 correctness of the sample list when designing the experiment.}
+
+\item{md}{An object of class \code{aquap_md} containing the metadata of the 
+experiment. Defaults to \code{getmd()}, what is calling the default filename 
+for the metadata file. See \code{\link{getmd}} and \code{\link{metadata_file}}.}
 
 \item{showFirstRows}{Logical. If the first rows of the sample list should be 
 displayed.}
@@ -48,7 +61,7 @@ list saved to a file.
 Creates and exports the randomized sample list to file.
 }
 \details{
-Possible formats to export are tab delimited text or Excel. 
+The exclusive format for the sample list is xlsx. 
 When the appropriate values at the bottom of the settings.r file are provided, 
 an approximate time estimate of how long it will take to work through the 
 sample list is given.
@@ -72,6 +85,9 @@ sl <- esl(md=getmd("myMetadataFile.r"), form="txt", showFirstRows=FALSE)
 }
 }
 \seealso{
+Other Import-Export: 
+\code{\link{sampleList_multiplyRows}()}
+
 Other Core functions: 
 \code{\link{gdmm}()},
 \code{\link{getFullData}()},

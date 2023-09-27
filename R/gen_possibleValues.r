@@ -19,6 +19,10 @@ gl_copyDestObj <- "copyDestinations"
 pv_copyDestNames <- c("root", "anData", "exports", "metadata", "R-code", "R-data", "rawdata", "results", "sl_in", "sl_out")
 
 
+## regarding sample list
+gl_conScanError <- "conScanError"
+pv_sampleListType <- "xls"
+
 ## regarding Aquagram
 pv_AquagramModes <- c("classic", "classic-diff", "sfc", "sfc-diff", "aucs", "aucs-diff", "aucs.tn", "aucs.tn-diff", "aucs.tn.dce", "aucs.tn.dce-diff", "aucs.dce",  "aucs.dce-diff")
 

@@ -115,8 +115,8 @@ check_mdDefaultValues <- function(localEnv, tePaSH=NULL) {
 		slType <- stn$imp_sampleListType
 	}
 	if (!is.null(slType)) {
-		if (length(slType) != 1 | !all(is.character(slType))) {
-			stop("Please provide a character length one to the variable 'sampleListType' in the metadata file.", call.=FALSE)
+		if (length(slType) != 1 | !all(slType == pv_sampleListType)) { # only xls
+			stop(paste0("Please provide either 'NULL' or '", pv_sampleListType, "' to the variable 'sampleListType' in the metadata file."), call.=FALSE)
 		}
 	}
 	assign("slType", slType, pos=parent.frame(n=1))
@@ -139,9 +139,11 @@ check_mdDefaultValues <- function(localEnv, tePaSH=NULL) {
 	if (all(multRows == "def")) {
 		multRows <- stn$imp_multiplyRows
 	}
-	if (length(multRows) != 1 | !all(is.logical(multRows))) {
-		stop("Please provide either 'TRUE' or 'FALSE' to the variable 'multiplyRows' in the metadata file.", call.=FALSE)
-	}
+	if (!all(multRows == "auto")) {
+		if (length(multRows) != 1 | !all(is.logical(multRows))) {
+			stop("Please provide either 'TRUE' , 'FALSE' or 'auto' to the variable 'multiplyRows' in the metadata file.", call.=FALSE)
+		} # end if
+	} # end if	
 	assign("multRows", multRows, pos=parent.frame(n=1))
 
 } # EOF

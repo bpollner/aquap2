@@ -78,7 +78,7 @@ stn <- list(
 	imp_specFileType = "vision_NSAS.da",	## the filetype of the spectral data. Refer to the help for 'getFullData'  for possible values
 	imp_startDate = "2013-11-01 00:00:00",	## the start-date used to calculate the absolute number of minutes since then
 	imp_sampleListType = "xls", 			## the filetype of the sample list in the sampleLists/sl_in folder. Please refer to the help for "getFullData" for possible values.
-	imp_multiplyRows = TRUE,				## if all the rows in the sample list should be multiplied by the number of consecutive scans.
+	imp_multiplyRows = "auto",				## if all the rows in the sample list should be multiplied by the number of consecutive scans.
 	imp_autoCopyYvarsAsClass = TRUE, 		## if all available Y-Variables should be automatically copied as a class variable at the time of importing the data. Recommended value is TRUE.
 	imp_alwaysReduceTRHClasses = FALSE,		## if the T and rel. humidity classes should be always reduced, even if the values only contain a single decimal point. If set to FALSE, the T and rel. hum. classes will not be reduced if the values contain only a single decimal point.
 	imp_TClassesDiv = 5,					## the number by which the temperature values get divided, then rounded, then multiplied

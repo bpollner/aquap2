@@ -195,23 +195,147 @@ insertEnumeration <- function(sampleList) {  # so that the row-numbers stay duri
 	out
 } # EOF
 
-esl_checkDefaults <- function(form) {
+insertErrorColumn <- function(sampleList) {
 	stn <- getstn()
-	if (form == "def") {
-		form <- stn$p_sampleListExportFormat
-	} else {
-		if (form != "txt" & form != "xls") {
-			stop("Please provide either 'txt' or 'xls' to the 'form' argument to export either a tab-delimited text file or an Excel-file.", call.=FALSE)
-		}
-	}
-	assign("form", form, pos=parent.frame(n=1))	
+	yPref <- stn$p_yVarPref
+	errCol <- paste0(yPref, gl_conScanError)
+	#
+	cns <- colnames(sampleList)
+	sampleList <- cbind(sampleList, X="")
+	colnames(sampleList) <- c(cns, errCol)
+	return(sampleList)
 } # EOF
 
+sl_checkVals <- function(multiplyRows, rnd, showFirstRows, timeEstimate) {
+	checkForLogic <- function(what, val) {
+		if (length(val) != 1 & all(is.logical(val))) {
+			stop(paste0("Please provide either 'TRUE' or 'FALSE' to the argument '", what, "'"), call.=FALSE)
+		} # end if
+	} # EOIF
+	checkForLogic("multiplyRows", multiplyRows)
+	checkForLogic("rnd", rnd)
+	checkForLogic("showFirstRows", showFirstRows)
+	checkForLogic("timeEstimate", timeEstimate)
+	#
+} # EOF
+
+sl_multiplyRows_sys <- function(sampleList, md, stn) {
+	#
+	nrScans <- md$postProc$nrConScans
+	multiList <- NULL
+	for (i in 1:nrScans) {
+		multiList <- rbind(multiList, sampleList)
+	} # end i loop
+	second <- matrix(rep(1:nrScans, each=nrow(sampleList) ))
+	first <- matrix(rep(1:nrow(sampleList), nrScans) )
+	a <- data.frame(multiList, second=second, first=first)
+	a <- as.data.frame(a[order(first, second), ][,1:(ncol(a)-2)]) # order, then cut away the last two columns
+
+	ConSNr <- rep(1:(nrScans),nrow(sampleList)) # generate a vector numbering all the consecutive scans
+	if (ncol(a) > 1) {
+		a <- data.frame(a[1], ConSNr=ConSNr, a[-1]) # insert into data frame
+	} else {
+		a <- data.frame(a[1], ConSNr=ConSNr) # insert into data frame		
+	}
+	ColNames <- colnames(a)
+	ColNames[2] <- paste(stn$p_yVarPref, stn$p_conSNrCol, sep="")
+	colnames(a) <- ColNames
+	rownames(a) <- seq(1:nrow(a)) # correct all the rownames
+	return(a)	
+}# EOF
+
+sl_writeNiceExcelFilePlease <- function(sampleList, filename, stn, md) {
+	# check if we have error column:
+	# a) if yes (that means we can not have Y_conSNr) we do NOT apply coloring to the lines
+	# b) if no, that meas we DO have Y_conSNr, we will apply nice common color to the rows in every sample
+	# extra: if more than one time point, add color to the different times
+	##
+	wsZoom <- 140
+	boarderGrey <- "gray68"
+	siSampleGrey <- "gray55"
+	errBCol <- "gray40"
+	errFillCol <- "lavenderblush"
+	#
+	grayCol1 <- "gray93"
+	grayCol2 <- "gray99"
+	colVec <- c(grayCol1, grayCol2)
+	#
+	tiCol1 <- "beige"
+	tiCol2 <- "bisque"
+	tiColVec <- c(tiCol1, tiCol2)
+	#
+	expName <- md$meta$expName
+	yPref <- stn$p_yVarPref
+	errCol <- paste0(yPref, gl_conScanError)
+	clPrev <- stn$p_ClassVarPref
+	tiCol <- stn$p_timeCol
+	indTiCol <- 2 # the index of the time column. comes in fix as 2
+	makeErrorBorder <- FALSE
+	makeSampleBorder <- FALSE
+	##
+	wb <- openxlsx::createWorkbook("SampleList")
+	openxlsx::addWorksheet(wb, sheetName=expName, zoom=wsZoom)	
+	openxlsx::writeData(wb, sheet=expName, sampleList, rowNames=FALSE)
+	#
+	
+	# now check for error column
+	siSampleInd <- NULL
+	cns <- colnames(sampleList)
+	if (!errCol %in% cns) { # that means we DO have the Y_conSNr in the multiplied rows, so we need coloring
+		indTiCol <- 3 # in that case we have inserted the number of cons scans, the time column moved one to the right
+		uniSNr <- unique(sampleList[,1]) # so far, it is all in our hands, the sample number IS the first column
+		colInd <- as.numeric(uniSNr%%2 == 0)+1 # gives alternating 1 or 2. Is weird like that. But fun. 
+		for (i in 1: length(uniSNr)) {
+			indRows <- which(sampleList[,1] == uniSNr[i])
+			cellFillStyle <- openxlsx::createStyle(fgFill=colVec[colInd[i]]) # colInd is a long vector of alternating 1 and 2, that in turn is used to subselect the first or second from colVec
+			openxlsx::addStyle(wb, sheet=expName, cellFillStyle, rows=indRows+1, cols = 1:ncol(sampleList), gridExpand=TRUE, stack=TRUE)    
+			makeSampleBorder <- TRUE
+			siSampleInd <- c(siSampleInd, indRows[1]) # get the row index of the first of each sample
+			 				
+		} # end for i 
+	} else { # so we DO have an error column, we want a nice boarder separating it from the rest, and a color
+		errInd <- which(cns == errCol)
+		redErrFill <- openxlsx::createStyle(fgFill=errFillCol) # colInd is a long vector of alternating 1 and 2, that in turn is used to subselect the first or second from colVec
+		openxlsx::addStyle(wb, sheet=expName, redErrFill, rows = 1: nrow(sampleList)+1, cols=errInd, gridExpand=TRUE, stack=TRUE)   
+		makeErrorBorder <- TRUE # do that later please
+	} # end else
+	##
+	
+	# check for more than one time point
+	uniTime <- unique(sampleList[,indTiCol])
+	if (length(uniTime) > 1) { # we will color the time column
+		tci <- 1		
+		for (i in seq_along(uniTime)) {
+			indRows <- which(sampleList[,indTiCol] == uniTime[i])
+			timeFillStyle <- openxlsx::createStyle(fgFill=tiColVec[tci])
+			if (tci == 1) {tci <- 2} else {tci <- 1}
+			openxlsx::addStyle(wb, sheet=expName, timeFillStyle, rows=indRows+1, cols = indTiCol, gridExpand=TRUE, stack=TRUE)    				
+		} # end for i
+	} # end if
+	#
+	
+	# make cell borders again
+	borderStyle <- openxlsx::createStyle(border="TopBottomLeftRight", borderColour=boarderGrey)
+	openxlsx::addStyle(wb, sheet=expName, borderStyle, rows=1:nrow(sampleList)+1, cols = 1:ncol(sampleList), gridExpand=TRUE, stack=TRUE)
+	if (makeErrorBorder) { # because if we do it upstairs then the "TopBottomLeftRight" boarder from above would undo that
+		ebs <- openxlsx::createStyle(border="left", borderColour=errBCol, borderStyle="thick")
+		allRows <- 0: nrow(sampleList)+1
+		openxlsx::addStyle(wb, sheet=expName, ebs, rows=allRows, cols = errInd, gridExpand=TRUE, stack=TRUE)    	
+	} # end if
+	if (makeSampleBorder) {
+		siBorder <- openxlsx::createStyle(border="top", borderColour=boarderGrey, borderStyle="medium")
+		openxlsx::addStyle(wb, sheet=expName, siBorder, rows=siSampleInd+1, cols = 1:ncol(sampleList), gridExpand=TRUE, stack=TRUE)   
+	} # end if
+	#
+	openxlsx::setColWidths(wb, sheet=expName, cols = 1:ncol(sampleList), widths = "auto")
+	ok <- openxlsx::saveWorkbook(wb, filename, overwrite = TRUE, returnValue=TRUE)
+	return(ok)
+} # EOF
 
 #### MASTER ##
 #' @title Create and Export Sample Lists
 #' @description Creates and exports the randomized sample list to file.
-#' @details Possible formats to export are tab delimited text or Excel. 
+#' @details The exclusive format for the sample list is xlsx. 
 #' When the appropriate values at the bottom of the settings.r file are provided, 
 #' an approximate time estimate of how long it will take to work through the 
 #' sample list is given. 
@@ -219,10 +343,23 @@ esl_checkDefaults <- function(form) {
 #' @param md An object of class \code{aquap_md} containing the metadata of the 
 #' experiment. Defaults to \code{getmd()}, what is calling the default filename 
 #' for the metadata file. See \code{\link{getmd}} and \code{\link{metadata_file}}.
-#' @param form Character, can be 'txt' to export the sample list in a tab 
-#' delimited text file, 'xls' to export as an Excel file, or if left at the 
-#' default 'def' is reading in the value from the settings.r file (parameter 
-#' \code{p_sampleListExportFormat}).
+#' @param multiplyRows Logical, defaults to \code{FALSE}. If each row in the 
+#' generated sample list should be multiplied by the number of consecutive scans 
+#' as specified at \code{nrConScans} in the metadata file. 
+#' \itemize{
+#' \item If left at the default \code{FALSE}, there is one row for each sample 
+#' in the sample list. Potential abberations from the planned number of 
+#' consecutive scans can be noted in the inserted column called 
+#' \code{conScanError} by providing \code{±n}, with 'n' being the number the 
+#' actual number of consecutive scans is differing from the intended. 
+#' \item  If \code{multiplyRows} is set to \code{TRUE}, each row in the generated 
+#' sample list is multiplied by the number of consecutive scans as specified at 
+#' \code{nrConScans} in the metadata file. In this case there is no column 
+#' allowing to denote errors, but the user has to manually delete or add rows 
+#' for each sample where the number of consecutive scans is differing from 
+#' from the intended. If rows were added, each cell in the row has to be filled 
+#' accordingly. 
+#' }
 #' @param rnd Logical, if the sample list should be randomized or not, defaults 
 #' to TRUE. (Having a non-randomized sample list can be interesting to check the 
 #' correctness of the sample list when designing the experiment.
@@ -248,9 +385,8 @@ esl_checkDefaults <- function(form) {
 #' }
 #' @family Core functions
 #' @export exportSampleList
-exportSampleList <- function(md=getmd(), form="def", rnd=TRUE, showFirstRows=TRUE, timeEstimate=FALSE) {
+exportSampleList <- function(multiplyRows = FALSE, rnd=TRUE, md=getmd(), showFirstRows=TRUE, timeEstimate=FALSE) {
 	stn <- autoUpS()
-	esl_checkDefaults(form)
 	fn_sl <- stn$fn_sampleLists
 	fn_sl_out <- stn$fn_sampleListOut
 		durationSingleScan <- stn$misc_durationSingleScan
@@ -261,28 +397,30 @@ exportSampleList <- function(md=getmd(), form="def", rnd=TRUE, showFirstRows=TRU
 		scanSeconds <- 	(nrConScans+1) * durationSingleScan 	## +1 because of the reference scan !
 		totalTime <- scanSeconds + handlingTime
 	##
-	if(!stn$allSilent) {cat("Creating sample list...\n")}
-	a <- makeTimeLabelSampleList(md, rnd)
-	b <- insertEnumeration(a)
+	sl_checkVals(multiplyRows, rnd, showFirstRows, timeEstimate) 
 	##
-		totalTimeInHours <- round((nrow(b)* totalTime) / (60*60),1)
-	if (form == "txt") {
-		ending <- "-out.txt"
-		msg <- ".txt"
-		toTab <- TRUE
-	} else {
-		ending <- "-out.xlsx"
-		msg <- ".xlsx"
-		toTab <- FALSE
-	}
+	if(!stn$allSilent) {cat("Creating sample list...\n")}
+	aaa <- makeTimeLabelSampleList(md, rnd)
+	bbb <- insertEnumeration(aaa)
+	##
+	totalTimeInHours <- round((nrow(bbb)* totalTime) / (60*60),1)
+	if (multiplyRows) {
+		bbb <- sl_multiplyRows_sys(bbb, md, stn) 
+	} else {  # we do NOT want an error column if we export with multiplied rows
+		bbb <- insertErrorColumn(bbb)
+	} # end else
+	ending <- "-out.xlsx"
+	msg <- ".xlsx"
 	filename <- paste(fn_sl, "/",fn_sl_out , "/", expName, ending, sep="")
 	if(!stn$allSilent) {cat("Writing sample list to file...\n")}
-	if (toTab) {
-		write.table(b, filename, sep="\t", row.names=FALSE)	
+	#
+	ok <- sl_writeNiceExcelFilePlease(bbb, filename, stn, md)
+	if (ok) {
+		cat(paste("A sample list in ", msg, " format with ", nrow(bbb), " rows has been saved to \"", fn_sl, "/", fn_sl_out, "\".\n", sep="") )	
 	} else {
-		openxlsx::write.xlsx(b, filename, rowNames=FALSE, sheetName=expName)
+		stop(paste0("Sorry, an error occured while trying to save the sample list to xlsx."), call.=FALSE)
 	} # end else
- 	cat(paste("A sample list in ", msg, " format with ", nrow(b), " rows has been saved to \"", fn_sl, "/", fn_sl_out, "\".\n", sep="") )
+ 	#
 	if (timeEstimate) {
 		if (length(timeLabels) > 1) {
 			cat("Minimum working time each time-point:", round((totalTimeInHours/length(timeLabels)), 1), "hours, in total", totalTimeInHours, "hours.\nHave fun!\n")
@@ -291,23 +429,33 @@ exportSampleList <- function(md=getmd(), form="def", rnd=TRUE, showFirstRows=TRU
 		}# end else
 	} # end if timeEstimate
 	if (showFirstRows) {
-		if (nrow(b) < 21 ) {pr <- nrow(b) } else {pr <- 21}
+		if (nrow(bbb) < 21 ) {pr <- nrow(bbb) } else {pr <- 21}
 		cat("\n")
-		print(b[1:pr,])
+		print(bbb[1:pr,])
 	}
-	return(invisible(b))
+	return(invisible(bbb))
 } # EOF
 
 #' @rdname exportSampleList
 #' @export
-esl <- function(md=getmd(), form="def", rnd=TRUE, showFirstRows=TRUE, timeEstimate=FALSE) {
-	out <- exportSampleList(md, form, rnd, showFirstRows, timeEstimate)
+esl <- function(multiplyRows = FALSE, rnd=TRUE, md=getmd(), showFirstRows=TRUE, timeEstimate=FALSE) {
+	out <- exportSampleList(multiplyRows, rnd, md, showFirstRows, timeEstimate)
 } # EOF
 ####### / Master ################################################
 ############################################################################################
 
 
-############################################################################################
-############################################################################################
-############################################################################################
+#' @title Multiply Rows in Sample List
+#' @description Reads in the sample list located in the folder 
+#' \code{sampleLists/sl_in} and, if it contains only one row for each sample, 
+#' is multiplying each row by the number of consecutive scans as defined in 
+#' \code{nrConScans} in the metadata file. If a correction value XXX is present, 
+#' it is applied. XXX
+#' @inheritParams exportSampleList
+#' @family Import-Export
+#' @export
+sampleList_multiplyRows <- function(md=getmd()) {
+
+} # EOF
+
 

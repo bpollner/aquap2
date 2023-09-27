@@ -313,13 +313,13 @@ gfd_checkNrOfRows <- function(header, headerFilePath, nrowsNIR, spectraFilePath,
 	if (!is.null(header)) {
 		if (nrow(header) != nrowsNIR) {
 			if (multiplyRows) {
-				to <- paste("after the multiplication of every row by ", nrConScans, " consecutive scans", sep="")
+				to <- paste("after multiplying the rows in the sample list by ", nrConScans, " \n(if no correction from error column was applied) consecutive scans", sep="")
 			} else {
 				to <- "(multiplication of rows was *not* performed)"
-			}
+			} # end else
 			stop(paste("The header that was constructed from the file \n\"", headerFilePath, "\"\n consists of ", nrow(header), " rows ", to, ", while the imported spectra from file \n\"", spectraFilePath, "\"\n consist of ", nrowsNIR, " rows. \nPlease make sure that all data to be imported have the same number of rows.", sep=""), call.=FALSE)
-		}
-	}
+		} # end if nrow not good
+	} # end if is null header
 } # EOF
 
 gfd_getExpNameNoSplit <- function(metadata, nRows) {
@@ -633,8 +633,8 @@ gfd_checkOverwrite_sl_trh_multRows <- function(md, slType, trhLog, multiplyRows)
 	#
 	if (slType != "def") {
 		if (!is.null(slType)) {
-			if (length(slType) != 1 | !all(is.character(slType))) {
-				stop("Please provide a character length one to the argument 'slType'.", call.=FALSE)
+			if (length(slType) != 1 | !all(slType == "xls")) {
+				stop("Please provide either 'NULL' or 'xls' to the argument 'slType'.", call.=FALSE)
 			} # end if
 		} # end check
 		use_slType <- slType
@@ -935,49 +935,117 @@ convertYColsToNumeric <- function(sampleList) {
 		for (i in 1: length(ind)) {
 			sampleList[ind[i]] <- as.numeric( as.character(sampleList[, ind[i]]) )
 		}
-	}	
+	} # end if
 	options(warn=0)
 	return(sampleList)
 } # EOF
 
 ### x-fold every line (Nr. Cons. Measurements), and add a numbering for each of the consecutive scans
-multiplySampleListRows <- function(sampleList, nrScans) {
+possibly_multiplySampleListRows <- function(sampleList, nrScans, multiplyRows) {
+	# we have to check multiplyRows: if it is:
+	# a) "auto" (the default): see if we have the error column present. That means we do NOT have the Y_conSNr column present
+	#  		if we HAVE the error column switch to b) TRUE, if not to c) FALSE
+	# b) TRUE multiply rows, use the value in the error column to adjust
+	#		inform: if an error col is present, if there are any values in it
+	# 		check: throw an error if the Y_conSNr is present
+	# c) FALSE take it as it is
+	# 		check: throw an error if the error column is present
+	#		check: throw an error if NO Y_conSNr is present
 	stn <- getstn()
-	multiList <- NULL
-#	sampleList <- as.data.frame(sampleList)
-	for (i in 1:nrScans) {
-		multiList <- rbind(multiList, sampleList)
-	} # end i loop
-	second <- matrix(rep(1:nrScans, each=nrow(sampleList) ))
-	first <- matrix(rep(1:nrow(sampleList), nrScans) )
-	a <- data.frame(multiList, second=second, first=first)
-	a <- as.data.frame(a[order(first, second), ][,1:(ncol(a)-2)]) # order, then cut away the last two columns
-
-	ConSNr <- rep(1:(nrScans),nrow(sampleList)) # generate a vector numbering all the consecutive scans
-	if (ncol(a) > 1) {
-		a <- data.frame(a[1], ConSNr=ConSNr, a[-1]) # insert into data frame
+	yPref <- stn$p_yVarPref
+	errCol <- paste0(yPref, gl_conScanError)
+	conSNrCol <- paste0(yPref, stn$p_conSNrCol)
+	sampleNrCol <- paste0(yPref, stn$p_sampleNrCol)
+	slIn <- paste0(stn$fn_sampleLists, "/", stn$fn_sampleListIn)
+	#
+	doMultiply <- multiplyRows # multiplyRows comes in as "auto", TRUE or FALSE
+	#
+	cns <- colnames(sampleList)
+	if ((errCol %in% cns) & (conSNrCol %in% cns)) {
+		stop(paste0("There can not be a column for \n\tconsecutive scan number '", conSNrCol, "' and \n\t an error column '", errCol, "' in a sample list.\nPlease modify your sample list in '", slIn, "' "), call.=FALSE)
+	} # end if
+ 	
+ 	##
+ 	if (multiplyRows == "auto") {
+ 		if ((!errCol %in% cns) & (!conSNrCol %in% cns)) { # would be the old single line sample lists without error column (and of course without conSNr column)
+ 			doMultiply <- TRUE 
+ 		} else if (errCol %in% cns) { # the single line sample list with error column
+ 			doMultiply <- TRUE 	
+ 		} else { # so we should have the conSNr column present
+ 			doMultiply <- FALSE
+ 		} # end else
+ 	}  # end if
+	assign("multiplyRows", doMultiply, pos=parent.frame(n=1)) # not elegant... meanwhile... sorry... 
+	assign("multiplyRows", doMultiply, pos=parent.frame(n=2))  # that is needed to always have the correct value for multiplyRows in the getFullData function
+ 	
+ 	if (!doMultiply) {
+		if (!conSNrCol %in% cns) { # I think this should never happen.... 
+ 			stop(paste0("There should be the column for consecutive scans '", conSNrCol, "' in the sample list."), call.=FALSE)
+ 		}  # end if	
+ 		return(sampleList) # easy. Just leave it as it is
+ 	}  # end if
+ 	
+ 	# if we are here doMultiply must be TRUE
+ 	# if we multiply, it can be with or without error column
+	if (!stn$allSilent) {cat("Multiplying the rows in the sample list... \n")}
+	errValUse <- rep(nrScans, nrow(sampleList))
+	errValZero <- vector("numeric", nrow(sampleList))
+	remErrCol <- FALSE
+	if (errCol %in% cns) {
+		errVal <- sampleList[,errCol] # is all NA if there are no values, or NA mixed with numbers
+		indErr <- which(!is.na(errVal)) # the indices of the error values
+		errValZero[indErr] <- errVal[indErr] # is a vector of numbers with mostly zeroes, sometimes a number indicating the correction value
+		errValUse <- errValUse + errValZero # add the intended nr of consecutive scans. So it is a vector undulating around the nrConScans.
+		remErrCol <- TRUE
+		#
+		len <- length(indErr)
+		cha1 <- "s"; cha2 <- ""
+		if (len == 1) {cha1 <- ""; cha2 <- "s"} 
+		if (all(is.na(errVal))) {
+			msgTxt <- "but no abberation in number of consecutive scans.\n"
+		} else {
+			msgTxt <- paste0(len, " sample", cha1, " show", cha2, " aberrant number of consecutive scans.\n")
+		} # end else
+		if (!stn$allSilent) {
+			cat(paste0("\tError column present, ", msgTxt))
+		} # end if
+		#	
+	} # end if errCol present
+		
+	###
+	aaa <-  sampleList[rep(seq_len(nrow(sampleList)), errValUse), ] # multiply each line by the value in errValUse
+	###
+	if (remErrCol) {
+		kk <- which(cns == errCol)
+		aaa <- aaa[, -kk] # remove the error column
+	} # end if
+	rl <- rle(aaa[,sampleNrCol]) #  
+	ConSNr <- NULL
+	for (i in seq_along(rl$lengths)){
+	  ConSNr <- c(ConSNr, 1:rl$lengths[i]) # generate vector for consecutive scans
+	} # end for i 
+	if (ncol(aaa) > 1) {
+		aaa <- data.frame(aaa[1], ConSNr=ConSNr, aaa[-1]) # insert into data frame
 	} else {
-		a <- data.frame(a[1], ConSNr=ConSNr) # insert into data frame		
+		aaa <- data.frame(aaa[1], ConSNr=ConSNr) # insert into data frame		
 	}
-	ColNames <- colnames(a)
+	ColNames <- colnames(aaa)
 	ColNames[2] <- paste(stn$p_yVarPref, stn$p_conSNrCol, sep="")
-	colnames(a) <- ColNames
-	rownames(a) <- seq(1:nrow(a)) # correct all the rownames
-	return(a)
+	colnames(aaa) <- ColNames
+	rownames(aaa) <- seq(1:nrow(aaa)) # correct all the rownames
+	return(aaa)
 } # EOF
 
 readHeader_checkDefaults <- function(slType, possibleValues, md, multiplyRows) {
+	# possibleValues is only "xls" any more
 	stn <- getstn()
 	if (all(slType == "def") & !is.null(slType)) {
-		slType <- stn$imp_sampleListType
+		slType <- stn$imp_sampleListType # can be only NULL or xlsx
 	}
 	if (!is.null(slType)) {
-		if (!all(is.character(slType)) | length(slType) != 1) {
-			stop("Please provide a character length one or NULL to the argument 'slType'.", call.=FALSE)
+		if (!all(slType == possibleValues) | length(slType) != 1) {
+			stop(paste0("Please provide either '", possibleValues,"' or 'NULL' to the argument 'slType'."), call.=FALSE)
 		}
-	}
-	if (!any(possibleValues %in% slType) & !is.null(slType)) {
-		stop("Please refer to the help for 'getFullData' for the possible values for the argument 'slType'", call.=FALSE)
 	}
 	assign("slType", slType, pos=parent.frame(n=1))
 	assign("slType", slType, pos=parent.frame(n=2)) # that is needed to always have the correct value for slType in the getFullData function
@@ -993,10 +1061,12 @@ readHeader_checkDefaults <- function(slType, possibleValues, md, multiplyRows) {
 	if (all(multiplyRows == "def")) {
 		multiplyRows <- stn$imp_multiplyRows
 	} else {
-		if (!all(is.logical(multiplyRows)) | length(multiplyRows) != 1) {
-			stop("Please provide either 'TRUE' or 'FALSE' to the argument 'multiplyRows'.", call.=FALSE)
-		}
-	}
+		if (!all(multiplyRows == "auto")) {
+			if (!all(is.logical(multiplyRows)) | length(multiplyRows) != 1) {
+				stop("Please provide either 'TRUE', 'FALSE' or 'auto' to the argument 'multiplyRows'.", call.=FALSE)
+			} # end if		
+		} # end if
+	} # end else
 	assign("multiplyRows", multiplyRows, pos=parent.frame(n=1))
 	assign("multiplyRows", multiplyRows, pos=parent.frame(n=2))  # that is needed to always have the correct value for multiplyRows in the getFullData function
 } # EOF
@@ -1068,44 +1138,39 @@ check_conScanColumn_2 <- function(header, filename, ext) {
 #' @export
 readHeader <- function(md=getmd(), slType="def", multiplyRows="def") {
 	stn <- autoUpS()
-	poss_sl_types <- c("csv", "txt", "xls") 			### XXXVARXXX
+	poss_sl_types <- pv_sampleListType # only xls
+	# 		
 	filename <- NULL # will be changed in the checking
-	readHeader_checkDefaults(slType, poss_sl_types, md, multiplyRows)
+	readHeader_checkDefaults(slType, poss_sl_types, md, multiplyRows) # is re-assigning multiplyRows
 	slInFolder <- paste(stn$fn_sampleLists, "/", stn$fn_sampleListIn, "/", sep="")
 	if (is.null(slType)) {
 		return(NULL)
 	}
-	if (slType == "csv") {
-		ext <- "-in.csv"
-		check_sl_existence(filename, ext)
-		rawHead <- read.csv(paste(slInFolder, filename, ext, sep=""))
-	}
-	if (slType == "txt") {
-		ext <- "-in.txt"
-		check_sl_existence(filename, ext)
-		rawHead <- read.table(paste(slInFolder, filename, ext, sep=""), header=TRUE)
-	}
-	if (slType == "xls") {
-		ext <- "-in.xlsx"
-		check_sl_existence(filename, ext)
-		rawHead <- openxlsx::read.xlsx(paste(slInFolder, filename, ext, sep="")) # ! character imports are NOT factors yet !!
-		for (i in 1: ncol(rawHead)) {
-			if (all(is.character(rawHead[,i]))) {
-				rawHead[,i] <- as.factor(rawHead[,i])
-			}
-		}
-		
-	}
+# 	if (slType == "csv") {
+# 		ext <- "-in.csv"
+# 		check_sl_existence(filename, ext)
+# 		rawHead <- read.csv(paste(slInFolder, filename, ext, sep=""))
+# 	}
+# 	if (slType == "txt") {
+# 		ext <- "-in.txt"
+# 		check_sl_existence(filename, ext)
+# 		rawHead <- read.table(paste(slInFolder, filename, ext, sep=""), header=TRUE)
+# 	}
+	#
+	ext <- "-in.xlsx"
+	check_sl_existence(filename, ext)
 	assign("headerFilePath", paste(slInFolder, filename, ext, sep=""), pos=parent.frame(n=1))
-	###
+	##
+	rawHead <- openxlsx::read.xlsx(paste(slInFolder, filename, ext, sep="")) # ! character imports are NOT factors yet !!
+	for (i in 1: ncol(rawHead)) {
+		if (all(is.character(rawHead[,i]))) {
+			rawHead[,i] <- as.factor(rawHead[,i])
+		} # end if
+	} # end for i	
 	rawHead <- convertYColsToNumeric(rawHead)
+	###
 	nrScans <- md$postProc$nrConScans
-	if (multiplyRows) {
-		header <- multiplySampleListRows(rawHead, nrScans)
-	} else {
-		header <- rawHead
-		# check_conScanColumn_2(header, filename, ext)
-	}
+	header <- possibly_multiplySampleListRows(rawHead, nrScans, multiplyRows)
 	return(header)
 } # EOF
 

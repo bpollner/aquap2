@@ -378,37 +378,43 @@ test_that("esl - wrong xlsx structure", { # that one is checking the folder stru
 
 test_that("esl - all errors", { # that one is checking the folder structure
   mdf <- "blabla.R"
-  expect_error(esl(getmd(mdf), rnd = F, showFirstRows = F))
+  expect_error(esl(md=getmd(mdf), rnd = F, showFirstRows = F))
   mdf <- "md_a_2.r"
-  expect_error(esl(getmd(mdf), form="aa", rnd = F, showFirstRows = F))
+  expect_error(esl(md=getmd(mdf), form="aa", rnd = F, showFirstRows = F))
   mdf <- "md_a_1err.R"
-  expect_error(esl(getmd(mdf), rnd = F, showFirstRows = F))
+  expect_error(esl(md=getmd(mdf), rnd = F, showFirstRows = F))
 }) # EOT
 
-test_that("esl - all good numbers", { # that one is checking the folder structure
+test_that("esl - all good numbers", { 
   mdf <- "md_a_1.r"
-  expect_equal(nrr(esl(getmd(mdf), rnd = F, showFirstRows =T)), 9)
+  expect_equal(nrr(esl(md=getmd(mdf), rnd = F, showFirstRows =T)), 9)
   mdf <- "md_a_2.r"
-  expect_equal(nrr(esl(getmd(mdf), rnd = F, showFirstRows = F)), 21)
+  expect_equal(nrr(esl(md=getmd(mdf), rnd = F, showFirstRows = F)), 21)
   mdf <- "md_a_3.r"
-  expect_equal(nrr(esl(getmd(mdf), form="txt", rnd = T, showFirstRows = F)), 33)
+  expect_equal(nrr(esl(md=getmd(mdf), rnd = T, showFirstRows = F)), 33)
   mdf <- "md_b_1.r"
-  expect_equal(nrr(esl(getmd(mdf), form="xls", rnd = F, showFirstRows = F)), 42)
+  expect_equal(nrr(esl(md=getmd(mdf), rnd = F, showFirstRows = F)), 42)
   mdf <- "md_b_2.r"
-  expect_equal(nrr(esl(getmd(mdf), rnd = F, showFirstRows = F, timeEstimate = T)), 105)
+  expect_equal(nrr(esl(md=getmd(mdf), rnd = F, showFirstRows = F, timeEstimate = T)), 105)
   mdf <- "md_b_3.r"
-  expect_equal(nrr(esl(getmd(mdf), rnd = F, showFirstRows = F)), 105)
+  expect_equal(nrr(esl(md=getmd(mdf), rnd = F, showFirstRows = F)), 105)
   mdf <- "md_c_1.r"
-  expect_equal(nrr(esl(getmd(mdf), rnd = F, showFirstRows = F)), 432)
+  expect_equal(nrr(esl(md=getmd(mdf), rnd = F, showFirstRows = F)), 432)
   mdf <- "md_c_3.r"
-  expect_equal(nrr(esl(getmd(mdf), rnd = F, showFirstRows = F, timeEstimate = TRUE)), 2688)
+  expect_equal(nrr(esl(md=getmd(mdf), rnd = F, showFirstRows = F, timeEstimate = TRUE)), 2688)
   mdf <- "md_KCl.r"
-  expect_equal(nrr(esl(getmd(mdf), rnd = F, showFirstRows = F)), 240)
+  expect_equal(nrr(esl(md=getmd(mdf), rnd = F, showFirstRows = F)), 240)
   mdf <- "md_d_1.r"
-  expect_equal(nrr(esl(getmd(mdf), rnd = F, showFirstRows = F, timeEstimate = TRUE)), 1728)
+  expect_equal(nrr(esl(md=getmd(mdf), rnd = F, showFirstRows = F, timeEstimate = TRUE)), 1728)
   mdf <- "md_d_2.r"
-  expect_equal(nrr(esl(getmd(mdf), rnd = F, showFirstRows = F)), 1296)
+  expect_equal(nrr(esl(md=getmd(mdf), rnd = F, showFirstRows = F)), 1296)
 }) # EOT
+
+test_that("esl - multiply rows", { 
+  mdf <- "md_a_2.r"
+  expect_equal(nrr(esl(multiplyRows=TRUE, md=getmd(mdf), rnd = F, showFirstRows = F)), 105)
+}) # EOT
+
 
 
 
