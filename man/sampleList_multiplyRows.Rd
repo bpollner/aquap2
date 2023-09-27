@@ -15,7 +15,7 @@ for the metadata file. See \code{\link{getmd}} and \code{\link{metadata_file}}.}
 Reads in the sample list located in the folder 
 \code{sampleLists/sl_in} and, if it contains only one row for each sample, 
 is multiplying each row by the number of consecutive scans as defined in 
-\code{nrConScans} in the metadata file. If a correction value XXX is present, 
+\code{nrConScans} in the metadata file. If a correction value in  is present, 
 it is applied. XXX
 }
 \seealso{

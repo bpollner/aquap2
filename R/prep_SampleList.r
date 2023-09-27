@@ -347,19 +347,21 @@ sl_writeNiceExcelFilePlease <- function(sampleList, filename, stn, md) {
 #' generated sample list should be multiplied by the number of consecutive scans 
 #' as specified at \code{nrConScans} in the metadata file. 
 #' \itemize{
-#' \item If left at the default \code{FALSE}, there is one row for each sample 
-#' in the sample list. Potential abberations from the planned number of 
-#' consecutive scans can be noted in the inserted column called 
+#' \item \code{FALSE} If left at the default \code{FALSE}, there is one row for 
+#' each sample in the sample list. Potential abberations from the planned number 
+#' of consecutive scans can be noted in the inserted column called 
 #' \code{conScanError} by providing \code{±n}, with 'n' being the number the 
 #' actual number of consecutive scans is differing from the intended. 
-#' \item  If \code{multiplyRows} is set to \code{TRUE}, each row in the generated 
+#' \item \code{TRUE} If \code{multiplyRows} is set to \code{TRUE}, each row in the generated 
 #' sample list is multiplied by the number of consecutive scans as specified at 
-#' \code{nrConScans} in the metadata file. In this case there is no column 
+#' \code{nrConScans} in the metadata file. In this case there is no error column 
 #' allowing to denote errors, but the user has to manually delete or add rows 
 #' for each sample where the number of consecutive scans is differing from 
 #' from the intended. If rows were added, each cell in the row has to be filled 
 #' accordingly. 
 #' }
+#' Please also refer to \code{\link{getFullData}} and the explanations for the 
+#' argument \code{multiplyRows} therein. 
 #' @param rnd Logical, if the sample list should be randomized or not, defaults 
 #' to TRUE. (Having a non-randomized sample list can be interesting to check the 
 #' correctness of the sample list when designing the experiment.
@@ -444,18 +446,70 @@ esl <- function(multiplyRows = FALSE, rnd=TRUE, md=getmd(), showFirstRows=TRUE, 
 ####### / Master ################################################
 ############################################################################################
 
+sl_renameSingleLineSampleList <- function(slInFolder, filename, ext) {
+	# we already did file existence checking upstairs
+	singleLineSuffix <- "_singleLine"
+	#
+	ok <- file.rename(from=paste0(slInFolder, filename, ext), to=paste0(slInFolder, filename, singleLineSuffix, ext) )
+	if (!ok) {
+		stop(paste0("Sorry, the file '", paste0(filename, ext), "' could not be renamed."), call.=FALSE)	
+	} # end if
+} # EOF
+
+
 
 #' @title Multiply Rows in Sample List
 #' @description Reads in the sample list located in the folder 
 #' \code{sampleLists/sl_in} and, if it contains only one row for each sample, 
 #' is multiplying each row by the number of consecutive scans as defined in 
-#' \code{nrConScans} in the metadata file. If a correction value XXX is present, 
-#' it is applied. XXX
+#' \code{nrConScans} in the metadata file. If a correction value in an error
+#' column is present, it is applied when multiplying the rows of the sample list.
 #' @inheritParams exportSampleList
+#' @param overwrite Logical. If the single line sample list file should be 
+#' overwritten. If \code{FALSE} (the default), the single line file remains in 
+#' \code{sampleLists/sl_in}, but it will be renamed.
+#' @return Invisible TRUE if the sample list was multiplied and the old sample 
+#' list was renamed; invisible FALSE if not multiplication of the sample list 
+#' took place.
 #' @family Import-Export
 #' @export
-sampleList_multiplyRows <- function(md=getmd()) {
-
+sampleList_multiplyRows <- function(md=getmd(), overwrite=FALSE) {
+	stn <- autoUpS()
+	slInFolder <- paste0(stn$fn_sampleLists, "/", stn$fn_sampleListIn, "/")
+	#
+	if (is(md, "aquap_md")) {
+		filename <- md$meta$expName
+	} else {
+		stop("Please provide a valid metadata object of class 'aquap_md' to the argument 'md'", call.=FALSE)
+	} # end else
+	ext <- "-in.xlsx" # only xlsx left
+	msgBody <- paste0("The sample list '", paste0(filename, ext, "'"))
+	check_sl_existence(filename, ext)
+	#
+	sampleList <- openxlsx::read.xlsx(paste(slInFolder, filename, ext, sep="")) # ! character imports are NOT factors yet !!
+	sampleList <- convertCColsToFactor(sampleList)	
+	sampleList <- convertYColsToNumeric(sampleList)
+	#
+	nrScans <- md$postProc$nrConScans
+	aaa <- gfd_possibly_multiplySampleListRows(sampleList, nrScans, multiplyRows="auto", doas=FALSE)
+		sampleList <- aaa$sampleList
+		isMult <- aaa$isMult
+	if (isMult) {
+		if (!overwrite) {
+			sl_renameSingleLineSampleList(slInFolder, filename, ext) # stops if unsuccessful
+		} # end if
+		fullFiNa <- paste0(slInFolder, filename, ext)
+		ok <- sl_writeNiceExcelFilePlease(sampleList, fullFiNa, stn,  md) # filename is complete here
+		if (!ok) {
+			stop(paste0("Sorry, an error occured while trying to save the sample list to xlsx."), call.=FALSE)
+		} else {
+			cat(paste0(msgBody, " was multiplied.\n"))
+			return(invisible(TRUE)) 
+		} # end else
+	} else { # so no mult took place
+		message(paste0(msgBody, " was not multiplied."))
+		return(invisible(FALSE))
+	} # end else
 } # EOF
 
 

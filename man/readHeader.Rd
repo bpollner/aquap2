@@ -13,35 +13,50 @@ The default is to get the metadata file via  \code{\link{getmd}}.}
 \item{slType}{Character. The type of sample-list file in the sampleLists/
 sl_in folder. Possible values are:
 \itemize{
-   \item "def" Gets the default value from the settings.r file
+   \item \code{def} Gets the value from the metadata file (variable 
+            \code{sampleListType}.)
          (variable 'imp_sampleListType')
-   \item NULL By providing 'NULL' to the argument 'slType' you indicate that 
-         no sample-list should be imported to create the header. This would 
-         be the case if you use a custom-function to import your spectral 
-         data and all the necessary class- and numerical variables are already 
-         defined in the same file that holds the spectral data. Please refer to
-         \code{\link{custom_import}} for further information on the requirements 
-         for this custom import function.
-         You can use a custom function to import spectral data and at the same 
+   \item \code{NULL} By providing 'NULL' to the argument \code{slType} you 
+            indicate  hat no sample-list should be imported to create the header. 
+            This would  be the case if you use a custom-function to import your 
+            spectral data and all the necessary class- and numerical variables 
+            are already defined in the same file that holds the spectral data. 
+            Please refer to \code{\link{custom_import}} for further information 
+            on the requirements for this custom import function.
+         A custom function can be used to import spectral data and at the same 
          time import additional variables from a sample-list file by providing 
          one of the characters listed below.
-   \item "xls" an Excel file ending in '.xlsx'
+   \item \code{xls} an Excel file ending in '.xlsx'
 }}
 
-\item{multiplyRows}{Character or Logical. If all the rows in the sample list 
+\item{multiplyRows}{Character or Logical. If the rows in the sample list 
 should be multiplied by the number of consecutive scans as specified 
-(in parameter \code{nrConScans}) in the metadata of the experiment. 
-If the argument \code{multiplyRows} in the function \code{getFullData} is 
-left at \code{def} the value (\code{TRUE} or \code{FALSE}) from  
-\code{multiplyRows} from the **metadata file** is used. If \code{multiplyRows} 
-is \code{FALSE} (what would be the case if you are using a sample list and, 
-during your measurements, had to divert from the planned number of consecutive 
-scans or had to make other changes so that the number of consecutive scans is not 
-the same for every sample) you have to manually insert the column (default name 
-would be 'C_conSNr') into the sample list and provide the values for every row.
-Set to \code{TRUE} for multiplying every row in the sample list by the number of 
-consecutive scans as specified in \code{nrConScans} in the metadata of the 
-experiment.}
+in the variable \code{nrConScans}) in the metadata of the experiment. 
+\itemize{
+     \item \code{def} If the argument \code{multiplyRows} in the function 
+        \code{getFullData} is left at \code{def}, the value (\code{TRUE} or 
+        \code{FALSE} or \code{auto}) from the variable \code{multiplyRows} from 
+        the **metadata file** is used. 
+ \item \code{auto} Checks if there is an error column in the sample list. 
+        If no error column and no column for consecutive scans or only the 
+        error column is present, the rows in the sample list will be multiplied
+        by the numer of consecutive scans as given in the metadata. The values 
+        in the error column (if any) will be used to correct the number of 
+        consecutive scans for each respective sample. If no error column, but 
+        a column for consecutive scans is present in the sample list, it will 
+        **not** be multiplied. 
+ \item \code{FALSE} The sample list will be left as it is. In that case 
+        it is the users responsibility to provide a sample list with the rows 
+        correctly multiplied to match the number of consecutive scans in the 
+        dataset. 
+ \item \code{TRUE} For multiplying every row in the sample list by the number 
+        of consecutive scans as specified in \code{nrConScans} in the metadata 
+        of the experiment. If values are given in the error column in the sample
+        list, the consecutive scans for each sample will be corrected by this 
+        number. 
+}
+Please also refer to \code{\link{exportSampleList}} and the explanation to the 
+argument \code{multiplyRows} therein.}
 }
 \description{
 This functions reads in the sample-list file and prepares the 
