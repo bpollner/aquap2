@@ -109,7 +109,7 @@ getTxtsBetweenLocal <- function(ftLocal, ftLocalR, indLocHook, indLocNext, ftPac
 
 getTextBetweenPac <- function(pacNames, singleMissingKey, ftPackR, ftPack, indKey, ftLocal, onDEV=FALSE) {
     pacHookAbove <- pacNames[which(pacNames == singleMissingKey)-1]
-	if (onDEV) {print("pacHookAbove: "); print(pacHookAbove); print("---------");}
+	# if (onDEV) {print("pacHookAbove: "); print(pacHookAbove); print("---------");}
     indPacHook <- which(ftPackR == pacHookAbove)
     keyIndFT <- which(ftPackR == singleMissingKey)
     if (indPacHook == (keyIndFT-1)) { # so there is no space between the two keys
@@ -117,7 +117,7 @@ getTextBetweenPac <- function(pacNames, singleMissingKey, ftPackR, ftPack, indKe
     } # end if
     #
     txtBetweenPac <- ftPack[(indPacHook+1):(indKey-1)]
-	if (onDEV) {print("txtBetweenPac Raw: "); print(txtBetweenPac); print("---------");}
+	# if (onDEV) {print("txtBetweenPac Raw: "); print(txtBetweenPac); print("---------");}
 
     # cut away everything that is above an empty line
     txtT <- trimws(txtBetweenPac)
@@ -135,7 +135,7 @@ getTextBetweenPac <- function(pacNames, singleMissingKey, ftPackR, ftPack, indKe
         return(NULL)
     } # end if
     out <- txtBetweenPac[(aa+1):(length(txtBetweenPac))]
-    if (onDEV) {print("txtBetweenPac selected: "); print(out); print("---------");}
+    # if (onDEV) {print("txtBetweenPac selected: "); print(out); print("---------");}
     ind <- which(out %in% ftLocal)
     if (length(ind) != 0) {
       #  out <- out[-ind] # make sure that we do not copy anything that is already in the local file
@@ -253,19 +253,19 @@ addMissingKeys <- function(ftLocal, splitChar, taPaObj, pathToPack, folderLocal,
 	DEV <- FALSE
   #	DEV <- TRUE
     missingKeys <- pacNames[which(!pacNames %in% locNames)]
-	if (DEV) {print("Missing Keys: "); print(missingKeys);}
+	# if (onDEV) {print("Missing Keys: "); print(missingKeys);}
     if (length(missingKeys != 0)) { # so we do have to add something
         ftLocalR <- getKeysOnlyFromText(ftLocal, splitChar)
         ftLocalR <- cleanOutLastEmptiesFromftLocalR(locNames, ftLocalR) # because, after deletion it might be possible that we have some "" empty chars on the end. Things are complicated here... 
-        if (DEV) {print("FIRST ftLocalR"); print(ftLocalR);}
+        # if (onDEV) {print("FIRST ftLocalR"); print(ftLocalR);}
         ftPack <- getKeyTxtCenter(pathToPack, taPaObj, lastCharPack)
         ftPackR <- getKeysOnlyFromText(ftPack, splitChar)
         pacNames <- adaptSort_X_Names(pacNames, ftPackR)
         locNames <- adaptSort_X_Names(locNames, ftLocalR)
-        if (DEV) {print("FIRST locNames: "); print(locNames); print("---------");}
+        # if (onDEV) {print("FIRST locNames: "); print(locNames); print("---------");}
         missingKVPs <- getMissingKVPs(ftPack, ftPackR, missingKeys) # all the missing key-values pairs in one object
         for (i in 1: length(missingKeys)) {
-		if (DEV) {print("Working on Key: "); print(missingKeys[i]) ; print("---------");}
+		# if (onDEV) {print("Working on Key: "); print(missingKeys[i]) ; print("---------");}
             indKey <- which(ftPackR == missingKeys[i])  # the pac index of a key missing in loc
             if (length(indKey) > 1) {stop("Sorry, it seems that a key name appears twice.", call.=FALSE)}
             newKVP <- missingKVPs[i]
@@ -274,12 +274,12 @@ addMissingKeys <- function(ftLocal, splitChar, taPaObj, pathToPack, folderLocal,
             pacHook <- pacNames[which(pacNames == missingKeys[i])-1]  ## XXX mod here if the first is missing !!!
             locHookKeyInd <- which(locNames == pacHook)
             locHook <- locNames[locHookKeyInd] # the name of the key in loc one higher than the missing one
-           	if (DEV) {print("pacHook:"); print(pacHook); print("---------"); print("locNames: "); print(locNames); print("locHook:"); print(locHook); print("---------");}
+           	# if (onDEV) {print("pacHook:"); print(pacHook); print("---------"); print("locNames: "); print(locNames); print("locHook:"); print(locHook); print("---------");}
 			
             # get the comments above and empty spaces below the pacHook (if there are any)
             txtBetweenPack <- getTextBetweenPac(pacNames, missingKeys[i],ftPackR, ftPack, indKey, ftLocal, onDEV=DEV)
             txtEmptyBelowPacKey <- getTxtEmptyBelowPacKey(indKey, pacNames, ftPack, ftPackR, ftLocal, onDEV=DEV)
-			if (DEV) {print("txtBetweenPack: "); print(txtBetweenPack); print("txtEmptyBelowPacKey: "); print(txtEmptyBelowPacKey); print("---------");}
+			# if (onDEV) {print("txtBetweenPack: "); print(txtBetweenPack); print("txtEmptyBelowPacKey: "); print(txtEmptyBelowPacKey); print("---------");}
 
             # get all local lines between hook and next
             indLocHook <- which(ftLocalR == locHook) # next higher hook in local file !!
@@ -289,7 +289,7 @@ addMissingKeys <- function(ftLocal, splitChar, taPaObj, pathToPack, folderLocal,
 				locNext <- locNames[which(locNames == locHook)+1] # the name of the next key present in the local file           	
 				indLocNext <- which(ftLocalR == locNext)
            	} # end else   
-			if (DEV) {print("indLocHook");print(indLocHook); print("indLocNext");print(indLocNext); print("---------")}
+			# if (onDEV) {print("indLocHook");print(indLocHook); print("indLocNext");print(indLocNext); print("---------")}
             aa <- getTxtsBetweenLocal(ftLocal, ftLocalR, indLocHook, indLocNext, ftPack, ftPackR, indKey, maxS) # here it is decided where in the between text the new KVP is put
                 txtBetweenLocal <- aa$tbl
                 txtBetweenLocalUpper <- aa$tbl_U
@@ -311,9 +311,9 @@ addMissingKeys <- function(ftLocal, splitChar, taPaObj, pathToPack, folderLocal,
 				locNames <- c(locNames[1:locHookKeyInd], missingKeys[i], locNames[(locHookKeyInd+1):length(locNames)])			
 			} # end else
             ftLocalR <- cleanOutLastEmptiesFromftLocalR(locNames, ftLocalR)
-			if (DEV) {print("New locNames: ");  print(locNames); print("---------"); print("--------xxxxxxxx-x-x-x-x-xxxxxxxxxxxxxxxxxx------");}
-			if (DEV) {print("New ftLocalR: "); print(ftLocalR); print("---------");}
-            if (DEV) {
+			# if (onDEV) {print("New locNames: ");  print(locNames); print("---------"); print("--------xxxxxxxx-x-x-x-x-xxxxxxxxxxxxxxxxxx------");}
+			# if (onDEV) {print("New ftLocalR: "); print(ftLocalR); print("---------");}
+            # if (onDEV) {
 		#		print(txtUpper)
 		#		print(locHook)
 		#		print(txtBetweenLocalUpper)
@@ -324,9 +324,9 @@ addMissingKeys <- function(ftLocal, splitChar, taPaObj, pathToPack, folderLocal,
 		#		print(locNext)
 		#		print(txtLower)
 				#
-				print("---------------------------")
-				print(ftLocal)
-				print("---------------------------")
+#				print("---------------------------")
+#				print(ftLocal)
+#				print("---------------------------")
 		#		wait()
             } # end if TRUE  # dev helpers, is printing things.
         } # end for i (going through missing keys)
@@ -343,16 +343,16 @@ deleteSurplusKeys <- function(folderLocal, nameLocal, ftLocal, splitChar, taPaOb
 #  DEV <- TRUE
    #
     surplusKeys <- locNames[which(!locNames %in% pacNames)]
-    if (DEV) {print("surplusKeys"); print(surplusKeys); print("---------");}
+    # if (onDEV) {print("surplusKeys"); print(surplusKeys); print("---------");}
     if (length(surplusKeys != 0)) { # so we do have to delete something
         ftLocalR <- getKeysOnlyFromText(ftLocal, splitChar) # the incoming ftLocal is "stn" only, and was possibly modified above in the additions
-        if (DEV) {print("Initial ftLocalR: "); print(ftLocalR); print("---------");}
-   #    if (DEV) {print("Initial ftLocal: "); print(ftLocal); print("---------");}
+        # if (onDEV) {print("Initial ftLocalR: "); print(ftLocalR); print("---------");}
+   #    # if (onDEV) {print("Initial ftLocal: "); print(ftLocal); print("---------");}
         for (i in 1: length(surplusKeys)) { # we are collecting possible single line comments above a block
             indKey <- which(ftLocalR == surplusKeys[i])
-            if (DEV) {print("indKey (local del.): "); print(indKey); print("working on: "); print(surplusKeys[i]); print("---------");}
+            # if (onDEV) {print("indKey (local del.): "); print(indKey); print("working on: "); print(surplusKeys[i]); print("---------");}
             aa <- trimws(ftLocal) # so that tabs etc go to ""
-            if (DEV) {print("ftLocal trimmed: "); print(aa); print("---------");}
+            # if (onDEV) {print("ftLocal trimmed: "); print(aa); print("---------");}
             ikm <- NULL
             min1 <- indKey -1 ; if (min1 < 1) {min1 <- 1}
             min2 <- indKey -2 ; if (min2 < 1) {min2 <- 1} # so we can delete also on second place

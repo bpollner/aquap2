@@ -6,3 +6,4 @@ vignettes/*.html
 .DS_Store
 aquap2_R.Rproj
 docs
+.Rhistory
