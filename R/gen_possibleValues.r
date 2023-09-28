@@ -16,7 +16,7 @@ gl_maxEmptyAp <- 4
 gl_LinkToExperiments <- "https://github.com/bpollner/aquap2_Data/archive/refs/heads/main.zip" # the complete repository "aquap2_Data"
 gl_expHomeSuffix <- "@home"
 gl_copyDestObj <- "copyDestinations"
-pv_copyDestNames <- c("root", "anData", "exports", "metadata", "R-code", "R-data", "rawdata", "results", "sl_in", "sl_out")
+pv_copyDestNames <- c("root", "anData", "exports", "metadata", "R-code", "R-data", "rawdata", "results", "sl_in", "sl_out", "settingsHome")
 
 
 ## regarding sample list

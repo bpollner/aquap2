@@ -327,8 +327,8 @@ addMissingKeys <- function(ftLocal, splitChar, taPaObj, pathToPack, folderLocal,
 #				print("---------------------------")
 #				print(ftLocal)
 #				print("---------------------------")
-		#		wait()
-            } # end if TRUE  # dev helpers, is printing things.
+#		#		wait()
+#        		} # end if TRUE  # dev helpers, is printing things.
         } # end for i (going through missing keys)
     	maxSD <- getMaxSpace(ftLocal) # the max space after adding keys
       	ftLocal <- reduceEmptyLines(ftLocal, maxS, maxSD, manMax)
@@ -487,3 +487,4 @@ checkFileVersionPossiblyModify <- function(pathToPack, folderLocal, nameLocal, p
     #
     return(invisible(TRUE))
 } # EOF
+
