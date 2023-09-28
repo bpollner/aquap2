@@ -2,7 +2,6 @@ inst/doc
 .Rproj.user
 vignettes/*.html
 .Rapp.history
-.Rhistory
 .DS_Store
 aquap2_R.Rproj
 docs
