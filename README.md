@@ -15,7 +15,7 @@ aquap2 can be useful in three distinct areas in NIRS:
 * **Data Analysis**: aquap2 provides an array of standard chemometric procedures as well as some specialized methods used in Aquaphotomics.
 
 
-## Installation
+## Getting Started
 To install the R-package "aquap2", do a github-install via devtools, in that way all dependencies should get installed as well.
 
 If you work on a Windows-machine, first download and install [R-tools](https://cran.r-project.org/bin/windows/Rtools/). (Re-start the R-session.)
@@ -26,13 +26,9 @@ If not already done, install the package "devtools" via
 ```
 install.packages("devtools")
 ```
-Use devtools to install a package dependency not available on CRAN:
-```
-library(devtools)
-install_github(repo="rwehrens/ChemometricsWithR", ref="master")
-```
 Install aquap2 from this repository:
 ```
+library(devtools)
 install_github(repo="bpollner/aquap2", ref="latestPublic")
 ```
 You can now launch aquap2 and perform (only required at first use) the required setup
@@ -46,12 +42,16 @@ All required code in a single block:
 ```
 install.packages("devtools")
 library(devtools)
-install_github(repo="rwehrens/ChemometricsWithR", ref="master")
 install_github(repo="bpollner/aquap2", ref="latestPublic")
 library(aquap2)
 updateSettings()
 updateSettings()
 ```
+
+## Note
+As of October 2023, the dependency from the package `ChemometricsWithR` has been removed.
+This should make installation more straightforward, and it is foreshadowing one of the many improvements we have planned for the immediate future.
+
 
 ## Course Material
 ### Japan 2018
