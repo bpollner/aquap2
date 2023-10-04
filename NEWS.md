@@ -1,9 +1,15 @@
-# Version 0.4.5
+# Version 0.5.0
 ## New:
 * Started with testing
+* Started with GitHub page
 * aquap2 is now making use of the package 'uniset' for handling the settings.R file.
+* Example datasets / experiments can now be installed easily (function `ap2dme`).
+* Possibility to manually denote abberations in number of consecutive scans in the sample list. 
+* Function to manually multiply a single-line sample list (`sampleList_multiplyRows`)
 
 ## Improved:
+* Removed dependency from package `ChemometricsWithR` (is not available on CRAN any more)
+* Completely overhauled the creation of the sample list: A xlsx file is used now to define the class and numerical variables.
 
 ## Bugfix:
 

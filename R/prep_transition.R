@@ -20,6 +20,17 @@ checkTransitToUniset_MaybeRenameSettingsFile <- function() {
 
 checkTransitTo_SLxlsx_MaybeMakeMetadataBackup <- function(fn, stn) {
 	# ) make a backup copy of the old metadata file (as the L1 and L2 will be deleted)
+	#
+	gpic <- function() {
+	  tp <- path.package("aquap2")
+	  if (dir.exists(paste0(tp, "/inst"))) {
+		ptpInst <- paste0(tp, "/inst")
+	  } else {
+		ptpInst <- tp
+	  }
+	  return(ptpInst)
+	} # EOIF
+	##		
 	mdFolder <- stn$fn_metadata
 	##
 	aa <- try( {
@@ -29,7 +40,10 @@ checkTransitTo_SLxlsx_MaybeMakeMetadataBackup <- function(fn, stn) {
 			sys.source(mdf, bb)
 			if (exists("L1", bb)) {
 				file.copy(from=mdf, to=paste0(mdFolder, "/", fn, "_old.R"))
-				message(paste0("It seems you are updating from an older version of 'aquap2': \nThe class-structure is now designed via an Excel file and not within the metadata file any more.\n   A local copy (ending in '_old.R') of the file '", fn, "' has been created in the folder '", mdFolder, "'.\n"))
+				# please also copy a template of the sl_classes file
+				file.copy(from=paste0(gpic(), "/templates/sl_classes.xlsx"), to=paste0(mdFolder, "/sl_classes.xlsx"))
+				#
+				message(paste0("It seems you are updating from an older version of 'aquap2': \nThe class-structure is now designed via an Excel file and not within the metadata file any more.\n   A local copy (ending in '_old.R') of the file '", fn, "' has been created in the folder '", mdFolder, "'.\n   A template for the xlsx file defining the class structure has been copied in the folder '", mdFolder, "'.\n"))
 			} # end if
 		} # end if
 	}, silent=TRUE ) # end try
