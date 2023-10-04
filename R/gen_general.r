@@ -309,7 +309,7 @@ ap2dme <- function(where, expName, ffs = FALSE, fdo = FALSE, sh=NULL) {
 			fileTo <- mtfina(paste0(fn_sampleLists, "/", fn_sampleListOut))
 			ok[[i]] <- file.copy(fileFrom, fileTo, overwrite=TRUE)
 		}  else if (toWhere == pvDest[11]) { # "settingsHome"
-			fileTo <- mtfina(settingsHome)
+			fileTo <- settingsHome			
 			ok[[i]] <- file.copy(fileFrom, fileTo, overwrite=TRUE)
 		} # end else if
 	} # end for i going through the elements of cpDest
