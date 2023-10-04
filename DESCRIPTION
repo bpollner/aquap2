@@ -1,7 +1,7 @@
 Package: aquap2
 Type: Package
 Title: Multivariate Data Analysis Tools for R including Aquaphotomics Methods
-Version: 0.4.4
+Version: 0.4.5
 Date: 2023-08-31
 Author: Bernhard Pollner, Zoltan Kovacs
 Maintainer: Bernhard Pollner <bernhard.pollner@mac.com>
@@ -18,7 +18,6 @@ Imports:
     doParallel,
     openxlsx,
     signal,
-    ChemometricsWithR,
     plyr,
     geometry,
     som,
@@ -56,6 +55,7 @@ Collate:
     'calc_simca.r'
     'cl_classFunctions.r'
     'cl_classDefs.r'
+    'crw_cp.R'
     'cube_generateDatasets.r'
     'cube_makeModels.r'
     'doc_anproc.r'

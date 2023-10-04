@@ -275,8 +275,8 @@ makePcaVariableReduction <- function(dfTrain, dfPred=NULL, dfTest=NULL, apCl) {
 		NIR <- predict(pcaObTrain, newdata=dfTest$NIR)[,nc] # the results are collected and then later the majority vote is done
 		dfTest$NIR <- I(NIR)
 	}
-	#########	# other version using ChemometricsWithR::PCA and its "project"
-	#	pcaObTrain <- ChemometricsWithR::PCA(scale(dfTrain$NIR, scale=FALSE))
+	#########	# other version using rw_PCA and its "project"
+	#	pcaObTrain <- rw_PCA(scale(dfTrain$NIR, scale=FALSE))
 	#	NIR <- pcaObTrain$scores[,nc] # replace the NIR, select components via nc
 	#	dfTrain$NIR <- I(NIR)
 	#	NIR <- ChemometricsWithR::project(pcaObTrain, newdata=dfPred$NIR)[,nc]
