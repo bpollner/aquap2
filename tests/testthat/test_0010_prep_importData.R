@@ -150,11 +150,12 @@ setwd(paste0(rootF, "/", xsCompHome))
 #### ### ### ### ### ### ### ### ### ### ### ### ### 
             ### import data ### 
             ### customImport ###
+# custom import is tested via the experiment LBWB
+
 
 
 
 
 # now get fancy: 
     # import from other data sources / formats, 
-    # make custom import
     # --> go through the functions in prep_importData.R

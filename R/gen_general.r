@@ -74,9 +74,9 @@ genFolderStr <- function(where=getwd()) {
 	} # end if
 	pathFrom <- paste(a, pAdd, "/templates/", sep="")
 	# adapt to maybe locally different default names
-	file.copy( paste(pathFrom, "metadata.r", sep=""), paste0(where, "/", fn_metadata, "/", fn_mDataDefFile), overwrite=TRUE) # they have the .R in the name
-	file.copy( paste(pathFrom, "anproc.r", sep=""), paste0(where, "/", fn_metadata, "/", fn_anProcDefFile), overwrite=TRUE) # they have the .R in the name
-	file.copy( paste(pathFrom, "sl_classes.xlsx", sep=""),  paste0(where, "/", fn_metadata, "/", fn_slClassesFile, ".xlsx"), overwrite=TRUE)
+	file.copy( paste(pathFrom, "metadata.r", sep=""), paste0(where, "/", fn_metadata, "/", fn_mDataDefFile), overwrite=FALSE) # they have the .R in the name
+	file.copy( paste(pathFrom, "anproc.r", sep=""), paste0(where, "/", fn_metadata, "/", fn_anProcDefFile), overwrite=FALSE) # they have the .R in the name
+	file.copy( paste(pathFrom, "sl_classes.xlsx", sep=""),  paste0(where, "/", fn_metadata, "/", fn_slClassesFile, ".xlsx"), overwrite=FALSE)
 	if (all(dirOk)) {
 		if (!stn$allSilent) {	cat("Folder structure created.\n")}
 	} else {
@@ -144,6 +144,8 @@ make_ap2dme_instructions <- function(ptFolder, dest = NULL) {
 #' experiment home folder, the latter one will be deleted and a new folder 
 #' structure will be created.
 #' @param fdo Logical. If the download should always be enforced
+#' @param sh Character length one. The path to settings home. Can and should 
+#' be left at the default \code{NULL}.
 #' @return Used for its side effect, i.e. do (possibly) download example data 
 #' and to create a working experiment folder structure. 
 #' Returns \code{NULL} if no data were downloaded, \code{FALSE} if data 
@@ -152,7 +154,7 @@ make_ap2dme_instructions <- function(ptFolder, dest = NULL) {
 #' structure was created successfully, and the data files were copied.
 #' @family Helper Functions
 #' @export
-ap2dme <- function(where, expName, ffs = FALSE, fdo = FALSE) {
+ap2dme <- function(where, expName, ffs = FALSE, fdo = FALSE, sh=NULL) {
 	stn <- getstn()
 	#
 #	gdExpRoot <- gl_LinkToExperiments # the server link to the complete rep aquap2_Data
@@ -161,6 +163,7 @@ ap2dme <- function(where, expName, ffs = FALSE, fdo = FALSE) {
 	cpyObj <- gl_copyDestObj
 	pvDest <- pv_copyDestNames
 	td <- tempdir()
+	settingsHome <- sh
 	###
 	fn_analysisData <- stn$fn_analysisData 
 	fn_exports <- stn$fn_exports
@@ -259,11 +262,17 @@ ap2dme <- function(where, expName, ffs = FALSE, fdo = FALSE) {
 	} # EOIF
 	##
 	
+	## organize settings home
+	if (is.null(sh)) {
+		shName <- aquap2_handover_to_uniset()$pkgUniset_RenvironSettingsHomeName
+		settingsHome <- Sys.getenv(shName)
+	} # end if
+		
 	## copy each file to the folder as instructed
 	ok <- vector("list", length(cpDest))
 	names(ok) <- names(cpDest)
 	foFr <- paste0(td, "/", remRepName, "/", expFolder, "/", expName, "/") # folder from	
-#	pvDest; c("root", "anData", "exports", "metadata", "R-code", "R-data", "rawdata", "results", "sl_in", "sl_out")
+#	pvDest; c("root", "anData", "exports", "metadata", "R-code", "R-data", "rawdata", "results", "sl_in", "sl_out", "settingsHome")
 	for (i in seq_along(cpDest)) {
 		tfn <- names(cpDest)[i] # this file name
 		fileFrom <- paste0(foFr, tfn) # fileFrom now contains the complete path to a file in the experiment folder
@@ -298,6 +307,9 @@ ap2dme <- function(where, expName, ffs = FALSE, fdo = FALSE) {
 			ok[[i]] <- file.copy(fileFrom, fileTo, overwrite=TRUE)
 		} else if (toWhere == pvDest[10]) { # "sl_out"
 			fileTo <- mtfina(paste0(fn_sampleLists, "/", fn_sampleListOut))
+			ok[[i]] <- file.copy(fileFrom, fileTo, overwrite=TRUE)
+		}  else if (toWhere == pvDest[11]) { # "settingsHome"
+			fileTo <- mtfina(settingsHome)
 			ok[[i]] <- file.copy(fileFrom, fileTo, overwrite=TRUE)
 		} # end else if
 	} # end for i going through the elements of cpDest

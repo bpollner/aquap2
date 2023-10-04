@@ -2,7 +2,7 @@
 ## introducing uniset and the class structure via xlsx
 checkTransitToUniset_MaybeRenameSettingsFile <- function() {
 	# 1) rename the settings.R file into "aquap2_settings.R"
-	settingsHome <- Sys.getenv("AQUAP2SH")
+	settingsHome <- aquap2_handover_to_uniset()$pkgUniset_RenvironSettingsHomeName
 	renameInto <- "aquap2_settings.R"
 	if (!file.exists(paste0(settingsHome, "/", renameInto))) {	
 		aa <- try( {
@@ -20,6 +20,7 @@ checkTransitToUniset_MaybeRenameSettingsFile <- function() {
 
 checkTransitTo_SLxlsx_MaybeMakeMetadataBackup <- function(fn, stn) {
 	# ) make a backup copy of the old metadata file (as the L1 and L2 will be deleted)
+	slName <- "sl_classes.xlsx"
 	#
 	gpic <- function() {
 	  tp <- path.package("aquap2")
@@ -41,9 +42,9 @@ checkTransitTo_SLxlsx_MaybeMakeMetadataBackup <- function(fn, stn) {
 			if (exists("L1", bb)) {
 				file.copy(from=mdf, to=paste0(mdFolder, "/", fn, "_old.R"))
 				# please also copy a template of the sl_classes file
-				file.copy(from=paste0(gpic(), "/templates/sl_classes.xlsx"), to=paste0(mdFolder, "/sl_classes.xlsx"))
+				file.copy(from=paste0(gpic(), "/templates/", slName), to=paste0(mdFolder, "/", slName))
 				#
-				message(paste0("It seems you are updating from an older version of 'aquap2': \nThe class-structure is now designed via an Excel file and not within the metadata file any more.\n   A local copy (ending in '_old.R') of the file '", fn, "' has been created in the folder '", mdFolder, "'.\n   A template for the xlsx file defining the class structure has been copied in the folder '", mdFolder, "'.\n"))
+				message(paste0("It seems you are updating from an older version of 'aquap2': \nThe class-structure is now designed via an Excel file and not within the metadata file any more.\n   A local copy (ending in '_old.R') of the file '", fn, "' has been created in the folder '", mdFolder, "'.\n   A template for the xlsx file defining the class structure ('", slName, "') \n   has been copied into the folder '", mdFolder, "'.\n"))
 			} # end if
 		} # end if
 	}, silent=TRUE ) # end try
