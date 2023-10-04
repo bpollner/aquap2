@@ -1,5 +1,5 @@
 # read spectra ----------------------------------------------------------------------
-readSpec_checkDefaults <- function(possibleFiletypes, md, filetype, naString) {
+readSpec_checkDefaults <- function(possibleFiletypes, md, filetype, naString, sh) {
 	stn <- getstn()
 	if (all(filetype == "def")) {
 		filetype <- stn$imp_specFileType
@@ -13,7 +13,12 @@ readSpec_checkDefaults <- function(possibleFiletypes, md, filetype, naString) {
 	}
 	if (grepl("custom@", filetype)) {
 		custName <- strsplit(filetype, "custom@")[[1]][2]
-		pathSH <- Sys.getenv("AQUAP2SH")
+		if (is.null(sh)) { # the normal case
+			shName <- aquap2_handover_to_uniset()$pkgUniset_RenvironSettingsHomeName
+			pathSH <- Sys.getenv(shName)
+		} else { # so incoming sh is not null, we are in a test scenario
+			pathSH <- sh
+		} # end else
 		if (!file.exists(paste(pathSH, custName, sep="/"))) {
  			stop(paste("The file \"", custName, "\" that contains the custom-function for importing of raw-spectra does not seem to exist in \n\"", pathSH, "\".\n", sep=""), call.=FALSE)
 		} else {
@@ -56,45 +61,50 @@ readSpec_checkDefaults <- function(possibleFiletypes, md, filetype, naString) {
 #' @seealso \code{\link{getFullData}}
 #' @family Development Functions
 #' @export
-readSpectra <- function(md=getmd(), filetype="def", naString="NA") {
+readSpectra <- function(md=getmd(), filetype="def", naString="NA", sh=NULL) {
 	stn <- autoUpS()
 	possibleFiletypes <- pv_filetypes #global constant, they get handed down to the checking function !  	
 # 	pv_filetypes <- c("vision_NSAS.da", "tabDelim.txt", "Pirouette.pir", "xlsx")
 	filename <- NULL # will be changed in the checking
-	readSpec_checkDefaults(possibleFiletypes, md, filetype, naString)
+	readSpec_checkDefaults(possibleFiletypes, md, filetype, naString, sh)
 	rawFolder <- stn$fn_rawdata
 	folderFile <- paste(rawFolder, "/", filename, sep="")
 	##
 	if (filetype == possibleFiletypes[1]) {
-		a <- paste(folderFile, ".da", sep="")
-		assign("spectraFilePath", a, pos=parent.frame(n=1))
-		return(getNIRData_Vision_da(a))
+		aaa <- paste(folderFile, ".da", sep="")
+		assign("spectraFilePath", aaa, pos=parent.frame(n=1))
+		return(getNIRData_Vision_da(aaa))
 	}
 	##
 	if (filetype == possibleFiletypes[2]) {
-		a <- paste(folderFile, ".txt", sep="")
-		assign("spectraFilePath", a, pos=parent.frame(n=1))
- 		return(getNirData_plainText(a, naString))
+		aaa <- paste(folderFile, ".txt", sep="")
+		assign("spectraFilePath", aaa, pos=parent.frame(n=1))
+ 		return(getNirData_plainText(aaa, naString))
 	}
 	if (filetype == possibleFiletypes[3]) {
-		a <- paste(folderFile, ".pir", sep="")
-		assign("spectraFilePath", a, pos=parent.frame(n=1))
- 		return(getNIRData_Pirouette(a))
+		aaa <- paste(folderFile, ".pir", sep="")
+		assign("spectraFilePath", aaa, pos=parent.frame(n=1))
+ 		return(getNIRData_Pirouette(aaa))
 	} 
 	if (filetype == possibleFiletypes[4]) {
-		a <- paste(folderFile, ".xlsx", sep="")
-		assign("spectraFilePath", a, pos=parent.frame(n=1))
- 		return(getNirData_Excel(a))
+		aaa <- paste(folderFile, ".xlsx", sep="")
+		assign("spectraFilePath", aaa, pos=parent.frame(n=1))
+ 		return(getNirData_Excel(aaa))
 	} 
 	## if nothing of the above happend, then we must have (checked!) the path to a valid custom .r file in "filetype" 
 	custName <- strsplit(filetype, "custom@")[[1]][2]
-	pathSH <- Sys.getenv("AQUAP2SH")
+	if (is.null(sh)) { # the normal case
+		shName <- aquap2_handover_to_uniset()$pkgUniset_RenvironSettingsHomeName
+		pathSH <- Sys.getenv(shName)
+	} else { # so incoming sh is not null, we are in a test scenario
+		pathSH <- sh
+	} # end else
 	pathToCustom <- paste(pathSH, custName, sep="/")
 	e <- new.env()
 	sys.source(pathToCustom, envir=e)
-	a <- paste(folderFile, e$fileExtension, sep="")
-	assign("spectraFilePath", a, pos=parent.frame(n=1))
-	return(e$spectralImport(a))
+	aaa <- paste(folderFile, e$fileExtension, sep="")
+	assign("spectraFilePath", aaa, pos=parent.frame(n=1))
+	return(e$spectralImport(aaa))
 } # EOF
 
 gfd_check_imports <- function(specImp) {
@@ -181,11 +191,7 @@ gfd_check_imports <- function(specImp) {
 	a <- specImp$info$nCharPrevWl
 	if (!all(is.numeric(a)) | length(a) !=1) {
 		stop(paste("Please provide an integer length 1 for the element 'nCharPrevWl' in the import function."),call.=FALSE)
-	}
-	a <- specImp$info$nCharPrevWl
-	if (!all(is.numeric(a)) | length(a) !=1) {
-		stop("Please provide a length one numeric as the input for the element 'nCharPrevWl' in the import function", call.=FALSE)
-	}
+	} # end if
 	ncpwl <- specImp$info$nCharPrevWl
 	options(warn = -1)
 	a <- as.numeric(substr(colnames(specImp$NIR), ncpwl+1, nchar(colnames(specImp$NIR))))
@@ -415,7 +421,8 @@ readTRHlogfile <- function(trhLog) {
 	}	
 	if (grepl("custom@", trhLog)) {
 		custName <- strsplit(trhLog, "custom@")[[1]][2]
-		pathSH <- Sys.getenv("AQUAP2SH")
+		shName <- aquap2_handover_to_uniset()$pkgUniset_RenvironSettingsHomeName
+		pathSH <- Sys.getenv(shName)
 		pathToCustom <- paste(pathSH, custName, sep="/")
 		e <- new.env()
 		sys.source(pathToCustom, envir=e)
@@ -540,7 +547,8 @@ gfd_check_trhLog_defaults <- function(trhLog) {
 		}
 	}
 	if (bcust) {
-		shPath <- Sys.getenv("AQUAP2SH")
+		shName <- aquap2_handover_to_uniset()$pkgUniset_RenvironSettingsHomeName
+		shPath <- Sys.getenv(shName)
 		# XXX modify here for testing !!
 		customFilename <- strsplit(trhLog, "custom@")[[1]][2]
 		if (!file.exists(paste(shPath, "/", customFilename, sep=""))) {
@@ -670,7 +678,7 @@ gfd_checkOverwrite_sl_trh_multRows <- function(md, slType, trhLog, multiplyRows)
 # get full data ---------------------------------------------------------------
 #' @template mr_getFullData
 #' @export
-getFullData <- function(md=getmd(), filetype="def", slType="def", trhLog="def", multiplyRows="def", ttl=TRUE, stf=TRUE, naString="NA", dol="def") {
+getFullData <- function(md=getmd(), filetype="def", slType="def", trhLog="def", multiplyRows="def", ttl=TRUE, stf=TRUE, naString="NA", dol="def", sh=NULL) {
 	stn <- autoUpS()
 	gfd_checkLoadSaveLogic(ttl, stf)
 	gfd_checkMetadata(md)
@@ -694,14 +702,14 @@ getFullData <- function(md=getmd(), filetype="def", slType="def", trhLog="def", 
 	header <- readHeader(md, slType, multiplyRows) ## re-assigns 'slType' and 'multiplyRows' also here -- in parent 2 level frame 
 													## if slType is NULL, header will be returned as NULL as well
 	spectraFilePath <- NULL # gets assigned in readSpectra()
-	si <-  readSpectra(md, filetype, naString) ### !!!!!!!!! here the import !!!!!!!!!
+	si <-  readSpectra(md, filetype, naString, sh) ### !!!!!!!!! here the import !!!!!!!!!
 	gfd_check_imports(si) # makes sure eveything is NULL or data.frame / matrix (NIR)
 	si <- gfd_makeNiceColumns(si) # makes all column names, transforms Y-variables to numeric
 	nr <- nrow(si$NIR)
 	gfd_checkNrOfRows(header, headerFilePath, nr, spectraFilePath, multiplyRows, nrConScans=md$postProc$nrConScans)  # makes sure spectra and sample list have same number of rows
 	if (is.null(header)) {
-		header <- data.frame(DELETE=rep(NA, nr))
-	}
+		header <- data.frame(DELETE=rep(NA, nr)) # XXX adapt DELETE to possible custom value
+	} # end if
 	expName <- noSplit <- NULL # gets assigned below in gfd_getExpNameNoSplit()
 	gfd_getExpNameNoSplit(metadata=md, nRows=nr)
 	NIR <- si$NIR
@@ -745,8 +753,8 @@ getFullData <- function(md=getmd(), filetype="def", slType="def", trhLog="def", 
 
 #' @rdname getFullData
 #' @export
-gfd <- function(md=getmd(), filetype="def", slType="def", trhLog="def", multiplyRows="def", ttl=TRUE, stf=TRUE, naString="NA", dol="def") {
-	return(getFullData(md, filetype, slType, trhLog, multiplyRows, ttl, stf, naString, dol))
+gfd <- function(md=getmd(), filetype="def", slType="def", trhLog="def", multiplyRows="def", ttl=TRUE, stf=TRUE, naString="NA", dol="def", sh=NULL) {
+	return(getFullData(md, filetype, slType, trhLog, multiplyRows, ttl, stf, naString, dol, sh))
 } # EOF
 
 

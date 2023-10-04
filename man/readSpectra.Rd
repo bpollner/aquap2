@@ -4,7 +4,7 @@
 \alias{readSpectra}
 \title{Read Spectra}
 \usage{
-readSpectra(md = getmd(), filetype = "def", naString = "NA")
+readSpectra(md = getmd(), filetype = "def", naString = "NA", sh = NULL)
 }
 \arguments{
 \item{md}{List. The object with the metadat of the experiment. 
@@ -34,6 +34,9 @@ for further information.
 
 \item{naString}{Character. What to use as 'NA'. Applies only when 'filetype' 
 is 'tabDelim.txt'.}
+
+\item{sh}{Character length one. Manual path to settings home. Can and should 
+be left at the default \code{NULL}.}
 }
 \value{
 The spectral data in the format as described in 'Value' in 

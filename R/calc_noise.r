@@ -38,7 +38,8 @@ test_plotNoiseData <- function(doTest=FALSE, noiseFile) {
 		C_outlier_all <- NULL
 		ss <- stn$noi_sampleSize
 		modus <- stn$noi_addMode
-		pathSH <- Sys.getenv("AQUAP2SH")
+		shName <- aquap2_handover_to_uniset()$pkgUniset_RenvironSettingsHomeName
+		pathSH <- Sys.getenv(shName)
 		noisePath <- paste(pathSH, noiseFile, sep="/")
 		noiDataset <- eval(parse(text=load(noisePath)))
 		noiDataset@metadata$meta$expName <- paste0("Noise Data (", noiseFile, ")")

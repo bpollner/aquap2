@@ -127,6 +127,8 @@
 #' value from the settings.r file will be used (parameter \code{imp_flagOutliers}.
 #' If \code{dol} evaluates to TRUE, an additional column flagging the outliers 
 #' as detected in the scope of the complete dataset will be added to the dataset.
+#' @param sh Character length one. Manual path to settings home. Can and should 
+#' be left at the default \code{NULL}.
 #' @seealso \code{\link{readSpectra}}, \code{\link{readHeader}}, 
 #' \code{\link{aquap_data-methods}}
 #' @return An object of class 'aquap_data' containing a data frame and six slots:

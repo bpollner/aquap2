@@ -1,5 +1,8 @@
 library(testthat)
 
+glvar <- "get_settings_from_aquap2_package_root"
+assign(glvar, TRUE, pos=.GlobalEnv)
+
 ## prepare (again,) the folders (to make this page independent)
 
 td <- tempdir()
@@ -152,8 +155,82 @@ setwd(paste0(rootF, "/", xsCompHome))
             ### customImport ###
 # custom import is tested via the experiment LBWB
 
+# first set it up
+LBWBhome <- "LBWB@home"
+eNa <- "LBWB"
+test_that("ap2dme - setup LBWB", { 
+  expect_true(ap2dme(eWhere, eNa, sh=tePaSH))
+  expect_null(ap2dme(eWhere, eNa, sh=tePaSH))
+}) # EOT
+setwd(paste0(rootF, "/", LBWBhome)) 
 
+# now test custom data import
+test_that("gfd, custom import - all is good", { 
+  expect_output(gfd(sh=tePaSH), "detecting outliers")
+  expect_output(gfd(sh=tePaSH), "was loaded")
+}) # EOT
 
+custImpFile <- "Buechi_Ibk_a4t6e2_dx.R"
+file.copy(paste0(tePaSH, "/", custImpFile), rootF)
+unlink(paste0(tePaSH, "/", custImpFile))
+
+test_that("gfd, custom import: missing file", { 
+  expect_error(gfd(ttl=F, sh=tePaSH))
+}) # EOT
+# put it back
+file.copy(paste0(rootF, "/", custImpFile), paste0(tePaSH, "/", custImpFile))
+unlink(paste0(rootF, "/", custImpFile))
+
+test_that("gfd, custom import - all is good again", { 
+  expect_output(gfd(sh=tePaSH), "was loaded")
+}) # EOT
+
+test_that("gfd - wrong things", { 
+  expect_error(gfd(filetype="blabla", ttl=F, sh=tePaSH))
+  expect_error(gfd(filetype=c("bla", 2), ttl=F, sh=tePaSH))
+  expect_error(gfd(naString = c("bla", 4), ttl=F, sh=tePaSH))  
+  expect_error(gfd(md="blabla", ttl=F, sh=tePaSH))  
+  }) # EOT
+
+si <- sibup <- readSpectra(sh=tePaSH)
+test_that("gfd_check_imports", { 
+  si$sampleNr <- 4
+  expect_error(gfd_check_imports(si)); si <- sibup
+  si$conSNr <- 4
+  expect_error(gfd_check_imports(si)); si <- sibup
+  si$timePoints <- 4
+  expect_error(gfd_check_imports(si)); si <- sibup
+  si$ecrm <- 4
+  expect_error(gfd_check_imports(si)); si <- sibup
+  si$repl <- 4
+  expect_error(gfd_check_imports(si)); si <- sibup
+  si$group <- 4
+  expect_error(gfd_check_imports(si)); si <- sibup
+  si$temp <- 4
+  expect_error(gfd_check_imports(si)); si <- sibup
+  si$relHum <- 4
+  expect_error(gfd_check_imports(si)); si <- sibup
+  si$C_cols <- 4
+  expect_error(gfd_check_imports(si)); si <- sibup
+  si$Y_cols <- 4
+  expect_error(gfd_check_imports(si)); si <- sibup
+  si$timestamp <- 4
+  expect_error(gfd_check_imports(si)); si <- sibup
+  si$NIR <- 4
+  expect_error(gfd_check_imports(si)); si <- sibup
+  si$info$nCharPrevWl <- "ablabla"
+  expect_error(gfd_check_imports(si)); si <- sibup
+  dimnames(si$NIR)[[2]][1] <- "www1000"
+  expect_error(gfd_check_imports(si)); si <- sibup
+  ns <- names(si)
+  ns[1] <- "blabla"
+  names(si) <- ns
+  expect_error(gfd_check_imports(si)); si <- sibup
+  names(si$info) <- "blabla"
+  expect_error(gfd_check_imports(si)); si <- sibup  
+}) # EOT
+
+# gfd(filetype="blabla", ttl=F, sh=tePaSH)
 
 
 # now get fancy: 

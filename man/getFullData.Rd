@@ -14,7 +14,8 @@ getFullData(
   ttl = TRUE,
   stf = TRUE,
   naString = "NA",
-  dol = "def"
+  dol = "def",
+  sh = NULL
 )
 
 gfd(
@@ -26,7 +27,8 @@ gfd(
   ttl = TRUE,
   stf = TRUE,
   naString = "NA",
-  dol = "def"
+  dol = "def",
+  sh = NULL
 )
 }
 \arguments{
@@ -137,6 +139,9 @@ provided by \code{\link[rrcovHD]{RSimca}}. If left at the default "def", the
 value from the settings.r file will be used (parameter \code{imp_flagOutliers}.
 If \code{dol} evaluates to TRUE, an additional column flagging the outliers 
 as detected in the scope of the complete dataset will be added to the dataset.}
+
+\item{sh}{Character length one. Manual path to settings home. Can and should 
+be left at the default \code{NULL}.}
 }
 \value{
 An object of class 'aquap_data' containing a data frame and six slots:

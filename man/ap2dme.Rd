@@ -4,7 +4,7 @@
 \alias{ap2dme}
 \title{Download and Make Example Experiment}
 \usage{
-ap2dme(where, expName, ffs = FALSE, fdo = FALSE)
+ap2dme(where, expName, ffs = FALSE, fdo = FALSE, sh = NULL)
 }
 \arguments{
 \item{where}{Character length one. The path where the experiment home folder
@@ -19,6 +19,9 @@ experiment home folder, the latter one will be deleted and a new folder
 structure will be created.}
 
 \item{fdo}{Logical. If the download should always be enforced}
+
+\item{sh}{Character length one. The path to settings home. Can and should 
+be left at the default \code{NULL}.}
 }
 \value{
 Used for its side effect, i.e. do (possibly) download example data 

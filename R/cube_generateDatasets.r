@@ -1380,7 +1380,8 @@ checkLoadNoiseFile <- function(header, maxNir, ap, md, noiseFile) {
 			stop("Please provide a character length one to the argument 'noiseFile' resp. in the settings.r file (parameter 'noi_noiseDataFilename').", call.=FALSE)
 		} 
 		##
-		pathSH <- Sys.getenv("AQUAP2SH")
+		shName <- aquap2_handover_to_uniset()$pkgUniset_RenvironSettingsHomeName
+		pathSH <- Sys.getenv(shName)
 		addInfo <- "Please see the help for ?noise_procedures for more information.\n"
 		noisePath <- paste(pathSH, noiseFile, sep="/")
 		if (!file.exists(noisePath)) {
@@ -1468,7 +1469,8 @@ checkTempCalibFile <- function(tempFile, ap, md) {
 				stop("Please provide a character length one to the argument 'tempFile' resp. in the settings.r file (parameter 'aqg_tempCalib_Filename').", call.=FALSE)
 			} 
 			##
-			pathSH <- Sys.getenv("AQUAP2SH")
+			shName <- aquap2_handover_to_uniset()$pkgUniset_RenvironSettingsHomeName
+			pathSH <- Sys.getenv(shName)
 			addInfo <- "Please see the help for ?tempCalib_procedures for more information.\n"
 			tempPath <- paste(pathSH, tempFile, sep="/")
 			if (!file.exists(tempPath)) {

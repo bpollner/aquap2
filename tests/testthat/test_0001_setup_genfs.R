@@ -240,8 +240,8 @@ test_that("check_mdDefaultValues - make some errors", {
   val <- 55
   expect_error(check_mdDefaultValues(tf(arg, val)))
   # the custom thing
-  val <- "custom@isNotHere.R"
-  expect_error(check_mdDefaultValues(tf(arg, val), tePaSH))
+#  val <- "custom@isNotHere.R"
+#  expect_error(check_mdDefaultValues(tf(arg, val), tePaSH))
   val <- "custom@importFromFormatX.R"
   expect_no_condition(check_mdDefaultValues(tf(arg, val), tePaSH))
   #

@@ -58,12 +58,15 @@ check_mdDefaultValues <- function(localEnv, tePaSH=NULL) {
 	if (grepl("custom@", ft)) {
 		cfn <- strsplit(ft, "custom@")[[1]][2] # isolate the filename
 		if (checkOnTest()) {
+			onTest <- TRUE
 			pathSH <- tePaSH
 		} else {
-			pathSH <- Sys.getenv("AQUAP2SH")
+			onTest <- FALSE
+			shName <- aquap2_handover_to_uniset()$pkgUniset_RenvironSettingsHomeName
+			pathSH <- Sys.getenv(shName)
 		} # end else
 		path <- paste(pathSH,  cfn, sep="/")
-		if (!file.exists(path)) {
+		if (!file.exists(path) & !onTest) { # not meaningful to handle down the settings home folder for tests also to here. Will be checked later again, when we can have the test-sh folder in the gfd function
 			stop(paste("The custom data-import file with the name '", cfn, "' does not seem to exist in \n\"", pathSH, "\".", sep=""), call.=FALSE)
 		}
 	}
