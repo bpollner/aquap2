@@ -199,6 +199,7 @@ gfd_check_imports <- function(specImp) {
 	if (any(is.na(a))) {
 		stop("There is an error with the column names of the NIR spectra representing the wavelength. \nMaybe not all columns do have the same number of characters before the wavelength, or some wrong columns are assigned to the NIR columns. \nPlease check in the import function if the provided number of characters before the wavelength is correct, and if the column names of the NIR data are correct as well.", call.=FALSE)
 	}
+	return(invisible(NULL))
 } # EOF
 
 gfd_makeNiceColumns <- function(specImp) {
@@ -276,7 +277,7 @@ gfd_makeNiceColumns <- function(specImp) {
 		noPrefInd <- which(substr(a, 1, lePref) != cPref)
 		if (length(noPrefInd) > 0) {
 			colnames(specImp$C_cols)[noPrefInd] <- paste(cPref, a[noPrefInd], sep="")
-		}
+		}  # end if
 		specImp$C_cols <- as.data.frame(apply(specImp$C_cols, 2, function(x) {
 				co <- as.factor(x)
 				names(co) <- NULL
@@ -813,6 +814,85 @@ loadAQdata <- function(md=getmd(), verbose=TRUE) {
 	}	
 } # EOF
 
+
+#' @title Export Data to xlsx
+#' @description Export a dataset to xlsx. The header and the NIR data are 
+#' being exported into a single worksheet. In an additional worksheet called 
+#' the name of the experiment with \code{_meta} as suffix, the number of columns 
+#' in the header is denoted, as well as if the first column is the rownames.
+#' In the third column called \code{ncpwl} the number of characters
+#' before the actual wavelength is denoted.
+#' @details By providing \code{expName="xxx"} in the \code{getmd} function at 
+#' parameter \code{md} it is possible to save the generated xlsx file under 
+#' a different name. See examples.
+#' @param dataset An object of class 'aquap_data'
+#' @param onlyNIR Logical. If only the NIR data should be exported to xlsx. If 
+#' left at the default \code{FALSE}, the header as well as the NIR data will 
+#' be exported into a single worksheet. 
+#' @inheritParams getFullData
+#' @return Invisible \code{TRUE} for a successful, invisible \code{FALSE} for 
+#' an unsuccessful generation of the xlsx file. Used for its side effect, i.e. 
+#' to export a dataset to xlsx.
+#' @family Helper Functions
+#' @examples
+#' \dontrun{
+#' fd <- gfd()
+#' export_ap2_ToXlsx(fd)
+#' export_ap2_ToXlsx(fd, md=getmd(expName="otherName"))
+#' }
+#' @export
+export_ap2_ToXlsx <- function(dataset, onlyNIR=FALSE, md=getmd()) {
+	stn <- autoUpS()
+	fn_rawdata <- stn$fn_rawdata
+	dataSheetSfx <- gl_xlsx_DataSheetSuffix
+	metaSSfx <- gl_xlsx_metaSheetSuffix
+	ncolHeader_name <- gl_xlsx_ncolHeader_name
+	rownamesAsFirstColumn <- gl_xlsx_rownamesAsFirstColumn
+	colnameNCPWL <- gl_xlsx_ncpwlColumn
+	wsZoom <- 120
+	#
+	gfd_checkMetadata(md)
+	if (!is(dataset, "aquap_data")) {
+		stop("Please provide an object of class 'aquap_data' to the argument 'dataset'.", call.=FALSE)
+	} # end if
+	#
+	if (!stn$allSilent) {cat(paste0("Writing data to xlsx... "))}
+	#
+	expName <- md$meta$expName
+	wb <- openxlsx::createWorkbook(expName)
+	ncpwl <- dataset@ncpwl
+	dataSheet <- paste0(expName, dataSheetSfx)
+	openxlsx::addWorksheet(wb, sheetName=dataSheet, zoom=wsZoom)
+	if (onlyNIR) {
+		haveRows <- FALSE
+		ncolHeader <- 0
+		rowsAsFirstCol <- haveRows		
+		outDf <- as.data.frame(cbind(as.matrix(dataset$NIR)))
+		openxlsx::writeData(wb, sheet=dataSheet, outDf, rowNames=haveRows)		
+	} else {	
+		haveRows <- FALSE
+		ncolHeader <- ncol(dataset$header)  # +1 if we export the rownames as well.
+		rowsAsFirstCol <- haveRows
+		outDf <- as.data.frame(cbind(as.matrix(dataset$header), as.matrix(dataset$NIR)))
+		openxlsx::writeData(wb, sheet=dataSheet, outDf, rowNames=haveRows)
+	} # end else
+	metaSheet <- paste0(expName, metaSSfx)
+	metaDf <- data.frame(x=ncolHeader, y=rowsAsFirstCol, z=ncpwl)
+	colnames(metaDf) <- c(ncolHeader_name, rownamesAsFirstColumn, colnameNCPWL)
+	openxlsx::addWorksheet(wb, sheetName=metaSheet, zoom=wsZoom)	
+	openxlsx::writeData(wb, sheet=metaSheet, metaDf, rowNames=FALSE)
+	openxlsx::setColWidths(wb, sheet=metaSheet, cols = 1:ncol(metaDf), widths = "auto")	
+	path <- paste0(fn_rawdata, "/", expName, ".xlsx")
+	ok <- openxlsx::saveWorkbook(wb, path, overwrite = TRUE, returnValue=TRUE)
+	if (ok & !stn$allSilent) {
+		cat(paste0("done.\n"))
+	} else {
+		message(paste0("Sorry, the xlsx file '", paste0(expName, ".xlsx"), "' could not be saved.\n"))
+		return(invisible(FALSE))
+	} # end else
+	return(invisible(TRUE))
+} # EOF
+
 # refine header -------------------------------------------------------------
 transformNrsIntoColorCharacters <- function(numbers) {
 	whatColors = c("black", "red", "green", "blue", "cyan", "magenta", "yellow2", "gray")
@@ -983,7 +1063,7 @@ gfd_possibly_multiplySampleListRows <- function(sampleList, nrScans, multiplyRow
 	#
 	cns <- colnames(sampleList)
 	if ((errCol %in% cns) & (conSNrCol %in% cns)) {
-		stop(paste0("There can not be a column for \n\tconsecutive scan number '", conSNrCol, "' and \n\t an error column '", errCol, "' in a sample list.\nPlease modify your sample list in '", slIn, "' "), call.=FALSE)
+		stop(paste0("There can not be a column for \n\tconsecutive scan number '", conSNrCol, "' and \n\tan error column '", errCol, "' in a sample list.\nPlease modify your sample list in '", slIn, "' "), call.=FALSE)
 	} # end if
  	
  	##
@@ -1116,7 +1196,7 @@ check_conScanColumn <- function(header, headerFilePath, spectraFilePath, slType,
 	lookHelp <- ""
 	if (!any(a %in% colnames(header))) {
 		if (is.null(slType)) {
-			from <- paste(" in the file \n\"", spectraFilePath, "\" containing the spectral data.", sep="")
+			from <- paste(" in the file \n'", spectraFilePath, "' containing the spectral data.", sep="")
 			if (custImp) {
 				whereCust <-  " and modify the custom import function accordingly.\n"
 				lookHelp <- "\nSee the help for 'custom_import' for further information."
@@ -1127,25 +1207,13 @@ check_conScanColumn <- function(header, headerFilePath, spectraFilePath, slType,
 			where <- paste(" to the file containing the spectral data", whereCust, sep="")
 			maybe <- ""
 		} else {
-			from <- paste(", neither in your sample-list file \n\"", headerFilePath, "\", nor in file \n\"", spectraFilePath, "\" containing the spectral data.", sep="")
+			from <- paste(", neither in your sample-list file \n'", headerFilePath, "', nor in the file \n'", spectraFilePath, "' containing the spectral data.", sep="")
 			where <- paste(" either to the sample list or to the file containing the spectral data. In the latter case please modify the custom import function accordingly.\n")
  			maybe <- "(You maybe encounter this error because you did choose to *not* multiply the rows of the sample list by the nr. of consecutive scans, in which case a column for the nr. of cons. scan gets inserted automatically.)\n"
 		}
-		msg <- paste("You do not have a column for the nr of the consecutive scan", from, " \nPlease, add a column called \"", a, "\"", where, maybe, lookHelp, sep="")
+		msg <- paste("You do not have a column for the nr of the consecutive scan", from, " \nPlease, add a column called '", a, "'", where, maybe, lookHelp, sep="")
 		stop(msg, call.=FALSE)
 	}	
-} # EOF
-
-check_conScanColumn_2 <- function(header, filename, ext) {
-	stn <- getstn()
-	a <- paste(stn$p_yVarPref, stn$p_conSNrCol, sep="")
-	if (!any(a %in% colnames(header))) {
-		stop(paste("You do not have a column for the nr of the consecutive scan in your sample list called \"", filename, ext, "\". \nPlease, add a column called \"", a, "\" to the file as the second column and provide the right values in this column. \n(You probably encounter this error because you did choose to *not* multiply the rows of the sample list by the nr. of consecutive scans.)\nPlease refer to the help for 'getFullData' for further information.", sep=""), call.=FALSE)
-	}
-	ind <- grep(a, colnames(header), fixed=TRUE)
-	if (ind != 2) {
-		stop(paste("Your 'custom-column' for the number of the consecutive scan should, please, be the second column. \nPlease modify the file \"", filename, ext, "\" accordingly.", sep=""), call.=FALSE)
-	}
 } # EOF
 
 #' @title Read Header
@@ -1217,6 +1285,7 @@ readHeader <- function(md=getmd(), slType="def", multiplyRows="def") {
 #' additional sample list is used (slType = 'NULL'), the function stops if no 
 #' column for the nr. of consec. scan is present or gets assigned. You can get 
 #' the current slType with 'get(".slType", pos=gl_ap2GD)' - see example.
+#' @param oT Logical. Only used for testing. Leave at the default \code{FALSE}.
 #' @return All the list elements needed in the \code{\link{custom_import}} function 
 #' except 'timestamp', 'info' and 'NIR get assigned in the environment from where 
 #' this function was called.
@@ -1247,7 +1316,7 @@ readHeader <- function(md=getmd(), slType="def", multiplyRows="def") {
 #'  } # EOF
 #' }
 #' @export
-imp_searchAskColumns <- function(allC_var, allY_var, slType=get(".slType", pos=gl_ap2GD)) {
+imp_searchAskColumns <- function(allC_var, allY_var, slType=get(".slType", pos=gl_ap2GD), oT=FALSE) {
 	stn <- autoUpS()
 	yPref <- stn$p_yVarPref
 	cPref <- stn$p_ClassVarPref
@@ -1308,9 +1377,13 @@ imp_searchAskColumns <- function(allC_var, allY_var, slType=get(".slType", pos=g
 				}
 				nrOk <- FALSE
 				while(!nrOk) {
-					a <- readLines(n=1)
-					options(warn=-1); a <- as.numeric(a); options(warn=0)
-					nrOk <- checkNumber(a, cle)
+					if (!oT) {
+						a <- readLines(n=1)
+						options(warn=-1); a <- as.numeric(a); options(warn=0)
+					} else {
+						a <- 1
+					} # end else
+						nrOk <- checkNumber(a, cle)					
 				} # end while
 				if (a == 0) { # user chooses to set to NULL
 					if (stdColumnNames[[k]][i] == paste(yPref, conSNrColn, sep="") & is.null(slType) ) { # so we choose to *not* assigne the cons. scan column and we do *not* have a sample list imported

@@ -26,6 +26,7 @@ to the desired folder can be selected interactively.
 \seealso{
 Other Helper Functions: 
 \code{\link{ap2dme}()},
+\code{\link{export_ap2_ToXlsx}()},
 \code{\link{genFolderStr}()},
 \code{\link{genNoiseRecExp}()},
 \code{\link{genTempCalibExp}()},

@@ -7,7 +7,8 @@
 imp_searchAskColumns(
   allC_var,
   allY_var,
-  slType = get(".slType", pos = gl_ap2GD)
+  slType = get(".slType", pos = gl_ap2GD),
+  oT = FALSE
 )
 }
 \arguments{
@@ -19,6 +20,8 @@ imp_searchAskColumns(
 additional sample list is used (slType = 'NULL'), the function stops if no 
 column for the nr. of consec. scan is present or gets assigned. You can get 
 the current slType with 'get(".slType", pos=gl_ap2GD)' - see example.}
+
+\item{oT}{Logical. Only used for testing. Leave at the default \code{FALSE}.}
 }
 \value{
 All the list elements needed in the \code{\link{custom_import}} function 

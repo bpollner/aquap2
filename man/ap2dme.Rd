@@ -48,6 +48,7 @@ The downloaded folder containing all available example datasets is stored in
 \seealso{
 Other Helper Functions: 
 \code{\link{ap2_settings_setup}()},
+\code{\link{export_ap2_ToXlsx}()},
 \code{\link{genFolderStr}()},
 \code{\link{genNoiseRecExp}()},
 \code{\link{genTempCalibExp}()},

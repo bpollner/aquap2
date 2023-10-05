@@ -54,6 +54,7 @@ Other Extract Elements:
 Other Helper Functions: 
 \code{\link{ap2_settings_setup}()},
 \code{\link{ap2dme}()},
+\code{\link{export_ap2_ToXlsx}()},
 \code{\link{genFolderStr}()},
 \code{\link{genNoiseRecExp}()},
 \code{\link{genTempCalibExp}()},

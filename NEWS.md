@@ -8,6 +8,7 @@
 * Function to manually multiply a single-line sample list (`sampleList_multiplyRows`)
 * Sample list file is now exclusively in xlsx format
 * The Metadata file now contains a variable for the sample list type, the temperature and humidity log file and for multiplying the rows within the sample list. Thus it is possible to encode all required information to import data statically in the metadata file, thus being able to call `gfd()` without additional parameters.
+* Added exporting of full dataset to xlsx.
 
 ## Improved:
 * Removed dependency from package `ChemometricsWithR` (is not available on CRAN any more)

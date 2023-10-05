@@ -32,6 +32,7 @@ gfd <- gfd() # imports noise raw-data and saves noise-data file in the
 Other Helper Functions: 
 \code{\link{ap2_settings_setup}()},
 \code{\link{ap2dme}()},
+\code{\link{export_ap2_ToXlsx}()},
 \code{\link{genFolderStr}()},
 \code{\link{genTempCalibExp}()},
 \code{\link{getcd}()},

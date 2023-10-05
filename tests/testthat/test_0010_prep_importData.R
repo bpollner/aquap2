@@ -93,6 +93,7 @@ test_that("gfd - sl types", {
 test_that("gfd - trhLog", { 
   expect_output(gfd(ttl=F, trhLog = "ESPEC"), "Done.")
   expect_error(gfd(ttl=F, trhLog = "blabla"))
+  expect_error(gfd(ttl=F, trhLog = 3)) # XXX new
   expect_error(gfd(ttl=F, trhLog = TRUE))
   expect_output(gfd(ttl=F, trhLog = FALSE), "Dataset saved")
 }) # EOT
@@ -142,12 +143,23 @@ test_that("gfd - sample list multiplied, wrong number of rows", {
   expect_error(gfd(ttl=F, multiplyRows = TRUE))
 }) # EOT
 
+# now install a fake sample list wiht both error and conSNr column
+erFiNa <- "xsComp-in-bothCols.xlsx"
+file.copy(paste0(ptp, "/testHelpers/sl_in/", erFiNa), 
+          paste0(rootF, "/", xsCompHome, "/sampleLists/sl_in/xsComp-in.xlsx"), overwrite = TRUE)
+
+test_that("gfd - both error and conSNr column", { 
+  expect_error(gfd(ttl=F))
+}) # EOT
+
+
 # get back the original xsComp
 test_that("ap2dme - forcing #2", { 
   expect_true(ap2dme(eWhere, eNa, ffs=T))
 }) # EOT
 setwd(paste0(rootF, "/", xsCompHome)) 
 # because when forcing the home folder got deleted
+
 
 
 #### ### ### ### ### ### ### ### ### ### ### ### ### 
@@ -232,7 +244,120 @@ test_that("gfd_check_imports", {
 
 # gfd(filetype="blabla", ttl=F, sh=tePaSH)
 
+test_that("gfd_makeNiceColumns", { 
+  len <- nrow(si$NIR)
+  si$sampleNr <- data.frame(sn=rep(1, len))
+  si$conSNr <- data.frame(csn=rep(4, len))
+  si$timePoints <- data.frame(tp=rep("T0", len))
+  si$ecrm <- data.frame(ecrm=rep("ec", len))
+  si$repl <- data.frame(reps=rep("R1", len))
+  si$group <- data.frame(grp=rep("Cont", len))
+  si$temp <- data.frame(temp=rep(25, len))
+  si$relHum <- data.frame(temp=rep(55, len))
+  si$C_cols <- data.frame(c1=rep("aa", len), c2=rep("bb", len))
+  si$Y_cols <- data.frame(y1=rep(2, len), y2=rep(5, len))
+  expect_null(gfd_check_imports(si))
+  expect_type(gfd_makeNiceColumns(si), "list")
+}) # EOT
+si <- sibup
+gfd_check_imports(si)
+si <- gfd_makeNiceColumns(si)
+
+# now we want to check for double columns.
+# we will use a fake sample list for that
+# move the old,the good one, to root
+ok <- file.copy(paste0(rootF, "/", LBWBhome, "/sampleLists/sl_in/LBWB-in.xlsx"), to=rootF)
+if (!ok) {stop("File copy error")}
+ok <- file.copy(paste0(ptp, "/testHelpers/sl_in/LBWB-in.xlsx"), 
+          paste0(rootF, "/", LBWBhome, "/sampleLists/sl_in/LBWB-in.xlsx"), overwrite=TRUE)
+if (!ok) {stop("File copy error")}
+
+# we now have an erronous sample list file in place that has double columns
+test_that("gfd - double column", { 
+  expect_error(gfd(ttl=F, sh=tePaSH))
+}) # EOT
+
+# copy back the good one
+ok <- file.copy(paste0(rootF, "/LBWB-in.xlsx"), 
+                paste0(rootF, "/", LBWBhome, "/sampleLists/sl_in/LBWB-in.xlsx"), overwrite=TRUE)
+if (!ok) {stop("File copy error")}
+# all should be good again
+test_that("gfd - all good again", { 
+  expect_output(gfd(ttl=F, sh=tePaSH, stf = FALSE), "not saved")
+}) # EOT
+
+
+test_that("gfd - small things", { 
+  expect_error(gfd(ttl=F, sh=tePaSH, stf="Yes"))
+  expect_error(gfd(ttl=F, sh=tePaSH, dol="Yes"))
+  fd <- gfd()
+  fd@version <- "0.0.2"
+  expect_error(checkDatasetVersion(fd))
+}) # EOT
+
+# rempove the rawdata file
+file.copy(paste0(rootF, "/", LBWBhome, "/rawdata/LBWB.dx"), 
+          paste0(rootF))
+unlink(paste0(rootF, "/", LBWBhome, "/rawdata/LBWB.dx"))
+test_that("checkForPresenceOfData", { 
+  expect_error(checkForPresenceOfData())
+}) # EOT
+# copy rawdata file back
+file.copy(paste0(rootF, "/LBWB.dx"), 
+          paste0(rootF, "/", LBWBhome, "/rawdata/LBWB.dx") )
+# gfd(ttl=F, sh=tePaSH)
+
+test_that("save & load", { 
+  expect_error(saveAQdata(rootF))
+  expect_message(loadAQdata(getmd(expName="bla")), "does not seem to exist")
+  expect_output(loadAQdata(getmd(expName="LBWB")), "loaded")
+}) # EOT
+
+test_that("more readHeader_checkDefaults", { 
+  expect_no_condition(readHeader_checkDefaults(slType="def", "xls", getmd(), "auto"))
+  expect_error(readHeader_checkDefaults(slType="bla", "xls", getmd(), "auto"))
+  expect_error(readHeader_checkDefaults(slType="bla", "xls", md=4, "auto"))
+  expect_no_condition(readHeader_checkDefaults(slType="def", "xls", getmd(), "def"))
+  expect_error(readHeader_checkDefaults(slType="def", "xls", getmd(), "yesPlease"))
+  }) # EOT
+
+test_that("check_sl_existence", { 
+  expect_error(check_sl_existence("bla", ".xls"))
+}) # EOT
+
+test_that("check_conScanColumn", { 
+  fd <- gfd()
+  header <- fd$header
+  header <- header[,-3] # remove the conSNr column  
+  slfp <- "sl_in/slFilePath"
+  rdfp <- "rawdata/spectFilePath"
+  cft <- "custom@blaFile.dx"
+  expect_error(check_conScanColumn(header, slfp, rdfp, slType = NULL, cft))
+  expect_error(check_conScanColumn(header, slfp, rdfp, slType = "xls", cft))
+}) # EOT
+
+test_that("imp_searchAskColumns", { 
+  nr <- 4
+  cvars <- data.frame(gr=rep("ng", nr), ti=rep("nt", nr), ecrm=rep("ec", nr), repl=rep("Rx", nr), 
+                      cbla=rep("blax", nr), cbla2=rep("bla2", nr)) 
+  
+  yvars <- data.frame(snr=rep(1, nr), consnr=rep(4, nr), temp=rep(4, nr), rh=rep(4, nr), 
+                      ybla=rep(4, nr),  ybla2=rep(4, nr))
+  impFunc <- function(cvars, yvars, oT=TRUE) {
+    imp_searchAskColumns(cvars, yvars, "xls", oT)
+    return(ls())
+  } # EOIF 
+  expect_output(impFunc(cvars, yvars, oT=TRUE), "Please enter")
+}) # EOT
+
+test_that("export_ap2_ToXlsx", { 
+  fd <- gfd()
+  expect_true(export_ap2_ToXlsx(fd, TRUE))
+  expect_true(export_ap2_ToXlsx(fd))
+}) # EOT
+
+
+
 
 # now get fancy: 
     # import from other data sources / formats, 
-    # --> go through the functions in prep_importData.R

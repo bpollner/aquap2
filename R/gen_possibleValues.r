@@ -23,6 +23,14 @@ pv_copyDestNames <- c("root", "anData", "exports", "metadata", "R-code", "R-data
 gl_conScanError <- "conScanError"
 pv_sampleListType <- "xls"
 
+
+gl_xlsx_DataSheetSuffix <- "_data"
+gl_xlsx_metaSheetSuffix <- "_meta"
+gl_xlsx_ncolHeader_name <- "ncol_header"
+gl_xlsx_rownamesAsFirstColumn <- "rownamesAsFirstColumn"
+gl_xlsx_ncpwlColumn <- "ncpwl"
+
+
 ## regarding Aquagram
 pv_AquagramModes <- c("classic", "classic-diff", "sfc", "sfc-diff", "aucs", "aucs-diff", "aucs.tn", "aucs.tn-diff", "aucs.tn.dce", "aucs.tn.dce-diff", "aucs.dce",  "aucs.dce-diff")
 
