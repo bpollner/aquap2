@@ -227,7 +227,7 @@ getNIRData_Pirouette <- function(dataFile) {
 } # EOF
 
 # Spectra from an Excel File ---------------------------
-getNirData_Excel <- function(dataFile) {
+getNirData_Excel <- function(dataFile, stn) {
 	metaSheetSfx <- gl_xlsx_metaSheetSuffix
 	dataSheetSfx <- gl_xlsx_DataSheetSuffix
 	allMetaCns <- c(gl_xlsx_ncolHeader_name, gl_xlsx_rownamesAsFirstColumn, gl_xlsx_ncpwlColumn)
@@ -260,7 +260,7 @@ getNirData_Excel <- function(dataFile) {
 	metaDf <- openxlsx::read.xlsx(wb, sheet=ind, colNames=TRUE, rowNames=FALSE)
 	metaSheetName <- wbNames[ind]
 	if (!all(allMetaCns %in% colnames(metaDf))) {
-		stop(paste0("Please make sure that the column names in the worksheet containing the metadata \n('", metaSheetName, "', in the file '", dataFile, "' ) \nhave the following names:\n\t", paste0(allMetaCns, collapse=", ")), call.=FALSE)
+		stop(paste0("Please make sure that the columns in the worksheet containing the metadata \n('", metaSheetName, "', in the file '", dataFile, "' ) \nhave the following names:\n\t", paste0(allMetaCns, collapse=", ")), call.=FALSE)
 	} # end if
 	
 	# now we can be quite sure about our metaDf, contains all three required columns
@@ -280,7 +280,10 @@ getNirData_Excel <- function(dataFile) {
 		NIR <- as.matrix(allData) # * no subscripting: we get all numbers
 		header <- NULL
 	} else { # so we have NIR and header in the same worksheet
-		NIR <- as.matrix(allData[, (nch+1):ncol(allData)]) # very interesting: when subscripting from allData we get characters. Compare * above
+		NIR <- try(as.matrix(allData[, (nch+1):ncol(allData)]), silent=TRUE) # very interesting: when subscripting from allData we get characters. Compare * above
+		if (is(NIR, "try-error")) {
+			stop(paste0("There was an error while trying to extract the NIR data.\nMaybe the number of columns of the header in the worksheet containing the metadata ('", metaSheetName, "' in the file \n'", dataFile, "') is not correct?"), call.=FALSE)
+		} # end if
 		cns <- colnames(NIR); rns <- rownames(NIR); nrc <- ncol(NIR); nrr <- nrow(NIR)
 		NIR <- matrix(as.numeric(NIR), nrow=nrr, ncol=nrc, byrow=FALSE)
 		colnames(NIR) <- cns

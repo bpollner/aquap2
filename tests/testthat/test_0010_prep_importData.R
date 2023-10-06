@@ -300,7 +300,7 @@ file.copy(paste0(rootF, "/", LBWBhome, "/rawdata/LBWB.dx"),
           paste0(rootF))
 unlink(paste0(rootF, "/", LBWBhome, "/rawdata/LBWB.dx"))
 test_that("checkForPresenceOfData", { 
-  expect_error(checkForPresenceOfData())
+  expect_true(checkForPresenceOfData()) # we have still things in there
 }) # EOT
 # copy rawdata file back
 file.copy(paste0(rootF, "/LBWB.dx"), 
@@ -347,41 +347,60 @@ test_that("imp_searchAskColumns", {
     imp_searchAskColumns(cvars, yvars, "xls", oT)
     return(ls())
   } # EOIF 
-  expect_output(impFunc(cvars, yvars, oT=TRUE), "Please enter")
+  expect_type(impFunc(cvars, yvars, oT=TRUE), "character")
 }) # EOT
+#impFunc(cvars, yvars, oT=TRUE)
 
 test_that("export_ap2_ToXlsx", { 
   fd <- gfd()
-  expect_true(export_ap2_ToXlsx(fd, TRUE))
+  expect_error(export_ap2_ToXlsx(fd, TRUE))
   expect_true(export_ap2_ToXlsx(fd))
+  expect_true(export_ap2_ToXlsx(fd, onlyNIR = TRUE))
+}) # EOT
+
+#### ### ### ### ### ### ### ### ### ### ### ### ### 
+                ### import data ### 
+                ### from xlsx ###
+
+# LBWB_full_bad_1: bad naming of _meta worksheet
+# LBWB_full_bad_2: double _meta
+# LBWB_full_bad_3: no _meta
+# LBWB_full_bad_4: bad colnames in _meta
+# LBWB_full_bad_sl_1: no cons scan nr # with slType=NULL
+# for the rest, see in-function
+test_that("gfd - from xlsx: All errors", { 
+  en <- "LBWB_full_bad_1"; slt="xls"
+  expect_error(gfd(filetype = "xls", ttl=F, md=getmd(expName=en), slType = slt))
+  en <- "LBWB_full_bad_2"; slt="xls"
+  expect_error(gfd(filetype = "xls", ttl=F, md=getmd(expName=en), slType = slt))
+  en <- "LBWB_full_bad_3"; slt="xls"
+  expect_error(gfd(filetype = "xls", ttl=F, md=getmd(expName=en), slType = slt))
+  en <- "LBWB_full_bad_4"; slt="xls"
+  expect_error(gfd(filetype = "xls", ttl=F, md=getmd(expName=en), slType = slt))
+  en <- "LBWB_full_bad_sl_1"; slt=NULL
+  expect_error(gfd(filetype = "xls", ttl=F, md=getmd(expName=en), slType = slt))
+}) # EOT
+
+test_that("gfd - from xlsx: Fusion", { 
+  en <- "LBWB_full_bad_sl_2"; slt="xls" #  err: trying fusion, but no sample nr col in sl
+  expect_error(gfd(filetype = "xls", ttl=F, md=getmd(expName=en), slType = slt))
+  en <- "LBWB_full_sl_2_wrncol"; slt="xls"  #  err: trying fusion, but wrong ncolHeader in _meta
+  expect_error(gfd(filetype = "xls", ttl=F, md=getmd(expName=en), slType = slt))
+  en <- "LBWB_full_sl_2"; slt="xls" # ok fusion ok
+  expect_output(gfd(filetype = "xls", ttl=F, md=getmd(expName=en), slType = slt), "Dataset saved")
+}) # EOT
+
+test_that("gfd - from xlsx: from here or there", { 
+  en <- "LBWB_full"; slt="xls" # error all double
+  expect_error(gfd(filetype = "xls", ttl=F, md=getmd(expName=en), slType = slt))
+  en <- "LBWB_full"; slt=NULL # ok (take all from xlsx)
+  expect_output(gfd(filetype = "xls", ttl=F, md=getmd(expName=en), slType = slt), "Dataset saved")
+  en <- "LBWB_NIR"; slt="xls" # ok (take all from sample list)
+  expect_output(gfd(filetype = "xls", ttl=F, md=getmd(expName=en), slType = slt), "Dataset saved")
 }) # EOT
 
 
-export_ap2_ToXlsx(fd, getmd(expName="LBWB_full_bad"), onlyNIR = FALSE)
-export_ap2_ToXlsx(fd, getmd(expName="LBWB_full"), onlyNIR = FALSE)
-export_ap2_ToXlsx(fd, getmd(expName="LBWB_NIR"), onlyNIR = TRUE)
-# also have to create the corresponding sample lists
 
-# introduce error in the worksheet: (have all already in LBWB experiment)
-  # bad naming of _meta
-  # double _meta
-  # no _meta at all
-  # bad column names
-
-fd <- gfd(filetype = "xls", ttl=F, md=getmd(expName="LBWB_full_bad"))
-
-fd <- gfd(filetype = "xls", ttl=F, md=getmd(expName="LBWB_NIR")) # ok 
-
-fd <- gfd(filetype = "xls", ttl=F, md=getmd(expName="LBWB_full")) # error double columns
-fd <- gfd(filetype = "xls", ttl=F, md=getmd(expName="LBWB_full"), slType = NULL) # ok
-
-# try combinations with sample list:
-  # have some columns in the sample list, the others in the xlsx file
-  # e.g. have only C_Bact and C_Group in the sample list
-  # have no consScanNr
-
-
-getStdColnames()
 
 # now get fancy: 
     # import from other data sources / formats, 

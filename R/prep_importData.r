@@ -89,7 +89,7 @@ readSpectra <- function(md=getmd(), filetype="def", naString="NA", sh=NULL) {
 	if (filetype == possibleFiletypes[4]) {
 		aaa <- paste(folderFile, ".xlsx", sep="")
 		assign("spectraFilePath", aaa, pos=parent.frame(n=1))
- 		return(getNirData_Excel(aaa))
+ 		return(getNirData_Excel(aaa, stn))
 	} 
 	## if nothing of the above happend, then we must have (checked!) the path to a valid custom .r file in "filetype" 
 	custName <- strsplit(filetype, "custom@")[[1]][2]
@@ -621,6 +621,7 @@ checkForPresenceOfData <- function() {
 	if (length(aa) == 0) {
 		stop(paste0("Sorry, it appears there are no data in the current '", rawFolder, "' folder."), call.=FALSE)
 	}
+	return(TRUE)
 } # EOF
 
 turnStringsIntoFactors <- function(header) {
@@ -1217,6 +1218,15 @@ check_conScanColumn <- function(header, headerFilePath, spectraFilePath, slType,
 	}	
 } # EOF
 
+check_sampleNumberColumn <- function(header) {
+	stn <- getstn()
+	yPref <- stn$p_yVarPref
+	sampleNrCol <- paste0(yPref, stn$p_sampleNrCol)
+	if (!sampleNrCol %in% colnames(header)) {
+		stop(paste0("Sorry, but there has to be a column called '", sampleNrCol, "' containing the sample number in the sample list."), call.=FALSE)
+	} # end if
+} # EOF
+
 #' @title Read Header
 #' @description This functions reads in the sample-list file and prepares the 
 #' header to be fused with the spectral data. 
@@ -1259,6 +1269,7 @@ readHeader <- function(md=getmd(), slType="def", multiplyRows="def") {
 	assign("headerFilePath", paste(slInFolder, filename, ext, sep=""), pos=parent.frame(n=1))
 	##
 	rawHead <- openxlsx::read.xlsx(paste(slInFolder, filename, ext, sep="")) # ! character imports are NOT factors yet !!
+	check_sampleNumberColumn(rawHead)
 	rawHead <- convertCColsToFactor(rawHead)	
 	rawHead <- convertYColsToNumeric(rawHead)
 	###
@@ -1368,13 +1379,13 @@ imp_searchAskColumns <- function(allC_var, allY_var, slType=get(".slType", pos=g
 			cle <- length(colnames(allVars[[k]]))
 			if (length(ind) == 0) {
 				if (cle > 0) {
-					cat(paste(msg1, cn, msg2, cn, msg3, sep=""))
+					if (!oT) { cat(paste(msg1, cn, msg2, cn, msg3, sep="")) }
 				} else {
-					cat(paste(msg1, cn, msg2_zero, cn, msg3_zero, sep=""))				
+					if (!oT) { cat(paste(msg1, cn, msg2_zero, cn, msg3_zero, sep="")) }
 				}
-				cat(notRep)
+				if (!oT) { cat(notRep) }
 				if (cle > 0) {
-					cat(paste(1:cle, " -- ", colnames(allVars[[k]]), "\n", sep=""))
+					if (!oT) { cat(paste(1:cle, " -- ", colnames(allVars[[k]]), "\n", sep="")) }
 				}
 				nrOk <- FALSE
 				while(!nrOk) {

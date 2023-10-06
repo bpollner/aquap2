@@ -4,17 +4,20 @@
 \alias{export_ap2_ToXlsx}
 \title{Export Data to xlsx}
 \usage{
-export_ap2_ToXlsx(dataset, onlyNIR = FALSE, md = getmd())
+export_ap2_ToXlsx(dataset, md = getmd(), onlyNIR = FALSE, rowns = TRUE)
 }
 \arguments{
 \item{dataset}{An object of class 'aquap_data'}
+
+\item{md}{List. The object with the metadat of the experiment. 
+The default is to get the metadata file via  \code{\link{getmd}}.}
 
 \item{onlyNIR}{Logical. If only the NIR data should be exported to xlsx. If 
 left at the default \code{FALSE}, the header as well as the NIR data will 
 be exported into a single worksheet.}
 
-\item{md}{List. The object with the metadat of the experiment. 
-The default is to get the metadata file via  \code{\link{getmd}}.}
+\item{rowns}{Logical. If rownames should be exported as well. Defaults to 
+\code{TRUE}.}
 }
 \value{
 Invisible \code{TRUE} for a successful, invisible \code{FALSE} for 
