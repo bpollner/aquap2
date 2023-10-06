@@ -1,11 +1,11 @@
 #' @title Customising Import from Logger-files
-#' @description Cou can provide your own import function for importing temperature 
+#' @description You can provide your own import function for importing temperature 
 #' and relative humidity data. The .r file containing this function has to be 
 #' located in the folder specified in the .Renviron file. 
 #' (see 'Note' in \code{\link{updateSettings}}) 
-#' To tell the package to use your custom function, you  have to provide the 
+#' To tell the package to use a custom function, you have to provide the 
 #' character \code{"custom@@yourFile.r"} to the approrpiate arguments (like e.g. 
-#' the function \code{\link{getFullData}}), with  "yourFile.r" being the 
+#' the function \code{\link{getFullData}}), with "yourFile.r" being the 
 #' name of the .r file containing the function.
 #' @details The requirements for this .r file are as follows: 
 #' There need to be two and only to objects in this file, having the names 
@@ -17,7 +17,7 @@
 #'    to be the data file. No additional arguments than the first one will be used.
 #'    Provide any necessary defaults in the function itself.
 #' }
-#' @return The returned value of the function has to be data frame with three 
+#' @return The returned value of the function has to be a data frame with three 
 #' columns having the following names:
 #' \itemize{
 #'    \item Time The column containing the timestamps in 'POSIX' format.

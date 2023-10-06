@@ -64,7 +64,7 @@ readSpec_checkDefaults <- function(possibleFiletypes, md, filetype, naString, sh
 readSpectra <- function(md=getmd(), filetype="def", naString="NA", sh=NULL) {
 	stn <- autoUpS()
 	possibleFiletypes <- pv_filetypes #global constant, they get handed down to the checking function !  	
-# 	pv_filetypes <- c("vision_NSAS.da", "tabDelim.txt", "Pirouette.pir", "xlsx")
+# 	pv_filetypes <- c("vision_NSAS.da", "tabDelim.txt", "Pirouette.pir", "xls")
 	filename <- NULL # will be changed in the checking
 	readSpec_checkDefaults(possibleFiletypes, md, filetype, naString, sh)
 	rawFolder <- stn$fn_rawdata
@@ -829,6 +829,8 @@ loadAQdata <- function(md=getmd(), verbose=TRUE) {
 #' @param onlyNIR Logical. If only the NIR data should be exported to xlsx. If 
 #' left at the default \code{FALSE}, the header as well as the NIR data will 
 #' be exported into a single worksheet. 
+#' @param rowns Logical. If rownames should be exported as well. Defaults to 
+#' \code{TRUE}.
 #' @inheritParams getFullData
 #' @return Invisible \code{TRUE} for a successful, invisible \code{FALSE} for 
 #' an unsuccessful generation of the xlsx file. Used for its side effect, i.e. 
@@ -841,7 +843,7 @@ loadAQdata <- function(md=getmd(), verbose=TRUE) {
 #' export_ap2_ToXlsx(fd, md=getmd(expName="otherName"))
 #' }
 #' @export
-export_ap2_ToXlsx <- function(dataset, onlyNIR=FALSE, md=getmd()) {
+export_ap2_ToXlsx <- function(dataset, md=getmd(), onlyNIR=FALSE, rowns=TRUE) {
 	stn <- autoUpS()
 	fn_rawdata <- stn$fn_rawdata
 	dataSheetSfx <- gl_xlsx_DataSheetSuffix
@@ -863,15 +865,14 @@ export_ap2_ToXlsx <- function(dataset, onlyNIR=FALSE, md=getmd()) {
 	ncpwl <- dataset@ncpwl
 	dataSheet <- paste0(expName, dataSheetSfx)
 	openxlsx::addWorksheet(wb, sheetName=dataSheet, zoom=wsZoom)
+	haveRows <- rowns
 	if (onlyNIR) {
-		haveRows <- FALSE
 		ncolHeader <- 0
 		rowsAsFirstCol <- haveRows		
 		outDf <- as.data.frame(cbind(as.matrix(dataset$NIR)))
 		openxlsx::writeData(wb, sheet=dataSheet, outDf, rowNames=haveRows)		
 	} else {	
-		haveRows <- FALSE
-		ncolHeader <- ncol(dataset$header)  # +1 if we export the rownames as well.
+		ncolHeader <- ncol(dataset$header)
 		rowsAsFirstCol <- haveRows
 		outDf <- as.data.frame(cbind(as.matrix(dataset$header), as.matrix(dataset$NIR)))
 		openxlsx::writeData(wb, sheet=dataSheet, outDf, rowNames=haveRows)
@@ -993,7 +994,7 @@ remakeTRHClasses_sys <- function(headerOnly, TDiv=stn$imp_TClassesDiv, TRound=st
 	alwaysReduceClasses <- stn$imp_alwaysReduceTRHClasses												
 	
 #	TInd <- grep(stn$p_tempCol, colnames(headerOnly), fixed=TRUE)		# find column-index that has the temperatur - the source
-	TInd <- which(colnames(headerOnly) == YTemp)			 				# find column-index that has the temperatur - the source
+	TInd <- which(colnames(headerOnly) == YTemp)	# find column-index that has the temperatur - the source
 	if (length(TInd) > 0) {
 #		TClInd  <- grep(Tpat, colnames(headerOnly), fixed=TRUE)					# find column-index that the temperatur already as class - the target
 		TClInd  <- which(colnames(headerOnly) == Tpat) 						# find column-index that the temperatur already as class - the target
@@ -1381,7 +1382,7 @@ imp_searchAskColumns <- function(allC_var, allY_var, slType=get(".slType", pos=g
 						a <- readLines(n=1)
 						options(warn=-1); a <- as.numeric(a); options(warn=0)
 					} else {
-						a <- 1
+						a <- 0
 					} # end else
 						nrOk <- checkNumber(a, cle)					
 				} # end while

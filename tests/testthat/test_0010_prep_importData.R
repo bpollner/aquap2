@@ -357,7 +357,32 @@ test_that("export_ap2_ToXlsx", {
 }) # EOT
 
 
+export_ap2_ToXlsx(fd, getmd(expName="LBWB_full_bad"), onlyNIR = FALSE)
+export_ap2_ToXlsx(fd, getmd(expName="LBWB_full"), onlyNIR = FALSE)
+export_ap2_ToXlsx(fd, getmd(expName="LBWB_NIR"), onlyNIR = TRUE)
+# also have to create the corresponding sample lists
 
+# introduce error in the worksheet: (have all already in LBWB experiment)
+  # bad naming of _meta
+  # double _meta
+  # no _meta at all
+  # bad column names
+
+fd <- gfd(filetype = "xls", ttl=F, md=getmd(expName="LBWB_full_bad"))
+
+fd <- gfd(filetype = "xls", ttl=F, md=getmd(expName="LBWB_NIR")) # ok 
+
+fd <- gfd(filetype = "xls", ttl=F, md=getmd(expName="LBWB_full")) # error double columns
+fd <- gfd(filetype = "xls", ttl=F, md=getmd(expName="LBWB_full"), slType = NULL) # ok
+
+# try combinations with sample list:
+  # have some columns in the sample list, the others in the xlsx file
+  # e.g. have only C_Bact and C_Group in the sample list
+  # have no consScanNr
+
+
+getStdColnames()
 
 # now get fancy: 
     # import from other data sources / formats, 
+  # check custom TRH import

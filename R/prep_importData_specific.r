@@ -228,12 +228,112 @@ getNIRData_Pirouette <- function(dataFile) {
 
 # Spectra from an Excel File ---------------------------
 getNirData_Excel <- function(dataFile) {
-	sampleNr <- conSNr <- timePoints <- ecrm <- repl <- group <- temp  <- relHum <- C_cols <- Y_cols <- timestamp <- NULL
-	eData <- openxlsx::read.xlsx(dataFile, sheet=1, colNames=TRUE, rowNames=TRUE) # in the first sheet the data
-	eMeta <- openxlsx::read.xlsx(dataFile, sheet=2, colNames=TRUE, rowNames=TRUE) # in the second sheet the metadata
-	info <- list(nCharPrevWl=eMeta[1,"ncpwl"])
-	NIR <- as.matrix(eData)
-	return(list(sampleNr=sampleNr, conSNr=conSNr, timePoints=timePoints, ecrm=ecrm, repl=repl, group=group, temp=temp, relHum=relHum, C_cols=C_cols, Y_cols=Y_cols, timestamp=timestamp, info=info, NIR=NIR))
+	metaSheetSfx <- gl_xlsx_metaSheetSuffix
+	dataSheetSfx <- gl_xlsx_DataSheetSuffix
+	allMetaCns <- c(gl_xlsx_ncolHeader_name, gl_xlsx_rownamesAsFirstColumn, gl_xlsx_ncpwlColumn)
+	yPref <- stn$p_yVarPref
+	cPref <- stn$p_ClassVarPref
+	outlierCol <- stn$p_outlierCol
+	noSplitCol <- stn$p_commonNoSplit
+	tempCol_C <- paste0(cPref, stn$p_tempCol)
+	rhCol_C <-	paste0(cPref, stn$p_RHCol)
+	sampleNr_C <- paste0(cPref, stn$p_sampleNrCol)
+	conSNr_C <- paste0(cPref, stn$p_conSNrCol)
+	absTime_C <- paste0(cPref, stn$p_absTime)
+	chron_C <- paste0(cPref, stn$p_chron)
+	tsChar <- "Timestamp" # XXX ? just like that?
+	absTime_Y <- paste0(yPref, stn$p_absTime)
+	absChron_Y <- paste0(yPref, stn$p_chron)
+	#
+	# do we have a worksheet with the metadata?
+	wb <- openxlsx::loadWorkbook(file=dataFile)
+	wbNames <- names(wb)
+	ind <- grep(metaSheetSfx, wbNames)
+	if (length(ind) == 0) {
+		stop(paste0("Sorry, for a smooth import from xlsx it is required that there is an extra worksheet containing some metadata.\nPlease add a worksheet with its name ending in '", metaSheetSfx, "' to the file \n'", dataFile, "', \nand provide there the following information:\n\t1: The number of columns of the header. Set to 0 if the data only contains NIR spectra.\n\t2: Are there rownames in the data? Provide either TRUE or FALSE.\n\t3: How many characters are there in front of the wavelengths? Set to 0 if there are no characters in front of the wavelengths.\nPlease provide the information in one row with three columns, wiht the columns having the following names:\n\t", paste0(allMetaCns, collapse=", ")), call.=FALSE )
+	} # end if
+	if (length(ind) > 1) {
+		stop(paste0("Sorry, there appears to me more than 1 worksheet ending in '", metaSheetSfx, "' in the file '", dataFile, "'.\nFor a smooth import from xlsx, there should be only one worksheet containing metadata.\n"), call.=FALSE)
+	} # end if
+	
+	# by now we must have one worksheet containing the metadata
+	metaDf <- openxlsx::read.xlsx(wb, sheet=ind, colNames=TRUE, rowNames=FALSE)
+	metaSheetName <- wbNames[ind]
+	if (!all(allMetaCns %in% colnames(metaDf))) {
+		stop(paste0("Please make sure that the column names in the worksheet containing the metadata \n('", metaSheetName, "', in the file '", dataFile, "' ) \nhave the following names:\n\t", paste0(allMetaCns, collapse=", ")), call.=FALSE)
+	} # end if
+	
+	# now we can be quite sure about our metaDf, contains all three required columns
+	ncolHeader <- nch <-  metaDf[1,gl_xlsx_ncolHeader_name]
+	hasRownames <- metaDf[1,gl_xlsx_rownamesAsFirstColumn]
+	ncpwl <- metaDf[1, gl_xlsx_ncpwlColumn]
+	
+	# do we have a sheet with the data suffix?
+	ind <- grep(dataSheetSfx, wbNames)
+	if (length(ind) == 0) {
+		dsInd <- 1 # we are assuming it would be the first worksheet holding the data
+	} else {
+		dsInd <- ind
+	} # ed else
+	allData <- openxlsx::read.xlsx(wb, sheet=dsInd, colNames=TRUE, rowNames=hasRownames)
+	if (ncolHeader == 0) {
+		NIR <- as.matrix(allData) # * no subscripting: we get all numbers
+		header <- NULL
+	} else { # so we have NIR and header in the same worksheet
+		NIR <- as.matrix(allData[, (nch+1):ncol(allData)]) # very interesting: when subscripting from allData we get characters. Compare * above
+		cns <- colnames(NIR); rns <- rownames(NIR); nrc <- ncol(NIR); nrr <- nrow(NIR)
+		NIR <- matrix(as.numeric(NIR), nrow=nrr, ncol=nrc, byrow=FALSE)
+		colnames(NIR) <- cns
+		rownames(NIR) <- rns
+		header <- allData[, 1:nch]
+	} # end else
+#	print(str(NIR)); print(str(header)); print("----dd-----"); wait()
+	sampleNr <- conSNr <- timePoints <- ecrm <- repl <- group <- temp  <- relHum <- C_cols <- Y_cols <- timestamp <- allC_var <- allY_var <- NULL
+	#
+	if (!is.null(header)) {
+		delThisCols <- function(header, char) {
+			ind <- grep(char, colnames(header))
+			if (length(ind) > 0) {
+				header <- header[,-ind]
+			} # end if
+			return(header)
+		} # EOIF
+		indTs <- which(colnames(header) == tsChar) # but this assumes that there is a column called "Timestamp"
+		if (length(indTs) == 1) { # so we have one column called "Timestamp"
+			timestamp <- as.data.frame(as.POSIXct(header[,indTs]))
+			header <- delThisCols(header, absTime_Y) # absTime in Y; we do not want to have it twice
+			header <- delThisCols(header, absChron_Y) # chron in Y; we do not want to have it twice
+			header <- delThisCols(header, absTime_C) # absTime in C; we do not want to have it twice
+			header <- delThisCols(header, chron_C)			
+		} else if (length(indTs) > 1) {
+			stop(paste0("Sorry, there should not be more than one column with the name '", tsChar, "'."), call.=FALSE)
+		} # end else
+		# get rid of possible: 
+		header <- delThisCols(header, outlierCol) # outliers
+		header <- delThisCols(header, noSplitCol) # no split column
+		header <- delThisCols(header, tempCol_C) # no temp as class
+		header <- delThisCols(header, rhCol_C) # no RH as class
+		header <- delThisCols(header, sampleNr_C) # no sample number as class
+		header <- delThisCols(header, conSNr_C) # no cons scan number as class
+		#
+		header <- convertYColsToNumeric(header)
+		#
+		indC <- grep(cPref, colnames(header))
+		if (length(indC) > 0) {
+			allC_var <- header[,indC] # collect all C_ variables
+		} # end if
+		indY <- grep(yPref, colnames(header))
+		if (length(indY) > 0) {
+			allY_var <- header[,indY] # collect all Y_ variables
+		} # end if		
+		slType <- get(".slType", pos=gl_ap2GD) ## .slType gets assigned in readHeader_checkDefaults
+		imp_searchAskColumns(allC_var, allY_var, slType, oT=TRUE) # assigns all the necessary list elements except NIR, info and timestamp in this frame !!!
+	} # end if	
+	#
+	info <- list(nCharPrevWl=ncpwl)
+	outList <- list(sampleNr=sampleNr, conSNr=conSNr, timePoints=timePoints, ecrm=ecrm, repl=repl, group=group, temp=temp, relHum=relHum, C_cols=C_cols, Y_cols=Y_cols, timestamp=timestamp, info=info, NIR=NIR)
+#	print(str(outList)); print("-----outlist----")
+	return(outList)
 } # EOF
 
 
