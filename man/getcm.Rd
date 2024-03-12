@@ -74,8 +74,8 @@ Other Extract Elements:
 \code{\link{getHeader}()},
 \code{\link{getWavelengths,aquap_data-method}},
 \code{\link{getcd}()},
-\code{\link{siWlg}()},
-\code{\link{siWl}()}
+\code{\link{siWl}()},
+\code{\link{siWlg}()}
 }
 \concept{Extract Elements}
 \concept{Helper Functions}

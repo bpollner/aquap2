@@ -1,4 +1,4 @@
-#' @include aquap2.r
+#' @include aquap2_PACKAGE.R
 #' @include cl_classFunctions.r
 
 # classes ---------------------------------------

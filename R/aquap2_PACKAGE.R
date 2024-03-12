@@ -40,6 +40,5 @@
 #' @import stats
 #' @import utils
 #'
-#' @docType package
 #' @name aquap2
 NULL

@@ -54,7 +54,7 @@ Suggests:
     testthat (>= 3.0.0)
 VignetteBuilder: knitr
 Collate: 
-    'aquap2.r'
+    'aquap2_PACKAGE.R'
     'calc_aqg.r'
     'calc_classif_gen.r'
     'calc_noise.r'
@@ -101,5 +101,5 @@ Collate:
     'uniset_functions.R'
     'uniset_globals.R'
     'zzz.r'
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.1
 Config/testthat/edition: 3

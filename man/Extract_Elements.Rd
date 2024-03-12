@@ -39,7 +39,7 @@ Other Extract Elements:
 \code{\link{getWavelengths,aquap_data-method}},
 \code{\link{getcd}()},
 \code{\link{getcm}()},
-\code{\link{siWlg}()},
-\code{\link{siWl}()}
+\code{\link{siWl}()},
+\code{\link{siWlg}()}
 }
 \concept{Extract Elements}

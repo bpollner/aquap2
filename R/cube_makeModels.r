@@ -83,8 +83,8 @@ calculateAquagram <- function(dataset, md, ap, idString, tempFile) {
 	if (is.null(ap$aquagr)) {
 		return(NULL)
 	}
-	apLoc <- list()
-	apLoc$stn <- stn # add the "stn" before the values, so simulate the old dotAp2 structure
+#	apLoc <- list()
+#	apLoc$stn <- stn # add the "stn" before the values, so simulate the old dotAp2 structure
 #	aq_loadGlobalAquagramCalibData()
 	if (ap$aquagr$bootCI) {
 		registerParallelBackend()  ## will be used in the calculation of confidence intervals
@@ -108,7 +108,8 @@ calculateAquagram <- function(dataset, md, ap, idString, tempFile) {
 	aquCalcRes  <- list()
 	length(aquCalcRes) <- lec <- length(vars)
 	for (i in 1: length(vars)) {
-		aquCalcRes[[i]] <- calcAquagramSingle(dataset, md, ap, vars[i], minus[i], idString, apLoc)
+#		aquCalcRes[[i]] <- calcAquagramSingle(dataset, md, ap, vars[i], minus[i], idString, apLoc)
+		aquCalcRes[[i]] <- calcAquagramSingle(dataset, md, ap, vars[i], minus[i], idString, stn)
 	} # end for i
 	
 	if (!stn$allSilent) {cat(bootTxtClosingAdd)}

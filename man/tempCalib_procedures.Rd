@@ -75,8 +75,8 @@ Other Temperature procedures:
 
 Other Aquagram documentation: 
 \code{\link{calc_aqg_args}},
-\code{\link{plot_aqg_args}},
-\code{\link{plot_aqg}()}
+\code{\link{plot_aqg}()},
+\code{\link{plot_aqg_args}}
 }
 \concept{Aquagram documentation}
 \concept{Temperature procedures}

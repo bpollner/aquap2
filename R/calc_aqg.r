@@ -202,8 +202,8 @@ calc_aquagr_CORE <- function(dataset, smoothN, reference, msc, selIndsWL, colInd
 
 
 calc_aquagr_bootCI <- function(dataset, smoothN, reference, msc, selIndsWL, colInd, useMC, R, mod, minus, TCalib, Texp, ap, parChar, apLoc) {
-	fnAnD <- apLoc$stn$fn_analysisData
-	saveBootResult <- apLoc$stn$aqg_saveBootRes
+	fnAnD <- apLoc$fn_analysisData
+	saveBootResult <- apLoc$aqg_saveBootRes
 	path <- paste(fnAnD, "bootResult", sep="/")
 	#
 	if (!dir.exists(fnAnD)) {
@@ -225,13 +225,13 @@ calc_aquagr_bootCI <- function(dataset, smoothN, reference, msc, selIndsWL, colI
 		} # end else dev mode
 		out <- as.matrix(calc_aquagr_CORE(dataset=datasetSubscripted, smoothN=smoN, reference=ref, msc=ms, selIndsWL=selIndW, colInd=colI, mod=mo, minus=minu, TCalib=TCali, Texp=Tex, apLoc=apLo))
 	} # EOIF
-	if (!apLoc$stn$allSilent) {cat(paste0("      calc. ", R, " bootstrap replicates (", parChar, ")... ")) }
+	if (!apLoc$allSilent) {cat(paste0("      calc. ", R, " bootstrap replicates (", parChar, ")... ")) }
 	thisR <- R
 	nCPUs <- getDesiredNrCPUs(allowNA=FALSE) # ! here we have some gl_ap2GD ! (but should be ok)
 	###
 	bootResult <- boot::boot(dataset, innerWorkings, R=thisR, strata=dataset$header[,colInd], parallel=useMC, ncpus=nCPUs, smoN=smoothN, ref=reference, ms=msc, selIndW=selIndsWL, colI=colInd, mo=mod, minu=minus, TCali=TCalib, Tex=Texp, apLo=apLoc, parInfo=useMC)   	### here the bootstrap replicates happen
 	###
-	if (!apLoc$stn$allSilent) {cat("ok\n")}
+	if (!apLoc$allSilent) {cat("ok\n")}
 	if (saveBootResult) {
 		save(bootResult, file=path)
 	}
@@ -262,7 +262,7 @@ calc_aquagr_bootCI <- function(dataset, smoothN, reference, msc, selIndsWL, colI
 #	} # end for i
 #	####
 	txtPar <- "" # DEV
-	if (apLoc$stn$aqg_bootUseParallel) {
+	if (apLoc$aqg_bootUseParallel) {
 		if (is.null(apLoc$.devMode)) { # so we are NOT in dev mode
 			registerParallelBackend()
 			txtPar <- "parallel"
@@ -279,7 +279,7 @@ calc_aquagr_bootCI <- function(dataset, smoothN, reference, msc, selIndsWL, colI
 		registerDoSEQ()
 		txtPar <- "seriell"
 	}
-	if (!apLoc$stn$allSilent) {cat(paste0("      calc. confidence intervals (", txtPar, ")... "))}
+	if (!apLoc$allSilent) {cat(paste0("      calc. confidence intervals (", txtPar, ")... "))}
 	###
 	mat2er <- foreach(i = 1: (nRows*nCols), .combine="cbind", .verbose=FALSE) %dopar% {
 			a <- boot::boot.ci(bootResult, index = i, type="bca")$bca[,4:5]    #### here the CIs are calculated  ## can not find the problem in windows parallel ("arguments must have same length". works perfekt in windows seriell)
@@ -288,7 +288,7 @@ calc_aquagr_bootCI <- function(dataset, smoothN, reference, msc, selIndsWL, colI
 	if (checkHaveParallel()) {
 		registerDoSEQ() # switch off when we do not need it any more
 	}
-	if (!apLoc$stn$allSilent) {cat("ok\n")}
+	if (!apLoc$allSilent) {cat("ok\n")}
 	ciMat <- matrix(mat2er, ncol=nCols) 
 	####
 	origMat <- bootResult$t0
@@ -427,7 +427,7 @@ calcUnivAucTable <- function(smoothN=17, ot=c(1300, 1600), tcdName) {
 	dataset <- get(tcdName, pos=gl_ap2GD)
 	if (!stn$allSilent) {cat(" * Calculating universal AUC table... ")}
 	avgTable <- tempCalibMakeAvgTable(dataset, smoothN, TRange=NULL, ot)
-	aucd <- calcAUCtable(avgTable, getstn())$aucd
+	aucd <- calcAUCtable(avgTable, stn)$aucd
 	if (!stn$allSilent) {cat("ok\n")}
 	return(aucd)
 } #EOF
@@ -612,10 +612,10 @@ getOvertoneCut <- function(otNumberChar) {
 getOvertoneWls <- function(otNumberChar, apLoc) {
 	val <- get("aquagramPSettings", pos=gl_ap2GD)
 	if (otNumberChar == "1st") {
-		if (apLoc$aqq_nCoord == 12) {
+		if (apLoc$aqg_nCoord == 12) {
 			return(val$ot1$wls$wls12)
 		} else {
-			if (apLoc$aqq_nCoord == 15) {
+			if (apLoc$aqg_nCoord == 15) {
 				return(val$ot1$wls$wls15)
 			} else {
 				stop("Please provide either '12' or '15' as the numbers of coordinates for the first overtone in the settings. Thank you.", call.=FALSE)
@@ -627,10 +627,10 @@ getOvertoneWls <- function(otNumberChar, apLoc) {
 getOvertoneColnames <- function(otNumberChar, apLoc) {
 	val <- get("aquagramPSettings", pos=gl_ap2GD)
 	if (otNumberChar == "1st") {
-		if (apLoc$aqq_nCoord == 12) {
+		if (apLoc$aqg_nCoord == 12) {
 			return(val$ot1$cns$cns12)
 		} else {
-			if (apLoc$aqq_nCoord == 15) {
+			if (apLoc$aqg_nCoord == 15) {
 				return(val$ot1$cns$cns15)
 			} else {
 				stop("Please provide either '12' or '15' as the numbers of coordinates for the first overtone in the settings. Thank you.", call.=FALSE)
@@ -782,7 +782,6 @@ aq_calculateCItable <- function(bootRes, groupAvg) {
 } # EOF
 
 calcAquagramSingle <- function(dataset, md, ap, classVar, minus, idString, apLoc) {
-	stn <- getstn()
 	##
 	ap <- ap_reCheckAqgBootR(ap, dataset) # we have to re-asses the bootstrap R, as after splitting, avg. of cons scans etc, the number of observation is, of course, different than when the datasets for the cube were made.
 	a <- ap$aquagr
@@ -826,7 +825,7 @@ calcAquagramSingle <- function(dataset, md, ap, classVar, minus, idString, apLoc
 		subtrSpec <- a$subtrSpec
 	} # end calc spectra
 	if (bootCI & !haveClassicAqg(ap)) { # should make it impossible to run a bootstrap on the classic aquagram
-		if (stn$aqg_bootUseParallel == TRUE) {
+		if (apLoc$aqg_bootUseParallel == TRUE) {
 			if (Sys.info()["sysname"] == "Windows") {
 				useMC <- "snow"
 			} else {

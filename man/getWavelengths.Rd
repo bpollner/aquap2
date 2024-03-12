@@ -41,7 +41,7 @@ Other Extract Elements:
 \code{\link{getHeader}()},
 \code{\link{getcd}()},
 \code{\link{getcm}()},
-\code{\link{siWlg}()},
-\code{\link{siWl}()}
+\code{\link{siWl}()},
+\code{\link{siWlg}()}
 }
 \concept{Extract Elements}
