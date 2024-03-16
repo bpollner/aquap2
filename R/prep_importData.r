@@ -1242,11 +1242,11 @@ readHeader_checkDefaults <- function(slType, possibleValues, md, multiplyRows) {
 	# possibleValues is only "xls" any more
 	stn <- getstn()
 	if (!is.null(slType)) {
-		if (!all(slType == possibleValues) | length(slType) != 1) {
-			stop(paste0("Please provide either '", paste(possibleValues, collapse=", "),"' or 'NULL' to the argument 'slType'."), call.=FALSE)
-		}
 		if (all(slType == "def")) {
 			slType <- stn$imp_sampleListType # can be only NULL or xlsx
+		}
+		if (!all(slType == possibleValues) | length(slType) != 1) {
+			stop(paste0("Please provide either '", paste(possibleValues, collapse=", "),"' or 'NULL' to the argument 'slType'."), call.=FALSE)
 		}
 	} # end if
 	assign("slType", slType, pos=parent.frame(n=1))

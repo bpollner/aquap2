@@ -139,7 +139,7 @@ cpa()
 
 #### ### ### ### ### ### ### ### ### ### ### ### ### 
                 ### Metadata ###
-test_that("getmd - baiscs", { 
+test_that("getmd - basics", { 
   expect_no_condition(getmd()) # all default
   expect_equal(getmd(expName="blabla")$meta$expName, "blabla")
   expect_error(getmd("blaName"))
@@ -421,3 +421,4 @@ test_that("esl - multiply rows", {
 ## delete all files in td metadata
 allinMd <- list.files(paste0(expHomeF, "/metadata"), full.names = TRUE)
 ok <- file.remove(allinMd)
+
