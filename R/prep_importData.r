@@ -64,7 +64,7 @@ readSpec_checkDefaults <- function(possibleFiletypes, md, filetype, naString, sh
 readSpectra <- function(md=getmd(), filetype="def", naString="NA", sh=NULL) {
 	stn <- autoUpS()
 	possibleFiletypes <- pv_filetypes #global constant, they get handed down to the checking function !  	
-# 	pv_filetypes <- c("vision_NSAS.da", "tabDelim.txt", "Pirouette.pir", "xls")
+# 	pv_filetypes <- c("vision_NSAS.da", "tabDelim.txt", "Pirouette.pir", "xls", "YunosatoDat.dat")
 	filename <- NULL # will be changed in the checking
 	readSpec_checkDefaults(possibleFiletypes, md, filetype, naString, sh)
 	rawFolder <- stn$fn_rawdata
@@ -90,7 +90,12 @@ readSpectra <- function(md=getmd(), filetype="def", naString="NA", sh=NULL) {
 		aaa <- paste(folderFile, ".xlsx", sep="")
 		assign("spectraFilePath", aaa, pos=parent.frame(n=1))
  		return(getNirData_Excel(aaa, stn))
-	} 
+	}
+	if (filetype == possibleFiletypes[5]) {
+		aaa <- paste(folderFile, ".dat", sep="")
+		assign("spectraFilePath", aaa, pos=parent.frame(n=1))
+ 		return(getNirDataPlusMeta_YunosatoDat(aaa, stn)) # per definition, the Yunosato .dat file contains raw spectra AND class and numeric variables
+	}	 
 	## if nothing of the above happend, then we must have (checked!) the path to a valid custom .r file in "filetype" 
 	custName <- strsplit(filetype, "custom@")[[1]][2]
 	if (is.null(sh)) { # the normal case
@@ -353,26 +358,52 @@ gfd_getExpNameNoSplit <- function(metadata, nRows) {
 	assign("noSplit", noSplit, pos=parent.frame(n=1))
 } # EOF
 
-gfd_checkForDoubleColumns <- function(header, spectraFilePath, headerFilePath, slType) {
+gfd_checkRemoveDoubleColumns <- function(header, spectraFilePath=NULL, headerFilePath=NULL, slType=NULL) {
+#	return(header)	
 	collect  <-  NULL
 	patterns <- paste(".", 1:12, sep="")
-	a <- colnames(header)
-	for (k in 1: length(patterns)) {	
-		inds <- grep(patterns[k], a)
-		if (length(inds) > 0) {
-			collect <- c(collect, inds)
-		}
-	}  # end for k
+	allCns <- colnames(header)
+	alteKollekte <- function(allCns, patterns) {
+		for (k in 1: length(patterns)) {	
+			inds <- grep(patterns[k], allCns)
+			if (length(inds) > 0) {
+				collect <- c(collect, inds)
+			}
+		}  # end for k	
+	} # EOIF
+	#
+	makeKollekte <- function(allCns, patterns) {
+		for (k in 1: length(patterns)) {
+			inds <- endsWith(allCns, patterns[k]) # is a logical vector the full length of allCns
+#			print("---------");print(patterns[k]); print(length(which(inds))); wait()
+			indsNum <- which(inds == TRUE)
+			if (length(indsNum) > 0) {
+				collect <- c(collect, indsNum)
+			}
+		} # end for k
+		return(collect)
+	} # EOIF
+	collect <- makeKollekte(allCns, patterns)
+#	dblCns <- allCns[sort(collect)]
+	if (is.null(collect)) {
+		headerClean <- header # so no doubles
+	} else {
+		headerClean <- header[,-collect] # we had doubles
+	} # end else
+#	print("---------");print(colnames(headerClean)); print(length(colnames(headerClean))); print("---------");
+	return(headerClean)
+	
+	### go towards stop - NOT in use any more
 	if (!is.null(collect)) {
 		if (is.null(slType)) {
 			files <- paste("\"", spectraFilePath, "\"", sep="")		
 		} else {
  			files <- paste("\"", headerFilePath, "\" and ", "\"", spectraFilePath, "\".", sep="")
 		}
-		cols <- paste(a[collect], collapse=", ")
+		cols <- paste(allCns[collect], collapse=", ")
 		msg <- paste("Some columns seem to appear twice: \n", cols,"\nPlease check the files used for importing data, that is \n", files, sep="")
 		stop(msg, call.=FALSE)
-	}
+	} # end if
 } # EOF
 
 gfd_importData <- function() {
@@ -700,11 +731,14 @@ getFullData <- function(md=getmd(), filetype="def", slType="def", trhLog="def", 
 
   	# import starts 
   	if(!stn$allSilent) {cat("Importing data...\n")}	
+	###########
 	headerFilePath <- NULL # gets assigned in readHeader()
 	header <- readHeader(md, slType, multiplyRows) ## re-assigns 'slType' and 'multiplyRows' also here -- in parent 2 level frame 
-													## if slType is NULL, header will be returned as NULL as well
+	###########									## if slType is NULL, header will be returned as NULL as well
+	###########
 	spectraFilePath <- NULL # gets assigned in readSpectra()
 	si <-  readSpectra(md, filetype, naString, sh) ### !!!!!!!!! here the import !!!!!!!!!
+	###########
 	gfd_check_imports(si) # makes sure eveything is NULL or data.frame / matrix (NIR)
 	si <- gfd_makeNiceColumns(si) # makes all column names, transforms Y-variables to numeric
 	nr <- nrow(si$NIR)
@@ -721,10 +755,11 @@ getFullData <- function(md=getmd(), filetype="def", slType="def", trhLog="def", 
 	headerFusion <- turnStringsIntoFactors(headerFusion) # see 2 lines above
 	check_conScanColumn(headerFusion, headerFilePath, spectraFilePath, slType, filetype) 
 	# ? check for existence of sample number column as well ?
-	gfd_checkForDoubleColumns(headerFusion, spectraFilePath, headerFilePath, slType)
+	headerFusion <- gfd_checkRemoveDoubleColumns(headerFusion, spectraFilePath, headerFilePath, slType)
 	headerFusion <- gfd_importMakeTRH_alignment(headerFusion, trhLog)
 	if (stn$imp_autoCopyYvarsAsClass) {  # if TRUE, copy all columns containing a Y-variable as class variable
 		headerFusion <- copyYColsAsClass(headerFusion)
+		headerFusion <- gfd_checkRemoveDoubleColumns(headerFusion) # because if we exported header to sample list, we already have the Y as C copied elements here.
 	}
 	headerFusion <- remakeTRHClasses_sys(headerFusion)
 	colRep <- extractClassesForColRep(headerFusion)		## the color representation of the factors
@@ -893,6 +928,63 @@ export_ap2_ToXlsx <- function(dataset, md=getmd(), onlyNIR=FALSE, rowns=TRUE) {
 		return(invisible(FALSE))
 	} # end else
 	return(invisible(TRUE))
+} # EOF
+
+#' @title Export Header to Xls
+#' @description Exports only the header, i.e. the class- and numerical variables, 
+#' to an xls-file in the folder \code{sl-in}. The filename is the experiment name, 
+#' followed by the suffix \code{_fromHeader} if parameter \code{asSlIn} is 
+#' \code{FALSE}. If it is \code{TRUE}, a possibly existing sampleList-in file 
+#' with the same name will be overwritten. 
+#' @param dataset An object of class 'aquap_data'
+#' @param asSlIn Logical, if the created xlsx file should be named ending in 
+#' \code{-in}, thus being ready to reimport as sample list file. Defaults to 
+#' \code{FALSE}. **Warning!** If \code{asSlIn} is set to \code{TRUE}, 
+#' any existing sample list with the same name will be overwritten without 
+#' warning!
+#' @param rowns Logical. If rownames should be exported as well. Defaults to 
+#' \code{TRUE}.
+#' @inheritParams getFullData
+#' @section Warning:
+#' If \code{asSlIn} is set to \code{TRUE}, any existing sample list with the 
+#' same name will be overwritten without warning!
+#' @return \code{TRUE} if the operation was successful, \code{FALSE} if not. 
+#' Used for its side effects, i.e. the header exported to xls in the \code{sl-in} 
+#' folder. 
+#' @family Helper Functions
+#' @export
+export_header_toXls <- function(dataset, md=getmd(), asSlIn=FALSE, rowns=TRUE) {
+	stn <- autoUpS()
+	finSuff <- "_fromHeader"
+	dataSheet <- "header"
+	wsZoom <- 120
+	haveRows <- rowns
+	fn_sampleLists <- stn$fn_sampleLists
+	fn_sampleListIn <- stn$fn_sampleListIn
+	slInAdd <- "-in"
+	#
+	expName <- md$meta$expName
+	if (asSlIn) {
+		filename <- paste0(expName, slInAdd)
+	} else {
+		filename <- paste0(expName, finSuff)
+	}
+	wb <- openxlsx::createWorkbook(filename)
+	openxlsx::addWorksheet(wb, sheetName=dataSheet, zoom=wsZoom)
+	outDf <- getHeader(dataset)
+	if (!stn$allSilent) {cat(paste0("Writing the header to xlsx... "))}
+	openxlsx::writeData(wb, sheet=dataSheet, outDf, rowNames=haveRows)	
+	path <- paste0(fn_sampleLists, "/", fn_sampleListIn, "/", filename, ".xlsx")
+	ok <- openxlsx::saveWorkbook(wb, path, overwrite = TRUE, returnValue=TRUE)
+	if (ok & !stn$allSilent) {
+		cat(paste0("done.\n"))
+		return(invisible(TRUE))
+	} else {
+		message(paste0("Sorry, the xlsx file '", filename, "' could not be saved.\n"))
+		return(invisible(FALSE))
+	} # end else
+	
+
 } # EOF
 
 # refine header -------------------------------------------------------------
@@ -1149,14 +1241,14 @@ gfd_possibly_multiplySampleListRows <- function(sampleList, nrScans, multiplyRow
 readHeader_checkDefaults <- function(slType, possibleValues, md, multiplyRows) {
 	# possibleValues is only "xls" any more
 	stn <- getstn()
-	if (all(slType == "def") & !is.null(slType)) {
-		slType <- stn$imp_sampleListType # can be only NULL or xlsx
-	}
 	if (!is.null(slType)) {
 		if (!all(slType == possibleValues) | length(slType) != 1) {
-			stop(paste0("Please provide either '", possibleValues,"' or 'NULL' to the argument 'slType'."), call.=FALSE)
+			stop(paste0("Please provide either '", paste(possibleValues, collapse=", "),"' or 'NULL' to the argument 'slType'."), call.=FALSE)
 		}
-	}
+		if (all(slType == "def")) {
+			slType <- stn$imp_sampleListType # can be only NULL or xlsx
+		}
+	} # end if
 	assign("slType", slType, pos=parent.frame(n=1))
 	assign("slType", slType, pos=parent.frame(n=2)) # that is needed to always have the correct value for slType in the getFullData function
 	assign(".slType", slType, pos=gl_ap2GD)
@@ -1371,6 +1463,7 @@ imp_searchAskColumns <- function(allC_var, allY_var, slType=get(".slType", pos=g
   		}
 	} # EOIF
 	##
+	
 	for (k in 1: length(listElementNames)) { # to go first through the C-variables, then through the Y-variables
 		for (i in 1: length(listElementNames[[k]])) { # go through the single element name
 	#		print(ht(allVars[[k]])); cat("\n--------------------------------------------------------------------\n")

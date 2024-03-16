@@ -28,9 +28,11 @@
 # MASS for: lda, qda
 # mclust for:  mclustda
 # e1071 for: svm
-#' @import mda 
+#' @importFrom mda fda
 #' @import MASS
-#' @import mclust
+#			 #' @importFrom MASS lda, qda
+#' @importFrom mclust MclustDA
+# 			#' @import mclust
 #' @import e1071
 #' @import nnet
 #' @import randomForest

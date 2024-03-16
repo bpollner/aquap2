@@ -31,6 +31,7 @@ Other Helper Functions:
 \code{\link{ap2_settings_setup}()},
 \code{\link{ap2dme}()},
 \code{\link{export_ap2_ToXlsx}()},
+\code{\link{export_header_toXls}()},
 \code{\link{genNoiseRecExp}()},
 \code{\link{genTempCalibExp}()},
 \code{\link{getcd}()},

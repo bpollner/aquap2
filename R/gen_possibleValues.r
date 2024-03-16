@@ -92,7 +92,7 @@ pv_tripleDotsMod <- c(pv_modifyUCL, pv_modifyDPT, pv_modifyPCA, pv_modifySIMCA, 
 ##############
 
 ## import, filetype etc.
-pv_filetypes <- c("vision_NSAS.da", "tabDelim.txt", "Pirouette.pir", "xls")
+pv_filetypes <- c("vision_NSAS.da", "tabDelim.txt", "Pirouette.pir", "xls", "YunosatoDatFile.dat")
 
 
 ## Data pre-treatment moduls
@@ -111,6 +111,8 @@ pv_suffixForTemplates <- "_TEMPLATE"
 ## Globals
 pv_noiseDistPrefix <- "nd_"
 
+# the column name containing the sample id in the case of raw data import from the Yunosato-styled dat file. 
+gl_ydSampleIdColName <- "ydSampleId"
 
 
 

@@ -33,6 +33,9 @@ specified in the .Renviron file. Please refer to \code{\link{custom_import}}
 for further information.
 \item \code{xls}: Import raw spectra from a xlsx file. Please see the section
 \code{Import from xlsx} below for further details.
+\item \code{YunosatoDatFile.dat}: Import raw spectra from a \code{.dat} file
+as styled by the Yunosato Aquaphotomics Lab, Japan. Please see the section 
+\code{Import from Yunosato .dat} below for further information.
 }}
 
 \item{naString}{Character. What to use as 'NA'. Applies only when 'filetype' 

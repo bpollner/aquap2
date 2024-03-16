@@ -7,8 +7,13 @@
 ap2_settings_setup(path = NULL)
 }
 \arguments{
-\item{path}{Character length one. The path to the folder where the settings-
-home folder should be located. Defaults to \code{NULL}.}
+\item{path}{Character length one, holding the path to the location where the 
+folder containing the settings.R file should be located. Defaults to 
+\code{NULL}. The path has to be given either in forward-slashes 
+(\code{/Users/Name/aFolder} on Unix machines and \code{C:/Users/Name/aFolder} 
+on windows machines), or in double back-slashes 
+\code{C:\\\\Users\\\\Name\\\\aFolder} on windows machines.
+If left at the default \code{NULL}, the location should be selectable interactively.}
 }
 \value{
 Called for its side-effects, i.e. performing the required setup 
@@ -27,6 +32,7 @@ to the desired folder can be selected interactively.
 Other Helper Functions: 
 \code{\link{ap2dme}()},
 \code{\link{export_ap2_ToXlsx}()},
+\code{\link{export_header_toXls}()},
 \code{\link{genFolderStr}()},
 \code{\link{genNoiseRecExp}()},
 \code{\link{genTempCalibExp}()},

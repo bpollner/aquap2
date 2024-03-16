@@ -58,6 +58,9 @@ specified in the .Renviron file. Please refer to \code{\link{custom_import}}
 for further information.
 \item \code{xls}: Import raw spectra from a xlsx file. Please see the section
 \code{Import from xlsx} below for further details.
+\item \code{YunosatoDatFile.dat}: Import raw spectra from a \code{.dat} file
+as styled by the Yunosato Aquaphotomics Lab, Japan. Please see the section 
+\code{Import from Yunosato .dat} below for further information.
 }}
 
 \item{slType}{Character. The type of sample-list file in the sampleLists/
@@ -238,6 +241,29 @@ to have those variables in the xlsx file as well.
 Generally, it is not possible to have two variables with the same name.
 Please look at the files generated via \code{\link{export_ap2_ToXlsx}} as a 
 reference.
+}
+
+\section{Import from Yunosato.dat}{
+
+It is possible to have all or some of the class- and numeric variables in the 
+\code{.dat} file. Whatever is present will be read out, and if an additional
+sample list is demanded to be imported (parameter \code{slType != NULL}) it 
+will be combined. The tab-separated .dat file by the Yunosato Aquaphotomics 
+lab is styled as follows:
+\itemize{
+\item The first rows starts with \code{#D} and contains the dimension in columns 
+x rows (e.g. \code{25x30})
+\item The second row starts with \code{#C} and contains the column names, with 
+a \code{w} preceding the wavelengths, a \code{*} preceding the class variables, 
+and a \code{$} preceding the numeric variables. Please consider the standard
+column names, see \code{\link{printStdColnames}}.
+\item The following rows all start with \code{#S} and contain the data, and in 
+the first columnn there is a string. This string is structured via \code{_},
+and in its last element there is a timestamp in the format 
+\code{"YYYYMMDDHHMMSS"}, and in its second last element there are the 
+consecutive scans. All previous elements stay as they are and are used as 
+base for rownnames and provided as an extra class variable.
+}
 }
 
 \examples{

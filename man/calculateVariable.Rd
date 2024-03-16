@@ -35,7 +35,7 @@ Typically, the expression could contain an if clause followed by two values,
 See examples.
 New variables of type 'numeric' can obviously only be calculated from numerical 
 variables, but the numeric result of such a calculation can be used as class 
-variable by setting the type of the new variable to 'class' voa providing 'c' 
+variable by setting the type of the new variable to 'class' via providing 'c' 
 to the argument 'type'.
 The name of the new variable and the expression used to calculate it is stored 
 in a list in the slot named 'calcVarInfo'. (\code{object@calcVarInfo})

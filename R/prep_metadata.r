@@ -114,12 +114,12 @@ check_mdDefaultValues <- function(localEnv, tePaSH=NULL) {
 	#
 	#
 	slType <- le$sampleListType
-	if (all(slType == "def")) {
-		slType <- stn$imp_sampleListType
-	}
 	if (!is.null(slType)) {
 		if (length(slType) != 1 | !all(slType == pv_sampleListType)) { # only xls
 			stop(paste0("Please provide either 'NULL' or '", pv_sampleListType, "' to the variable 'sampleListType' in the metadata file."), call.=FALSE)
+		}
+		if (all(slType == "def")) {
+			slType <- stn$imp_sampleListType
 		}
 	}
 	assign("slType", slType, pos=parent.frame(n=1))

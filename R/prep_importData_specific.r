@@ -339,7 +339,109 @@ getNirData_Excel <- function(dataFile, stn) {
 	return(outList)
 } # EOF
 
+#########################################################
+## Yunosato styled .dat file ####
 
+# import from .dat file as styled by the Yunosato Aquaphotomics Lab, Japan
+# as discussed with their developer, the .dat file is to be styled as follows:
+# row starting with "#D" is the dimension: nr of columns and nr of observations / rows. e.g. "#D	25x30"
+# row starting with  "#C" the column names: "w" preceding the wavelengths, "*" preceding the class-variables, "$" preceding the numeric variables
+# subsequent rows starting with "#S": starting with one character as sample name, then the raw data
+# 		The sample name in the first element in all the #S rows is further structured, with individual elements being separated by a "_".
+#		e.g. "S1-1_3_20240212164741"
+# 		the last element is a date/time stamp
+#		the second-last element is the number of the consecutive scan
+#		all elements before that, may they include an "_" or not, are a user-defined sample name and will be used in a new class-variable called "ydSampleId"
+#		the required column holding the running sample number is called "$SampleNr"
+
+getNirDataPlusMeta_YunosatoDat <- function(dataFile, stn, yDatPref = "w", ydCPref = "*", ydYPref = "$", ydIdSep = "_", yDimSplit="x", saIdColn = gl_ydSampleIdColName) {
+	# the incoming dataFile is the path to the .dat file, we have to open the .dat file first
+	dimPref <- "#D"
+	colNpref <- "#C"
+	dPref <- "#S"
+	yPref <- stn$p_yVarPref
+	cPref <- stn$p_ClassVarPref
+	sampleNrColinDat <- paste0(ydYPref, stn$p_sampleNrCol)
+	sampleNrCol_Y <- paste0(yPref, stn$p_sampleNrCol)
+	saIdCnUse <- paste0(cPref, saIdColn)
+	conSNr_Y <- paste0(yPref, stn$p_conSNrCol)
+
+	#
+	##### read in the .dat file and get indices
+	fcon <- file(dataFile, open="r")
+    datChars <- readLines(fcon)   # read in the Yunosato .dat file
+    close(fcon)	
+    dimInd <- grep(dimPref, datChars) # the number of the character that has the dimension
+    cnInd <- grep(colNpref, datChars) # the number of the characters that has the colnum names
+	datInd <- grep(dPref, datChars) # all the characters that contain data !! still the sample ID in the first column
+    
+    ### get dimensions
+    dimChar <- datChars[dimInd]
+	dimChar <- trimws(gsub(pattern=paste0(dimPref, "\t"), "", dimChar))
+	bbb <- strsplit(dimChar,split = yDimSplit)[[1]] # (get out of the list)
+	colDim <- as.numeric(bbb[1])
+	rowDim <- as.numeric(bbb[2])
+	
+	### get columns
+	colChar <- datChars[cnInd] # the one row (character vector) that contains all the column names
+	colChar <- strsplit(colChar, "\t")[[1]][-1] # leave out the first, it MUST be the #C
+	datColInd <- startsWith(colChar, yDatPref)
+	dataCols <- colChar[datColInd]
+	clInd <- startsWith(colChar, ydCPref)
+	classCols <- colChar[clInd]
+	numInd <-startsWith(colChar,ydYPref)
+	numCols <- colChar[numInd]
+	# replace yunosato prefix with aquap2 prefix
+	classCols <- sub(ydCPref, cPref, classCols, fixed=TRUE)
+	numCols <- sub(ydYPref, yPref, numCols, fixed=TRUE)	# fixed does the magic
+	if (! sampleNrCol_Y %in% numCols) {
+		stop(paste0("Sorry, it appears that the column '", sampleNrColinDat, "' for the running sample number in your .dat file is missing. \nPlease modify your .dat file and re-import."), call.=FALSE)
+	} # end if
+	
+	### get the NIR data and extract the sample IDs
+	onlyData <- datChars[datInd]
+	onlyData <- strsplit(onlyData, split="\t") # gives back a list with a vector of strings for each row in each list element
+	sampleIds <- unlist(lapply(onlyData, function(x) x[2])) # get out the sample IDs
+	onlyData <- lapply(onlyData, function(x) x[-c(1,2)]) # only leave the real data: first the NIR data, then the columns
+	
+	### split up the sample IDs
+	idSplit <- strsplit(sampleIds, "_")
+	timestamp <- unlist(lapply(idSplit, function(x) x[length(x)])) # the last is the timestamp
+	timestamp <- as.data.frame(strptime(timestamp, format="%Y%m%d%H%M%S"))
+	colnames(timestamp) <- "timestamp"
+	conSNr <- as.numeric(unlist(lapply(idSplit, function(x) x[(length(x)-1)]))) # the second last is the nr of consecutive scan
+	conSNr <- as.data.frame(conSNr)
+	colnames(conSNr) <- conSNr_Y
+	sampleIds <- unlist(lapply(idSplit, function(x) paste(x[1:(length(x)-2)], collapse="_"))) # should catch all additional splits in the ID, if there might be an "_" inside
+
+	# ok, so now we have the column names, the timestamp, the consec. scan number and the sample ID
+	### lets get the data
+	odDf <- do.call(rbind.data.frame, onlyData)
+	NIR <- apply(odDf[,datColInd], 2, as.numeric) # gives back a matrix
+	colnames(NIR) <- dataCols
+	rownames(NIR) <- sampleIds
+	
+	# get the class and numerics
+	sampleNr <- timePoints <- ecrm <- repl <- group <- temp  <- relHum <- C_cols <- Y_cols <- allC_var <- allY_var <- NULL
+	if (any(clInd)) {
+		allC_var <- as.data.frame(odDf[,clInd]) # as.data.frame is reduntant here... 
+		allC_var <- cbind(allC_var, as.data.frame(sampleIds))
+		colnames(allC_var) <- c(classCols, saIdCnUse)
+	} # end if 	
+	if (any(numInd)) { # so we have at least one in class or numeric
+		allY_var <- odDf[,numInd]
+		colnames(allY_var) <- numCols
+		allY_var <- as.data.frame(apply(allY_var, 2, as.numeric))
+		allY_var <- cbind(allY_var, conSNr)
+	} # end if
+	#
+	slType <- get(".slType", pos=gl_ap2GD) ## .slType gets assigned in readHeader_checkDefaults
+	imp_searchAskColumns(allC_var, allY_var, slType, oT=TRUE) # assigns all the necessary list elements except NIR, info and timestamp in this frame !!!
+	info <- list(nCharPrevWl=length(yDatPref))
+	outList <- list(sampleNr=sampleNr, conSNr=conSNr, timePoints=timePoints, ecrm=ecrm, repl=repl, group=group, temp=temp, relHum=relHum, C_cols=C_cols, Y_cols=Y_cols, timestamp=timestamp, info=info, NIR=NIR)
+#	print(str(outList)); print("-----outlist----")
+	return(outList)	
+} # EOF
 ##########################################################################
 
 

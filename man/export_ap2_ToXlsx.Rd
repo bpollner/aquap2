@@ -48,6 +48,7 @@ export_ap2_ToXlsx(fd, md=getmd(expName="otherName"))
 Other Helper Functions: 
 \code{\link{ap2_settings_setup}()},
 \code{\link{ap2dme}()},
+\code{\link{export_header_toXls}()},
 \code{\link{genFolderStr}()},
 \code{\link{genNoiseRecExp}()},
 \code{\link{genTempCalibExp}()},

@@ -1,4 +1,4 @@
-# Version 0.5.0
+# Version 0.5.1
 ## New:
 * Started with testing
 * Started with GitHub page
@@ -10,10 +10,13 @@
 * The Metadata file now contains a variable for the sample list type, the temperature and humidity log file and for multiplying the rows within the sample list. Thus it is possible to encode all required information to import data statically in the metadata file, thus being able to call `gfd()` without additional parameters.
 * Added exporting of full dataset to xlsx.
 * Added importing from xlsx rawdata: Can be either NIR only, or NIR + header. 
+* Added possibility to export only the header to xlsx. 
+* Added import function for Yunosato Aquaphotomics lab styled .dat file. 
 
 ## Improved:
 * Removed dependency from package `ChemometricsWithR` (is not available on CRAN any more)
 * Completely overhauled the creation of the sample list: A xlsx file is used now to define the class and numerical variables.
+* Improved import when importing from raw-data file AND sample list file. Double columns now simply get deleted.
 
 ## Bugfix:
 
