@@ -148,7 +148,7 @@ autoUpS <- function(cfs=getstn()$defCfs) {
 #' @title Test for Uniset
 #' @description Is testing if the uniset integration is set up correctly.
 #' @return A list of length 4.
-#  #' @export
+#' @export
 testUniset <- function() {
 	uniset::uniset_test(uniset_handover)
 } # EOF
