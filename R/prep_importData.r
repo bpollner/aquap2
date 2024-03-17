@@ -984,10 +984,12 @@ export_header_toXls <- function(dataset, md=getmd(), asSlIn=FALSE, rowns=TRUE) {
 	outDf <- getHeader(dataset)
 	if (!stn$allSilent) {cat(paste0("Writing the header to xlsx... "))}
 	openxlsx::writeData(wb, sheet=dataSheet, outDf, rowNames=haveRows)	
+	finaShow <- paste0(filename, ".xlsx")
 	path <- paste0(fn_sampleLists, "/", fn_sampleListIn, "/", filename, ".xlsx")
 	ok <- openxlsx::saveWorkbook(wb, path, overwrite = TRUE, returnValue=TRUE)
 	if (ok & !stn$allSilent) {
 		cat(paste0("done.\n"))
+		cat(paste0("The file '", finaShow, "' has been written to '", fn_sampleLists, "/", fn_sampleListIn, "\n"))
 		return(invisible(TRUE))
 	} else {
 		message(paste0("Sorry, the xlsx file '", filename, "' could not be saved.\n"))

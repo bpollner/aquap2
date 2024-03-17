@@ -402,8 +402,23 @@ test_that("gfd - from xlsx: from here or there", {
 }) # EOT
 
 
-# continue here with Yunosato .dat import
+############ continue here with Yunosato .dat import
+############# YunosatoDat.dat
 
+# first set it up
+yunoDatHome <- "yunoDat@home"
+eWhere <- rootF
+eNa <- "yunoDat"
+test_that("ap2dme - setup yunoDat", { 
+  expect_true(ap2dme(eWhere, eNa, sh=tePaSH))
+  expect_null(ap2dme(eWhere, eNa, sh=tePaSH))
+}) # EOT
+setwd(paste0(rootF, "/", yunoDatHome)) 
+
+# all the yunosatoDat specific things are in the metadata of the downloaded experiment
+test_that("gfd - YunosatoDat.dat", {
+  expect_output(gfd(ttl=FALSE), "Dataset saved")
+})
 
 
 # now get fancy: 
