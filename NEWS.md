@@ -12,6 +12,7 @@
 * Added importing from xlsx rawdata: Can be either NIR only, or NIR + header. 
 * Added possibility to export only the header to xlsx. 
 * Added import function for Yunosato Aquaphotomics lab styled .dat file. 
+* Added possibility to automatically remove double columns during data import.
 
 ## Improved:
 * Removed dependency from package `ChemometricsWithR` (is not available on CRAN any more)

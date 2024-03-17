@@ -271,10 +271,11 @@ if (!ok) {stop("File copy error")}
 ok <- file.copy(paste0(ptp, "/testHelpers/sl_in/LBWB-in.xlsx"), 
           paste0(rootF, "/", LBWBhome, "/sampleLists/sl_in/LBWB-in.xlsx"), overwrite=TRUE)
 if (!ok) {stop("File copy error")}
+
 # we now have an erronous sample list file in place that has double columns
-# but it is possible to import !!
-test_that("gfd - double column", { 
-  expect_output(gfd(ttl=F, sh=tePaSH), "Dataset saved")
+test_that("gfd - double column", {
+  expect_error(gfd(ttl=F, sh=tePaSH, remDC=FALSE))
+  expect_output(gfd(ttl=F, sh=tePaSH), "1 double column has been removed")
 }) # EOT
 
 # copy back the good one
@@ -390,16 +391,18 @@ test_that("gfd - from xlsx: Fusion", {
   expect_output(gfd(filetype = "xls", ttl=F, md=getmd(expName=en), slType = slt), "Dataset saved")
 }) # EOT
 
-
 test_that("gfd - from xlsx: from here or there", { 
-  en <- "LBWB_full"; slt="xls" # all double
-  expect_output(gfd(filetype = "xls", ttl=F, md=getmd(expName=en), slType = slt), "Dataset saved")
+  en <- "LBWB_full"; slt="xls" #  all double
+  expect_error(gfd(filetype = "xls", ttl=F, md=getmd(expName=en), slType = slt, remDC=FALSE))  
+  expect_output(gfd(filetype = "xls", ttl=F, md=getmd(expName=en), slType = slt), "10 double columns")
   en <- "LBWB_full"; slt=NULL # ok (take all from xlsx)
   expect_output(gfd(filetype = "xls", ttl=F, md=getmd(expName=en), slType = slt), "Dataset saved")
   en <- "LBWB_NIR"; slt="xls" # ok (take all from sample list)
   expect_output(gfd(filetype = "xls", ttl=F, md=getmd(expName=en), slType = slt), "Dataset saved")
 }) # EOT
 
+
+# continue here with Yunosato .dat import
 
 
 

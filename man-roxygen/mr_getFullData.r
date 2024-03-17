@@ -135,6 +135,14 @@
 #' as detected in the scope of the complete dataset will be added to the dataset.
 #' @param sh Character length one. Manual path to settings home. Can and should 
 #' be left at the default \code{NULL}.
+#' @param remDC Logical. Takes its factory-fresh default value \code{TRUE} 
+#' from the key \code{imp_remDoubleCols} in the settings.R file. \code{remDC} 
+#' defines if columns with identical names should be removed automatically at 
+#' the time of data import. Double columns can arise from the same column 
+#' being present in the rawdata file (e.g. as possible in the case when importing 
+#' from filetype \code{YunosatoDatFile.dat}) AND in the sample list file. If 
+#' \code{remDC} is set to \code{FALSE}, importing double columns will throw an 
+#' error and the import will be stopped. 
 #' @section Import from xlsx: 
 #' For the raw spectra to be imported from a xlsx file, a few prerequisites have
 #' to be fulfilled. It is recommended to look at the file structure of

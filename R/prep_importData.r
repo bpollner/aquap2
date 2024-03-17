@@ -358,8 +358,8 @@ gfd_getExpNameNoSplit <- function(metadata, nRows) {
 	assign("noSplit", noSplit, pos=parent.frame(n=1))
 } # EOF
 
-gfd_checkRemoveDoubleColumns <- function(header, spectraFilePath=NULL, headerFilePath=NULL, slType=NULL) {
-#	return(header)	
+gfd_checkRemoveDoubleColumns <- function(header, spectraFilePath=NULL, headerFilePath=NULL, slType=NULL, remDC=TRUE, remMsg=TRUE) {
+#	return(header)
 	collect  <-  NULL
 	patterns <- paste(".", 1:12, sep="")
 	allCns <- colnames(header)
@@ -386,24 +386,31 @@ gfd_checkRemoveDoubleColumns <- function(header, spectraFilePath=NULL, headerFil
 	collect <- makeKollekte(allCns, patterns)
 #	dblCns <- allCns[sort(collect)]
 	if (is.null(collect)) {
-		headerClean <- header # so no doubles
+		return(header)
 	} else {
-		headerClean <- header[,-collect] # we had doubles
-	} # end else
+		if (remDC) { # so we want to remove double columns
+			if (remMsg) {
+				leco <- length(collect)
+				if (leco == 1) {add <- " has"} else {add <- "s have"} 
+				msg <- paste0("   ** ",leco, " double column", add, " been removed from the dataset. **\n")
+				cat(msg)
+			} # end if remMsg
+			return( header[,-collect])		# #	headerClean <- header[,-collect] # we had doubles
+		} else { # so no removing of double columns, go towards error
+			if (is.null(slType)) {
+				files <- paste("\"", spectraFilePath, "\"", sep="")		
+			} else {
+ 				files <- paste("\"", headerFilePath, "\" and ", "\"", spectraFilePath, "\".", sep="")
+			} # end else
+			cols <- paste(allCns[collect], collapse=", ")
+			leco <- length(collect)
+			if (leco == 1) {add <- " column seems"} else {add <- " columns seem"} 
+			msg <- paste("The following ", length(allCns[collect]), add, " to appear more than once: \n", cols,"\n-----------------\nPlease check the files used for importing data, that is \n", files, "\n-----------------\n", sep="")
+			msg2 <- paste("Alternatively, you can set 'remDC' in the import function 'gfd()' to TRUE")
+			stop(c(msg,  msg2), call.=FALSE)	
+		} # end else remDC		
+	} # end else is.null
 #	print("---------");print(colnames(headerClean)); print(length(colnames(headerClean))); print("---------");
-	return(headerClean)
-	
-	### go towards stop - NOT in use any more
-	if (!is.null(collect)) {
-		if (is.null(slType)) {
-			files <- paste("\"", spectraFilePath, "\"", sep="")		
-		} else {
- 			files <- paste("\"", headerFilePath, "\" and ", "\"", spectraFilePath, "\".", sep="")
-		}
-		cols <- paste(allCns[collect], collapse=", ")
-		msg <- paste("Some columns seem to appear twice: \n", cols,"\nPlease check the files used for importing data, that is \n", files, sep="")
-		stop(msg, call.=FALSE)
-	} # end if
 } # EOF
 
 gfd_importData <- function() {
@@ -711,8 +718,11 @@ gfd_checkOverwrite_sl_trh_multRows <- function(md, slType, trhLog, multiplyRows)
 # get full data ---------------------------------------------------------------
 #' @template mr_getFullData
 #' @export
-getFullData <- function(md=getmd(), filetype="def", slType="def", trhLog="def", multiplyRows="def", ttl=TRUE, stf=TRUE, naString="NA", dol="def", sh=NULL) {
+getFullData <- function(md=getmd(), filetype="def", slType="def", trhLog="def", multiplyRows="def", ttl=TRUE, stf=TRUE, naString="NA", dol="def", sh=NULL, remDC=getstn()$imp_remDoubleCols) {
 	stn <- autoUpS()
+	if (is.null(remDC)) { # that could happen in case a user did not yet call any update settings functions, and there´s still an old version of the settings.R file present
+		remDC <- TRUE # the default is to remove double columns
+	} # end if
 	gfd_checkLoadSaveLogic(ttl, stf)
 	gfd_checkMetadata(md)
 	dataset <- NULL
@@ -755,11 +765,11 @@ getFullData <- function(md=getmd(), filetype="def", slType="def", trhLog="def", 
 	headerFusion <- turnStringsIntoFactors(headerFusion) # see 2 lines above
 	check_conScanColumn(headerFusion, headerFilePath, spectraFilePath, slType, filetype) 
 	# ? check for existence of sample number column as well ?
-	headerFusion <- gfd_checkRemoveDoubleColumns(headerFusion, spectraFilePath, headerFilePath, slType)
+	headerFusion <- gfd_checkRemoveDoubleColumns(headerFusion, spectraFilePath, headerFilePath, slType, remDC)
 	headerFusion <- gfd_importMakeTRH_alignment(headerFusion, trhLog)
 	if (stn$imp_autoCopyYvarsAsClass) {  # if TRUE, copy all columns containing a Y-variable as class variable
-		headerFusion <- copyYColsAsClass(headerFusion)
-		headerFusion <- gfd_checkRemoveDoubleColumns(headerFusion) # because if we exported header to sample list, we already have the Y as C copied elements here.
+		headerFusion <- copyYColsAsClass(headerFusion) # remMsg=FALSE: we do not want to hear about removing all the copied stuff. just upstairs is enough. 
+		headerFusion <- gfd_checkRemoveDoubleColumns(headerFusion, remDC=remDC, remMsg=FALSE) # because if we exported header to sample list, we already have the Y as C copied elements here.
 	}
 	headerFusion <- remakeTRHClasses_sys(headerFusion)
 	colRep <- extractClassesForColRep(headerFusion)		## the color representation of the factors
@@ -790,8 +800,8 @@ getFullData <- function(md=getmd(), filetype="def", slType="def", trhLog="def", 
 
 #' @rdname getFullData
 #' @export
-gfd <- function(md=getmd(), filetype="def", slType="def", trhLog="def", multiplyRows="def", ttl=TRUE, stf=TRUE, naString="NA", dol="def", sh=NULL) {
-	return(getFullData(md, filetype, slType, trhLog, multiplyRows, ttl, stf, naString, dol, sh))
+gfd <- function(md=getmd(), filetype="def", slType="def", trhLog="def", multiplyRows="def", ttl=TRUE, stf=TRUE, naString="NA", dol="def", sh=NULL, remDC=getstn()$imp_remDoubleCols) {
+	return(getFullData(md, filetype, slType, trhLog, multiplyRows, ttl, stf, naString, dol, sh, remDC))
 } # EOF
 
 
