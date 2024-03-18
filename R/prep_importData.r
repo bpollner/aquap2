@@ -64,7 +64,7 @@ readSpec_checkDefaults <- function(possibleFiletypes, md, filetype, naString, sh
 readSpectra <- function(md=getmd(), filetype="def", naString="NA", sh=NULL) {
 	stn <- autoUpS()
 	possibleFiletypes <- pv_filetypes #global constant, they get handed down to the checking function !  	
-# 	pv_filetypes <- c("vision_NSAS.da", "tabDelim.txt", "Pirouette.pir", "xls", "YunosatoDat.dat")
+#	pv_filetypes <- c("vision_NSAS.da", "tabDelim.txt", "Pirouette.pir", "xls", "YunosatoDatFile.dat", "MicroNIR.csv")
 	filename <- NULL # will be changed in the checking
 	readSpec_checkDefaults(possibleFiletypes, md, filetype, naString, sh)
 	rawFolder <- stn$fn_rawdata
@@ -95,7 +95,12 @@ readSpectra <- function(md=getmd(), filetype="def", naString="NA", sh=NULL) {
 		aaa <- paste(folderFile, ".dat", sep="")
 		assign("spectraFilePath", aaa, pos=parent.frame(n=1))
  		return(getNirDataPlusMeta_YunosatoDat(aaa, stn)) # per definition, the Yunosato .dat file contains raw spectra AND class and numeric variables
-	}	 
+	}	
+	if (filetype == possibleFiletypes[6]) {
+		aaa <- paste(folderFile, ".csv", sep="")
+		assign("spectraFilePath", aaa, pos=parent.frame(n=1))
+ 		return(getNirData_microNIR(aaa, stn)) # 
+	}
 	## if nothing of the above happend, then we must have (checked!) the path to a valid custom .r file in "filetype" 
 	custName <- strsplit(filetype, "custom@")[[1]][2]
 	if (is.null(sh)) { # the normal case
@@ -221,7 +226,7 @@ gfd_makeNiceColumns <- function(specImp) {
 	relHumColn <- stn$p_RHCol
 	absTime <- stn$p_absTime
 	chron <- stn$p_chron
-
+	tiStaColName <- gl_timestamp_column_name
 	nr <- nrow(specImp$NIR)
 	##
 	if (!is.null(specImp$sampleNr)) {
@@ -305,15 +310,14 @@ gfd_makeNiceColumns <- function(specImp) {
 	if (!is.null(specImp$timestamp)) {
 		if (stn$imp_makeTimeDistanceColumn) {
 			startDate <- as.POSIXct(stn$imp_startDate)
-			startDateNr <- as.double(startDate)
-			a <- unclass(specImp$timestamp[,1])
-			MinuteTimStamp <- as.numeric(round((a - startDateNr)/60, 2))
-			chrons <- data.frame(absTime=MinuteTimStamp, chron=1:length(MinuteTimStamp))
-			timestamp <- specImp$timestamp
+			startDateNr <- unclass(startDate)
+			a <- unclass(specImp$timestamp[,1]) # OK
+			deltaT <- (a - startDateNr)
+			chrons <- data.frame(absTime=deltaT, chron=1:length(deltaT))
 			specImp$timestamp <- cbind(specImp$timestamp, chrons)
-			colnames(specImp$timestamp) <- c("Timestamp", paste0(yPref, absTime), paste0(yPref, chron))
+			colnames(specImp$timestamp) <- c(tiStaColName, paste0(yPref, absTime), paste0(yPref, chron))
 		} else {
-			colnames(specImp$timestamp) <- "Timestamp"		
+			colnames(specImp$timestamp) <- tiStaColName		
 		}
 	} else {
 		specImp$timestamp <- data.frame(DELETE = rep(NA, nr))

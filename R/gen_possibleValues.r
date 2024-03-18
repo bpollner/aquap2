@@ -94,7 +94,7 @@ pv_tripleDotsMod <- c(pv_modifyUCL, pv_modifyDPT, pv_modifyPCA, pv_modifySIMCA, 
 ##############
 
 ## import, filetype etc.
-pv_filetypes <- c("vision_NSAS.da", "tabDelim.txt", "Pirouette.pir", "xls", "YunosatoDatFile.dat")
+pv_filetypes <- c("vision_NSAS.da", "tabDelim.txt", "Pirouette.pir", "xls", "YunosatoDatFile.dat", "MicroNIR.csv")
 
 
 ## Data pre-treatment moduls

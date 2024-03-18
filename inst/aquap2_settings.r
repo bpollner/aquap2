@@ -76,7 +76,7 @@ settings <- list(
 
 	## Import Data
 	imp_specFileType = "vision_NSAS.da",	## the filetype of the spectral data. Refer to the help for 'getFullData'  for possible values
-	imp_startDate = "2013-11-01 00:00:00",	## the start-date used to calculate the absolute number of minutes since then
+	imp_startDate = "2023-06-01 00:00:00",	## the start-date used to calculate the absolute number of minutes since then
 	imp_sampleListType = "xls", 			## the filetype of the sample list in the sampleLists/sl_in folder. Please refer to the help for "getFullData" for possible values.
 	imp_multiplyRows = "auto",				## if all the rows in the sample list should be multiplied by the number of consecutive scans.
 	imp_remDoubleCols = TRUE, 				## if double columns should be automatically removed at the time of data import. Double columns can arise from the same column being e.g. present in the rawdata file AND in the sample list file. If imp_remDoubleCols is set to FALSE, importing double columns will throw an error and the import will be stopped. 

@@ -444,6 +444,15 @@ getNirDataPlusMeta_YunosatoDat <- function(dataFile, stn, yDatPref = "w", ydCPre
 } # EOF
 ##########################################################################
 
+#### import from MicroNIR.csv
+getNirData_microNIR <- function(dataFile, stn) {
+	
+	
+} # EOF
+
+
+
+
 
 # Temp & relHum from ESPEC -----------------------------------------------
 importTRH_ESPEC <- function(path) {
