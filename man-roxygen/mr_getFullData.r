@@ -143,6 +143,10 @@
 #' from filetype \code{YunosatoDatFile.dat}) AND in the sample list file. If 
 #' \code{remDC} is set to \code{FALSE}, importing double columns will throw an 
 #' error and the import will be stopped. 
+#' @param rawOnlyNIR Logical. If class- and numerical variables that got possibly 
+#' imported from within a raw data file should be discarded. Defaults to 
+#' \code{FALSE}. Set to \code{TRUE} to only import the NIR (and a possible 
+#' timestamp) from the rawdata file. 
 #' @section Import from xlsx: 
 #' For the raw spectra to be imported from a xlsx file, a few prerequisites have
 #' to be fulfilled. It is recommended to look at the file structure of

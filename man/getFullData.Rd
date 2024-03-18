@@ -16,7 +16,8 @@ getFullData(
   naString = "NA",
   dol = "def",
   sh = NULL,
-  remDC = getstn()$imp_remDoubleCols
+  remDC = getstn()$imp_remDoubleCols,
+  rawOnlyNIR = FALSE
 )
 
 gfd(
@@ -30,7 +31,8 @@ gfd(
   naString = "NA",
   dol = "def",
   sh = NULL,
-  remDC = getstn()$imp_remDoubleCols
+  remDC = getstn()$imp_remDoubleCols,
+  rawOnlyNIR = FALSE
 )
 }
 \arguments{
@@ -159,6 +161,11 @@ being present in the rawdata file (e.g. as possible in the case when importing
 from filetype \code{YunosatoDatFile.dat}) AND in the sample list file. If 
 \code{remDC} is set to \code{FALSE}, importing double columns will throw an 
 error and the import will be stopped.}
+
+\item{rawOnlyNIR}{Logical. If class- and numerical variables that got possibly 
+imported from within a raw data file should be discarded. Defaults to 
+\code{FALSE}. Set to \code{TRUE} to only import the NIR (and a possible 
+timestamp) from the rawdata file.}
 }
 \value{
 An object of class 'aquap_data' containing a data frame and six slots:

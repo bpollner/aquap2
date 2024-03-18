@@ -22,7 +22,9 @@ ttap <- function(obj, md=getmd(), dol=TRUE, ncpwl=1, reduceTRH=FALSE, stf=TRUE) 
 	class(header) <- "data.frame"
 	outliers <- flagOutliers_allScope(obj$NIR, detectOutliers=dol)
 	header <- cbind(header, outliers)
-	header <- copyYColsAsClass(header)
+	aaa <- copyYColsAsClass(header)
+		header <- aaa$headerExt
+		copiedCols <- aaa$newColnames
 	if (reduceTRH) {
 		header <- remakeTRHClasses_sys(header)
 	}

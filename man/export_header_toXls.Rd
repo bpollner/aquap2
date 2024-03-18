@@ -4,7 +4,13 @@
 \alias{export_header_toXls}
 \title{Export Header to Xls}
 \usage{
-export_header_toXls(dataset, md = getmd(), asSlIn = FALSE, rowns = TRUE)
+export_header_toXls(
+  dataset,
+  md = getmd(),
+  asSlIn = FALSE,
+  rowns = TRUE,
+  cutCCC = TRUE
+)
 }
 \arguments{
 \item{dataset}{An object of class 'aquap_data'}
@@ -20,6 +26,10 @@ warning!}
 
 \item{rowns}{Logical. If rownames should be exported as well. Defaults to 
 \code{TRUE}.}
+
+\item{cutCCC}{Logical. If the numeric columns possibly copied as class 
+variables during rawdata import should be omitted. Defaults to \code{TRUE}.
+(cutCCC: 'cut copied C-Cols')}
 }
 \value{
 \code{TRUE} if the operation was successful, \code{FALSE} if not. 

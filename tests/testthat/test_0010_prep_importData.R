@@ -420,6 +420,22 @@ test_that("gfd - YunosatoDat.dat", {
   expect_output(gfd(ttl=FALSE), "Dataset saved")
 })
 
+# first export the header to sample list
+test_that("export header to sample list: export_header_toXls", {
+  fd <- gfd()
+  expect_output(export_header_toXls(fd, asSlIn = FALSE), "ysd1_fromHeader")
+  expect_output(export_header_toXls(fd, asSlIn = TRUE), "ysd1-in.xlsx")
+})
+
+# we now have a sample list in place, 
+# now re-import under different conditions
+test_that("export header to sample list: export_header_toXls", {
+  expect_output(gfd(ttl=FALSE, slType="xls", remDC=TRUE, rawOnlyNIR=TRUE), "double columns")
+  expect_error(gfd(ttl=FALSE, slType="xls", remDC=FALSE, rawOnlyNIR=TRUE))
+  erMsg <- "not have a column for the nr of the consecutive scan"
+  expect_error(gfd(ttl=FALSE, slType=NULL, remDC=FALSE, rawOnlyNIR=TRUE), erMsg)
+})
+
 
 # now get fancy: 
 # import from other data sources / formats, 

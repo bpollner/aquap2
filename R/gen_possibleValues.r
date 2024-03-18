@@ -30,6 +30,8 @@ gl_xlsx_ncolHeader_name <- "ncol_header"
 gl_xlsx_rownamesAsFirstColumn <- "rownamesAsFirstColumn"
 gl_xlsx_ncpwlColumn <- "ncpwl"
 
+gl_timestamp_column_name <- "Timestamp"
+
 
 ## regarding Aquagram
 pv_AquagramModes <- c("classic", "classic-diff", "sfc", "sfc-diff", "aucs", "aucs-diff", "aucs.tn", "aucs.tn-diff", "aucs.tn.dce", "aucs.tn.dce-diff", "aucs.dce",  "aucs.dce-diff")
@@ -100,7 +102,7 @@ pv_dptModules <- c("sgol", "snv", "msc", "emsc", "osc", "deTr", "gsd")
 pv_extraMods <- "extraMods"
 
 ## the version of the dataset
-pv_versionDataset <- "0.1.4"   # change this only!! if the structure of the dataset has been changed !! XXX
+pv_versionDataset <- "0.5.1"   # change this only!! if the structure of the dataset has been changed !! XXX
 
 pv_initialTempCalibFilename <- "TempCalib"
 pv_YcolumnNameSampleTemp <- "smpTemp"
