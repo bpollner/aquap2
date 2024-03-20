@@ -207,7 +207,7 @@ gfd_check_imports <- function(specImp) {
 	a <- as.numeric(substr(colnames(specImp$NIR), ncpwl+1, nchar(colnames(specImp$NIR))))
 	options(warn = 0)
 	if (any(is.na(a))) {
-		stop("There is an error with the column names of the NIR spectra representing the wavelength. \nMaybe not all columns do have the same number of characters before the wavelength, or some wrong columns are assigned to the NIR columns. \nPlease check in the import function if the provided number of characters before the wavelength is correct, and if the column names of the NIR data are correct as well.", call.=FALSE)
+		stop("There is an error with the column names of the NIR spectra representing the wavelength. \nMaybe not all columns do have the same number of characters before the wavelength, or some wrong columns are assigned to the NIR columns, what can happen if the number of columns in the metadata xls sheet is not set correctly. \nPlease check in the import function if the provided number of characters before the wavelength is correct, and if the column names of the NIR data are correct as well.", call.=FALSE)
 	}
 	return(invisible(NULL))
 } # EOF
@@ -976,13 +976,13 @@ export_ap2_ToXlsx <- function(dataset, md=getmd(), onlyNIR=FALSE, rowns=TRUE) {
 		ncolHeader <- 0
 		rowsAsFirstCol <- haveRows		
 		outDf <- as.data.frame(cbind(as.matrix(dataset$NIR)))
-		openxlsx::writeData(wb, sheet=dataSheet, outDf, rowNames=haveRows)		
 	} else {	
 		ncolHeader <- ncol(dataset$header)
 		rowsAsFirstCol <- haveRows
 		outDf <- as.data.frame(cbind(as.matrix(dataset$header), as.matrix(dataset$NIR)))
-		openxlsx::writeData(wb, sheet=dataSheet, outDf, rowNames=haveRows)
 	} # end else
+	openxlsx::writeData(wb, sheet=dataSheet, outDf, rowNames=haveRows)
+	#
 	metaSheet <- paste0(expName, metaSSfx)
 	metaDf <- data.frame(x=ncolHeader, y=rowsAsFirstCol, z=ncpwl)
 	colnames(metaDf) <- c(ncolHeader_name, rownamesAsFirstColumn, colnameNCPWL)
@@ -1074,8 +1074,18 @@ export_header_toXls <- function(dataset, md=getmd(), asSlIn=FALSE, rowns=TRUE, c
 
 } # EOF
 
-importExport_raw_toXls <- function(md=getmd(), filetype="def") {
-	# could be like calling gfd() with slType=NULL, then exporting all we got in to xls
+#' @title Import Raw, Export to Xls
+#' @description Imports a given rawdata file in any of the supported formats, 
+#' reads in the Timestamps (if present) and exports the content (NIR spectra 
+#' and any class- and numerical variables) immediately to xlsx. Most checks 
+#' that are done when calling 'gfd()' will be omitted. This function can be 
+#' helpful if you want to just get your hands on the rawdata.
+#' @inheritParams getFullData
+#' @return Returns (invisible) the obtained data. Mainly used for its side-effects, 
+#' i.e. to directly export rawdata to xlsx.
+#' @export
+importExport_raw_toXls <- function(md=getmd(), filetype="def", sh=NULL) {
+	stn <- autoUpS()
 	slType <- NULL
 	trhLog <- FALSE
 	ttl <- FALSE
@@ -1086,20 +1096,76 @@ importExport_raw_toXls <- function(md=getmd(), filetype="def") {
 	rawOnlyNIR <- FALSE
 	checkThings <- FALSE
 	naString <- "NA"
+	#
+	fn_rawdata <- stn$fn_rawdata
+	tiStaName <- gl_timestamp_column_name
+	dataSheetSfx <- gl_xlsx_DataSheetSuffix
+	metaSSfx <- gl_xlsx_metaSheetSuffix	
+	colnameNCPWL <- gl_xlsx_ncpwlColumn
+	ncolHeader_name <- gl_xlsx_ncolHeader_name
+	rownamesAsFirstColumn <- gl_xlsx_rownamesAsFirstColumn
+	haveRows <- TRUE
+	wsZoom <- 120
+	#
 	assign(".slType", slType, pos=gl_ap2GD)
+	dirRawSufx <- "_directRaw" 
 	#
 	checkForPresenceOfData()
   	gfd_checkOverwrite_sl_trh_multRows(md, slType, trhLog, multiplyRows) # is possible re-assigning: slType, trhLog, multiplyRows
 	gfd_check_trhLog_defaults(trhLog)
 	#	
-	si <- readSpectra(md, filetype, naString)
+	si <- readSpectra(md, filetype, naString, sh)
 	si <- gfd_makeNiceColumns(si) # makes all column names, transforms Y-variables to numeric
+	if (!is.null(si$timestamp)) {
+		if (ncol(si$timestamp) > 1) {
+			si$timestamp <- si$timestamp[,tiStaName, drop=FALSE] # kick out Y_absTime and Y_chron			
+		} #end if
+	} # end if
 	nonNir <- cbind(si$sampleNr, si$conSNr, si$timePoints, si$ecrm, si$repl, si$group, si$C_cols, si$Y_cols, si$temp, si$relHum, si$timestamp, stringsAsFactors=TRUE) # stringsAsFactors problem with the changed defaults in R 4.x --> but does not help here !!
 	indDel <- which(colnames(nonNir) == "DELETE")
-	nonNir <- nonNir[,-indDel]
-
-	return(nonNir)
-	
+	nonNir <- nonNir[,-indDel] # if there is no nonNir, data 'nonNir' comes in as data frame with zero columns
+	NIR <- si$NIR
+	######
+	if (!stn$allSilent) {cat(paste0("Writing rawdata to xlsx... "))}
+	#
+	# we have to check how nonNir behaves when we only have spectra in the dataset
+	expName <- md$meta$expName
+	wb <- openxlsx::createWorkbook(expName)
+	ncpwl <- si$info$nCharPrevWl
+	dataSheet <- paste0(expName, dataSheetSfx)
+	openxlsx::addWorksheet(wb, sheetName=dataSheet, zoom=wsZoom)
+	ncolHeader <- ncol(nonNir)
+	rowsAsFirstCol <- haveRows
+	if (ncolHeader == 0) {
+		outDf <- as.data.frame(cbind(as.matrix(NIR)))
+	} else {	
+		outDf <- as.data.frame(cbind(as.matrix(nonNir), as.matrix(NIR)))
+	} # end else
+	openxlsx::writeData(wb, sheet=dataSheet, outDf, rowNames=haveRows)
+	#
+	metaSheet <- paste0(expName, metaSSfx)
+	metaDf <- data.frame(x=ncolHeader, y=rowsAsFirstCol, z=ncpwl)
+	colnames(metaDf) <- c(ncolHeader_name, rownamesAsFirstColumn, colnameNCPWL)
+	openxlsx::addWorksheet(wb, sheetName=metaSheet, zoom=wsZoom)	
+	openxlsx::writeData(wb, sheet=metaSheet, metaDf, rowNames=FALSE)
+	openxlsx::setColWidths(wb, sheet=metaSheet, cols = 1:ncol(metaDf), widths = "auto")	
+	pathOrig <- paste0(fn_rawdata, "/", expName, ".xlsx")
+	pathAdd <- paste0(fn_rawdata, "/", expName, dirRawSufx, ".xlsx")
+	if (file.exists(pathOrig)) {
+		fiNaAdd <- dirRawSufx
+		cat(paste0("\n   The file '", paste0(expName, ".xlsx' seems to exist in '", fn_rawdata, "'.\n   The exported file containing the direct rawdata will be renamed into \n   '", expName, dirRawSufx, ".xlsx'.\n")))
+		ok <- openxlsx::saveWorkbook(wb, pathAdd, overwrite = TRUE, returnValue=TRUE)
+	} else { # so the original file des exist (should only happen in case of xlsx, and that would be stupid to export the same xlsx into xlsx. But... well... )
+		fiNaAdd <- ""
+		ok <- openxlsx::saveWorkbook(wb, pathOrig, overwrite = FALSE, returnValue=TRUE)		
+	}
+	if (ok & !stn$allSilent) {
+		cat(paste0("done.\n"))
+	} else {
+		message(paste0("Sorry, the xlsx file '", paste0(expName, dirRawSufx, ".xlsx"), "' could not be saved.\n"))
+		return(invisible(FALSE))
+	} # end else
+	return(invisible(outDf))	
 } # EOF
 
 # refine header -------------------------------------------------------------
@@ -1582,6 +1648,7 @@ imp_searchAskColumns <- function(allC_var, allY_var, slType=get(".slType", pos=g
   		}
 	} # EOIF
 	##
+	
 	
 	for (k in 1: length(listElementNames)) { # to go first through the C-variables, then through the Y-variables
 		for (i in 1: length(listElementNames[[k]])) { # go through the single element name

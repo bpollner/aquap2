@@ -323,12 +323,19 @@ getNirData_Excel <- function(dataFile, stn) {
 		#
 		indC <- grep(cPref, colnames(header))
 		if (length(indC) > 0) {
-			allC_var <- header[,indC] # collect all C_ variables
+			allC_var <- header[,indC, drop=FALSE] # collect all C_ variables
 		} # end if
 		indY <- grep(yPref, colnames(header))
 		if (length(indY) > 0) {
-			allY_var <- header[,indY] # collect all Y_ variables
-		} # end if		
+			allY_var <- header[,indY, drop=FALSE] # collect all Y_ variables
+		} # end if
+		if (is.null(allC_var) & is.null(allY_var) & ncolHeader != 0) {
+ 			errMsg <- paste0("I am sorry, there was an error when trying to access the class- and \nnumerical varialbes in the dataset.. \nIn the sheet holding the metadata, the length of the header-block is specified. \nPlease make sure that the value stored therein truly represents the situation in the first sheet." )
+#			stop(errMsg, call.=FALSE)
+		} # end if
+	#	print("---------"); print(ncolHeader); print(allC_var); print(allY_var); print("---------");
+	#	print(class(allC_var)); print(class(allY_var))
+	#	print("---------");print(allC_var); print(allY_var); print("---------");
 		slType <- get(".slType", pos=gl_ap2GD) ## .slType gets assigned in readHeader_checkDefaults
 		imp_searchAskColumns(allC_var, allY_var, slType, oT=TRUE) # assigns all the necessary list elements except NIR, info and timestamp in this frame !!!
 	} # end if	
@@ -339,7 +346,7 @@ getNirData_Excel <- function(dataFile, stn) {
 	return(outList)
 } # EOF
 
-#########################################################
+##########################################################################
 ## Yunosato styled .dat file ####
 getNirDataPlusMeta_YunosatoDat <- function(dataFile, stn, yDatPref = "w", ydCPref = "*", ydYPref = "$", ydIdSep = "_", yDimSplit="x") {
 	# the incoming dataFile is the path to the .dat file, we have to open the .dat file first
@@ -627,6 +634,9 @@ getNirData_microNIR <- function(dataFile, stn) {
 
 
 
+
+##########################################################################
+##########################################################################
 
 # Temp & relHum from ESPEC -----------------------------------------------
 importTRH_ESPEC <- function(path) {
