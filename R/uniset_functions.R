@@ -97,8 +97,11 @@ updateSettings <- function(silent=FALSE) {
 		return(invisible(test_getLocalStn() ))
 	} # end if
 	#
-	stn <- uniset::uniset_updateSettings(get("uniset_handover"),
-		setupFunc="ap2_settings_setup", silent)
+	stn <- try(uniset::uniset_updateSettings(get("uniset_handover"),
+		setupFunc="ap2_settings_setup", silent), silent=TRUE)
+	if (is(stn, "try-error")) {
+		stop(gl_errMsgUniset, call.=FALSE)
+	} # end if
 	return(invisible(stn))
 } # EOF
 
@@ -118,8 +121,12 @@ getstn <- function() {
 		# gets returned as NULL if the file could not be sourced, that means
 		# 'updateSettings()' has not been called yet. Hence, we have to force the
 		# manual update here.
-		stn <- uniset::uniset_updateSettings(get("uniset_handover"),
-			setupFunc="ap2_settings_setup", silent=TRUE)
+		checkTransitToUniset_MaybeRenameSettingsFile()		
+		stn <- try(uniset::uniset_updateSettings(get("uniset_handover"),
+			setupFunc="ap2_settings_setup", silent=TRUE), silent=TRUE)
+		if (is(stn, "try-error")) {
+			stop(gl_errMsgUniset, call.=FALSE)
+		} # end if
 	} # end if
 	return(invisible(stn))
 } # EOF
@@ -139,8 +146,11 @@ autoUpS <- function(cfs=getstn()$defCfs) {
 		return(invisible(test_getLocalStn()))
 	} # end if
 	#
-	stn <- uniset::uniset_autoUpS(get("uniset_handover"),
-		setupFunc="ap2_settings_setup")
+	stn <- try(uniset::uniset_autoUpS(get("uniset_handover"),
+		setupFunc="ap2_settings_setup"), silent=TRUE)
+	if (is(stn, "try-error")) {
+		stop(gl_errMsgUniset, call.=FALSE)
+	} # end if		
 	return(invisible(stn))
 } # EOF
 

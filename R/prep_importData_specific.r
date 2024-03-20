@@ -341,21 +341,20 @@ getNirData_Excel <- function(dataFile, stn) {
 
 #########################################################
 ## Yunosato styled .dat file ####
-
-# import from .dat file as styled by the Yunosato Aquaphotomics Lab, Japan
-# as discussed with their developer, the .dat file is to be styled as follows:
-# row starting with "#D" is the dimension: nr of columns and nr of observations / rows. e.g. "#D	25x30"
-# row starting with  "#C" the column names: "w" preceding the wavelengths, "*" preceding the class-variables, "$" preceding the numeric variables
-# subsequent rows starting with "#S": starting with one character as sample name, then the raw data
-# 		The sample name in the first element in all the #S rows is further structured, with individual elements being separated by a "_".
-#		e.g. "S1-1_3_20240212164741"
-# 		the last element is a date/time stamp
-#		the second-last element is the number of the consecutive scan
-#		all elements before that, may they include an "_" or not, are a user-defined sample name and will be used in a new class-variable called "ydSampleId"
-#		the required column holding the running sample number is called "$SampleNr"
-
-getNirDataPlusMeta_YunosatoDat <- function(dataFile, stn, yDatPref = "w", ydCPref = "*", ydYPref = "$", ydIdSep = "_", yDimSplit="x", saIdColn = gl_ydSampleIdColName) {
+getNirDataPlusMeta_YunosatoDat <- function(dataFile, stn, yDatPref = "w", ydCPref = "*", ydYPref = "$", ydIdSep = "_", yDimSplit="x") {
 	# the incoming dataFile is the path to the .dat file, we have to open the .dat file first
+	########
+	# import from .dat file as styled by the Yunosato Aquaphotomics Lab, Japan
+	# as discussed with their developer, the .dat file is to be styled as follows:
+	# row starting with "#D" is the dimension: nr of columns and nr of observations / rows. e.g. "#D	25x30"
+	# row starting with  "#C" the column names: "w" preceding the wavelengths, "*" preceding the class-variables, "$" preceding the numeric variables
+	# subsequent rows starting with "#S": starting with one character as sample name, then the raw data
+	# 		The sample name in the first element in all the #S rows is further structured, with individual elements being separated by a "_".
+	#		e.g. "S1-1_3_20240212164741"
+	# 		the last element is a date/time stamp
+	#		the second-last element is the number of the consecutive scan
+	#		all elements before that, may they include an "_" or not, are a user-defined sample name and will be used in a new class-variable called "ydSampleId"
+	#		the required column holding the running sample number is called "$SampleNr"
 	dimPref <- "#D"
 	colNpref <- "#C"
 	dPref <- "#S"
@@ -363,7 +362,7 @@ getNirDataPlusMeta_YunosatoDat <- function(dataFile, stn, yDatPref = "w", ydCPre
 	cPref <- stn$p_ClassVarPref
 	sampleNrColinDat <- paste0(ydYPref, stn$p_sampleNrCol)
 	sampleNrCol_Y <- paste0(yPref, stn$p_sampleNrCol)
-	saIdCnUse <- paste0(cPref, saIdColn)
+	saIdCnUse <- paste0(cPref, gl_ydSampleIdColName)
 	conSNr_Y <- paste0(yPref, stn$p_conSNrCol)
 
 	#
@@ -444,12 +443,187 @@ getNirDataPlusMeta_YunosatoDat <- function(dataFile, stn, yDatPref = "w", ydCPre
 } # EOF
 ##########################################################################
 
-#### import from MicroNIR.csv
+##########################################################################
+##  import from MicroNIR.csv
 getNirData_microNIR <- function(dataFile, stn) {
+# descr ##### 
+	# first column contains the sample-id: asdfasdf-1.sam,
+	# ending with '-' and then the cons. scan nr. 
+	# are we sure the sample id before the '-' is unique? Yes. If same character
+	# gets put in again, the cons. scan nr continues where it stopped last.
+	# !! if the rest (all without the last '-1.sam') is only numbers, then use
+	# this as sample Number. 
+	# If it contains characters, fuse together, use as sample ID and generate the
+	# sample number via rle() from this sampleID.
+	#
+	# column names are prepended with an X. Only 'X' for the first column,
+	# X1300 (e.g.) for the wavelength.
+	# The rest is called 
+	# Instrument.Serial.Number Temperature            Notes            Timestamp
+	#
+	# rename the "Temperature" to "device_temp"
+	# put the instrument serial number into an @ in the dataset
+	#
+	# keep the notes in, but also export as extra file only containing those
+	# rows that do contain notes, together with:
+	# rowname, sampleNumber, consScanNr (do we always have sample Number) ?
+	# put that in sl-in
+	#
+	# Timestamp. Yes.
+	#
+	## code ####
+	# first get the first column, isolate cons. scans, the rest is sample ID and rowname
+	# All numbers? --> sampleNr
+	# has character? --> sampleId, use rle() on rest for sampleNr
+	stn <- getstn()
+	yPref <- stn$p_yVarPref
+	cPref <- stn$p_ClassVarPref
+	Y_sampleNrCol <- paste0(yPref, stn$p_sampleNrCol)
+	Y_conSNrCol <- paste0(yPref, stn$p_conSNrCol)
+	C_colnSampleId <- paste0(cPref, stn$p_sampleIdCol)
+	notesColName <- stn$p_NotesCol
+	timeFormat <- stn$imp_timeFormat_microNir
+	prWls <- "X"
+	samPat <- ".sam"
+	snSamSep <- "-"
+	addSep <- "#"
+	colnNotesIn <- "Notes"
+	colnTempIn <- "Temperature"
+	colnIsnIn <- "Instrument.Serial.Number"
+	colnTsIn <- "Timestamp"
+	txtMicroNirsAdd <- "VIAVI MicroNIR, "
+	#
+	colnDeviceTemp <- paste0(yPref, "deviceTemp")
+	colnTiSta <- gl_timestamp_column_name
+	####
+	raw <- read.csv(dataFile)
+	C_cols <- data.frame(raw[,colnNotesIn])  # will possibly add sampleId
+	colnames(C_cols) <- notesColName
+	fc <- raw[,1]
+	fcSplit <- strsplit(fc, snSamSep)
+	sLast <- unlist(lapply(fcSplit, function(x) x[length(x)]))
+	conSNr <- as.data.frame(as.numeric(gsub(samPat, "", sLast))) # so we have the cons. scan nr. 
+	colnames(conSNr) <- Y_conSNrCol
 	
+	saId <- unlist(lapply(fcSplit, function(x) {
+		aa <- x[1:(length(x)-1)]
+	  	paste(aa, collapse=snSamSep) })) # end unlist
+	saId <- data.frame(saId)
+	colnames(saId) <- C_colnSampleId
+	#
+	# all numeric?
+	options(warn=-1)
+	saIdNum <- as.numeric(saId[,1])
+	options(warn=0)
+	if (!any(is.na(saIdNum))) { # just numbers --> use for sampleNr, no sampleId
+		sampleNr <- data.frame(saIdNum) # no addition to C_cols, as no sampleId
+		colnames(sampleNr) <- Y_sampleNrCol
+		univSaId <- saIdNum
+	} else { # use it as sample ID, use rle for sampleNr
+		C_cols <- cbind(C_cols, saId)
+		rleSaid <- rle(saId[,1])
+		snrs <- 1:length(rleSaid$lengths)
+		sampleNr <- data.frame(sampleNr=rep(snrs, rleSaid$lengths)) # and we have the sampleNr
+		colnames(sampleNr) <- Y_sampleNrCol
+		univSaId <- saId[,1]
+	} # end else
+		
+	# now correct for possible double sampleIds
+	makeBadBoyAddition <- function(bbRl) {
+		vecBad <- 1:sum(bbRl$values)
+		collec <- vector("character")
+		uvb <- 1 # which one of vecBad to use
+	  	for (i in seq_along(bbRl$lengths)) {
+			if (bbRl$values[i] == 1) { # an occurrence
+		  		charAdd <- rep(paste0(addSep, vecBad[uvb]), bbRl$lengths[i])
+		  		uvb <- uvb+1
+			} else {
+		  		charAdd <- rep("", bbRl$lengths[i])
+			} # end else
+			collec <- c(collec, charAdd)
+	  	} # end for i
+		return(collec)
+	}# EOIF
 	
-} # EOF
+	fuseAdditionsTogether <- function(collListSaIdAdd) {
+		dfAdd <- data.frame(matrix(NA, nrow(raw)))
+		for (i in 1:(length(collListSaIdAdd))) {
+			tiAdd <- data.frame(collListSaIdAdd[[i]])
+			dfAdd <- cbind(dfAdd, tiAdd)
+	  	} # end for i 
+	  	dfAdd <- dfAdd[,-1, drop=FALSE]
+	  	out <- as.data.frame(apply(dfAdd, 1, function(x) paste(x, collapse="")))
+	  	return(out)
+	} # EOIF
+	
+	genNewConSNrs <- function(saIdNew) {
+		newConSNrs <- vector("numeric")
+	  	idLe <- rle(saIdNew)$lengths
+	  	for (i in seq_along(idLe)) {
+			newSi <- 1:(idLe[i])
+			newConSNrs <- c(newConSNrs, newSi)
+		} # end for i
+		return(newConSNrs)
+	}# EOIF
+	
+	##########
+	# first: Who is more than once?
+	saIdChar <- saId[,1]
+	tval <- table(rle(saIdChar)$values)
+	tNames <- which(tval > 1) # could be more than one !
+	collListSaIdAdd <- vector("list", length(tNames))
+	if (length(tNames) > 0) {
+		for (i in seq_along(tNames)) {
+			tiNa <- names(tNames)[i] # get the sampleId that is more than once present
+			bbRl <- rle(stringr::str_count(saIdChar, tiNa))
+			singleAddToSaId <- makeBadBoyAddition(bbRl)
+			collListSaIdAdd[[i]] <- singleAddToSaId
+		} # end for i
+		dfAdd <- fuseAdditionsTogether(collListSaIdAdd) 
+		ind <- which(colnames(C_cols) == C_colnSampleId)
+		newDf <- cbind(C_cols[,ind],dfAdd)
+		newVals <- apply(newDf, 1, function(x) paste(x, collapse=""))
+		C_cols[,ind] <- newVals
+	} # end if
+	
+	#########
+	# now correct the consec scan nr
+	if (length(tNames) > 0) {
+		saIdNew <- C_cols[,2]
+		conSNr[,1] <- genNewConSNrs(saIdNew)
+	} # end if
+	
+	########
+	# collect NIR
+	NIR <- raw[,-1]
+	prWls
+	wlsInd <- startsWith(colnames(NIR), prefix = prWls)
+	NIR <- as.matrix(NIR[,wlsInd])
+	univSampId <- 
+	rownames(NIR) <- niceRownames <- paste(univSaId, conSNr[,1], sep="_")
+	
+	#######
+	# organize the rest
+	rest <- raw[,-1][,which(!wlsInd)] # double subscription yea
+	rest <- rest[,-3]
+	instrSerNr <- rest[1,1]
+	#
+	Y_cols <- rest[colnTempIn] # device temperature goes into Y_cols
+	colnames(Y_cols) <- colnDeviceTemp
+	#
+	tiStamp <- rest[,colnTsIn]
+	timestamp <- as.data.frame(strptime(tiStamp, format=timeFormat)) #  the 24 hours format would be "%d/%m/%Y %H:%M:%S"
+	colnames(timestamp) <- colnTiSta
 
+	timePoints <- ecrm <- repl <- group <- temp  <- relHum <- NULL
+	slType <- get(".slType", pos=gl_ap2GD) ## .slType gets assigned in readHeader_checkDefaults
+	info <- list(nCharPrevWl=length(prWls))
+	assign("instrumentInfo", paste0(txtMicroNirsAdd, instrSerNr), pos=parent.frame(n=2))
+	outList <- list(sampleNr=sampleNr, conSNr=conSNr, timePoints=timePoints, ecrm=ecrm, repl=repl, group=group, temp=temp, relHum=relHum, C_cols=C_cols, Y_cols=Y_cols, timestamp=timestamp, info=info, NIR=NIR)
+#	print(str(outList)); print("-----outlist----")
+	return(outList)		
+} # EOF
+##########################################################################
 
 
 
@@ -459,5 +633,31 @@ importTRH_ESPEC <- function(path) {
 	TRH <- read.table(path, header=F, skip=4)[,-c(2,5:10)] # this the temp file
 	colnames(TRH) <- c("Time", "Temp", "RelHum")
 	TRH$Time <- strptime(TRH$Time,format = "%Y/%m/%d %H:%M'%S")
+	return(TRH)
+} # EOF
+
+
+importTRH_HoboWare <- function(path, what) { # what can be "xls" or "csv"
+	stn <- getstn()
+	tiFormat <- stn$imp_timeFormat_HOBOware
+	if (what == "csv") {
+		TRH <-read.csv(path, header=FALSE)
+	} else {
+		TRH <- openxlsx::read.xlsx(path, detectDates=FALSE)
+	} # end else
+	TRH <- TRH[-c(1,2),c(2,3,4)] # only keep date, temp and relhum, skip the first two rows
+	colnames(TRH) <- c("Time", "Temp", "RelHum")
+	TRH$Temp <- as.numeric(TRH$Temp)
+	TRH$RelHum <- as.numeric(TRH$RelHum)	
+	if (what == "csv") {
+		TRH$Time <- strptime(TRH$Time,format = tiFormat)
+	} else {
+		stop("Please use for the moment csv import for the data logger. Time import from xlsx is still not behaving... ")
+		TRH$Time <- as.POSIXct(as.numeric(TRH$Time), origin = "1899-12-30") # the origin of xlsx time, but it does not work yet	
+	} # end else
+	#	print(str(TRH)); print(ht(TRH))
+	if (any(is.na(TRH$Time))) {
+		stop(paste0("Sorry, creating POSIX timestamps for the data logger import failed.\n   Is the time format as specified in 'imp_timeFormat_HOBOware' in the global settings file correct?\n   If import was done via .xlsx, you could try importing the data from .csv file."), call.=FALSE)
+	} # end if
 	return(TRH)
 } # EOF

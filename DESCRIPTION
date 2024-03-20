@@ -47,7 +47,8 @@ Imports:
     mclust,
     randomForest,
     e1071,
-    nnet
+    nnet,
+    stringr
 Suggests:
     devtools,
     knitr,

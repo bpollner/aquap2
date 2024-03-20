@@ -99,7 +99,7 @@ readSpectra <- function(md=getmd(), filetype="def", naString="NA", sh=NULL) {
 	if (filetype == possibleFiletypes[6]) {
 		aaa <- paste(folderFile, ".csv", sep="")
 		assign("spectraFilePath", aaa, pos=parent.frame(n=1))
- 		return(getNirData_microNIR(aaa, stn)) # 
+ 		return(getNirData_microNIR(aaa, stn)) # # is assigning instrSerNr in gfd()
 	}
 	## if nothing of the above happend, then we must have (checked!) the path to a valid custom .r file in "filetype" 
 	custName <- strsplit(filetype, "custom@")[[1]][2]
@@ -457,11 +457,33 @@ readTRHlogfile <- function(trhLog) {
 	stn <- getstn()
 	rawFolder <- stn$fn_rawdata
 	logfileName <- stn$imp_TRH_logfile_name
-	if (trhLog == "ESPEC") {
+	pvLTs <- pv_loggerTypes # c("ESPEC", "HOBO")
+
+	if (trhLog == pvLTs[1]) { # ESPEC
 		ext <- ".txt"
 		path <- paste(rawFolder, "/", logfileName, ext, sep="")
 		TRHimp <- importTRH_ESPEC(path)
-	}	
+	} # end if ESPEC
+	#
+	if (trhLog == pvLTs[2]) { # HOBO
+		# we say in the manual that 'HOBO' can import both .csv and .xlsx files. 
+		# First check which one is there, if both are there throw an error
+		# we already checked in gfd_check_trhLog_defaults that we do not have doubles or nothing
+		# so we must have one of the below
+		pathCsv <- paste0(rawFolder, "/", logfileName, ".csv")
+		pathXls <- paste0(rawFolder, "/", logfileName, ".xlsx")
+		haveCsv <- file.exists(pathCsv)
+		haveXls <- file.exists(pathXls)
+		if (haveCsv) {
+			finalPath <- pathCsv
+			what <- "csv"
+		} else {
+			finalPath <- pathXls		
+			what <- "xls"
+		} # end else 	
+		TRHimp <- importTRH_HoboWare(finalPath, what)
+	} # end if HOBO
+	#
 	if (grepl("custom@", trhLog)) {
 		custName <- strsplit(trhLog, "custom@")[[1]][2]
 		shName <- aquap2_handover_to_uniset()$pkgUniset_RenvironSettingsHomeName
@@ -485,7 +507,7 @@ alignTempRelHum <- function(timeDataset, TRHlog) {
 	TIndUpRange <- round((narrowMinutes*60)/as.double(diffT), 0) ## for a narrowed-down area of narrowMinutes
 	rowNr <- rep(NA, length(timeDataset))
 	if (min(abs(difftime(TRHlog$Time, timeDataset[1], units="secs"))) > mtp*60) {
-		stop(paste("The first spectra aquisition time seems to be more than", mtp, "minutes separated from any data in the time-log. The import of the  data-file has been aborted. Sorry."), call.= FALSE)
+		stop(paste("The first spectra aquisition time seems to be more than", mtp, "minutes separated from any data in the time-log. \nThe import of the  data-file has been aborted. Sorry."), call.= FALSE)
 	} # end if difftime 
 	firstIndex <- which( (TRHlog$Time-timeDataset[1]) == min( abs(TRHlog$Time-timeDataset[1])) )
 	if (length(firstIndex) < 1 ) {
@@ -524,9 +546,9 @@ alignTempRelHum <- function(timeDataset, TRHlog) {
 
 gfd_importMakeTRH_alignment <- function(header, trhLog) {
 	stn <- getstn()
-	a <- which(colnames(header) == "Timestamp")
+	a <- which(colnames(header) == gl_timestamp_column_name)
 	if (length(a) == 0 & trhLog != FALSE) {
-		message(paste("There is no 'Timestamp' column in your dataset to which data from a logger could be aligned. \n(Alignment is controlled by argument 'trhLog'.) "))
+		message(paste("There is no '", gl_timestamp_column_name, "' column in your dataset to which data from a logger could be aligned. \n(Alignment is controlled by argument 'trhLog'.) "))
 		message("Importing continues without the alignment of log data.")
 	}
 	if (length(a) !=0 ) {	 # so only do all this if we actually have a timestamp in the columns
@@ -566,7 +588,7 @@ gfd_check_trhLog_defaults <- function(trhLog) {
 	# can be: FALSE, 'def' "ESPEC", "custom@name.r"
 	filename <- stn$imp_TRH_logfile_name
 	rawFolder <- stn$fn_rawdata
-	possibleValues <- c("ESPEC") ## XXXVARXXX
+	possibleValues <- pv_loggerTypes # c("ESPEC", "HOBO")
 	stopMsg <- "Please refer to the help for 'getFullData' to find out about the possible values for the argument 'trhLog'"
 	if (trhLog == TRUE) {
 		stop(stopMsg, call.=FALSE)
@@ -587,8 +609,20 @@ gfd_check_trhLog_defaults <- function(trhLog) {
 			if (!file.exists(paste(rawFolder, "/", filename, ext, sep=""))) {
 				stop(paste("The file \"", filename, ext, "\" does not seem to exist in the ", rawFolder, " folder, sorry.", sep=""), call.=FALSE)
 			}
-		}
-	}
+		} # end ESPEC
+		if (trhLog == "HOBO") {
+			# we say in the manual that 'HOBO' can import both .csv and .xlsx files. 
+			# First check which one is there, if both are there throw an error
+			haveCsv <- file.exists(paste0(rawFolder, "/", filename, ".csv"))
+			haveXls <- file.exists(paste0(rawFolder, "/", filename, ".xlsx"))
+			if (haveCsv & haveXls) {
+				stop(paste0("It seems that both '.csv' and '.xlsx' data logger files are present.\n   Please decide which one to use and remove or rename the other one. \n   Thank you."), call.=FALSE)
+			} # end if
+			if (!haveCsv & !haveXls) {  # so we have nothing
+				stop(paste0("The file '", filename, ".csv/.xlsx' does not seem to exist in the ", rawFolder, " folder, sorry."), call.=FALSE)
+			} # end if
+		} # end HOBO		
+	} # end if afix	
 	if (bcust) {
 		shName <- aquap2_handover_to_uniset()$pkgUniset_RenvironSettingsHomeName
 		shPath <- Sys.getenv(shName)
@@ -749,7 +783,7 @@ getFullData <- function(md=getmd(), filetype="def", slType="def", trhLog="def", 
 	# some more checking
   	checkForPresenceOfData()
   	gfd_checkOverwrite_sl_trh_multRows(md, slType, trhLog, multiplyRows) # is possible re-assigning: slType, trhLog, multiplyRows
-	gfd_check_trhLog_defaults(trhLog)
+	gfd_check_trhLog_defaults(trhLog) # 
 
   	# import starts 
   	if(!stn$allSilent) {cat("Importing data...\n")}	
@@ -758,8 +792,8 @@ getFullData <- function(md=getmd(), filetype="def", slType="def", trhLog="def", 
 	header <- readHeader(md, slType, multiplyRows) ## re-assigns 'slType' and 'multiplyRows' also here -- in parent 2 level frame 
 	###########									## if slType is NULL, header will be returned as NULL as well
 	###########
-	spectraFilePath <- NULL # gets assigned in readSpectra()
-	si <-  readSpectra(md, filetype, naString, sh) ### !!!!!!!!! here the import !!!!!!!!!
+	spectraFilePath <- instrumentInfo <- NULL # gets maybe assigned in readSpectra()
+	si <-  readSpectra(md, filetype, naString, sh) ### !!!!!!!!! here the import !!!!!!!!! ## the MicroNIRS Import is assigning instrumentInfo here
 	###########
 	if (rawOnlyNIR) {
 		si <- gfd_removeHeaderDataFromRawImport(si)
@@ -813,6 +847,7 @@ getFullData <- function(md=getmd(), filetype="def", slType="def", trhLog="def", 
 	fullData@version <- pv_versionDataset # get from the constants -- change at the constants only if the structure of the dataset has changed !!! XXX
 	fullData@metadata <- md
 	fullData@colCopyInfo <- copiedCols 
+	fullData@info <- list(instrument=instrumentInfo)
 	fullData@anproc <- NULL # the ap not yet here of course
 	fullData@ncpwl <- si$info$nCharPrevWl
 	if (stf) {
@@ -1037,6 +1072,34 @@ export_header_toXls <- function(dataset, md=getmd(), asSlIn=FALSE, rowns=TRUE, c
 	} # end else
 	
 
+} # EOF
+
+importExport_raw_toXls <- function(md=getmd(), filetype="def") {
+	# could be like calling gfd() with slType=NULL, then exporting all we got in to xls
+	slType <- NULL
+	trhLog <- FALSE
+	ttl <- FALSE
+	stf <- FALSE
+	dol <- FALSE
+	remDC <- FALSE
+	multiplyRows <- FALSE
+	rawOnlyNIR <- FALSE
+	checkThings <- FALSE
+	naString <- "NA"
+	assign(".slType", slType, pos=gl_ap2GD)
+	#
+	checkForPresenceOfData()
+  	gfd_checkOverwrite_sl_trh_multRows(md, slType, trhLog, multiplyRows) # is possible re-assigning: slType, trhLog, multiplyRows
+	gfd_check_trhLog_defaults(trhLog)
+	#	
+	si <- readSpectra(md, filetype, naString)
+	si <- gfd_makeNiceColumns(si) # makes all column names, transforms Y-variables to numeric
+	nonNir <- cbind(si$sampleNr, si$conSNr, si$timePoints, si$ecrm, si$repl, si$group, si$C_cols, si$Y_cols, si$temp, si$relHum, si$timestamp, stringsAsFactors=TRUE) # stringsAsFactors problem with the changed defaults in R 4.x --> but does not help here !!
+	indDel <- which(colnames(nonNir) == "DELETE")
+	nonNir <- nonNir[,-indDel]
+
+	return(nonNir)
+	
 } # EOF
 
 # refine header -------------------------------------------------------------

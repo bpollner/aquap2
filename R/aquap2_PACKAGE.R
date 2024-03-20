@@ -33,6 +33,7 @@
 #			 #' @importFrom MASS lda, qda
 #' @importFrom mclust MclustDA
 # 			#' @import mclust
+#' @importFrom stringr str_count
 #' @import e1071
 #' @import nnet
 #' @import randomForest

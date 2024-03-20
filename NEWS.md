@@ -13,6 +13,9 @@
 * Added possibility to export only the header to xlsx. 
 * Added import function for Yunosato Aquaphotomics lab styled .dat file. 
 * Added possibility to automatically remove double columns during data import.
+* Added importing from MicroNIR (VIAVI) data format
+* Added importing T and RH data from Hoboware data loggers
+
 
 ## Improved:
 * Removed dependency from package `ChemometricsWithR` (is not available on CRAN any more)

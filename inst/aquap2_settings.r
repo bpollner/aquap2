@@ -27,10 +27,12 @@ settings <- list(
 	p_ClassVarPref = "C_",					## the prefix for class-variables
 	p_timeCol = "Time", 					## the name of the column containing the time-points (if any)
 	p_sampleNrCol = "SampleNr", 			## the name of the column containing the number of the sample in the list, automatically generated
+	p_sampleIdCol = "SampleId", 			## should the rawdata give rise to creating a sample ID (e.g. in the case of MicroNIRS), define here its default column name
 	p_conSNrCol= "conSNr",					## the name of the second column containing the number of the consecutive scan, automatically generated
 	p_ECRMCol = "ECRM", 					## the name of the column holding the class for indicating either environmental control or real measurement
 	p_tempCol = "Temp",						## the name of the column holding the room temperature at which the measurements were taken
-	p_RHCol ="RelHum",						## the name of the column holding the relative humidity at which the measurements were taken 
+	p_RHCol = "RelHum",						## the name of the column holding the relative humidity at which the measurements were taken 
+	p_NotesCol = "Notes", 					## the name of the column holding the notes, if any column containing notes is defined in the raw data input file
 	p_absTime = "absTime", 					## the name of the column holding the absolute time since the date specified in 'imp_startDate'
 	p_chron = "chron", 						## the name of the column holding the chronological order of the spectra, so ignoring any time-delays in between scans
 	p_userDefinedSpecialColnames = c("Conc", "Weight"),		## the special column names where the colors defined in "col_userDefinedRamps" will be used
@@ -77,6 +79,8 @@ settings <- list(
 	## Import Data
 	imp_specFileType = "vision_NSAS.da",	## the filetype of the spectral data. Refer to the help for 'getFullData'  for possible values
 	imp_startDate = "2023-06-01 00:00:00",	## the start-date used to calculate the absolute number of minutes since then
+	imp_timeFormat_microNir = "%d/%m/%Y %H:%M:%S", ## the format of the time string as in the MicroNIR file. 
+	imp_timeFormat_HOBOware = "%d/%m/%Y %H:%M:%S", ## the format of the time string in the data logger import from HOBOware
 	imp_sampleListType = "xls", 			## the filetype of the sample list in the sampleLists/sl_in folder. Please refer to the help for "getFullData" for possible values.
 	imp_multiplyRows = "auto",				## if all the rows in the sample list should be multiplied by the number of consecutive scans.
 	imp_remDoubleCols = TRUE, 				## if double columns should be automatically removed at the time of data import. Double columns can arise from the same column being e.g. present in the rawdata file AND in the sample list file. If imp_remDoubleCols is set to FALSE, importing double columns will throw an error and the import will be stopped. 
@@ -88,7 +92,7 @@ settings <- list(
 	imp_RHRounding = 1, 					## digits precision for rounding when re-factoring the rel. humidity
 	imp_makeExpNameColumn = FALSE, 			## if a column containing the name of the experiment in every row should be added to the dataset. This is useful if you plan to fuse datasets from several experiments.
 	imp_makeTimeDistanceColumn = TRUE, 		## if, should a timestamp be available, a column with the time-distance from a user-defined point in time and an other with the chronological order (1:nrow enumeration) should be generated
-	imp_use_TRH_logfile = "ESPEC", 			## if and how values for temperature and relative humidity should be imported from an external logfile. See the help for 'getFullData' for information on possible values
+	imp_use_TRH_logfile = FALSE, 			## if and how values for temperature and relative humidity should be imported from an external logfile. See the help for 'getFullData' for information on possible values
 	imp_TRH_logfile_name = "TRHlog", 		## the name of the logfile for temperatur and rel.humidity in the rawdata folder.
 	imp_narrowMinutes = 3, 					## how many minutes ahead should be looked for matching log-data before going through the whole log file?
 	imp_secsNarrowPrecision = 10, 			## precision in seconds that log-data have to be within spectral acquisition time in the first, the narrowed-down search step (there is no precision step in the second search through the whole log file)

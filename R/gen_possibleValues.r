@@ -1,6 +1,7 @@
 # in onLoad and onUnload, and connected
 gl_ap2GD <- "aquap2_globalData" # the name for entry in the search path where the .auqp2Env is stored
 
+gl_errMsgUniset <- paste0("I am very sorry, but there was an error accessing the global settings file.\nA solution could be to\n   -) delete/rename the the existing settings file in your 'aquap2SH' folder, then\n   -) to re-run the setup function 'ap2_settings_setup(path)', \nwith 'path' pointing to the folder that contains your 'aquap2SH' folder \n(as defined in the .Renviron.R file in user/home).")
 
 ## for version check of metadata and analysis procedure
 gl_firstElement_metadata <- "expName"
@@ -95,7 +96,7 @@ pv_tripleDotsMod <- c(pv_modifyUCL, pv_modifyDPT, pv_modifyPCA, pv_modifySIMCA, 
 
 ## import, filetype etc.
 pv_filetypes <- c("vision_NSAS.da", "tabDelim.txt", "Pirouette.pir", "xls", "YunosatoDatFile.dat", "MicroNIR.csv")
-
+pv_loggerTypes <- c("ESPEC", "HOBO")
 
 ## Data pre-treatment moduls
 pv_dptModules <- c("sgol", "snv", "msc", "emsc", "osc", "deTr", "gsd")
