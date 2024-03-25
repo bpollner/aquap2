@@ -329,7 +329,7 @@ getNirData_Excel <- function(dataFile, stn) {
 		if (length(indY) > 0) {
 			allY_var <- header[,indY, drop=FALSE] # collect all Y_ variables
 		} # end if
-		if (is.null(allC_var) & is.null(allY_var) & ncolHeader != 0) {
+		if ((length(indC) == 0) & (length(indY) == 0) & ncolHeader != 0) {
  			errMsg <- paste0("I am sorry, there was an error when trying to access the class- and \nnumerical varialbes in the dataset.. \nIn the sheet holding the metadata, the length of the header-block is specified. \nPlease make sure that the value stored therein truly represents the situation in the first sheet." )
 #			stop(errMsg, call.=FALSE)
 		} # end if
@@ -371,6 +371,7 @@ getNirDataPlusMeta_YunosatoDat <- function(dataFile, stn, yDatPref = "w", ydCPre
 	sampleNrCol_Y <- paste0(yPref, stn$p_sampleNrCol)
 	saIdCnUse <- paste0(cPref, gl_ydSampleIdColName)
 	conSNr_Y <- paste0(yPref, stn$p_conSNrCol)
+	delCol <- stn$p_deleteCol
 
 	#
 	##### read in the .dat file and get indices
@@ -388,22 +389,6 @@ getNirDataPlusMeta_YunosatoDat <- function(dataFile, stn, yDatPref = "w", ydCPre
 	colDim <- as.numeric(bbb[1])
 	rowDim <- as.numeric(bbb[2])
 	
-	### get columns
-	colChar <- datChars[cnInd] # the one row (character vector) that contains all the column names
-	colChar <- strsplit(colChar, "\t")[[1]][-1] # leave out the first, it MUST be the #C
-	datColInd <- startsWith(colChar, yDatPref)
-	dataCols <- colChar[datColInd]
-	clInd <- startsWith(colChar, ydCPref)
-	classCols <- colChar[clInd]
-	numInd <-startsWith(colChar,ydYPref)
-	numCols <- colChar[numInd]
-	# replace yunosato prefix with aquap2 prefix
-	classCols <- sub(ydCPref, cPref, classCols, fixed=TRUE)
-	numCols <- sub(ydYPref, yPref, numCols, fixed=TRUE)	# fixed does the magic
-	if (! sampleNrCol_Y %in% numCols) {
-		stop(paste0("Sorry, it appears that the column '", sampleNrColinDat, "' for the running sample number in your .dat file is missing. \nPlease modify your .dat file and re-import."), call.=FALSE)
-	} # end if
-	
 	### get the NIR data and extract the sample IDs
 	onlyData <- datChars[datInd]
 	onlyData <- strsplit(onlyData, split="\t") # gives back a list with a vector of strings for each row in each list element
@@ -419,6 +404,23 @@ getNirDataPlusMeta_YunosatoDat <- function(dataFile, stn, yDatPref = "w", ydCPre
 	conSNr <- as.data.frame(conSNr)
 	colnames(conSNr) <- conSNr_Y
 	sampleIds <- unlist(lapply(idSplit, function(x) paste(x[1:(length(x)-2)], collapse="_"))) # should catch all additional splits in the ID, if there might be an "_" inside
+	aaa <- rle(sampleIds)
+	snp <- 1:length(aaa$lengths)
+	sampNrUse <- data.frame(rep(snp, aaa$lengths)) # this is now the running sample number generated from the sampleIDs
+	colnames(sampNrUse) <- sampleNrCol_Y
+	
+	### get columns
+	colChar <- datChars[cnInd] # the one row (character vector) that contains all the column names
+	colChar <- strsplit(colChar, "\t")[[1]][-1] # leave out the first, it MUST be the #C
+	datColInd <- startsWith(colChar, yDatPref)
+	dataCols <- colChar[datColInd]
+	clInd <- startsWith(colChar, ydCPref)
+	classCols <- colChar[clInd]
+	numInd <-startsWith(colChar,ydYPref)
+	numCols <- colChar[numInd]
+	# replace yunosato prefix with aquap2 prefix
+	classCols <- sub(ydCPref, cPref, classCols, fixed=TRUE)
+	numCols <- sub(ydYPref, yPref, numCols, fixed=TRUE)	# fixed does the magic
 
 	# ok, so now we have the column names, the timestamp, the consec. scan number and the sample ID
 	### lets get the data
@@ -426,6 +428,16 @@ getNirDataPlusMeta_YunosatoDat <- function(dataFile, stn, yDatPref = "w", ydCPre
 	NIR <- apply(odDf[,datColInd], 2, as.numeric) # gives back a matrix
 	colnames(NIR) <- dataCols
 	rownames(NIR) <- sampleIds
+	
+	if (! sampleNrCol_Y %in% numCols) {
+		msg <- paste0("   *It appears that there is no running sample number present in the rawdata coming from the .dat file.\n   *An auto-generated sample number will be used instead.\n")
+		cat(msg)
+#		stop(paste0("Sorry, it appears that the column '", sampleNrColinDat, "' for the running sample number in your .dat file is missing. \nPlease modify your .dat file and re-import."), call.=FALSE)
+	} else { # so we do have a sample number present, lets use that one
+		sampNrUse <- data.frame(matrix(NA, nrow=nrow(NIR))) # so we use the sample number encoded in the rawdata and set the previously generated to NULL
+		colnames(sampNrUse) <- delCol
+	} # end else
+	
 	
 	# get the class and numerics
 	sampleNr <- timePoints <- ecrm <- repl <- group <- temp  <- relHum <- C_cols <- Y_cols <- allC_var <- allY_var <- NULL
@@ -438,12 +450,13 @@ getNirDataPlusMeta_YunosatoDat <- function(dataFile, stn, yDatPref = "w", ydCPre
 		allY_var <- odDf[,numInd]
 		colnames(allY_var) <- numCols
 		allY_var <- as.data.frame(apply(allY_var, 2, as.numeric))
-		allY_var <- cbind(allY_var, conSNr)
+		allY_var <- cbind(allY_var, sampNrUse, conSNr)
 	} # end if
 	#
 	slType <- get(".slType", pos=gl_ap2GD) ## .slType gets assigned in readHeader_checkDefaults
 	imp_searchAskColumns(allC_var, allY_var, slType, oT=TRUE) # assigns all the necessary list elements except NIR, info and timestamp in this frame !!!
 	info <- list(nCharPrevWl=length(yDatPref))
+
 	outList <- list(sampleNr=sampleNr, conSNr=conSNr, timePoints=timePoints, ecrm=ecrm, repl=repl, group=group, temp=temp, relHum=relHum, C_cols=C_cols, Y_cols=Y_cols, timestamp=timestamp, info=info, NIR=NIR)
 #	print(str(outList)); print("-----outlist----")
 	return(outList)	

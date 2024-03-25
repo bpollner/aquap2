@@ -12,7 +12,7 @@ titles and as a first part of the name of saved PDFs.}
 settings.r file. (Parameter \code{p_commonNoSplit}.)}
 
 \item{envControlLabel}{The label for the environmental control. Leave at 
-code{def} to take the default value from the settings 
+\code{def} to take the default value from the settings 
 (parameter \code{p_envControlLabel}).}
 
 \item{realMeasurementLabel}{The label for the "real measurement", for all 

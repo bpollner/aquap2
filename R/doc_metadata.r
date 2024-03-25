@@ -17,7 +17,7 @@
 #'  of the dataset. The default 'def' reads in the default value from the 
 #' settings.r file. (Parameter \code{p_commonNoSplit}.) 
 #' @param envControlLabel The label for the environmental control. Leave at 
-#' code{def} to take the default value from the settings 
+#' \code{def} to take the default value from the settings 
 #' (parameter \code{p_envControlLabel}).
 #' @param realMeasurementLabel The label for the "real measurement", for all 
 #' the samples of an experiment. Leave at \code{def} to take the default value 
