@@ -725,7 +725,7 @@ pls_pred_checkColorBy <- function(indepDataset, anp2, dsName) {
 #' @details Please see the documentation for the single parameters (\code{cnv} 
 #' and \code{inv}) to see how the selection of the available models and the 
 #' selection of possibly available data for validation is handled. For coloring, 
-#' the argument code{pls.colorBy} of the analysis procedure can be used, but 
+#' the argument \code{pls.colorBy} of the analysis procedure can be used, but 
 #' here the data for the colors are selected from the \strong{independent} 
 #' dataset. If the parameter \code{plsr_indepPred_exportToExcel} in the 
 #' settings file is set to TRUE, the results are exported to an excel file in the 
