@@ -1238,8 +1238,8 @@ processSingleRow_CPT <- function(dataset, siClass, siValue, siWlSplit, siCsAvg, 
 	keepEC <- stn$gd_keepECs
 	newDataset <- ssc_s(dataset, siClass, siValue, keepEC) 
 	if (is.null(newDataset)) { # character "nixnox" is returned if a variable combination yields no data. That is because returning NULL introduced a bug if it was on the end of the list... probably...
-#		return("nixnox")
-		return(NULL)
+		return("nixnox")
+#		return(NULL)
 	}
 	initializeExtraModelsList() ### upper end
 	newDataset <- selectWls(newDataset, siWlSplit[1], siWlSplit[2])
@@ -1262,7 +1262,7 @@ processSingleRow_CPT <- function(dataset, siClass, siValue, siWlSplit, siCsAvg, 
 
 correct_cpt <- function(cpt, nullInd) {
 	n <- nullInd
-	#
+	#	
 	classes <- cpt@splitVars$classes[-n,] 
 	rownames(classes) <- 1:nrow(classes)
 	cpt@splitVars$classes <- classes
@@ -1271,7 +1271,6 @@ correct_cpt <- function(cpt, nullInd) {
 	rownames(values) <- 1:nrow(values)
 	cpt@splitVars$values <- values
 	#
-	cpt@splitVars$values <- cpt@splitVars$values[-n,]
 	cpt@wlSplit <- cpt@wlSplit[-n]
 	cpt@csAvg <- cpt@csAvg[-n]
 	cpt@noise <- cpt@noise[-n]
@@ -1609,7 +1608,8 @@ gdmm <- function(dataset, ap=getap(), noiseFile="def", tempFile="def") {
 	wlSplit <- cpt@wlSplit # ! is a list
 	csAvg <- cpt@csAvg # is a vector
 	noise <- cpt@noise # is a vector
-	exOut <- cpt@exOut # is a vector
+	exOut <- cpt@exOut # is a vector	
+	
 	### generate datasets
 	if (!stn$allSilent) {cat("Generating Datasets...\n")}
 	for (i in 1:len) {
@@ -1620,16 +1620,17 @@ gdmm <- function(dataset, ap=getap(), noiseFile="def", tempFile="def") {
 	###
 	### clean out the NULL-datasets
 #	nullInd <- which(unlist(lapply(cubeList, is.null))) # which one of the split by variable resulted in zero rows (has been returned as NULL in ssc_s)
-#	nullInd <- which(cubeList == "nixnox")
-	nullInd <- which(lapply(cubeList, is.null) == TRUE)
+	nullInd <- which(cubeList == "nixnox")
+#	nullInd <- which(lapply(cubeList, is.null) == TRUE)
+
 	if (length(nullInd) > 0) {
 		cubeList <- cubeList[-nullInd]
 		cp <- cp[-nullInd,]
 		rownames(cp) <- 1:nrow(cp)
-		cpt <- correct_cpt(cpt, nullInd)
-		message(paste("  *", length(nullInd), "* of the split-by-variable combinations resulted in no data. Those datasets have been omitted.", sep=""))
+		cpt <- correct_cpt(cpt, nullInd) ##### !!!! ######	
+		message(paste("  *", length(nullInd), "* of the split-by-variable combinations resulted in no data. \n  Those datasets have been omitted.", sep=""))
 	}
-	###
+	###	
 	
 	### now make the models (so far, we have only the dataset and the id-string in the set)
 	stat <- checkForStats(ap) 	#  check the ap if and where we calculate a model
