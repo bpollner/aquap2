@@ -1,4 +1,4 @@
-makePCAScorePlots <- function(cube, ap, comps=c(1:5), pcs=c(1,2), onMain="", onSub="") {
+makePCAScorePlots <- function(cube, ap, comps=c(1:5), pcs=c(1,2), onMain="", onSub="", ...) {
 	stn <- getstn()
 #	plot(0, type="n")
 	trRobust <- stn$pca_CI_ellipse_robust
@@ -81,13 +81,13 @@ makePCAScorePlots <- function(cube, ap, comps=c(1:5), pcs=c(1,2), onMain="", onS
 			print(trelPlot1)
 			if (!is.null(el2colorBy) & !is.null(trElci)) { # so we want an other plot with additional CI ellipses			
 				###
-				bb <- extractColorLegendValues(getDataset(set), el2colorBy[i]) 
+				bb <- extractColorLegendValues(getDataset(set), el2colorBy[i], ...) 
 				colorUnique_el <- bb$color_unique
 				colorLegend_el <- bb$color_legend
 				legendTextExt_el <- bb$txtE
 				grouping_el <- bb$dataGrouping
-				pch_data_el <- bb$pch_data
-				pch_legend_el <- bb$pch_legend
+				pch_data_el <- bb$pch_data 			###### ML special --> maluPch in makePchSingle in extractColorLegendValues
+				pch_legend_el <- bb$pch_legend 		###### ML special
 				legCex_el <- bb$legCex		
 				legNrCols_el <- bb$legNrCols
 				elc <- extractColorLegendValues(getDataset(set), el2colorBy[i], minPart=minPartElipse, ltyIn=trLty) # possibly knocking out participants !
@@ -121,7 +121,7 @@ makePCAScorePlots <- function(cube, ap, comps=c(1:5), pcs=c(1,2), onMain="", onS
 	} # end for k
 } #EOF
 
-plotPCA_Scores <- function(cube, ap, where="pdf", comps= c(1:5), pcs=c(1,2), onMain="", onSub="", fns="") {
+plotPCA_Scores <- function(cube, ap, where="pdf", comps= c(1:5), pcs=c(1,2), onMain="", onSub="", fns="", ...) {
 	stn <- getstn()
 	if (!stn$allSilent & (where == "pdf" )) {cat("Plotting PCA score plots... ")}
 	expName <- getExpName(cube)
@@ -135,7 +135,7 @@ plotPCA_Scores <- function(cube, ap, where="pdf", comps= c(1:5), pcs=c(1,2), onM
 	onMain <- paste(expName, onMain, sep=" ")
 	if (where == "pdf") { pdf(file=filename, width, height, onefile=TRUE, family='Helvetica', pointsize=12) }
 	if (where != "pdf" & Sys.getenv("RSTUDIO") != 1) {dev.new(height=height, width=width)}	
-	makePCAScorePlots(cube, ap, comps, pcs, onMain, onSub)
+	makePCAScorePlots(cube, ap, comps, pcs, onMain, onSub, ...)
 	if (where == "pdf") {dev.off()}
 	if (!stn$allSilent & (where == "pdf" )) {cat("ok\n") }
 } # EOF
@@ -276,7 +276,7 @@ plot_pca_cube <- function(cube, aps="def", ld.bandwidth="def", ld.adLines="def",
 	##
 	pv <- pv_pca_what 		# c("both", "scores", "loadings")
 	if (any(c(pv[1], pv[2]) %in% what)) { # scores
-		plotPCA_Scores(cube, ap, where, comps=pcSc, pcs, onMain, onSub, fns)
+		plotPCA_Scores(cube, ap, where, comps=pcSc, pcs, onMain, onSub, fns, ...)
 	}
 	if (any(c(pv[1], pv[3]) %in% what)) { # loadings
 		plotPCA_Loadings(cube, ap, where, comps=pcLo, onMain, onSub, fns, bandwidth=ld.bandwidth, adLines=ld.adLines, ccol=ld.col, clty=ld.lty)	

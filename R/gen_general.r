@@ -523,18 +523,36 @@ is.wholenumber <- function(x, tol = .Machine$double.eps^0.5) {
 	 return(abs(x - round(x)) < tol)
 } # EOF
 
-makePchSingle<- function(PchToReFact, extra = FALSE) {  #PchToReFact: the factor what you want to display with different pch, extra: additional not nice pch
+makePchSingle<- function(PchToReFact, extra = FALSE, maluPch=NULL) {  #PchToReFact: the factor what you want to display with different pch, extra: additional not nice pch
 	nr <- length(unique(PchToReFact))
  	if (extra) {
  		nicePch<-c(0:20,35,127,134,135,164,169,171,174,182,187)
  	} else {
  		nicePch<-c(0:20)
  	}
+ 	if (!is.null(maluPch)) {
+ 		if (!all(is.numeric(maluPch))) {
+ 			stop("Please provide only numerics for the custom pch. Have a good day.", call.=FALSE)
+ 		}
+ 		if (length(maluPch) != nr) {
+ 			stop(paste0("Please provide exactly ", nr, " numbers for the custom pch."), call.=FALSE)
+ 		}
+ 		nicePch <-  maluPch
+ 	}
  	if (nr > length(nicePch)){
    		nicePch <- rep(nicePch,ceiling(nr/length(nicePch)))
  	}
  	return(nicePch[PchToReFact])
 } # EOF
+
+makePchLegend <- function(pch_data, lto, maluPch=NULL) {
+	pch_legend <- as.numeric(levels(as.factor(pch_data)))[lto]
+	if (!is.null(maluPch)) {
+		pch_legend <- maluPch[lto]
+	}
+	return(pch_legend)
+} # EOF
+
 
 makePchGroup <- function(PchToReFact, extra = FALSE) {
 	nr <- length(unique(PchToReFact))
@@ -559,7 +577,7 @@ getUniqLevelColor <- function(nrc) {
 } # EOF
 
 # color_data, color_unique, color_legend, txt, txtE, sumPart, dataGrouping, pch_data, pch_legend
-extractColorLegendValues <- function(dataset, groupBy, minPart=NULL, minDistinctVals=NULL, ltyIn=NULL) { # returns a list
+extractColorLegendValues <- function(dataset, groupBy, minPart=NULL, minDistinctVals=NULL, ltyIn=NULL, maluPch=NULL, ...) { # returns a list
 	stn <- getstn()
 	legColLim <- stn$plt_lengthLegend_limToCols	# the number when we switch to columns
 	maxLengLeg <- stn$plt_lengthLegend_truncate	# the maximum legend length
@@ -595,8 +613,8 @@ extractColorLegendValues <- function(dataset, groupBy, minPart=NULL, minDistinct
 #	color_legend <- color_unique[lto] # the old version, appears to be not always correct
 	ind <- which(colnames(dataset$colRep) == groupBy) # get once the index of our grouping variable in the colRep
 	color_legend <- sapply(legendText, function(x, cri, ds, grby) ssc_s(ds, grby, x)$colRep[1,cri], cri=ind, ds=dataset, grby=groupBy) # look through each of the elements of the legend text and extract the corresponding color from the colRep
-	pch_data <- makePchSingle(grouping)
-	pch_legend <- as.numeric(levels(as.factor(pch_data)))[lto]
+	pch_data <- makePchSingle(grouping, extra = FALSE,  maluPch)
+	pch_legend <- makePchLegend(pch_data, lto, maluPch)
 	###
 	####### have minimum participants
 	if (!is.null(minPart)) {
